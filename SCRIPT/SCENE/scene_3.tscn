@@ -57,10 +57,10 @@ domain_warp_fractal_lacunarity = 6.13
 domain_warp_fractal_gain = 1.4
 
 [sub_resource type="NoiseTexture2D" id="NoiseTexture2D_bppol"]
+noise = SubResource("FastNoiseLite_i4bni")
 seamless = true
 seamless_blend_skirt = 0.676
 bump_strength = 7.9
-noise = SubResource("FastNoiseLite_i4bni")
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_pp4km"]
 shader = ExtResource("1_wutbe")

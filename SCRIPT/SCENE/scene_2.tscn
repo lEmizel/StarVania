@@ -1,4 +1,4 @@
-[gd_scene load_steps=20 format=3 uid="uid://d1onj2oa16cs5"]
+[gd_scene load_steps=25 format=3 uid="uid://d1onj2oa16cs5"]
 
 [ext_resource type="Texture2D" uid="uid://byj1i32f3f3tl" path="res://MEDIA/Image_6-09-24_à_12.02.png" id="1_scdot"]
 [ext_resource type="PackedScene" uid="uid://bqndjpts1oqr3" path="res://SCRIPT/MENU/heatle_bare.tscn" id="2_hnscr"]
@@ -8,6 +8,11 @@
 [ext_resource type="Texture2D" uid="uid://b3j6wolipm8yi" path="res://MEDIA/scene2/pierre1.png" id="6_uawq3"]
 [ext_resource type="Texture2D" uid="uid://db0m1kkml8sck" path="res://MEDIA/scene2/sable2.png" id="7_8te1o"]
 [ext_resource type="Texture2D" uid="uid://cki5i16kleo52" path="res://MEDIA/scene2/sable1.png" id="8_uawq3"]
+[ext_resource type="Texture2D" uid="uid://dubul05u3eia2" path="res://MEDIA/scene2/platforme.png" id="9_u6nr3"]
+[ext_resource type="Texture2D" uid="uid://487k8plamuuq" path="res://MEDIA/scene2/platforme2.png" id="10_kaoho"]
+[ext_resource type="PackedScene" uid="uid://lfopd74ueqri" path="res://SCRIPT/INTERACTIBLE/cadre_mur_griffe.tscn" id="11_j5qst"]
+[ext_resource type="Texture2D" uid="uid://ducb1cnve3db" path="res://MEDIA/scene2/pierre4.png" id="12_j5qst"]
+[ext_resource type="Texture2D" uid="uid://v2sybljvty8l" path="res://MEDIA/scene2/pierre.png" id="13_foiom"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_07pt2"]
 size = Vector2(212.062, 1248.5)
@@ -50,6 +55,7 @@ position = Vector2(53, 102)
 texture = ExtResource("1_scdot")
 
 [node name="StaticBody2D" type="StaticBody2D" parent="."]
+z_index = 80
 collision_layer = 3
 collision_mask = 3
 
@@ -200,14 +206,36 @@ shape = SubResource("RectangleShape2D_u6nr3")
 script = ExtResource("5_v1k16")
 fill_color = Color(0.79607844, 0.19607843, 0.25490198, 0.87058824)
 
-[node name="Pierre1" type="Sprite2D" parent="."]
+[node name="Pierre1" type="Sprite2D" parent="Node2D"]
 position = Vector2(-2825, -1566)
 texture = ExtResource("6_uawq3")
 
-[node name="Sable2" type="Sprite2D" parent="."]
+[node name="Sable2" type="Sprite2D" parent="Node2D"]
 position = Vector2(3735, -67)
 texture = ExtResource("7_8te1o")
 
-[node name="Sable1" type="Sprite2D" parent="."]
-position = Vector2(-389, -390)
+[node name="Sable1" type="Sprite2D" parent="Node2D"]
+position = Vector2(-402, -396)
 texture = ExtResource("8_uawq3")
+
+[node name="Platforme" type="Sprite2D" parent="Node2D"]
+position = Vector2(-734, 763)
+texture = ExtResource("9_u6nr3")
+
+[node name="Platforme2" type="Sprite2D" parent="Node2D"]
+position = Vector2(-2371, 1356)
+texture = ExtResource("10_kaoho")
+
+[node name="CadreMurGriffe" parent="Node2D" instance=ExtResource("11_j5qst")]
+position = Vector2(-166, 567)
+
+[node name="CadreMurGriffe2" parent="Node2D" instance=ExtResource("11_j5qst")]
+position = Vector2(-1214, 590)
+
+[node name="Pierre4" type="Sprite2D" parent="Node2D"]
+position = Vector2(1546, 433)
+texture = ExtResource("12_j5qst")
+
+[node name="Pierre" type="Sprite2D" parent="Node2D"]
+position = Vector2(1987, 684)
+texture = ExtResource("13_foiom")
