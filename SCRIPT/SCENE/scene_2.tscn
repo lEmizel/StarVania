@@ -1,11 +1,10 @@
-[gd_scene load_steps=18 format=3 uid="uid://d1onj2oa16cs5"]
+[gd_scene load_steps=17 format=3 uid="uid://d1onj2oa16cs5"]
 
 [ext_resource type="Texture2D" uid="uid://byj1i32f3f3tl" path="res://MEDIA/Image_6-09-24_à_12.02.png" id="1_scdot"]
 [ext_resource type="PackedScene" uid="uid://bqndjpts1oqr3" path="res://SCRIPT/MENU/heatle_bare.tscn" id="2_hnscr"]
 [ext_resource type="PackedScene" uid="uid://vkm3ut4hytpr" path="res://SCRIPT/CHARACHTER/PLAYER.tscn" id="3_v1k16"]
 [ext_resource type="Script" uid="uid://pcqotyxb20op" path="res://SCRIPT/camera2d.gd" id="4_lcu4i"]
-[ext_resource type="PackedScene" uid="uid://lskntqxi822j" path="res://SCRIPT/MONSTER/Orbe.tscn" id="5_v1k16"]
-[ext_resource type="PackedScene" uid="uid://bs1685hwv6d0w" path="res://SCRIPT/MONSTER/SKELETON.tscn" id="6_lcu4i"]
+[ext_resource type="Script" uid="uid://cldc0dscj1uj1" path="res://SCRIPT/OUTILS/LEVEL_EXPORTER.gd" id="5_v1k16"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_07pt2"]
 size = Vector2(212.062, 1248.5)
@@ -102,6 +101,7 @@ one_way_collision = true
 polygon = PackedVector2Array(-4698, 1566, -4702, 1865, -4684, 1832, -4656, 1588, -4470, 1571)
 
 [node name="CHUTE_GRIFFE" type="Area2D" parent="." groups=["CHUTE"]]
+visible = false
 position = Vector2(2, 1)
 
 [node name="CHUTE" type="CollisionShape2D" parent="CHUTE_GRIFFE"]
@@ -192,41 +192,6 @@ position = Vector2(-5640, 1964)
 [node name="CollisionShape2D" type="CollisionShape2D" parent="GRAB2"]
 shape = SubResource("RectangleShape2D_u6nr3")
 
-[node name="CharacterBody2D2" parent="." instance=ExtResource("5_v1k16")]
-position = Vector2(-1213, -1207)
-
-[node name="CharacterBody2D3" parent="." instance=ExtResource("5_v1k16")]
-position = Vector2(-295, -1196)
-
-[node name="CharacterBody2D4" parent="." instance=ExtResource("5_v1k16")]
-position = Vector2(825, -1272)
-
-[node name="CharacterBody2D5" parent="." instance=ExtResource("5_v1k16")]
-position = Vector2(1491, -1280)
-
-[node name="CharacterBody2D8" parent="." instance=ExtResource("5_v1k16")]
-position = Vector2(-189, 415)
-
-[node name="CharacterBody2D9" parent="." instance=ExtResource("5_v1k16")]
-position = Vector2(-1232, 441)
-
-[node name="CharacterBody2D6" parent="." instance=ExtResource("5_v1k16")]
-position = Vector2(1996, -1297)
-
-[node name="CharacterBody2D7" parent="." instance=ExtResource("5_v1k16")]
-position = Vector2(1996, -1297)
-
-[node name="enemi" parent="." instance=ExtResource("6_lcu4i")]
-position = Vector2(-726, -875)
-
-[node name="enemi4" parent="." instance=ExtResource("6_lcu4i")]
-position = Vector2(-3372, 330)
-
-[node name="enemi5" parent="." instance=ExtResource("6_lcu4i")]
-position = Vector2(-3238, 338)
-
-[node name="enemi2" parent="." instance=ExtResource("6_lcu4i")]
-position = Vector2(-11, -852)
-
-[node name="enemi3" parent="." instance=ExtResource("6_lcu4i")]
-position = Vector2(-766, 721)
+[node name="Node2D" type="Node2D" parent="."]
+script = ExtResource("5_v1k16")
+fill_color = Color(0.79607844, 0.19607843, 0.25490198, 0.87058824)
