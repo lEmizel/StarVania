@@ -1,4 +1,4 @@
-[gd_scene load_steps=25 format=3 uid="uid://d1onj2oa16cs5"]
+[gd_scene load_steps=26 format=3 uid="uid://d1onj2oa16cs5"]
 
 [ext_resource type="Texture2D" uid="uid://byj1i32f3f3tl" path="res://MEDIA/Image_6-09-24_à_12.02.png" id="1_scdot"]
 [ext_resource type="PackedScene" uid="uid://bqndjpts1oqr3" path="res://SCRIPT/MENU/heatle_bare.tscn" id="2_hnscr"]
@@ -13,6 +13,7 @@
 [ext_resource type="PackedScene" uid="uid://lfopd74ueqri" path="res://SCRIPT/INTERACTIBLE/cadre_mur_griffe.tscn" id="11_j5qst"]
 [ext_resource type="Texture2D" uid="uid://ducb1cnve3db" path="res://MEDIA/scene2/pierre4.png" id="12_j5qst"]
 [ext_resource type="Texture2D" uid="uid://v2sybljvty8l" path="res://MEDIA/scene2/pierre.png" id="13_foiom"]
+[ext_resource type="Texture2D" uid="uid://ds0or5j510qwo" path="res://level_export.png" id="14_foiom"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_07pt2"]
 size = Vector2(212.062, 1248.5)
@@ -110,6 +111,10 @@ one_way_collision = true
 [node name="CollisionPolygon2D15" type="CollisionPolygon2D" parent="StaticBody2D"]
 polygon = PackedVector2Array(-4698, 1566, -4702, 1865, -4684, 1832, -4656, 1588, -4470, 1571)
 
+[node name="CollisionPolygon2D16" type="CollisionPolygon2D" parent="StaticBody2D"]
+position = Vector2(-104, 6)
+polygon = PackedVector2Array(3460, 1347, 3832, 1337, 4309, 1320, 4519, 1329, 4502, 1449, 3662, 1472, 3466, 1463)
+
 [node name="CHUTE_GRIFFE" type="Area2D" parent="." groups=["CHUTE"]]
 visible = false
 position = Vector2(2, 1)
@@ -141,11 +146,11 @@ shape = SubResource("RectangleShape2D_v1k16")
 [node name="GRIFFE" type="Area2D" parent="." groups=["GRIFFE"]]
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="GRIFFE"]
-position = Vector2(-164, 571)
+position = Vector2(-173, 453)
 shape = SubResource("RectangleShape2D_lcu4i")
 
 [node name="CollisionShape2D2" type="CollisionShape2D" parent="GRIFFE"]
-position = Vector2(-1225, 590)
+position = Vector2(-1225, 472)
 shape = SubResource("RectangleShape2D_lcu4i")
 
 [node name="CollisionShape2D3" type="CollisionShape2D" parent="GRIFFE"]
@@ -181,10 +186,10 @@ shape = SubResource("RectangleShape2D_k37m6")
 [node name="CanvasLayer" parent="." instance=ExtResource("2_hnscr")]
 
 [node name="CharacterBody2D" parent="." instance=ExtResource("3_v1k16")]
-position = Vector2(-1680, -984)
+position = Vector2(481, 666)
 
 [node name="Camera2D" type="Camera2D" parent="."]
-position = Vector2(-1672, -1052)
+position = Vector2(489, 598)
 process_callback = 0
 limit_smoothed = true
 position_smoothing_enabled = true
@@ -204,14 +209,16 @@ shape = SubResource("RectangleShape2D_u6nr3")
 
 [node name="Node2D" type="Node2D" parent="."]
 script = ExtResource("5_v1k16")
+export_scale = 0.5
 fill_color = Color(0.79607844, 0.19607843, 0.25490198, 0.87058824)
+bg_color = Color(0.101960786, 0.101960786, 0.101960786, 0)
 
 [node name="Pierre1" type="Sprite2D" parent="Node2D"]
 position = Vector2(-2825, -1566)
 texture = ExtResource("6_uawq3")
 
 [node name="Sable2" type="Sprite2D" parent="Node2D"]
-position = Vector2(3735, -67)
+position = Vector2(3741, -59)
 texture = ExtResource("7_8te1o")
 
 [node name="Sable1" type="Sprite2D" parent="Node2D"]
@@ -227,10 +234,10 @@ position = Vector2(-2371, 1356)
 texture = ExtResource("10_kaoho")
 
 [node name="CadreMurGriffe" parent="Node2D" instance=ExtResource("11_j5qst")]
-position = Vector2(-166, 567)
+position = Vector2(-169.5, 455)
 
 [node name="CadreMurGriffe2" parent="Node2D" instance=ExtResource("11_j5qst")]
-position = Vector2(-1214, 590)
+position = Vector2(-1217.5, 478)
 
 [node name="Pierre4" type="Sprite2D" parent="Node2D"]
 position = Vector2(1546, 433)
@@ -239,3 +246,7 @@ texture = ExtResource("12_j5qst")
 [node name="Pierre" type="Sprite2D" parent="Node2D"]
 position = Vector2(1987, 684)
 texture = ExtResource("13_foiom")
+
+[node name="LevelExport" type="Sprite2D" parent="."]
+position = Vector2(10859, 77)
+texture = ExtResource("14_foiom")

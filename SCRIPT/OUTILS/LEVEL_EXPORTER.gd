@@ -1,37 +1,34 @@
 ## level_exporter.gd
-## Script @tool pour Godot 4 — Exporte les collision shapes d'un niveau en PNG 1:1
+## Script @tool pour Godot 4 — Exporte les collision shapes d'un niveau en PNG
 ##
 ## UTILISATION :
 ## 1. Attache ce script à un Node vide dans ta scène de niveau
-## 2. Dans l'inspecteur, configure le chemin d'export si besoin
+## 2. Dans l'inspecteur, configure le chemin d'export et le scale si besoin
 ## 3. Coche "Exporter Niveau" → le PNG est généré
 ## 4. Ouvre le PNG dans Procreate comme calque de référence
 ##
-## Le personnage de 300×300 dans le jeu = 300×300 pixels dans l'image.
+## export_scale = 1.0 → taille réelle (1 pixel jeu = 1 pixel image)
+## export_scale = 0.5 → moitié résolution (image 4× plus légère)
 
 @tool
 extends Node
 
 ## Chemin de sauvegarde du PNG exporté
 @export var export_path: String = "res://level_export.png"
+## Facteur d'échelle (0.5 = moitié résolution, 1.0 = taille réelle)
+@export var export_scale: float = 1.0
 ## Couleur de remplissage des collision shapes
-@export var fill_color: Color = Color(0.8, 0.2, 0.2, 0.6)
+@export var fill_color: Color = Color(0.8, 0.2, 0.2, 1.0)
 ## Couleur du contour des shapes
 @export var outline_color: Color = Color(1, 1, 1, 1)
-## Couleur de fond (transparent par défaut)
-@export var bg_color: Color = Color(0, 0, 0, 0)
-## Marge en pixels autour du niveau
+## Couleur de fond
+@export var bg_color: Color = Color(0.1, 0.1, 0.1, 1.0)
+## Marge en pixels autour du niveau (en unités jeu, sera scalée)
 @export var margin: int = 200
-## Épaisseur du contour en pixels
+## Épaisseur du contour en pixels image
 @export var outline_thickness: int = 2
 ## Nombre de segments pour approximer les cercles/capsules
 @export var circle_segments: int = 32
-## Dessiner un rectangle témoin aux dimensions du personnage (300×300)
-@export var draw_player_ref: bool = true
-## Taille du personnage témoin en pixels
-@export var player_ref_size: Vector2 = Vector2(300, 300)
-## Position du témoin (coin haut-gauche du niveau par défaut, ajuste si besoin)
-@export var player_ref_position: Vector2 = Vector2(0, 0)
 
 ## ▶ Coche cette case pour lancer l'export !
 @export var exporter_niveau: bool = false : set = _on_export_pressed
@@ -44,7 +41,6 @@ extends Node
 func _on_export_pressed(value: bool) -> void:
 	if not value:
 		return
-	# Reset immédiat pour pouvoir re-cliquer
 	exporter_niveau = false
 	
 	if not Engine.is_editor_hint():
@@ -83,49 +79,37 @@ func _export_level() -> void:
 	var bounds := _compute_bounds(polygons)
 	bounds = bounds.grow(margin)
 	
-	var img_w: int = int(ceil(bounds.size.x))
-	var img_h: int = int(ceil(bounds.size.y))
+	# 4. Appliquer le scale à la taille de l'image
+	var img_w: int = int(ceil(bounds.size.x * export_scale))
+	var img_h: int = int(ceil(bounds.size.y * export_scale))
 	
-	# Sécurité : prévenir si l'image est énorme
+	# Sécurité
 	var megapixels := (img_w * img_h) / 1_000_000.0
-	print("[LevelExporter] Taille image : %d × %d px (%.1f MP)" % [img_w, img_h, megapixels])
+	print("[LevelExporter] Taille image : %d × %d px (%.1f MP) — scale: %.2f" % [img_w, img_h, megapixels, export_scale])
 	if megapixels > 300:
 		push_warning("Attention : image très grande (%.0f MP). Ça peut prendre du temps." % megapixels)
 	
-	# 4. Créer l'image
+	# 5. Créer l'image
 	var img := Image.create(img_w, img_h, false, Image.FORMAT_RGBA8)
 	img.fill(bg_color)
 	
-	var offset := bounds.position  # Décalage pour ramener les coordonnées en espace image
+	var offset := bounds.position
 	
-	# 5. Dessiner chaque polygone
+	# 6. Dessiner chaque polygone (avec scale appliqué aux points)
 	for poly in polygons:
 		var adjusted := PackedVector2Array()
 		for p in poly:
-			adjusted.append(p - offset)
+			adjusted.append((p - offset) * export_scale)
 		_fill_polygon_scanline(img, adjusted, fill_color)
 		_draw_polygon_outline(img, adjusted, outline_color, outline_thickness)
-	
-	# 6. Dessiner le personnage témoin
-	if draw_player_ref:
-		var ref_pos: Vector2 = player_ref_position - offset
-		var ref_rect := PackedVector2Array([
-			ref_pos,
-			ref_pos + Vector2(player_ref_size.x, 0),
-			ref_pos + Vector2(player_ref_size.x, player_ref_size.y),
-			ref_pos + Vector2(0, player_ref_size.y),
-		])
-		var player_color := Color(0, 1, 0, 0.4)
-		_fill_polygon_scanline(img, ref_rect, player_color)
-		_draw_polygon_outline(img, ref_rect, Color(0, 1, 0, 1), 3)
 	
 	# 7. Sauvegarder
 	var err := img.save_png(export_path)
 	if err == OK:
 		print("[LevelExporter] ✅ Niveau exporté : %s" % export_path)
 		print("[LevelExporter] Dimensions : %d × %d px" % [img_w, img_h])
-		print("[LevelExporter] Ton personnage de %d×%d fera exactement %d×%d px dans cette image." 
-			% [int(player_ref_size.x), int(player_ref_size.y), int(player_ref_size.x), int(player_ref_size.y)])
+		if export_scale != 1.0:
+			print("[LevelExporter] Scale %.2f — dans Godot, importe tes sprites avec un scale de %.1f et filtre nearest." % [export_scale, 1.0 / export_scale])
 	else:
 		push_error("Erreur lors de la sauvegarde : %s" % str(err))
 
@@ -186,13 +170,11 @@ func _shape_data_to_polygon(sd: Dictionary) -> PackedVector2Array:
 	
 	elif shape is CapsuleShape2D:
 		var r: float = shape.radius
-		var h: float = shape.height / 2.0 - r  # demi-hauteur du corps
+		var h: float = shape.height / 2.0 - r
 		var half_segs: int = circle_segments / 2
-		# Demi-cercle haut
 		for i in range(half_segs + 1):
 			var angle: float = PI + (float(i) / half_segs) * PI
 			local_points.append(Vector2(cos(angle) * r, sin(angle) * r - h))
-		# Demi-cercle bas
 		for i in range(half_segs + 1):
 			var angle: float = (float(i) / half_segs) * PI
 			local_points.append(Vector2(cos(angle) * r, sin(angle) * r + h))
@@ -201,12 +183,9 @@ func _shape_data_to_polygon(sd: Dictionary) -> PackedVector2Array:
 		local_points = shape.points
 	
 	elif shape is ConcavePolygonShape2D:
-		# Les ConcavePolygon sont des segments, on les convertit en outline
 		local_points = shape.segments
-		# Pas idéal, mais on fait de notre mieux
 	
 	elif shape is SegmentShape2D:
-		# Segment = ligne entre 2 points, on en fait un rectangle fin
 		var a: Vector2 = shape.a
 		var b: Vector2 = shape.b
 		var normal: Vector2 = (b - a).normalized().orthogonal() * 2.0
@@ -215,7 +194,6 @@ func _shape_data_to_polygon(sd: Dictionary) -> PackedVector2Array:
 		])
 	
 	elif shape is WorldBoundaryShape2D:
-		# On ignore les world boundaries
 		return PackedVector2Array()
 	
 	else:
@@ -261,7 +239,6 @@ func _fill_polygon_scanline(img: Image, polygon: PackedVector2Array, color: Colo
 	if polygon.size() < 3:
 		return
 	
-	# Trouver les bornes Y
 	var min_y: int = int(floor(polygon[0].y))
 	var max_y: int = int(ceil(polygon[0].y))
 	for p in polygon:
@@ -273,26 +250,22 @@ func _fill_polygon_scanline(img: Image, polygon: PackedVector2Array, color: Colo
 	
 	var n: int = polygon.size()
 	
-	# Pour chaque ligne de scan
 	for y in range(min_y, max_y + 1):
 		var intersections: Array[float] = []
-		var fy: float = float(y) + 0.5  # Centre du pixel
+		var fy: float = float(y) + 0.5
 		
 		for i in n:
 			var j: int = (i + 1) % n
 			var yi: float = polygon[i].y
 			var yj: float = polygon[j].y
 			
-			# L'arête croise-t-elle cette ligne ?
 			if (yi <= fy and yj > fy) or (yj <= fy and yi > fy):
 				var t: float = (fy - yi) / (yj - yi)
 				var x_intersect: float = polygon[i].x + t * (polygon[j].x - polygon[i].x)
 				intersections.append(x_intersect)
 		
-		# Trier les intersections
 		intersections.sort()
 		
-		# Remplir entre les paires
 		for k in range(0, intersections.size() - 1, 2):
 			var x_start: int = maxi(int(floor(intersections[k])), 0)
 			var x_end: int = mini(int(ceil(intersections[k + 1])), img.get_width() - 1)
@@ -323,7 +296,6 @@ func _draw_thick_line(img: Image, from: Vector2, to: Vector2, color: Color, thic
 		_draw_line_bresenham(img, int(from.x), int(from.y), int(to.x), int(to.y), color)
 		return
 	
-	# Pour l'épaisseur, on dessine plusieurs lignes parallèles
 	var dir := (to - from).normalized()
 	var normal := dir.orthogonal()
 	var half_t := thickness / 2.0
