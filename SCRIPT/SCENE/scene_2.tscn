@@ -1,4 +1,4 @@
-[gd_scene load_steps=26 format=3 uid="uid://d1onj2oa16cs5"]
+[gd_scene load_steps=29 format=3 uid="uid://d1onj2oa16cs5"]
 
 [ext_resource type="Texture2D" uid="uid://byj1i32f3f3tl" path="res://MEDIA/Image_6-09-24_à_12.02.png" id="1_scdot"]
 [ext_resource type="PackedScene" uid="uid://bqndjpts1oqr3" path="res://SCRIPT/MENU/heatle_bare.tscn" id="2_hnscr"]
@@ -14,6 +14,9 @@
 [ext_resource type="Texture2D" uid="uid://ducb1cnve3db" path="res://MEDIA/scene2/pierre4.png" id="12_j5qst"]
 [ext_resource type="Texture2D" uid="uid://v2sybljvty8l" path="res://MEDIA/scene2/pierre.png" id="13_foiom"]
 [ext_resource type="Texture2D" uid="uid://ds0or5j510qwo" path="res://level_export.png" id="14_foiom"]
+[ext_resource type="Texture2D" uid="uid://cywpjmdlp8hyr" path="res://MEDIA/scene2/pierre1 2.png" id="15_1o1fj"]
+[ext_resource type="Texture2D" uid="uid://bcex5psoj7yqv" path="res://MEDIA/scene2/sable1 2.png" id="16_dql3j"]
+[ext_resource type="Texture2D" uid="uid://4aoshvj60ncg" path="res://MEDIA/scene2/sable2 2.png" id="17_dyffl"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_07pt2"]
 size = Vector2(212.062, 1248.5)
@@ -115,6 +118,9 @@ polygon = PackedVector2Array(-4698, 1566, -4702, 1865, -4684, 1832, -4656, 1588,
 position = Vector2(-104, 6)
 polygon = PackedVector2Array(3460, 1347, 3832, 1337, 4309, 1320, 4519, 1329, 4502, 1449, 3662, 1472, 3466, 1463)
 
+[node name="CollisionPolygon2D17" type="CollisionPolygon2D" parent="StaticBody2D"]
+polygon = PackedVector2Array(9435, -289, 9524, -299, 9845, -326, 9943, -313, 10129, -296, 10300, -279, 10505, -289, 10665, -313, 10829, -345, 10951, -331, 11134, -309, 11265, -308, 11409, -320, 11530, -345, 11708, -329, 11876, -330, 12015, -332, 12046, -330, 12045, -169, 11476, -131, 10333, -149, 9480, -151, 9303, -164, 9324, -252, 9440, -534, 9528, -552, 9511, -331, 9507, -311)
+
 [node name="CHUTE_GRIFFE" type="Area2D" parent="." groups=["CHUTE"]]
 visible = false
 position = Vector2(2, 1)
@@ -186,10 +192,12 @@ shape = SubResource("RectangleShape2D_k37m6")
 [node name="CanvasLayer" parent="." instance=ExtResource("2_hnscr")]
 
 [node name="CharacterBody2D" parent="." instance=ExtResource("3_v1k16")]
-position = Vector2(481, 666)
+position = Vector2(9715, -379)
+scale = Vector2(0.5, 0.5)
 
 [node name="Camera2D" type="Camera2D" parent="."]
-position = Vector2(489, 598)
+position = Vector2(4476, -1101)
+zoom = Vector2(2, 2)
 process_callback = 0
 limit_smoothed = true
 position_smoothing_enabled = true
@@ -250,3 +258,15 @@ texture = ExtResource("13_foiom")
 [node name="LevelExport" type="Sprite2D" parent="."]
 position = Vector2(10859, 77)
 texture = ExtResource("14_foiom")
+
+[node name="Pierre12" type="Sprite2D" parent="."]
+position = Vector2(9117, -653)
+texture = ExtResource("15_1o1fj")
+
+[node name="Sable12" type="Sprite2D" parent="."]
+position = Vector2(10309, -67)
+texture = ExtResource("16_dql3j")
+
+[node name="Sable22" type="Sprite2D" parent="."]
+position = Vector2(12422, 108)
+texture = ExtResource("17_dyffl")
