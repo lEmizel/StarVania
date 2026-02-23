@@ -7,7 +7,7 @@
 [ext_resource type="Script" uid="uid://cldc0dscj1uj1" path="res://SCRIPT/OUTILS/LEVEL_EXPORTER.gd" id="5_v1k16"]
 [ext_resource type="Texture2D" uid="uid://b3j6wolipm8yi" path="res://MEDIA/scene2/pierre1.png" id="6_uawq3"]
 [ext_resource type="Texture2D" uid="uid://db0m1kkml8sck" path="res://MEDIA/scene2/sable2.png" id="7_8te1o"]
-[ext_resource type="Texture2D" uid="uid://cxmotl28bx8m" path="res://MEDIA/scene2/sable.png" id="8_k37m6"]
+[ext_resource type="Texture2D" uid="uid://cki5i16kleo52" path="res://MEDIA/scene2/sable1.png" id="8_uawq3"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_07pt2"]
 size = Vector2(212.062, 1248.5)
@@ -205,9 +205,9 @@ position = Vector2(-2825, -1566)
 texture = ExtResource("6_uawq3")
 
 [node name="Sable2" type="Sprite2D" parent="."]
-position = Vector2(-286, -674)
+position = Vector2(3735, -67)
 texture = ExtResource("7_8te1o")
 
-[node name="Sable" type="Sprite2D" parent="."]
-position = Vector2(5282, -617)
-texture = ExtResource("8_k37m6")
+[node name="Sable1" type="Sprite2D" parent="."]
+position = Vector2(-389, -390)
+texture = ExtResource("8_uawq3")
