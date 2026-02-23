@@ -1,10 +1,13 @@
-[gd_scene load_steps=17 format=3 uid="uid://d1onj2oa16cs5"]
+[gd_scene load_steps=20 format=3 uid="uid://d1onj2oa16cs5"]
 
 [ext_resource type="Texture2D" uid="uid://byj1i32f3f3tl" path="res://MEDIA/Image_6-09-24_à_12.02.png" id="1_scdot"]
 [ext_resource type="PackedScene" uid="uid://bqndjpts1oqr3" path="res://SCRIPT/MENU/heatle_bare.tscn" id="2_hnscr"]
 [ext_resource type="PackedScene" uid="uid://vkm3ut4hytpr" path="res://SCRIPT/CHARACHTER/PLAYER.tscn" id="3_v1k16"]
 [ext_resource type="Script" uid="uid://pcqotyxb20op" path="res://SCRIPT/camera2d.gd" id="4_lcu4i"]
 [ext_resource type="Script" uid="uid://cldc0dscj1uj1" path="res://SCRIPT/OUTILS/LEVEL_EXPORTER.gd" id="5_v1k16"]
+[ext_resource type="Texture2D" uid="uid://b3j6wolipm8yi" path="res://MEDIA/scene2/pierre1.png" id="6_uawq3"]
+[ext_resource type="Texture2D" uid="uid://db0m1kkml8sck" path="res://MEDIA/scene2/sable2.png" id="7_8te1o"]
+[ext_resource type="Texture2D" uid="uid://cxmotl28bx8m" path="res://MEDIA/scene2/sable.png" id="8_k37m6"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_07pt2"]
 size = Vector2(212.062, 1248.5)
@@ -41,6 +44,7 @@ size = Vector2(129, 297.5)
 [node name="scene_2" type="Node2D"]
 
 [node name="Image6-09-24À12_02" type="Sprite2D" parent="."]
+visible = false
 z_index = -4096
 position = Vector2(53, 102)
 texture = ExtResource("1_scdot")
@@ -195,3 +199,15 @@ shape = SubResource("RectangleShape2D_u6nr3")
 [node name="Node2D" type="Node2D" parent="."]
 script = ExtResource("5_v1k16")
 fill_color = Color(0.79607844, 0.19607843, 0.25490198, 0.87058824)
+
+[node name="Pierre1" type="Sprite2D" parent="."]
+position = Vector2(-2825, -1566)
+texture = ExtResource("6_uawq3")
+
+[node name="Sable2" type="Sprite2D" parent="."]
+position = Vector2(-286, -674)
+texture = ExtResource("7_8te1o")
+
+[node name="Sable" type="Sprite2D" parent="."]
+position = Vector2(5282, -617)
+texture = ExtResource("8_k37m6")
