@@ -1,0 +1,33 @@
+[gd_scene load_steps=5 format=3 uid="uid://c8y35es6jse5x"]
+
+[ext_resource type="Script" uid="uid://03kqremk8ljt" path="res://SCRIPT/MENU/heatle_bare_monster.gd" id="1_oepe6"]
+[ext_resource type="Texture2D" uid="uid://cf1akc700blvy" path="res://MEDIA/INTERFACE/LIFE/barre de vie_1.png" id="2_5mh1r"]
+[ext_resource type="Texture2D" uid="uid://cshedngp5p540" path="res://MEDIA/INTERFACE/LIFE/barre de vie_3.png" id="3_he5hf"]
+[ext_resource type="Texture2D" uid="uid://b4dum1u5n5lp0" path="res://MEDIA/INTERFACE/LIFE/barre de vie_2.png" id="4_a726w"]
+
+[node name="Node" type="Node2D"]
+script = ExtResource("1_oepe6")
+
+[node name="barre_de_vie" type="TextureProgressBar" parent="."]
+light_mask = 0
+offset_left = 49.0
+offset_top = 28.0
+offset_right = 1343.0
+offset_bottom = 208.0
+scale = Vector2(0.3, 0.3)
+max_value = 50.0
+value = 50.0
+texture_over = ExtResource("2_5mh1r")
+texture_progress = ExtResource("3_he5hf")
+
+[node name="Under_barre_de_vie" type="TextureProgressBar" parent="."]
+light_mask = 0
+z_index = -1
+offset_left = 49.0
+offset_top = 28.0
+offset_right = 1343.0
+offset_bottom = 208.0
+scale = Vector2(0.3, 0.3)
+max_value = 50.0
+value = 50.0
+texture_progress = ExtResource("4_a726w")

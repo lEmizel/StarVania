@@ -1,0 +1,58 @@
+[gd_scene load_steps=13 format=3 uid="uid://bc2iigjdyudgm"]
+
+[ext_resource type="Texture2D" uid="uid://guwxmnos4f84" path="res://MEDIA/CHARACHTER/effect/step/ground_effect_step10.png" id="1_d5xmm"]
+[ext_resource type="Texture2D" uid="uid://cwpqhgrf03xk1" path="res://MEDIA/CHARACHTER/effect/step/ground_effect_step9.png" id="2_6c28w"]
+[ext_resource type="Texture2D" uid="uid://jri24alw4v2l" path="res://MEDIA/CHARACHTER/effect/step/ground_effect_step8.png" id="3_23b4l"]
+[ext_resource type="Texture2D" uid="uid://7texf6rx0qne" path="res://MEDIA/CHARACHTER/effect/step/ground_effect_step7.png" id="4_fphvj"]
+[ext_resource type="Texture2D" uid="uid://bx6j8yeqc85ae" path="res://MEDIA/CHARACHTER/effect/step/ground_effect_step6.png" id="5_vkotk"]
+[ext_resource type="Texture2D" uid="uid://ko075fuegbqf" path="res://MEDIA/CHARACHTER/effect/step/ground_effect_step5.png" id="6_vy5dk"]
+[ext_resource type="Texture2D" uid="uid://tnbrx4nli8cx" path="res://MEDIA/CHARACHTER/effect/step/ground_effect_step4.png" id="7_r756e"]
+[ext_resource type="Texture2D" uid="uid://b0sfmbnl8vb5" path="res://MEDIA/CHARACHTER/effect/step/ground_effect_step3.png" id="8_kebws"]
+[ext_resource type="Texture2D" uid="uid://cdn3455ald54u" path="res://MEDIA/CHARACHTER/effect/step/ground_effect_step2.png" id="9_3ar8j"]
+[ext_resource type="Texture2D" uid="uid://r87ny50t0ykm" path="res://MEDIA/CHARACHTER/effect/step/ground_effect_step1.png" id="10_atyra"]
+[ext_resource type="Script" uid="uid://fl8l7kh37mt" path="res://SCRIPT/CHARACHTER/particule_ground_step.gd" id="11_6c28w"]
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_rv0ot"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("1_d5xmm")
+}, {
+"duration": 1.0,
+"texture": ExtResource("2_6c28w")
+}, {
+"duration": 1.0,
+"texture": ExtResource("3_23b4l")
+}, {
+"duration": 1.0,
+"texture": ExtResource("4_fphvj")
+}, {
+"duration": 1.0,
+"texture": ExtResource("5_vkotk")
+}, {
+"duration": 1.0,
+"texture": ExtResource("6_vy5dk")
+}, {
+"duration": 1.0,
+"texture": ExtResource("7_r756e")
+}, {
+"duration": 1.0,
+"texture": ExtResource("8_kebws")
+}, {
+"duration": 1.0,
+"texture": ExtResource("9_3ar8j")
+}, {
+"duration": 1.0,
+"texture": ExtResource("10_atyra")
+}],
+"loop": false,
+"name": &"run_to_ground",
+"speed": 24.0
+}]
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D"]
+position = Vector2(0, -37.77)
+scale = Vector2(0.5, 0.5)
+sprite_frames = SubResource("SpriteFrames_rv0ot")
+animation = &"run_to_ground"
+script = ExtResource("11_6c28w")

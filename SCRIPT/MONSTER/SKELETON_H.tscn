@@ -1,0 +1,8 @@
+[gd_scene load_steps=2 format=3 uid="uid://cnf8wrewe0rae"]
+
+[ext_resource type="PackedScene" uid="uid://cvsm5r3e17ah5" path="res://SCRIPT/MONSTER/BASE_MONSTER.tscn" id="1_lo06q"]
+
+[node name="CharacterBody2D" instance=ExtResource("1_lo06q")]
+
+[node name="animator" parent="POINT" index="0"]
+animation = &"dead"

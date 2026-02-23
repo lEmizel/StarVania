@@ -1,0 +1,172 @@
+[gd_scene load_steps=30 format=3 uid="uid://cvsm5r3e17ah5"]
+
+[ext_resource type="Script" uid="uid://d1o462tapmycy" path="res://SCRIPT/MONSTER/ai desire.gd" id="1_pj56r"]
+[ext_resource type="PackedScene" uid="uid://c8y35es6jse5x" path="res://SCRIPT/MENU/heatle_bare_monster.tscn" id="2_56k4p"]
+[ext_resource type="Texture2D" uid="uid://beru4euen3aju" path="res://MEDIA/MONSTER/SKELETON/attack01/Skeleton_attack01-1.png" id="3_pv3ro"]
+[ext_resource type="Texture2D" uid="uid://du5on68mnqjni" path="res://MEDIA/MONSTER/SKELETON/attack01/Skeleton_attack01-2.png" id="4_4laxi"]
+[ext_resource type="Texture2D" uid="uid://124tdq5hvon" path="res://MEDIA/MONSTER/SKELETON/attack01/Skeleton_attack01-3.png" id="5_q5htv"]
+[ext_resource type="Texture2D" uid="uid://2gx2t7fjxq1l" path="res://MEDIA/MONSTER/SKELETON/attack01/Skeleton_attack01-4.png" id="6_00c2u"]
+[ext_resource type="Texture2D" uid="uid://d1qj2sx3yu16t" path="res://MEDIA/MONSTER/SKELETON/attack01/Skeleton_attack01-5.png" id="7_s7rte"]
+[ext_resource type="Texture2D" uid="uid://g075j7pfi0lv" path="res://MEDIA/MONSTER/SKELETON/attack01/Skeleton_attack01-6.png" id="8_y5nx4"]
+[ext_resource type="Texture2D" uid="uid://de61gexsfn0we" path="res://MEDIA/MONSTER/SKELETON/dead/Skeleton_death-1.png" id="9_3dena"]
+[ext_resource type="Texture2D" uid="uid://dycbokgiug34b" path="res://MEDIA/MONSTER/SKELETON/dead/Skeleton_death-2.png" id="10_wtgb4"]
+[ext_resource type="Texture2D" uid="uid://b6yoo6jei5fp4" path="res://MEDIA/MONSTER/SKELETON/dead/Skeleton_death-3.png" id="11_dtm2q"]
+[ext_resource type="Texture2D" uid="uid://b66eg6u03sbxt" path="res://MEDIA/MONSTER/SKELETON/dead/Skeleton_death-4.png" id="12_6iya7"]
+[ext_resource type="Texture2D" uid="uid://ck4ng1bachoq5" path="res://MEDIA/MONSTER/SKELETON/hit/Skeleton_hit.png" id="13_xm4ue"]
+[ext_resource type="Texture2D" uid="uid://d33q5udvg7roa" path="res://MEDIA/MONSTER/SKELETON/idle/Skeleton_Idle-1.png" id="14_vj0nf"]
+[ext_resource type="Texture2D" uid="uid://b31ugb6w76sai" path="res://MEDIA/MONSTER/SKELETON/idle/Skeleton_Idle-2.png" id="15_fnr66"]
+[ext_resource type="Texture2D" uid="uid://dv8muy5y4v7tb" path="res://MEDIA/MONSTER/SKELETON/idle/Skeleton_Idle-3.png" id="16_0woah"]
+[ext_resource type="Texture2D" uid="uid://dh8itvb31qkby" path="res://MEDIA/MONSTER/SKELETON/idle/Skeleton_Idle-4.png" id="17_ho4f7"]
+[ext_resource type="Texture2D" uid="uid://dhcib5ltqwafl" path="res://MEDIA/MONSTER/SKELETON/walk/Skeleton_walk-1.png" id="18_8vwrf"]
+[ext_resource type="Texture2D" uid="uid://bmaj3vaw6rwi5" path="res://MEDIA/MONSTER/SKELETON/walk/Skeleton_walk-2.png" id="19_ljeqg"]
+[ext_resource type="Texture2D" uid="uid://05chsqqxtik8" path="res://MEDIA/MONSTER/SKELETON/walk/Skeleton_walk-3.png" id="20_kmqrp"]
+[ext_resource type="Texture2D" uid="uid://bub6nsvkttqxj" path="res://MEDIA/MONSTER/SKELETON/walk/Skeleton_walk-4.png" id="21_ca08e"]
+[ext_resource type="Texture2D" uid="uid://u2fnnuolr0eg" path="res://MEDIA/MONSTER/SKELETON/walk/Skeleton_walk-5.png" id="22_iv5r3"]
+[ext_resource type="Texture2D" uid="uid://dfs8bsd4capem" path="res://MEDIA/MONSTER/SKELETON/walk/Skeleton_walk-6.png" id="23_o54o1"]
+[ext_resource type="Texture2D" uid="uid://5ttjh7frnolj" path="res://MEDIA/MONSTER/SKELETON/wallback/Skeleton_walkback-1.png" id="24_tufsm"]
+[ext_resource type="Texture2D" uid="uid://bmjkyhe04g3xr" path="res://MEDIA/MONSTER/SKELETON/wallback/Skeleton_walkback-2.png" id="25_wsy0e"]
+[ext_resource type="Texture2D" uid="uid://cdnjkfrelkr07" path="res://MEDIA/MONSTER/SKELETON/wallback/Skeleton_walkback-3.png" id="26_55r0n"]
+[ext_resource type="Texture2D" uid="uid://b7me0rjqaho6v" path="res://MEDIA/MONSTER/SKELETON/wallback/Skeleton_walkback-4.png" id="27_04mjh"]
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_7joub"]
+radius = 52.0
+height = 116.0
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_dnpf1"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("3_pv3ro")
+}, {
+"duration": 1.0,
+"texture": ExtResource("4_4laxi")
+}, {
+"duration": 1.0,
+"texture": ExtResource("5_q5htv")
+}, {
+"duration": 1.0,
+"texture": ExtResource("6_00c2u")
+}, {
+"duration": 1.0,
+"texture": ExtResource("7_s7rte")
+}, {
+"duration": 1.0,
+"texture": ExtResource("8_y5nx4")
+}],
+"loop": false,
+"name": &"attack",
+"speed": 9.0
+}, {
+"frames": [{
+"duration": 1.1,
+"texture": ExtResource("9_3dena")
+}, {
+"duration": 1.3,
+"texture": ExtResource("10_wtgb4")
+}, {
+"duration": 1.5,
+"texture": ExtResource("11_dtm2q")
+}, {
+"duration": 2.5,
+"texture": ExtResource("12_6iya7")
+}],
+"loop": false,
+"name": &"dead",
+"speed": 10.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("13_xm4ue")
+}],
+"loop": false,
+"name": &"hit",
+"speed": 2.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("14_vj0nf")
+}, {
+"duration": 1.0,
+"texture": ExtResource("15_fnr66")
+}, {
+"duration": 1.0,
+"texture": ExtResource("16_0woah")
+}, {
+"duration": 1.0,
+"texture": ExtResource("17_ho4f7")
+}],
+"loop": true,
+"name": &"idle",
+"speed": 8.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("18_8vwrf")
+}, {
+"duration": 1.0,
+"texture": ExtResource("19_ljeqg")
+}, {
+"duration": 1.0,
+"texture": ExtResource("20_kmqrp")
+}, {
+"duration": 1.0,
+"texture": ExtResource("21_ca08e")
+}, {
+"duration": 1.0,
+"texture": ExtResource("22_iv5r3")
+}, {
+"duration": 1.0,
+"texture": ExtResource("23_o54o1")
+}],
+"loop": true,
+"name": &"walk",
+"speed": 8.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("24_tufsm")
+}, {
+"duration": 1.0,
+"texture": ExtResource("25_wsy0e")
+}, {
+"duration": 1.0,
+"texture": ExtResource("26_55r0n")
+}, {
+"duration": 1.0,
+"texture": ExtResource("27_04mjh")
+}],
+"loop": true,
+"name": &"walk_back",
+"speed": 6.0
+}]
+
+[node name="CharacterBody2D" type="CharacterBody2D"]
+collision_layer = 6
+collision_mask = 6
+script = ExtResource("1_pj56r")
+ai_type = "SKELETON"
+
+[node name="bare_de_vie" parent="." instance=ExtResource("2_56k4p")]
+position = Vector2(-90, -232)
+scale = Vector2(0.37, 0.37)
+
+[node name="Collision" type="CollisionShape2D" parent="."]
+position = Vector2(0, -57)
+shape = SubResource("CapsuleShape2D_7joub")
+
+[node name="POINT" type="Node2D" parent="."]
+
+[node name="animator" type="AnimatedSprite2D" parent="POINT"]
+position = Vector2(-1, -97)
+scale = Vector2(1.22, 1.22)
+sprite_frames = SubResource("SpriteFrames_dnpf1")
+animation = &"walk_back"
+
+[node name="Node" type="Node" parent="POINT/animator"]
+
+[node name="vision" type="Area2D" parent="POINT"]
+position = Vector2(-27, -93)
+
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="POINT/vision"]
+position = Vector2(80, -2)
+polygon = PackedVector2Array(-49, -16, 203, -152, 205, 148, -47, 25)

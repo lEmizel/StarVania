@@ -1,0 +1,47 @@
+[gd_scene load_steps=3 format=3 uid="uid://dm012xrdmag4v"]
+
+[ext_resource type="Script" uid="uid://bui8qtlmxn1f7" path="res://SCRIPT/MENU/menu.gd" id="1_x6qr1"]
+[ext_resource type="Texture2D" uid="uid://lrnkdxayk2me" path="res://MEDIA/Calque_d’image_2.png" id="2_x6qr1"]
+
+[node name="MENU" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -690.0
+offset_top = 47.0
+offset_right = -690.0
+offset_bottom = 47.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_x6qr1")
+
+[node name="CenterContainer" type="CenterContainer" parent="."]
+layout_mode = 2
+offset_left = 1267.0
+offset_top = 338.0
+offset_right = 2022.0
+offset_bottom = 713.0
+
+[node name="BoxContainer" type="BoxContainer" parent="CenterContainer"]
+layout_mode = 2
+vertical = true
+
+[node name="PLAY" type="Button" parent="CenterContainer/BoxContainer"]
+layout_mode = 2
+text = "PLAY"
+
+[node name="LOAD" type="Button" parent="CenterContainer/BoxContainer"]
+layout_mode = 2
+text = "LOAD"
+
+[node name="QUIT" type="Button" parent="CenterContainer/BoxContainer"]
+layout_mode = 2
+text = "QUIT
+"
+
+[node name="CaptureD’écran2025-07-01À02_09_24" type="Sprite2D" parent="."]
+z_index = -4096
+position = Vector2(1646, 730)
+scale = Vector2(0.794772, 0.787171)
+texture = ExtResource("2_x6qr1")

@@ -1,0 +1,111 @@
+[gd_scene load_steps=9 format=3 uid="uid://bqndjpts1oqr3"]
+
+[ext_resource type="Texture2D" uid="uid://b4dum1u5n5lp0" path="res://MEDIA/INTERFACE/LIFE/barre de vie_2.png" id="1_2nv3c"]
+[ext_resource type="Script" uid="uid://cx4wwxs1vi63p" path="res://SCRIPT/MENU/gestion_interface.gd" id="1_thk5q"]
+[ext_resource type="Texture2D" uid="uid://cf1akc700blvy" path="res://MEDIA/INTERFACE/LIFE/barre de vie_1.png" id="2_thk5q"]
+[ext_resource type="Texture2D" uid="uid://cshedngp5p540" path="res://MEDIA/INTERFACE/LIFE/barre de vie_3.png" id="3_2kld3"]
+[ext_resource type="Texture2D" uid="uid://l660dral3o4s" path="res://MEDIA/INTERFACE/LIFE/barre endurence.png" id="5_2kld3"]
+[ext_resource type="Texture2D" uid="uid://bjq4d0hj335x8" path="res://MEDIA/INTERFACE/bloodBare.png" id="6_33wgg"]
+[ext_resource type="Script" uid="uid://bubpno8tf3eu0" path="res://SCRIPT/MENU/label.gd" id="7_meh65"]
+
+[sub_resource type="LabelSettings" id="LabelSettings_6788f"]
+font_size = 20
+
+[node name="CanvasLayer" type="CanvasLayer"]
+script = ExtResource("1_thk5q")
+HP_PX_PER_POINT = 1.8
+HP_BACK_START_DELAY = 2.3
+EN_PX_PER_POINT = 7.0
+DBG_COUNT_INTERVAL = 0.025
+ENDURANCE_REGEN_DELAY = 1.2
+
+[node name="barre_de_vie" type="TextureProgressBar" parent="."]
+offset_left = 69.0
+offset_top = 48.0
+offset_right = 1366.0
+offset_bottom = 369.0
+scale = Vector2(0.3, 0.3)
+max_value = 50.0
+value = 50.0
+nine_patch_stretch = true
+stretch_margin_left = 60
+stretch_margin_top = 150
+stretch_margin_right = 60
+texture_over = ExtResource("2_thk5q")
+texture_progress = ExtResource("3_2kld3")
+
+[node name="Under_barre_de_vie" type="TextureProgressBar" parent="."]
+z_index = -1
+offset_left = 69.0
+offset_top = 49.0
+offset_right = 1363.0
+offset_bottom = 229.0
+scale = Vector2(0.3, 0.3)
+max_value = 50.0
+value = 50.0
+nine_patch_stretch = true
+stretch_margin_left = 60
+stretch_margin_top = 150
+stretch_margin_right = 60
+texture_progress = ExtResource("1_2nv3c")
+
+[node name="barre_endurence" type="TextureProgressBar" parent="."]
+offset_left = 69.0
+offset_top = 92.0
+offset_right = 1363.0
+offset_bottom = 272.0
+scale = Vector2(0.3, 0.3)
+max_value = 50.0
+value = 50.0
+nine_patch_stretch = true
+stretch_margin_left = 60
+stretch_margin_top = 150
+stretch_margin_right = 60
+texture_over = ExtResource("2_thk5q")
+texture_progress = ExtResource("5_2kld3")
+
+[node name="Under_endurence" type="TextureProgressBar" parent="."]
+z_index = -1
+offset_left = 69.0
+offset_top = 92.0
+offset_right = 1363.0
+offset_bottom = 272.0
+scale = Vector2(0.3, 0.3)
+max_value = 50.0
+value = 50.0
+nine_patch_stretch = true
+stretch_margin_left = 60
+stretch_margin_top = 150
+stretch_margin_right = 60
+texture_progress = ExtResource("1_2nv3c")
+
+[node name="TextureRect" type="TextureProgressBar" parent="."]
+offset_left = 1706.0
+offset_top = 52.0
+offset_right = 3045.0
+offset_bottom = 252.0
+scale = Vector2(0.12, 0.14)
+nine_patch_stretch = true
+stretch_margin_left = 100
+stretch_margin_top = 100
+stretch_margin_right = 100
+stretch_margin_bottom = 100
+texture_over = ExtResource("6_33wgg")
+
+[node name="Label" type="Label" parent="." groups=["UI_Blood"]]
+offset_left = 1712.0
+offset_top = 51.0
+offset_right = 1856.0
+offset_bottom = 79.0
+text = "800"
+label_settings = SubResource("LabelSettings_6788f")
+horizontal_alignment = 2
+script = ExtResource("7_meh65")
+
+[node name="postive_number" type="Label" parent="Label"]
+layout_mode = 0
+offset_left = -10.0
+offset_top = -23.0
+offset_right = 144.0
+text = "+40"
+horizontal_alignment = 2

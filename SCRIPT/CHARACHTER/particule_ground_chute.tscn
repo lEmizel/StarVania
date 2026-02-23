@@ -1,0 +1,69 @@
+[gd_scene load_steps=15 format=3 uid="uid://bfwic6xtfgc4p"]
+
+[ext_resource type="Texture2D" uid="uid://d07cknlml40se" path="res://MEDIA/CHARACHTER/effect/jump/Illustration_sans_titre-1.png" id="1_x17lf"]
+[ext_resource type="Texture2D" uid="uid://bxrh1a281784x" path="res://MEDIA/CHARACHTER/effect/jump/Illustration_sans_titre-2.png" id="2_d2wi0"]
+[ext_resource type="Texture2D" uid="uid://d3o85pdg2g3wx" path="res://MEDIA/CHARACHTER/effect/jump/Illustration_sans_titre-3.png" id="3_0cf7y"]
+[ext_resource type="Texture2D" uid="uid://b2j4cc1hb08uf" path="res://MEDIA/CHARACHTER/effect/jump/Illustration_sans_titre-4.png" id="4_ahg8x"]
+[ext_resource type="Texture2D" uid="uid://0wvwkf8r3500" path="res://MEDIA/CHARACHTER/effect/jump/Illustration_sans_titre-5.png" id="5_3677g"]
+[ext_resource type="Texture2D" uid="uid://dsf7bt0e3dsn2" path="res://MEDIA/CHARACHTER/effect/jump/Illustration_sans_titre-6.png" id="6_k5o5w"]
+[ext_resource type="Texture2D" uid="uid://crcqr7w54c8qw" path="res://MEDIA/CHARACHTER/effect/jump/Illustration_sans_titre-7.png" id="7_ndp7s"]
+[ext_resource type="Texture2D" uid="uid://c3buruq6vfo4s" path="res://MEDIA/CHARACHTER/effect/jump/Illustration_sans_titre-8.png" id="8_pvs5x"]
+[ext_resource type="Texture2D" uid="uid://ct5y4qlp77s5t" path="res://MEDIA/CHARACHTER/effect/jump/Illustration_sans_titre-9.png" id="9_1ktqh"]
+[ext_resource type="Texture2D" uid="uid://wrmhdyy6k7u3" path="res://MEDIA/CHARACHTER/effect/jump/Illustration_sans_titre-10.png" id="10_nib5a"]
+[ext_resource type="Script" uid="uid://fl8l7kh37mt" path="res://SCRIPT/CHARACHTER/particule_ground_step.gd" id="11_1ktqh"]
+[ext_resource type="Texture2D" uid="uid://da5rxjyqti5p0" path="res://MEDIA/CHARACHTER/effect/jump/Illustration_sans_titre-11.png" id="11_t3yxy"]
+[ext_resource type="Texture2D" uid="uid://dgbtm2u48s80e" path="res://MEDIA/CHARACHTER/effect/jump/Illustration_sans_titre-12.png" id="12_eqpv1"]
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_rv0ot"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("1_x17lf")
+}, {
+"duration": 1.0,
+"texture": ExtResource("2_d2wi0")
+}, {
+"duration": 1.0,
+"texture": ExtResource("3_0cf7y")
+}, {
+"duration": 1.0,
+"texture": ExtResource("4_ahg8x")
+}, {
+"duration": 1.0,
+"texture": ExtResource("5_3677g")
+}, {
+"duration": 1.0,
+"texture": ExtResource("6_k5o5w")
+}, {
+"duration": 1.0,
+"texture": ExtResource("7_ndp7s")
+}, {
+"duration": 1.0,
+"texture": ExtResource("8_pvs5x")
+}, {
+"duration": 1.0,
+"texture": ExtResource("9_1ktqh")
+}, {
+"duration": 1.0,
+"texture": ExtResource("10_nib5a")
+}, {
+"duration": 1.0,
+"texture": ExtResource("11_t3yxy")
+}, {
+"duration": 1.0,
+"texture": ExtResource("12_eqpv1")
+}],
+"loop": false,
+"name": &"particule_ground_chute",
+"speed": 24.0
+}]
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D"]
+z_index = 140
+position = Vector2(0, -37.77)
+scale = Vector2(0.5, 0.5)
+sprite_frames = SubResource("SpriteFrames_rv0ot")
+animation = &"particule_ground_chute"
+frame = 11
+frame_progress = 1.0
+script = ExtResource("11_1ktqh")

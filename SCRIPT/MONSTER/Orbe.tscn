@@ -1,0 +1,194 @@
+[gd_scene load_steps=35 format=3 uid="uid://lskntqxi822j"]
+
+[ext_resource type="Script" uid="uid://d1o462tapmycy" path="res://SCRIPT/MONSTER/ai desire.gd" id="1_h8u1p"]
+[ext_resource type="PackedScene" uid="uid://c8y35es6jse5x" path="res://SCRIPT/MENU/heatle_bare_monster.tscn" id="2_cf60x"]
+[ext_resource type="Texture2D" uid="uid://d2x4g68ct5eoq" path="res://MEDIA/MONSTER/ORBE/ATTACK/Orbe_attack-1.png" id="3_cf60x"]
+[ext_resource type="Texture2D" uid="uid://l86llj40qfju" path="res://MEDIA/MONSTER/ORBE/ATTACK/Orbe_attack-2.png" id="4_i6f64"]
+[ext_resource type="Texture2D" uid="uid://ue4e4tf1spqd" path="res://MEDIA/MONSTER/ORBE/ATTACK/Orbe_attack-3.png" id="5_0vxwp"]
+[ext_resource type="Texture2D" uid="uid://bft25o3g1fkax" path="res://MEDIA/MONSTER/ORBE/ATTACK/Orbe_attack-4.png" id="6_44a0i"]
+[ext_resource type="Texture2D" uid="uid://bvtola08yjeju" path="res://MEDIA/MONSTER/ORBE/ATTACK/Orbe_attack-5.png" id="7_3kqys"]
+[ext_resource type="Texture2D" uid="uid://b8vx3miutvgpc" path="res://MEDIA/MONSTER/ORBE/ATTACK/Orbe_attack-6.png" id="8_sliy2"]
+[ext_resource type="Texture2D" uid="uid://dd44kv7urw042" path="res://MEDIA/MONSTER/ORBE/DEATH/Orbe_death-1.png" id="9_3lqle"]
+[ext_resource type="Texture2D" uid="uid://co3nbdousyw00" path="res://MEDIA/MONSTER/ORBE/HIT/Orbe_hit-1.png" id="9_58aom"]
+[ext_resource type="Texture2D" uid="uid://k7hjn8af86xf" path="res://MEDIA/MONSTER/ORBE/HIT/Orbe_hit-2.png" id="10_s374u"]
+[ext_resource type="Texture2D" uid="uid://djbo0wkkk6l5l" path="res://MEDIA/MONSTER/ORBE/DEATH/Orbe_death-2.png" id="10_ys8th"]
+[ext_resource type="Texture2D" uid="uid://cswlrkh4clat7" path="res://MEDIA/MONSTER/ORBE/DEATH/Orbe_death-3.png" id="11_68lg3"]
+[ext_resource type="Texture2D" uid="uid://imxwpw2l50ot" path="res://MEDIA/MONSTER/ORBE/HIT/Orbe_hit-3.png" id="11_w0ja5"]
+[ext_resource type="Texture2D" uid="uid://gnnufg7los18" path="res://MEDIA/MONSTER/ORBE/DEATH/Orbe_death-4.png" id="12_w8lcj"]
+[ext_resource type="Texture2D" uid="uid://caqau6ubm0jij" path="res://MEDIA/MONSTER/ORBE/DEATH/Orbe_death-5.png" id="13_5wl5o"]
+[ext_resource type="Texture2D" uid="uid://cgpjkhn12uodo" path="res://MEDIA/MONSTER/ORBE/DEATH/Orbe_death-6.png" id="14_icoro"]
+[ext_resource type="Texture2D" uid="uid://dnsr2a6jl13ei" path="res://MEDIA/MONSTER/ORBE/DEATH/Orbe_death-7.png" id="15_f461f"]
+[ext_resource type="Texture2D" uid="uid://drefr3722t0nt" path="res://MEDIA/MONSTER/ORBE/DEATH/Orbe_death-8.png" id="16_cesa6"]
+[ext_resource type="Texture2D" uid="uid://cfgajxi82jvkx" path="res://MEDIA/MONSTER/ORBE/DEATH/Orbe_death-9.png" id="17_anqki"]
+[ext_resource type="Texture2D" uid="uid://c5x83ixa5o8in" path="res://MEDIA/vide.png" id="18_68lg3"]
+[ext_resource type="Texture2D" uid="uid://b2ufxw4swtehq" path="res://MEDIA/MONSTER/ORBE/IDLE/oeil_idle-1.png" id="21_jukru"]
+[ext_resource type="Texture2D" uid="uid://bxx2mw543i25l" path="res://MEDIA/MONSTER/ORBE/IDLE/oeil_idle-2.png" id="22_0nkvt"]
+[ext_resource type="Texture2D" uid="uid://bstfee0af4okf" path="res://MEDIA/MONSTER/ORBE/IDLE/oeil_idle-3.png" id="23_tp3x7"]
+[ext_resource type="Texture2D" uid="uid://djwe23tt0fk82" path="res://MEDIA/MONSTER/ORBE/IDLE/oeil_idle-4.png" id="24_aciry"]
+[ext_resource type="Texture2D" uid="uid://rht0rwihpe0j" path="res://MEDIA/MONSTER/ORBE/IDLE/oeil_idle-5.png" id="25_rrqko"]
+[ext_resource type="Texture2D" uid="uid://4joimyjvrvbm" path="res://MEDIA/MONSTER/ORBE/IDLE/oeil_idle-6.png" id="26_gkaft"]
+[ext_resource type="Texture2D" uid="uid://cwyoyhl2w6bta" path="res://MEDIA/MONSTER/ORBE/IDLE/oeil_idle-7.png" id="27_vrols"]
+[ext_resource type="Texture2D" uid="uid://wk6dp6wkljo1" path="res://MEDIA/MONSTER/ORBE/IDLE/oeil_idle-8.png" id="28_avseb"]
+[ext_resource type="Texture2D" uid="uid://seeybaikb8re" path="res://MEDIA/MONSTER/ORBE/IDLE/oeil_idle-9.png" id="29_qy5kg"]
+[ext_resource type="Script" uid="uid://d0bby4h8vgmww" path="res://SCRIPT/MONSTER/animator_ORBE.gd" id="30_ys8th"]
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_p2oq4"]
+radius = 70.0
+height = 140.0
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_mdjyn"]
+animations = [{
+"frames": [{
+"duration": 1.2,
+"texture": ExtResource("3_cf60x")
+}, {
+"duration": 1.4,
+"texture": ExtResource("4_i6f64")
+}, {
+"duration": 1.0,
+"texture": ExtResource("5_0vxwp")
+}, {
+"duration": 1.0,
+"texture": ExtResource("6_44a0i")
+}, {
+"duration": 1.0,
+"texture": ExtResource("7_3kqys")
+}, {
+"duration": 1.0,
+"texture": ExtResource("8_sliy2")
+}],
+"loop": false,
+"name": &"attack",
+"speed": 18.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("9_3lqle")
+}, {
+"duration": 1.0,
+"texture": ExtResource("10_ys8th")
+}, {
+"duration": 1.0,
+"texture": ExtResource("11_68lg3")
+}, {
+"duration": 1.0,
+"texture": ExtResource("12_w8lcj")
+}, {
+"duration": 1.0,
+"texture": ExtResource("13_5wl5o")
+}, {
+"duration": 1.0,
+"texture": ExtResource("14_icoro")
+}, {
+"duration": 1.0,
+"texture": ExtResource("15_f461f")
+}, {
+"duration": 1.0,
+"texture": ExtResource("16_cesa6")
+}, {
+"duration": 1.0,
+"texture": ExtResource("17_anqki")
+}, {
+"duration": 1.0,
+"texture": ExtResource("18_68lg3")
+}],
+"loop": false,
+"name": &"dead",
+"speed": 9.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("9_58aom")
+}, {
+"duration": 1.0,
+"texture": ExtResource("10_s374u")
+}, {
+"duration": 1.0,
+"texture": ExtResource("11_w0ja5")
+}],
+"loop": false,
+"name": &"hit",
+"speed": 7.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("21_jukru")
+}, {
+"duration": 1.0,
+"texture": ExtResource("22_0nkvt")
+}, {
+"duration": 1.0,
+"texture": ExtResource("23_tp3x7")
+}, {
+"duration": 1.0,
+"texture": ExtResource("24_aciry")
+}, {
+"duration": 1.0,
+"texture": ExtResource("25_rrqko")
+}, {
+"duration": 1.0,
+"texture": ExtResource("26_gkaft")
+}, {
+"duration": 1.0,
+"texture": ExtResource("27_vrols")
+}, {
+"duration": 1.0,
+"texture": ExtResource("28_avseb")
+}, {
+"duration": 1.0,
+"texture": ExtResource("29_qy5kg")
+}],
+"loop": true,
+"name": &"idle",
+"speed": 10.0
+}, {
+"frames": [],
+"loop": true,
+"name": &"walk",
+"speed": 5.0
+}]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_3lqle"]
+radius = 455.133
+
+[node name="CharacterBody2D" type="CharacterBody2D"]
+collision_layer = 4
+collision_mask = 2
+script = ExtResource("1_h8u1p")
+ai_type = "ORBE"
+
+[node name="bare_de_vie" parent="." instance=ExtResource("2_cf60x")]
+position = Vector2(-88, -169)
+scale = Vector2(0.37, 0.37)
+
+[node name="Collision" type="CollisionShape2D" parent="."]
+visible = false
+position = Vector2(12, -50)
+shape = SubResource("CapsuleShape2D_p2oq4")
+
+[node name="POINT" type="Node2D" parent="."]
+position = Vector2(0, -64)
+
+[node name="animator" type="AnimatedSprite2D" parent="POINT"]
+light_mask = 0
+texture_filter = 1
+sprite_frames = SubResource("SpriteFrames_mdjyn")
+animation = &"idle"
+script = ExtResource("30_ys8th")
+
+[node name="vision" type="Area2D" parent="POINT"]
+visible = false
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="POINT/vision"]
+visible = false
+position = Vector2(12, 21)
+shape = SubResource("CircleShape2D_3lqle")
+
+[node name="collision_attack" type="Area2D" parent="POINT"]
+visible = false
+
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="POINT/collision_attack"]
+visible = false
+position = Vector2(-10, -17)
+polygon = PackedVector2Array(45, 14, 96, 9, 131, 86, 59, 123, -15, 110, -22, 63, 10, 32)
+disabled = true

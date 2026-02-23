@@ -1,0 +1,61 @@
+[gd_scene load_steps=13 format=3 uid="uid://c5a6or75xrx3o"]
+
+[ext_resource type="Texture2D" uid="uid://dn18bn6k73r0l" path="res://MEDIA/CHARACHTER/effect/wall_jump/Illustration_sans_titre-1.png" id="1_kqpnf"]
+[ext_resource type="Texture2D" uid="uid://bx55si3bk0jxf" path="res://MEDIA/CHARACHTER/effect/wall_jump/Illustration_sans_titre-2.png" id="2_y2jti"]
+[ext_resource type="Texture2D" uid="uid://cvxyrevbseo26" path="res://MEDIA/CHARACHTER/effect/wall_jump/Illustration_sans_titre-3.png" id="3_juotj"]
+[ext_resource type="Texture2D" uid="uid://b0pr4lkdrbkdu" path="res://MEDIA/CHARACHTER/effect/wall_jump/Illustration_sans_titre-4.png" id="4_m2hkw"]
+[ext_resource type="Texture2D" uid="uid://bhebncah0dngo" path="res://MEDIA/CHARACHTER/effect/wall_jump/Illustration_sans_titre-5.png" id="5_ayii0"]
+[ext_resource type="Texture2D" uid="uid://d4nro243yemd3" path="res://MEDIA/CHARACHTER/effect/wall_jump/Illustration_sans_titre-6.png" id="6_logfp"]
+[ext_resource type="Texture2D" uid="uid://byigoq4lb3pnc" path="res://MEDIA/CHARACHTER/effect/wall_jump/Illustration_sans_titre-7.png" id="7_ny6i8"]
+[ext_resource type="Texture2D" uid="uid://cemk0f58nyt2n" path="res://MEDIA/CHARACHTER/effect/wall_jump/Illustration_sans_titre-8.png" id="8_swybs"]
+[ext_resource type="Texture2D" uid="uid://d0g8yto56e6bd" path="res://MEDIA/CHARACHTER/effect/wall_jump/Illustration_sans_titre-9.png" id="9_h3e5d"]
+[ext_resource type="Texture2D" uid="uid://ma1lvhokmtiy" path="res://MEDIA/CHARACHTER/effect/wall_jump/Illustration_sans_titre-10.png" id="10_ccpry"]
+[ext_resource type="Script" uid="uid://fl8l7kh37mt" path="res://SCRIPT/CHARACHTER/particule_ground_step.gd" id="13_ebno6"]
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_rv0ot"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("1_kqpnf")
+}, {
+"duration": 1.0,
+"texture": ExtResource("2_y2jti")
+}, {
+"duration": 1.0,
+"texture": ExtResource("3_juotj")
+}, {
+"duration": 1.0,
+"texture": ExtResource("4_m2hkw")
+}, {
+"duration": 1.0,
+"texture": ExtResource("5_ayii0")
+}, {
+"duration": 1.0,
+"texture": ExtResource("6_logfp")
+}, {
+"duration": 1.0,
+"texture": ExtResource("7_ny6i8")
+}, {
+"duration": 1.0,
+"texture": ExtResource("8_swybs")
+}, {
+"duration": 1.0,
+"texture": ExtResource("9_h3e5d")
+}, {
+"duration": 1.0,
+"texture": ExtResource("10_ccpry")
+}],
+"loop": false,
+"name": &"particule_wall_jump",
+"speed": 24.0
+}]
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D"]
+z_index = 140
+position = Vector2(31, -37)
+scale = Vector2(1.12, 1.12)
+sprite_frames = SubResource("SpriteFrames_rv0ot")
+animation = &"particule_wall_jump"
+frame = 9
+frame_progress = 1.0
+script = ExtResource("13_ebno6")

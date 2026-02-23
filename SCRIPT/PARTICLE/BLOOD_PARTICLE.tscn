@@ -1,0 +1,55 @@
+[gd_scene load_steps=8 format=3 uid="uid://c283fbr082sr"]
+
+[ext_resource type="Texture2D" uid="uid://cnhr4pynig8rh" path="res://MEDIA/PARTICULE/blood_particle_petite.png" id="1_m3nu8"]
+[ext_resource type="Script" uid="uid://cx41dkcdldxya" path="res://gpu_particles_2d.gd" id="2_x56yi"]
+
+[sub_resource type="Gradient" id="Gradient_l5t25"]
+offsets = PackedFloat32Array(0, 0.227528, 0.651685, 0.994382)
+colors = PackedColorArray(1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0)
+
+[sub_resource type="GradientTexture1D" id="GradientTexture1D_whcmu"]
+gradient = SubResource("Gradient_l5t25")
+
+[sub_resource type="Curve" id="Curve_w8o6o"]
+_data = [Vector2(0.0463415, 0.0956522), 0.0, 0.0, 0, 0, Vector2(0.512195, 0.259834), 0.0, 0.0, 0, 0, Vector2(1, 0.0902692), 0.0, 0.0, 0, 0]
+point_count = 3
+
+[sub_resource type="CurveTexture" id="CurveTexture_dwx1o"]
+curve = SubResource("Curve_w8o6o")
+
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_5tiwl"]
+lifetime_randomness = 0.19
+particle_flag_disable_z = true
+emission_shape_scale = Vector3(0.52, 0.76, 1)
+emission_shape = 1
+emission_sphere_radius = 19.6
+gravity = Vector3(0, 95.42, 0)
+radial_accel_min = -6.06
+radial_accel_max = 12.12
+tangential_accel_min = -32.32
+tangential_accel_max = 24.24
+scale_min = 0.05
+scale_max = 0.6
+color_ramp = SubResource("GradientTexture1D_whcmu")
+emission_curve = SubResource("CurveTexture_dwx1o")
+turbulence_noise_strength = 5.07
+turbulence_noise_scale = 10.0
+turbulence_noise_speed = Vector3(5.93, 0, 0)
+turbulence_noise_speed_random = 1.94
+turbulence_influence_max = 0.362
+
+[node name="Node2D" type="Node2D"]
+z_index = 3
+
+[node name="GPUParticles2D" type="GPUParticles2D" parent="."]
+light_mask = 0
+z_index = 3
+position = Vector2(-1, -1)
+amount = 70
+texture = ExtResource("1_m3nu8")
+randomness = 0.89
+collision_base_size = 0.0
+process_material = SubResource("ParticleProcessMaterial_5tiwl")
+script = ExtResource("2_x56yi")
+seek_speed = 680.0
+target_y_offset = -60.0
