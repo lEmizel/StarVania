@@ -1,7 +1,7 @@
 extends CharacterBody2D
 
 
-enum States { IDLE, RUN, CHUTE, JUMP, WALL_GRIFFE, WALL_JUMP, CLIMB, ROLL, CHUTE_GRIFFE, GRAB, ATTACK_LIGHT_1, ATTACK_LIGHT_2, ATTACK_LIGHT_3, ATTACK_AIR, ATTACK_LOURDE, DEAD, HIT, HEAL }
+enum States { IDLE, RUN, CHUTE, JUMP, WALL_GRIFFE, WALL_JUMP, CLIMB, ROLL, CHUTE_GRIFFE, GRAB, ATTACK_LIGHT_1, ATTACK_LIGHT_2, ATTACK_LIGHT_3, ATTACK_AIR, ATTACK_LOURDE, DEAD, HIT, HEAL, DROP }
 const STATE_STAMINA_COSTS := {
 	States.ROLL:            0,
 	States.ATTACK_LIGHT_1:  0,
@@ -55,6 +55,9 @@ const WALL_JUMP_SCENE = preload("uid://c5a6or75xrx3o")
 
 # AMÉLIORATION: combo_count remplace le bool "combo" — plus clair et extensible
 var combo_buffered := false   # true si le joueur a appuyé pendant l'anim en cours
+
+
+
 
 
 func _ready() -> void:
@@ -308,6 +311,11 @@ func initialize_states() -> void:
 		"input": dead_input,
 		"exit": dead_exit,
 	}
+	state_functions[States.DROP] = {
+		"enter": drop_enter,
+		"execute": drop_execute,
+		"exit": drop_exit,
+	}
 
 # ----------- Gestion du changement d'état ---------------
 
@@ -379,6 +387,9 @@ func idle_input(event: InputEvent) -> void:
 	elif Input.is_action_just_pressed("lourde_attack"):
 		change_state(States.ATTACK_LOURDE)
 		return
+	elif Input.is_action_just_pressed("down_move") and is_on_floor():
+		change_state(States.DROP)
+		return
 
 func idle_exit() -> void:
 	pass
@@ -437,6 +448,9 @@ func run_input(event: InputEvent) -> void:
 	elif Input.is_action_just_pressed("lourde_attack"):
 		change_state(States.ATTACK_LOURDE)
 		return
+	elif Input.is_action_just_pressed("down_move") and is_on_floor():
+		change_state(States.DROP)
+		return
 
 func run_exit() -> void:
 	pass
@@ -444,21 +458,30 @@ func run_exit() -> void:
 
 #region JUMP
 
-const MIN_JUMP_TIME   := 0.02
-const MAX_JUMP_HOLD   := 0.22
-const GRAVITY_RISE    := 0.55
-const GRAVITY_CUTOFF  := 2.00
+const JUMP_VELOCITY   = -700.0   # retour à l'original
+const MIN_JUMP_TIME   := 0.01
+const MAX_JUMP_HOLD   := 0.25
+const GRAVITY_RISE    := 0.45    # hold long → monte bien haut
+const GRAVITY_CUTOFF  := 3.50    # lâche tôt → coupe net
 const GRAVITY_FALL    := 1.35
-var _jump_timer := 0.0
 
-const JUMP_VELOCITY = -700.0
 const AIR_CONTROL = 0.2
 const DECELERATION_RATE = 0.95
+var _jump_timer := 0.0
+var _climb_auto_exit := false
+const CLIMB_EXIT_VELOCITY := -1000.0  # plus fort que JUMP_VELOCITY (-700)
 
 func jump_enter():
 	animator.play("jump")
-	velocity.y = JUMP_VELOCITY
 	_jump_timer = 0.0
+	
+	if _climb_auto_exit:
+		velocity.y = CLIMB_EXIT_VELOCITY
+		velocity.x = 0.0
+		_climb_auto_exit = false
+		_jump_timer = MAX_JUMP_HOLD  # ← désactive le hold, gravité normale immédiate
+	else:
+		velocity.y = JUMP_VELOCITY
 
 
 func jump_execute(delta):
@@ -498,11 +521,16 @@ func jump_input(event: InputEvent) -> void:
 	if Input.is_action_just_pressed("light_attack"):
 		change_state(States.ATTACK_AIR)
 		return
-	# FIX: déplacé depuis jump_execute — just_pressed appartient à _input
+	# CLIMB
+	var hit_r := _raycast_hits_group(climbcast_right, "CLIMB")
+	var hit_l := _raycast_hits_group(climbcast_left,  "CLIMB")
+	if hit_r and hit_l and Input.is_action_just_pressed("griffe"):
+		change_state(States.CLIMB)
+		return
+	# GRIFFE
 	if _raycast_hits_group(climbcast_right, "GRIFFE") \
 		and abs(velocity.x) > 0 \
 		and Input.is_action_just_pressed("griffe"):
-		print("GRIFFE trouvée")
 		change_state(States.WALL_GRIFFE)
 		return
 
@@ -745,7 +773,6 @@ func climb_execute(delta: float) -> void:
 	velocity = dir * CLIMB_SPEED
 	_flip_from_input()
 
-	# FIX: sortie CHUTE si ni gauche ni droite — gardé ici car c'est de la physique, pas du just_pressed
 	var hit_left  := _raycast_hits_group(climbcast_left,  "CLIMB")
 	var hit_right := _raycast_hits_group(climbcast_right, "CLIMB")
 	if not (hit_left or hit_right):
@@ -754,6 +781,7 @@ func climb_execute(delta: float) -> void:
 
 	var hit_up := _raycast_hits_group(climbcast_up, "CLIMB")
 	if not hit_up:
+		_climb_auto_exit = true
 		change_state(States.JUMP)
 		return
 
@@ -1151,3 +1179,46 @@ func dead_input(event: InputEvent) -> void:
 
 func dead_exit() -> void:
 	velocity = Vector2.ZERO
+
+# =====================  DROP (passer à travers one-way)  ===========================
+#region DROP
+const ONEWAY_LAYER := 2
+const DROP_THROUGH_TIME := 0.25
+var _drop_timer := 0.0
+
+func drop_enter() -> void:
+	_drop_timer = DROP_THROUGH_TIME
+	set_collision_mask_value(ONEWAY_LAYER, false)
+	animator.play("chute")
+	velocity.y = 50.0
+	FALL_POINT = global_position.y
+
+func drop_execute(delta: float) -> void:
+	_drop_timer -= delta
+	velocity.y += gravity * delta
+
+	var direction := Input.get_axis("left_move", "right_move")
+	if direction != 0:
+		velocity.x = lerp(velocity.x, direction * AIR_SPEED, AIR_CONTROL)
+		_flip_from_input()
+	else:
+		velocity.x = lerp(velocity.x, 0.0, DECELERATION_RATE * delta)
+
+	# Timer expiré → réactive le mask et passe en CHUTE
+	if _drop_timer <= 0.0:
+		change_state(States.CHUTE)
+		return
+
+	# Si on atterrit sur du terrain solide (layer 1) avant la fin du timer
+	if is_on_floor():
+		calcule_falling_damage()
+		if current_state == States.DEAD or current_state == States.HIT:
+			return
+		if Input.is_action_pressed("right_move") or Input.is_action_pressed("left_move"):
+			goto_state(States.RUN)
+		else:
+			goto_state(States.IDLE)
+
+func drop_exit() -> void:
+	set_collision_mask_value(ONEWAY_LAYER, true)
+#endregion

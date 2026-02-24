@@ -59,6 +59,7 @@ position = Vector2(53, 102)
 texture = ExtResource("1_scdot")
 
 [node name="StaticBody2D" type="StaticBody2D" parent="."]
+visible = false
 z_index = 80
 collision_layer = 3
 collision_mask = 3
@@ -192,11 +193,11 @@ shape = SubResource("RectangleShape2D_k37m6")
 [node name="CanvasLayer" parent="." instance=ExtResource("2_hnscr")]
 
 [node name="CharacterBody2D" parent="." instance=ExtResource("3_v1k16")]
-position = Vector2(9715, -379)
+position = Vector2(1063, -1656)
 scale = Vector2(0.5, 0.5)
 
 [node name="Camera2D" type="Camera2D" parent="."]
-position = Vector2(4476, -1101)
+position = Vector2(-4176, -2378)
 zoom = Vector2(2, 2)
 process_callback = 0
 limit_smoothed = true
@@ -214,6 +215,14 @@ position = Vector2(-5640, 1964)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="GRAB2"]
 shape = SubResource("RectangleShape2D_u6nr3")
+
+[node name="Node2D2" type="Node2D" parent="."]
+scale = Vector2(2, 2)
+
+[node name="Pierre12" type="Sprite2D" parent="Node2D2"]
+position = Vector2(3240, 414.5)
+scale = Vector2(2, 2)
+texture = ExtResource("15_1o1fj")
 
 [node name="Node2D" type="Node2D" parent="."]
 script = ExtResource("5_v1k16")
@@ -259,10 +268,6 @@ texture = ExtResource("13_foiom")
 position = Vector2(10859, 77)
 texture = ExtResource("14_foiom")
 
-[node name="Pierre12" type="Sprite2D" parent="."]
-position = Vector2(9117, -653)
-texture = ExtResource("15_1o1fj")
-
 [node name="Sable12" type="Sprite2D" parent="."]
 position = Vector2(10309, -67)
 texture = ExtResource("16_dql3j")
@@ -270,3 +275,8 @@ texture = ExtResource("16_dql3j")
 [node name="Sable22" type="Sprite2D" parent="."]
 position = Vector2(12422, 108)
 texture = ExtResource("17_dyffl")
+
+[node name="Pierre12" type="Sprite2D" parent="."]
+position = Vector2(-2834, -1552)
+scale = Vector2(2, 2)
+texture = ExtResource("15_1o1fj")
