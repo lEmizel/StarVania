@@ -1,4 +1,4 @@
-[gd_scene load_steps=15 format=3 uid="uid://q73v1b80lt2r"]
+[gd_scene load_steps=29 format=3 uid="uid://q73v1b80lt2r"]
 
 [ext_resource type="Script" uid="uid://b2gdi5nrgeles" path="res://SCRIPT/SCENE/scene_01.gd" id="1_1b2e2"]
 [ext_resource type="PackedScene" uid="uid://vkm3ut4hytpr" path="res://SCRIPT/CHARACHTER/PLAYER.tscn" id="1_ck7e4"]
@@ -6,6 +6,17 @@
 [ext_resource type="PackedScene" uid="uid://bqndjpts1oqr3" path="res://SCRIPT/MENU/heatle_bare.tscn" id="1_yo8g7"]
 [ext_resource type="Script" uid="uid://pcqotyxb20op" path="res://SCRIPT/camera2d.gd" id="2_lnqh0"]
 [ext_resource type="Script" uid="uid://cldc0dscj1uj1" path="res://SCRIPT/OUTILS/LEVEL_EXPORTER.gd" id="6_ww6ae"]
+[ext_resource type="Script" uid="uid://cqpdbfmlcuq38" path="res://SCRIPT/OUTILS/SpriteScaler.gd" id="7_iy4gx"]
+[ext_resource type="Texture2D" uid="uid://dcoehimdkota1" path="res://MEDIA/scene1/level_export.png" id="8_7mbse"]
+[ext_resource type="Texture2D" uid="uid://x1xhhjnqawxw" path="res://MEDIA/scene1/pierre.png" id="12_hjvkj"]
+[ext_resource type="Texture2D" uid="uid://58e5vxap5iau" path="res://MEDIA/scene1/pierrefond2.png" id="13_lr8rl"]
+[ext_resource type="Texture2D" uid="uid://diashs3gwpu8u" path="res://MEDIA/scene1/pierrefond3.png" id="14_ahag3"]
+[ext_resource type="Texture2D" uid="uid://rfc5o3trpmy6" path="res://MEDIA/scene1/fond2.png" id="14_ym6pt"]
+[ext_resource type="Texture2D" uid="uid://cxp06rtlbnm8b" path="res://MEDIA/scene1/fond1.png" id="15_26mbw"]
+[ext_resource type="Texture2D" uid="uid://clda7sgwbi0ju" path="res://MEDIA/scene1/pierrefond.png" id="15_wgl0l"]
+[ext_resource type="Texture2D" uid="uid://deliy3uihffxb" path="res://MEDIA/scene1/Calque 2.png" id="16_06s65"]
+[ext_resource type="Texture2D" uid="uid://bit74n8tnaoei" path="res://MEDIA/scene1/sol1.png" id="16_bxkm8"]
+[ext_resource type="Texture2D" uid="uid://mgm6rn61fhhb" path="res://level_export.png" id="17_26mbw"]
 
 [sub_resource type="Gradient" id="Gradient_jri6e"]
 offsets = PackedFloat32Array(0, 0.542683, 1)
@@ -15,7 +26,10 @@ colors = PackedColorArray(1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 0)
 size = Vector2(547, 169)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_gqq6u"]
-size = Vector2(98, 732)
+size = Vector2(75, 613)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_06s65"]
+size = Vector2(89, 856)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_oo8qs"]
 size = Vector2(225, 538)
@@ -25,6 +39,12 @@ size = Vector2(179.5, 454)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_7mbse"]
 size = Vector2(200, 564.75)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_ym6pt"]
+size = Vector2(200.5, 423.25)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_26mbw"]
+size = Vector2(200.5, 473.5)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_iy4gx"]
 size = Vector2(169, 2093)
@@ -72,6 +92,9 @@ position = Vector2(0, -320)
 polygon = PackedVector2Array(14153, 1660, 14383, 1657, 14383, 1666, 14150, 1676)
 one_way_collision = true
 
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="platforme"]
+polygon = PackedVector2Array(21160, 111, 21009, 119, 21002, 289, 21169, 280)
+
 [node name="classicsol" type="StaticBody2D" parent="."]
 
 [node name="CollisionPolygon2D3" type="CollisionPolygon2D" parent="classicsol"]
@@ -92,7 +115,7 @@ position = Vector2(-252, 38)
 polygon = PackedVector2Array(7987, 1672, 8004, 1464, 7992, 1010, 7578, 984, 7608, 1654, 7704, 1831)
 
 [node name="CollisionPolygon2D6" type="CollisionPolygon2D" parent="classicsol"]
-position = Vector2(838.4004, 0)
+position = Vector2(463.6504, 0)
 polygon = PackedVector2Array(10225.6, 1606, 10217.6, 994, 10415.6, 1018, 10424.6, 1594)
 
 [node name="CollisionPolygon2D7" type="CollisionPolygon2D" parent="classicsol"]
@@ -105,11 +128,11 @@ polygon = PackedVector2Array(11701, 2082, 11959, 2070, 12505, 2052, 12778, 2031,
 
 [node name="CollisionPolygon2D9" type="CollisionPolygon2D" parent="classicsol"]
 position = Vector2(838.4004, 0)
-polygon = PackedVector2Array(11762.6, 1839, 11760, 1748, 11765.6, 1664, 11777.6, 1590, 12126.6, 1497, 12400.6, 1428, 12753.6, 1358, 13316.6, 1340, 13312.6, 1511, 12994.6, 1496, 12495.6, 1547, 12413.6, 1569, 11907.6, 1698, 11866.6, 1837)
+polygon = PackedVector2Array(11762.6, 1839, 11760, 1748, 11765.6, 1664, 11777.6, 1590, 12329.6, 1566, 12326.6, 1301, 12754.6, 1307, 13316.6, 1340, 13312.6, 1511, 12994.6, 1496, 12688.6, 1533, 12532.6, 1556, 12481.6, 1669, 11907.6, 1698, 11866.6, 1837)
 
 [node name="CollisionPolygon2D10" type="CollisionPolygon2D" parent="classicsol"]
 position = Vector2(868, 0)
-polygon = PackedVector2Array(11105.6, 1594, 11472, 1587, 11469, 1649, 11103.6, 1654)
+polygon = PackedVector2Array(11041, 1584, 11472, 1587, 11469, 1649, 11043, 1643)
 
 [node name="CollisionPolygon2D11" type="CollisionPolygon2D" parent="classicsol"]
 position = Vector2(838.4004, 0)
@@ -143,11 +166,96 @@ polygon = PackedVector2Array(19943, 1318, 19945, 1381, 20252, 1383, 20254, 1311)
 position = Vector2(1836, -83)
 polygon = PackedVector2Array(19943, 1318, 19945, 1381, 20252, 1383, 20254, 1311)
 
+[node name="CollisionPolygon2D20" type="CollisionPolygon2D" parent="classicsol"]
+position = Vector2(-75, 3)
+polygon = PackedVector2Array(21494, 466, 22017, 452, 22445, 440, 22427, 618, 21516, 620)
+
+[node name="CollisionPolygon2D21" type="CollisionPolygon2D" parent="classicsol"]
+polygon = PackedVector2Array(22099, -134, 21652, -136, 21170, -147, 21154, 10, 21975, 31, 22143, 19, 22143, -135, 22112, -135)
+
+[node name="CollisionPolygon2D22" type="CollisionPolygon2D" parent="classicsol"]
+polygon = PackedVector2Array(20327, -145, 19949, -150, 19618, -152, 19622, 43, 20208, 37, 20348, 34)
+
+[node name="CollisionPolygon2D23" type="CollisionPolygon2D" parent="classicsol"]
+polygon = PackedVector2Array(20326, -91, 20363, 115, 20468, 237, 20588, 290, 20871, 325, 21099, 244, 21162, -25, 21168, -100, 21237, -100, 21236, 231, 21176, 388, 20975, 468, 20646, 465, 20390, 379, 20289, 226, 20286, -60)
+
+[node name="CollisionPolygon2D24" type="CollisionPolygon2D" parent="classicsol"]
+polygon = PackedVector2Array(19840, -147, 19841, -298, 19614, -307, 19626, -140)
+
+[node name="CollisionPolygon2D25" type="CollisionPolygon2D" parent="classicsol"]
+position = Vector2(306, -197)
+polygon = PackedVector2Array(19842, -230, 19841, -298, 19618, -295, 19618, -239)
+one_way_collision = true
+
+[node name="CollisionPolygon2D26" type="CollisionPolygon2D" parent="classicsol"]
+position = Vector2(642, -373)
+polygon = PackedVector2Array(19842, -230, 19841, -298, 19618, -295, 19618, -239)
+one_way_collision = true
+
+[node name="CollisionPolygon2D27" type="CollisionPolygon2D" parent="classicsol"]
+position = Vector2(309, -542)
+polygon = PackedVector2Array(19842, -230, 19841, -298, 19618, -295, 19618, -239)
+one_way_collision = true
+
+[node name="CollisionPolygon2D29" type="CollisionPolygon2D" parent="classicsol"]
+position = Vector2(309, -542)
+polygon = PackedVector2Array(18906, -240, 18905, -308, 18682, -305, 18682, -249)
+one_way_collision = true
+
+[node name="CollisionPolygon2D31" type="CollisionPolygon2D" parent="classicsol"]
+position = Vector2(-326, -1306)
+polygon = PackedVector2Array(18906, -240, 18905, -308, 18682, -305, 18682, -249)
+one_way_collision = true
+
+[node name="CollisionPolygon2D35" type="CollisionPolygon2D" parent="classicsol"]
+position = Vector2(-2058, -1869)
+polygon = PackedVector2Array(18906, -240, 18905, -308, 18682, -305, 18682, -249)
+one_way_collision = true
+
+[node name="CollisionPolygon2D36" type="CollisionPolygon2D" parent="classicsol"]
+position = Vector2(-1753, -1935)
+rotation = -0.00476219
+polygon = PackedVector2Array(18906, -240, 18905, -308, 18682, -305, 18682, -249)
+one_way_collision = true
+
+[node name="CollisionPolygon2D37" type="CollisionPolygon2D" parent="classicsol"]
+position = Vector2(-1753, -1935)
+rotation = -0.009777558
+polygon = PackedVector2Array(19229.248, -263.84082, 19228.248, -331.84082, 19005.248, -328.84082, 19005.248, -272.84082)
+one_way_collision = true
+
+[node name="CollisionPolygon2D28" type="CollisionPolygon2D" parent="classicsol"]
+position = Vector2(-1064, -32)
+polygon = PackedVector2Array(19270, -847, 19267, -620, 18453, -624, 18455, -868)
+
+[node name="CollisionPolygon2D30" type="CollisionPolygon2D" parent="classicsol"]
+polygon = PackedVector2Array(17591, -889, 17602, -1204, 17395, -1203, 17396, -889)
+
+[node name="CollisionPolygon2D32" type="CollisionPolygon2D" parent="classicsol"]
+polygon = PackedVector2Array(18835, -1618, 19412, -1621, 20001, -1631, 20514, -1629, 20521, -1509, 19668, -1483, 18875, -1481, 18847, -1571)
+
+[node name="CollisionPolygon2D33" type="CollisionPolygon2D" parent="classicsol"]
+polygon = PackedVector2Array(17390, -1875, 17028, -1883, 16685, -1885, 16506, -1911, 16353, -1945, 16347, -1712, 16597, -1633, 17292, -1650, 17395, -1660)
+
+[node name="CollisionPolygon2D34" type="CollisionPolygon2D" parent="classicsol"]
+polygon = PackedVector2Array(16355, -1921, 16366, -2019, 16525, -1997, 16525, -1876)
+
+[node name="CollisionPolygon2D38" type="CollisionPolygon2D" parent="classicsol"]
+polygon = PackedVector2Array(17655, -2454, 17650, -2390, 19609, -2385, 20077, -2384, 20130, -2385, 20115, -2488, 19332, -2509, 18686, -2505, 17943, -2467)
+
+[node name="CollisionPolygon2D39" type="CollisionPolygon2D" parent="classicsol"]
+position = Vector2(-82, 3)
+polygon = PackedVector2Array(20204, -2485, 20211, -1867, 20284, -1869, 20283, -2485)
+
+[node name="CollisionPolygon2D40" type="CollisionPolygon2D" parent="classicsol"]
+position = Vector2(219, 240)
+polygon = PackedVector2Array(20195, -2715, 20202, -1864, 20284, -1869, 20269, -2714)
+
 [node name="CharacterBody2D" parent="." instance=ExtResource("1_ck7e4")]
-position = Vector2(8081, 1417)
+position = Vector2(7982, 1462)
 
 [node name="Camera2D" type="Camera2D" parent="."]
-position = Vector2(8055, 1361)
+position = Vector2(7956, 1406)
 process_callback = 0
 limit_smoothed = true
 position_smoothing_enabled = true
@@ -156,7 +264,23 @@ script = ExtResource("2_lnqh0")
 [node name="GRIFFE" type="Area2D" parent="." groups=["GRIFFE"]]
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="GRIFFE"]
-position = Vector2(410.5, 491.5)
+position = Vector2(12303, 3030)
+shape = SubResource("RectangleShape2D_lnqh0")
+
+[node name="CollisionShape2D2" type="CollisionShape2D" parent="GRIFFE"]
+position = Vector2(20712, -374)
+shape = SubResource("RectangleShape2D_lnqh0")
+
+[node name="CollisionShape2D5" type="CollisionShape2D" parent="GRIFFE"]
+position = Vector2(18021, -1785)
+shape = SubResource("RectangleShape2D_lnqh0")
+
+[node name="CollisionShape2D3" type="CollisionShape2D" parent="GRIFFE"]
+position = Vector2(19616, -1105)
+shape = SubResource("RectangleShape2D_lnqh0")
+
+[node name="CollisionShape2D4" type="CollisionShape2D" parent="GRIFFE"]
+position = Vector2(18601, -1094)
 shape = SubResource("RectangleShape2D_lnqh0")
 
 [node name="wall_jump" type="StaticBody2D" parent="." groups=["wall_jump"]]
@@ -164,40 +288,52 @@ collision_layer = 3
 collision_mask = 3
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="wall_jump" groups=["wall_jump"]]
-position = Vector2(-1294, 327)
+position = Vector2(20162, -2180)
 shape = SubResource("RectangleShape2D_gqq6u")
 
 [node name="CollisionShape2D2" type="CollisionShape2D" parent="wall_jump" groups=["wall_jump"]]
-position = Vector2(-1009, 163)
-shape = SubResource("RectangleShape2D_gqq6u")
+position = Vector2(20459.5, -2052)
+shape = SubResource("RectangleShape2D_06s65")
 
-[node name="CLIMB" type="Area2D" parent="." groups=["CLIMB"]]
+[node name="CLIMB2" type="Area2D" parent="." groups=["CLIMB"]]
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="CLIMB"]
-position = Vector2(-157.75, 119.75)
+[node name="CollisionShape2D" type="CollisionShape2D" parent="CLIMB2"]
+position = Vector2(11610, 3254)
 shape = SubResource("RectangleShape2D_oo8qs")
 
-[node name="CollisionShape2D2" type="CollisionShape2D" parent="CLIMB"]
+[node name="CollisionShape2D2" type="CollisionShape2D" parent="CLIMB2"]
 position = Vector2(14267.5, 1617)
 shape = SubResource("RectangleShape2D_oo8qs")
 
-[node name="CollisionShape2D3" type="CollisionShape2D" parent="CLIMB"]
+[node name="CollisionShape2D3" type="CollisionShape2D" parent="CLIMB2"]
 position = Vector2(19694, 1613)
 shape = SubResource("RectangleShape2D_oo8qs")
 
-[node name="CollisionShape2D4" type="CollisionShape2D" parent="CLIMB"]
-position = Vector2(10960.75, 1225)
+[node name="CollisionShape2D4" type="CollisionShape2D" parent="CLIMB2"]
+position = Vector2(10586, 1225)
 shape = SubResource("RectangleShape2D_ww6ae")
 
-[node name="CollisionShape2D5" type="CollisionShape2D" parent="CLIMB"]
-position = Vector2(21302, 752)
+[node name="CollisionShape2D6" type="CollisionShape2D" parent="CLIMB2"]
+position = Vector2(10979.25, 1245)
+shape = SubResource("RectangleShape2D_ww6ae")
+
+[node name="CollisionShape2D5" type="CollisionShape2D" parent="CLIMB2"]
+position = Vector2(21319, 752)
 shape = SubResource("RectangleShape2D_7mbse")
+
+[node name="CollisionShape2D7" type="CollisionShape2D" parent="CLIMB2"]
+position = Vector2(22246, 71.625)
+shape = SubResource("RectangleShape2D_ym6pt")
+
+[node name="CollisionShape2D8" type="CollisionShape2D" parent="CLIMB2"]
+position = Vector2(17500, -1641)
+shape = SubResource("RectangleShape2D_26mbw")
 
 [node name="CHUTE_GRIFFE" type="Area2D" parent="." groups=["CHUTE"]]
 position = Vector2(2, 1)
 
 [node name="CollisionShape2D2" type="CollisionShape2D" parent="CHUTE_GRIFFE"]
-position = Vector2(2435, 327)
+position = Vector2(10357, 3077)
 shape = SubResource("RectangleShape2D_iy4gx")
 
 [node name="GRAB" type="Area2D" parent="." groups=["GRAB"]]
@@ -224,6 +360,109 @@ position = Vector2(13491, 1741)
 [node name="CollisionShape2D" type="CollisionShape2D" parent="GRAB4"]
 shape = SubResource("RectangleShape2D_ixido")
 
+[node name="GRAB5" type="Area2D" parent="." groups=["GRAB"]]
+position = Vector2(13167, 1304)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="GRAB5"]
+shape = SubResource("RectangleShape2D_ixido")
+
+[node name="GRAB6" type="Area2D" parent="." groups=["GRAB"]]
+position = Vector2(21170, -144)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="GRAB6"]
+shape = SubResource("RectangleShape2D_ixido")
+
+[node name="GRAB7" type="Area2D" parent="." groups=["GRAB"]]
+position = Vector2(17601, -1204)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="GRAB7"]
+shape = SubResource("RectangleShape2D_ixido")
+
 [node name="Node" type="Node" parent="."]
 script = ExtResource("6_ww6ae")
+export_scale = 0.5
 bg_color = Color(0.101960786, 0.101960786, 0.101960786, 0)
+
+[node name="Node2D" type="Node2D" parent="."]
+z_index = -15
+script = ExtResource("7_iy4gx")
+
+[node name="LevelExport" type="Sprite2D" parent="Node2D"]
+z_index = -35
+position = Vector2(14887, 2295)
+scale = Vector2(2, 2)
+texture = ExtResource("8_7mbse")
+
+[node name="Pierre" type="Sprite2D" parent="Node2D"]
+visible = false
+position = Vector2(10782, 1305)
+scale = Vector2(2, 2)
+texture = ExtResource("12_hjvkj")
+
+[node name="Sol1" type="Sprite2D" parent="Node2D"]
+visible = false
+z_index = -5
+position = Vector2(9680, 1989)
+scale = Vector2(2, 2)
+texture = ExtResource("16_bxkm8")
+
+[node name="Parallax2D2" type="Parallax2D" parent="Node2D"]
+visible = false
+scroll_scale = Vector2(0.2, 0.2)
+
+[node name="Fond2" type="Sprite2D" parent="Node2D/Parallax2D2"]
+z_index = -20
+position = Vector2(10797.963, 2396.045)
+scale = Vector2(2, 2)
+texture = ExtResource("14_ym6pt")
+
+[node name="Pierrefond5" type="Sprite2D" parent="Node2D/Parallax2D2"]
+modulate = Color(1.130224, 1.130224, 1.130224, 1)
+z_index = -25
+position = Vector2(10348.147, 2092.045)
+scale = Vector2(2, 2)
+texture = ExtResource("15_wgl0l")
+
+[node name="Pierrefond4" type="Sprite2D" parent="Node2D/Parallax2D2"]
+modulate = Color(1.1869953, 1.1869953, 1.1869953, 1)
+z_index = -25
+position = Vector2(11123.0625, 2071.045)
+scale = Vector2(2, 2)
+texture = ExtResource("14_ahag3")
+
+[node name="Parallax2D" type="Parallax2D" parent="Node2D"]
+visible = false
+scroll_scale = Vector2(0.4, 0.4)
+
+[node name="Pierrefond3" type="Sprite2D" parent="Node2D/Parallax2D"]
+z_index = -10
+position = Vector2(9427.238, 1988.1213)
+scale = Vector2(2, 2)
+texture = ExtResource("14_ahag3")
+
+[node name="Pierrefond2" type="Sprite2D" parent="Node2D/Parallax2D"]
+z_index = -10
+position = Vector2(10450.396, 1977.4045)
+scale = Vector2(2, 2)
+texture = ExtResource("13_lr8rl")
+
+[node name="Pierrefond" type="Sprite2D" parent="Node2D/Parallax2D"]
+z_index = -10
+position = Vector2(11259.275, 2076.1702)
+scale = Vector2(2, 2)
+texture = ExtResource("15_wgl0l")
+
+[node name="Fond1" type="Sprite2D" parent="Node2D/Parallax2D"]
+z_index = -10
+position = Vector2(10064.56, 2421.7837)
+scale = Vector2(2, 2)
+texture = ExtResource("15_26mbw")
+
+[node name="Calque2" type="Sprite2D" parent="."]
+z_index = -1000
+position = Vector2(10962, 1381)
+texture = ExtResource("16_06s65")
+
+[node name="LevelExport" type="Sprite2D" parent="."]
+position = Vector2(19887, 4273)
+texture = ExtResource("17_26mbw")
