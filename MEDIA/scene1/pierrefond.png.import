@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://mgm6rn61fhhb"
-path="res://.godot/imported/level_export.png-697cbb8b1f1b03665632b52500b8cfd0.ctex"
+uid="uid://clda7sgwbi0ju"
+path="res://.godot/imported/pierrefond.png-b90e2e08e5b019b8dfcf1a35a1bef8cb.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://level_export.png"
-dest_files=["res://.godot/imported/level_export.png-697cbb8b1f1b03665632b52500b8cfd0.ctex"]
+source_file="res://MEDIA/scene1/pierrefond.png"
+dest_files=["res://.godot/imported/pierrefond.png-b90e2e08e5b019b8dfcf1a35a1bef8cb.ctex"]
 
 [params]
 

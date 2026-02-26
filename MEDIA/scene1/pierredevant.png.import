@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://mgm6rn61fhhb"
-path="res://.godot/imported/level_export.png-697cbb8b1f1b03665632b52500b8cfd0.ctex"
+uid="uid://c15nofq0gy2w"
+path="res://.godot/imported/pierredevant.png-3b7866aa456e7beeed96688eef1ef67a.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://level_export.png"
-dest_files=["res://.godot/imported/level_export.png-697cbb8b1f1b03665632b52500b8cfd0.ctex"]
+source_file="res://MEDIA/scene1/pierredevant.png"
+dest_files=["res://.godot/imported/pierredevant.png-3b7866aa456e7beeed96688eef1ef67a.ctex"]
 
 [params]
 
