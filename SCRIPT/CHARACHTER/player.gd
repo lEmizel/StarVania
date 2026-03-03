@@ -38,15 +38,20 @@ var previous_state : States = States.IDLE
 var state_functions: Dictionary = {}
 var position_x_enemi = null
 
-const GROUND_SPEED = 600            # FIX: renommé pour clarté
+const GROUND_SPEED = 650            # FIX: renommé pour clarté
 const AIR_SPEED    = 400            # FIX: anciennement var SPEED locale shadowed
 var last_direction := 1  # 1 = droite, -1 = gauche
-var no_WJ = false
+
 const CLIMB_SPEED := 200.0
 const ROLL_SPEED := 700.0
 
+const COYOTE_TIME := 0.08
+var _coyote_timer := 0.0
+const JUMP_BUFFER_TIME := 0.12  # très court — juste un filet de sécurité
+var _jump_buffer_timer := 0.0
 
-var grab_target_position: Vector2 = Vector2.ZERO
+const GRAB_COOLDOWN := 0.2  # secondes avant de pouvoir re-grab
+var _grab_cooldown_timer := 0.0
 var current_grab_area: Area2D = null
 
 const FOOTSTEP_SCENE = preload("uid://bc2iigjdyudgm")
@@ -94,6 +99,25 @@ func _on_animation_finished() -> void:
 ## pour éviter de changer d'état pendant qu'on est encore dans le callback.
 ## change_state : transition IMMÉDIATE — à utiliser depuis input/animation_finished.
 # AMÉLIORATION: documentation claire de la distinction
+
+
+
+func _handle_landing() -> void:
+	calcule_falling_damage()
+	if current_state == States.DEAD or current_state == States.HIT:
+		return
+	var land_fx = instantiate_scene(CHUTE_SCENE)
+	land_fx.global_position = ANCRE_SOL.global_position
+	if land_fx is AnimatedSprite2D:
+		land_fx.play()
+	if _jump_buffer_timer > 0.0:
+		_jump_buffer_timer = 0.0
+		goto_state(States.JUMP)
+		return
+	if Input.is_action_pressed("right_move") or Input.is_action_pressed("left_move"):
+		goto_state(States.RUN)
+	else:
+		goto_state(States.IDLE)
 
 func apply_damage(amount: int, source_x) -> void:
 	if current_state in [States.ROLL, States.DEAD]:
@@ -145,8 +169,6 @@ func _raycast_hits_group(rc: RayCast2D, group_name: String, body_only := false) 
 	rc.force_raycast_update()
 	return false
 
-func _is_valid_press(action_name: String) -> bool:
-	return Input.is_action_just_pressed(action_name)
 
 
 func calcule_falling_damage() -> int:
@@ -398,7 +420,7 @@ func idle_exit() -> void:
 # =====================  RUN  ===========================
 
 var run_frame_counter : int = 0
-var air_ground_instance
+
 
 
 func run_enter() -> void:
@@ -486,8 +508,8 @@ func jump_enter():
 
 func jump_execute(delta):
 	_jump_timer += delta
+	_grab_cooldown_timer = max(_grab_cooldown_timer - delta, 0.0)
 
-	# FIX: utilise AIR_SPEED au lieu de redéclarer var SPEED locale
 	var direction = Input.get_axis("left_move", "right_move")
 	_flip_from_input()
 	if direction != 0:
@@ -511,8 +533,12 @@ func jump_execute(delta):
 	else:
 		g_mul = GRAVITY_FALL
 
-	# FIX: check GRIFFE déplacé dans jump_input (is_action_just_pressed)
 	velocity.y += gravity * g_mul * delta
+
+	if _grab_cooldown_timer <= 0.0 and _raycast_hits_group(grab, "GRAB"):
+		current_grab_area = grab.get_collider()
+		change_state(States.GRAB)
+		return
 
 	if velocity.y > 0.0:
 		change_state(States.CHUTE)
@@ -540,21 +566,27 @@ func jump_exit():
 
 
 
-# FIX: FALL_POINT initialisé à -INF pour éviter des faux dégâts si chute_enter
-# n'est jamais passé (edge case)
+
+#region CHUTE
+
+# =====================  CHUTE  ===========================
 var FALL_POINT: float = -1e9
 
 func chute_enter() -> void:
 	if previous_state != States.ATTACK_AIR:
 		FALL_POINT = global_position.y
-	print("enter_CHUTE  |  start y =", FALL_POINT)
+	if previous_state in [States.RUN, States.IDLE]:
+		_coyote_timer = COYOTE_TIME
+	else:
+		_coyote_timer = 0.0
 	animator.play("chute")
 
 
 func chute_execute(delta: float) -> void:
 	var direction := Input.get_axis("left_move", "right_move")
-
-	# FIX: supprimé is_action_just_pressed("light_attack") d'ici → déplacé dans chute_input
+	_grab_cooldown_timer = max(_grab_cooldown_timer - delta, 0.0)
+	_coyote_timer = max(_coyote_timer - delta, 0.0)
+	_jump_buffer_timer = max(_jump_buffer_timer - delta, 0.0)
 
 	if direction != 0 and previous_state != States.WALL_JUMP:
 		last_direction = sign(direction)
@@ -562,75 +594,58 @@ func chute_execute(delta: float) -> void:
 
 	velocity.y += gravity * delta
 
-	# FIX: utilise AIR_SPEED au lieu de var SPEED locale
 	if direction != 0:
 		velocity.x = lerp(velocity.x, direction * AIR_SPEED, AIR_CONTROL)
 	else:
 		velocity.x = lerp(velocity.x, 0.0, DECELERATION_RATE * delta)
 
-	# Détection de GRAB
-	if previous_state != States.GRAB and _raycast_hits_group(grab, "GRAB"):
-		var area := grab.get_collider()
-		current_grab_area = area
-		print("j'ai trouvé le GRAB")
+	if _grab_cooldown_timer <= 0.0 and _raycast_hits_group(grab, "GRAB"):
+		current_grab_area = grab.get_collider()
 		change_state(States.GRAB)
 		return
 
-	# Mur wall_jump (body_only) — is_colliding ne nécessite pas just_pressed
 	if _raycast_hits_group(wall_right, "wall_jump", true):
 		change_state(States.WALL_JUMP)
 		return
 
-	# Atterrissage
 	if is_on_floor():
-		calcule_falling_damage()
-
-		var land_fx = instantiate_scene(CHUTE_SCENE)
-		land_fx.global_position = ANCRE_SOL.global_position
-		if land_fx is AnimatedSprite2D:
-			land_fx.play()
-
-		if current_state == States.DEAD or current_state == States.HIT:
-			return
-
-		if Input.is_action_pressed("right_move") or Input.is_action_pressed("left_move"):
-			goto_state(States.RUN)
-		else:
-			goto_state(States.IDLE)
+		_handle_landing()
 
 
 func chute_input(event: InputEvent) -> void:
-	# FIX: tous les just_pressed sont regroupés ici (fiable dans _input)
+	if Input.is_action_just_pressed("jump"):
+		if _coyote_timer > 0.0:
+			_coyote_timer = 0.0
+			change_state(States.JUMP)
+			return
+		else:
+			_jump_buffer_timer = JUMP_BUFFER_TIME
+		
 	if Input.is_action_just_pressed("light_attack"):
-		print("j'attaque en l'air")
 		change_state(States.ATTACK_AIR)
 		return
 
-	# FIX: déplacé depuis chute_execute
 	if _raycast_hits_group(climbcast_up, "CHUTE") \
 		and Input.is_action_just_pressed("griffe"):
 		change_state(States.CHUTE_GRIFFE)
 		return
 
-	# FIX: déplacé depuis chute_execute
 	var hit_r := _raycast_hits_group(climbcast_right, "CLIMB")
 	var hit_l := _raycast_hits_group(climbcast_left,  "CLIMB")
 	if hit_r and hit_l and Input.is_action_just_pressed("griffe"):
-		print("CLIMB gauche + droite")
 		change_state(States.CLIMB)
 		return
 
-	# FIX: déplacé depuis chute_execute
 	if _raycast_hits_group(climbcast_right, "GRIFFE") \
 		and abs(velocity.x) > 0 \
 		and Input.is_action_just_pressed("griffe"):
-		print("GRIFFE trouvée")
 		change_state(States.WALL_GRIFFE)
 		return
 
 
 func chute_exit() -> void:
 	pass
+#endregion
 
 
 
@@ -672,59 +687,50 @@ func wall_griffe_exit():
 
 
 #region WALL_JUMP
+enum WallJumpPhase { SLIDING, JUMPING }
+var _wj_phase: WallJumpPhase = WallJumpPhase.SLIDING
+const WALL_YJUMP := -500.0
+const WALL_XJUMP := 290.0
+const WALL_GLIDE_SPEED := 300.0
+
 func wall_jump_enter():
 	_flip_facing_on_wall()
 	velocity = Vector2.ZERO
+	_wj_phase = WallJumpPhase.SLIDING
 	animator.play("wall_jump")
-	print("enter_wall_jump | last_direction:", last_direction, " | point.scale.x:", point.scale.x)
-
 
 func wall_jump_execute(delta: float) -> void:
-	# Phase « jump » : gravité + bascule en CHUTE dès qu'on redescend
-	if animator.animation == "jump":
-		velocity.y += gravity * delta
-		if velocity.y > 0:
-			change_state(States.CHUTE)
-		return
+	match _wj_phase:
+		WallJumpPhase.SLIDING:
+			# Vérif mur (wall_left = côté mur car on a flippé)
+			var on_wall := _raycast_hits_group(wall_left, "wall_jump", true)
+			if not on_wall:
+				change_state(States.CHUTE)
+				return
+			# Glissement
+			velocity.y = lerp(velocity.y, WALL_GLIDE_SPEED, 0.05)
+			if is_on_floor():
+				change_state(States.IDLE)
 
-	# Phase accrochée
-	var on_left  := _raycast_hits_group(wall_left,  "wall_jump", true)
-	var on_right := _raycast_hits_group(wall_right, "wall_jump", true)
-
-	if on_right and not on_left:
-		change_state(States.CHUTE)
-		return
-
-	if not (on_left or on_right):
-		change_state(States.CHUTE)
-		return
-
-	var glide_speed := 300.0
-	velocity.y = lerp(velocity.y, glide_speed, 0.05)
-
-	if is_on_floor():
-		change_state(States.IDLE)
-
+		WallJumpPhase.JUMPING:
+			velocity.y += gravity * delta
+			if velocity.y > 0:
+				change_state(States.CHUTE)
 
 func wall_jump_input(event: InputEvent) -> void:
-	const WALL_YJUMP := -500
-	const WALL_XJUMP := 290
-
-	if Input.is_action_just_pressed("jump") and animator.animation != "jump":
-		var land_fx = instantiate_scene(WALL_JUMP_SCENE)
-		land_fx.global_position = ANCRE_WALL.global_position
-		land_fx.scale.x *= point.scale.x
-		if land_fx is AnimatedSprite2D:
-			land_fx.play()
-		animator.play("jump")
-		velocity.y = WALL_YJUMP
-		velocity.x = WALL_XJUMP if last_direction == 1 else -WALL_XJUMP
-	if Input.is_action_just_pressed("esquive"):
-		change_state(States.CHUTE)
-
-
-func wall_jump_animation_finished():
-	pass
+	if _wj_phase == WallJumpPhase.SLIDING:
+		if Input.is_action_just_pressed("jump"):
+			_wj_phase = WallJumpPhase.JUMPING
+			var land_fx = instantiate_scene(WALL_JUMP_SCENE)
+			land_fx.global_position = ANCRE_WALL.global_position
+			land_fx.scale.x *= point.scale.x
+			if land_fx is AnimatedSprite2D:
+				land_fx.play()
+			animator.play("jump")
+			velocity.y = WALL_YJUMP
+			velocity.x = WALL_XJUMP * last_direction
+		elif Input.is_action_just_pressed("esquive"):
+			change_state(States.CHUTE)
 
 func wall_jump_exit():
 	pass
@@ -808,12 +814,16 @@ func roll_enter() -> void:
 		point.scale.x  = dir
 		velocity.x     = dir * ROLL_SPEED
 		animator.play("roll")
+	else:
+		# Pas de direction → on ne roll pas, retour IDLE
+		call_deferred("change_state", States.IDLE)
 
 func roll_execute(delta: float) -> void:
 	velocity.y += gravity * delta
 
 func roll_input(event: InputEvent) -> void:
-	pass
+	if Input.is_action_just_pressed("jump"):
+		change_state(States.JUMP)
 
 func roll_exit() -> void:
 	pass
@@ -866,24 +876,33 @@ func chute_griffe_exit() -> void:
 
 
 #region GRAB
+const GRAB_LERP_SPEED := 600.0   # vitesse d'approche en pixels/sec
+var _grab_locked := false          # true quand le perso a atteint le point
+
 func grab_enter() -> void:
 	velocity = Vector2.ZERO
-
-	if current_grab_area:
-		var grab_pos = current_grab_area.global_position
-		var offset = ancre_grab.global_position - global_position
-		var target_pos = grab_pos - offset
-		global_position = target_pos
-
-	animator.play("suspendu")
+	_grab_locked = false
+	animator.play("chute")  # on garde l'anim de chute pendant l'approche
 
 func grab_execute(delta: float) -> void:
-	if current_grab_area:
-		var grab_pos = current_grab_area.global_position
-		var offset = ancre_grab.global_position - global_position
-		var target_pos = grab_pos - offset
-		var lerp_speed = 10.0
-		global_position = global_position.move_toward(target_pos, lerp_speed * delta)
+	if not current_grab_area:
+		change_state(States.CHUTE)
+		return
+
+	var grab_pos = current_grab_area.global_position
+	var offset = ancre_grab.global_position - global_position
+	var target_pos = grab_pos - offset
+
+	if not _grab_locked:
+		# Phase d'approche — le perso glisse vers le point
+		global_position = global_position.move_toward(target_pos, GRAB_LERP_SPEED * delta)
+		if global_position.distance_to(target_pos) < 2.0:
+			global_position = target_pos
+			_grab_locked = true
+			animator.play("suspendu")  # anim seulement quand on est accroché
+	else:
+		# Phase accrochée — on reste collé
+		global_position = target_pos
 
 func grab_input(event: InputEvent) -> void:
 	if Input.is_action_just_pressed("jump"):
@@ -892,7 +911,9 @@ func grab_input(event: InputEvent) -> void:
 		change_state(States.CHUTE)
 
 func grab_exit() -> void:
-	pass
+	_grab_locked = false
+	current_grab_area = null
+	_grab_cooldown_timer = GRAB_COOLDOWN
 #endregion
 
 
@@ -910,7 +931,9 @@ func attack_light_1_enter() -> void:
 	animator.play("attack")
 
 func attack_light_1_execute(delta: float) -> void:
-	pass
+	velocity.y += gravity * delta
+	if not is_on_floor():
+		change_state(States.CHUTE)
 
 func attack_light_1_input(event: InputEvent) -> void:
 	# Buffer pendant l'anim principale
@@ -957,7 +980,9 @@ func attack_light_2_enter() -> void:
 	animator.play("attack_02")
 
 func attack_light_2_execute(delta: float) -> void:
-	pass
+	velocity.y += gravity * delta
+	if not is_on_floor():
+		change_state(States.CHUTE)
 
 func attack_light_2_input(event: InputEvent) -> void:
 	if event.is_action("light_attack") \
@@ -1002,7 +1027,9 @@ func attack_light_3_enter() -> void:
 	animator.play("attack_03")
 
 func attack_light_3_execute(delta: float) -> void:
-	pass
+	velocity.y += gravity * delta
+	if not is_on_floor():
+		change_state(States.CHUTE)
 
 func attack_light_3_input(event: InputEvent) -> void:
 	if animator.animation == "attack_03_r":
@@ -1038,7 +1065,9 @@ func attack_lourde_enter() -> void:
 	animator.play("attack_lourde")
 
 func attack_lourde_execute(delta: float) -> void:
-	pass
+	velocity.y += gravity * delta
+	if not is_on_floor():
+		change_state(States.CHUTE)
 
 func attack_lourde_input(event: InputEvent) -> void:
 	pass
@@ -1058,16 +1087,14 @@ func attack_lourde_exit() -> void:
 
 func attack_air_enter() -> void:
 	animator.play("attack_air")
+	if velocity.y < 0.0:
+		velocity.y = 0.0  # stoppe la montée, la gravité prend le relais
 
 func attack_air_execute(delta: float) -> void:
 	velocity.y += gravity * delta
 
 	if is_on_floor():
-		calcule_falling_damage()
-		if Input.is_action_pressed("right_move") or Input.is_action_pressed("left_move"):
-			goto_state(States.RUN)
-		else:
-			change_state(States.IDLE)
+		_handle_landing()
 
 func attack_air_input(event: InputEvent) -> void:
 	pass
@@ -1086,7 +1113,9 @@ func heal_enter() -> void:
 	animator.play("heal")
 
 func heal_execute(delta: float) -> void:
-	pass
+	velocity.y += gravity * delta
+	if not is_on_floor():
+		change_state(States.CHUTE)
 
 func heal_input(event: InputEvent) -> void:
 	pass
@@ -1108,11 +1137,9 @@ func heal_exit() -> void:
 # -------------------------------------------------
 # HIT
 # -------------------------------------------------
-var HIT_DEBUG := true
-var _hit_seq  := 0
-func _dbg(msg:String) -> void:
-	if HIT_DEBUG:
-		print("[", Engine.get_physics_frames(), "] ", msg)
+
+
+
 
 @export var HIT_STUN_TIME: float = 0.25
 @export var HIT_KNOCK_X:  float = 500.0
@@ -1204,20 +1231,12 @@ func drop_execute(delta: float) -> void:
 	else:
 		velocity.x = lerp(velocity.x, 0.0, DECELERATION_RATE * delta)
 
-	# Timer expiré → réactive le mask et passe en CHUTE
 	if _drop_timer <= 0.0:
 		change_state(States.CHUTE)
 		return
 
-	# Si on atterrit sur du terrain solide (layer 1) avant la fin du timer
 	if is_on_floor():
-		calcule_falling_damage()
-		if current_state == States.DEAD or current_state == States.HIT:
-			return
-		if Input.is_action_pressed("right_move") or Input.is_action_pressed("left_move"):
-			goto_state(States.RUN)
-		else:
-			goto_state(States.IDLE)
+		_handle_landing()
 
 func drop_exit() -> void:
 	set_collision_mask_value(ONEWAY_LAYER, true)

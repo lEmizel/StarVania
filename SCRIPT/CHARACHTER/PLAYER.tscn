@@ -1,25 +1,20 @@
-[gd_scene load_steps=149 format=3 uid="uid://vkm3ut4hytpr"]
+[gd_scene format=3 uid="uid://vkm3ut4hytpr"]
 
 [ext_resource type="Script" uid="uid://bndyputxtyu7e" path="res://SCRIPT/CHARACHTER/player.gd" id="1_gvikp"]
 [ext_resource type="Texture2D" uid="uid://pjb3qgt2ynse" path="res://MEDIA/CHARACHTER/ANIMATION/ATTACK/FIRST_COMBO/First_Combo-1.png" id="2_2r0ux"]
 [ext_resource type="Texture2D" uid="uid://dcsvu6bkg0p6i" path="res://MEDIA/CHARACHTER/ANIMATION/ATTACK/FIRST_COMBO/First_Combo-2.png" id="3_7sbf1"]
-[ext_resource type="Texture2D" uid="uid://bhgwsvrpoq5y8" path="res://MEDIA/CHARACHTER/ANIMATION/IDLE/Idle-1.png" id="3_704nj"]
 [ext_resource type="Texture2D" uid="uid://w7w2fcmhg0tq" path="res://MEDIA/CHARACHTER/ANIMATION/CLIMB/Climb-1.png" id="3_cpk4i"]
 [ext_resource type="Texture2D" uid="uid://eu6yxdu1f67w" path="res://MEDIA/CHARACHTER/ANIMATION/RUN/Run-1.png" id="3_x5tfy"]
 [ext_resource type="Texture2D" uid="uid://cql4sjkd2ubir" path="res://MEDIA/CHARACHTER/ANIMATION/RUN/Run-2.png" id="4_2b8ed"]
-[ext_resource type="Texture2D" uid="uid://cdu6qatlcmfka" path="res://MEDIA/CHARACHTER/ANIMATION/IDLE/Idle-2.png" id="4_a8anc"]
 [ext_resource type="Texture2D" uid="uid://bd3kid2p0u845" path="res://MEDIA/CHARACHTER/ANIMATION/CLIMB/Climb-5.png" id="4_cpk4i"]
 [ext_resource type="Texture2D" uid="uid://cqjiqpg31xra" path="res://MEDIA/CHARACHTER/ANIMATION/ATTACK/FIRST_COMBO/First_Combo-3.png" id="4_juw1b"]
 [ext_resource type="Texture2D" uid="uid://cexegt0cpqu2o" path="res://MEDIA/CHARACHTER/ANIMATION/ATTACK/FIRST_COMBO/First_Combo-4.png" id="5_d3c81"]
 [ext_resource type="Texture2D" uid="uid://1jgy1u2jut6m" path="res://MEDIA/CHARACHTER/ANIMATION/CLIMB/Climb-4.png" id="5_ixn3k"]
-[ext_resource type="Texture2D" uid="uid://cdqgadtqvcw5e" path="res://MEDIA/CHARACHTER/ANIMATION/IDLE/Idle-3.png" id="5_nqv15"]
 [ext_resource type="Texture2D" uid="uid://cq7i3pgwh3g84" path="res://MEDIA/CHARACHTER/ANIMATION/RUN/Run-3.png" id="5_yukam"]
 [ext_resource type="Texture2D" uid="uid://d3643k1ixxk5v" path="res://MEDIA/CHARACHTER/ANIMATION/CLIMB/Climb-2.png" id="6_go1nu"]
 [ext_resource type="Texture2D" uid="uid://cy3gt3tdkpn7u" path="res://MEDIA/CHARACHTER/ANIMATION/ATTACK/FIRST_COMBO/First_Combo-5.png" id="6_tiixe"]
 [ext_resource type="Texture2D" uid="uid://sjd68ac6cjee" path="res://MEDIA/CHARACHTER/ANIMATION/RUN/Run-4.png" id="6_vbodk"]
-[ext_resource type="Texture2D" uid="uid://cmq4vacqit3l4" path="res://MEDIA/CHARACHTER/ANIMATION/IDLE/Idle-4.png" id="6_xwnqv"]
 [ext_resource type="Texture2D" uid="uid://dlk2lv3y54kd" path="res://MEDIA/CHARACHTER/ANIMATION/ATTACK/SECOND_COMBO/Second_Combo-1.png" id="7_vv3x7"]
-[ext_resource type="Texture2D" uid="uid://cii3jwgi8igmd" path="res://MEDIA/CHARACHTER/ANIMATION/IDLE/Idle-5.png" id="7_vvfu3"]
 [ext_resource type="Texture2D" uid="uid://cnol0m4g82yhv" path="res://MEDIA/CHARACHTER/ANIMATION/RUN/Run-5.png" id="7_xd23p"]
 [ext_resource type="Texture2D" uid="uid://d0e36wxujoycp" path="res://MEDIA/CHARACHTER/ANIMATION/RUN/Run-6.png" id="8_mvgwy"]
 [ext_resource type="Texture2D" uid="uid://bee8j26gaqu6h" path="res://MEDIA/CHARACHTER/ANIMATION/ATTACK/SECOND_COMBO/Second_Combo-2.png" id="8_qrgtr"]
@@ -113,11 +108,17 @@
 [ext_resource type="Texture2D" uid="uid://dliyfiu1mk010" path="res://MEDIA/CHARACHTER/effect/slash_attack/1/Light_attack-14-6.png" id="68_ll8uo"]
 [ext_resource type="Texture2D" uid="uid://g6rnusp8uike" path="res://MEDIA/CHARACHTER/ANIMATION/HEAL/HEAL-13.png" id="68_nr0yv"]
 [ext_resource type="Texture2D" uid="uid://bvkq47ehkqcfp" path="res://MEDIA/CHARACHTER/effect/slash_attack/1/Light_attack-14-7.png" id="69_v8iao"]
+[ext_resource type="Texture2D" uid="uid://ds2io8n374xgb" path="res://MEDIA/CHARACHTER/ANIMATION/IDLE/Demon_idle-1.png" id="70_v0jdk"]
 [ext_resource type="Texture2D" uid="uid://ckuattqqho62w" path="res://MEDIA/CHARACHTER/effect/slash_attack/1/Light_attack-14-8.png" id="70_wcjl6"]
+[ext_resource type="Texture2D" uid="uid://c00cki8vsn2pj" path="res://MEDIA/CHARACHTER/ANIMATION/IDLE/Demon_idle-2.png" id="71_1w4ht"]
 [ext_resource type="Texture2D" uid="uid://c1v1y0841mc8v" path="res://MEDIA/CHARACHTER/effect/slash_attack/2/Light_attack-14-10.png" id="71_765c3"]
+[ext_resource type="Texture2D" uid="uid://dgxcl2bi1xotf" path="res://MEDIA/CHARACHTER/ANIMATION/IDLE/Demon_idle-3.png" id="72_15n1l"]
 [ext_resource type="Texture2D" uid="uid://l0hucgxi6y6s" path="res://MEDIA/CHARACHTER/effect/slash_attack/2/Light_attack-14-9.png" id="72_a1okx"]
 [ext_resource type="Texture2D" uid="uid://bxm6225mgvddm" path="res://MEDIA/CHARACHTER/effect/slash_attack/2/Light_attack-14-8.png" id="73_48n40"]
+[ext_resource type="Texture2D" uid="uid://ct4g76ijjp3k2" path="res://MEDIA/CHARACHTER/ANIMATION/IDLE/Demon_idle-4.png" id="73_weqbp"]
 [ext_resource type="Texture2D" uid="uid://bpfcfu2df63j8" path="res://MEDIA/CHARACHTER/effect/slash_attack/2/Light_attack-14-7.png" id="74_68vd3"]
+[ext_resource type="Texture2D" uid="uid://buxyjkp6vfgrf" path="res://MEDIA/CHARACHTER/ANIMATION/IDLE/Demon_idle-5.png" id="74_irlr4"]
+[ext_resource type="Texture2D" uid="uid://de4py4p0tgw4w" path="res://MEDIA/CHARACHTER/ANIMATION/IDLE/Demon_idle-6.png" id="75_ebrd3"]
 [ext_resource type="Texture2D" uid="uid://dfagqvypeiypt" path="res://MEDIA/CHARACHTER/effect/slash_attack/2/Light_attack-14-6.png" id="75_hmwec"]
 [ext_resource type="Texture2D" uid="uid://cbnxvbu7f3jso" path="res://MEDIA/CHARACHTER/effect/slash_attack/2/Light_attack-14-5.png" id="76_srkq8"]
 [ext_resource type="Texture2D" uid="uid://clah7ubljj8in" path="res://MEDIA/CHARACHTER/effect/slash_attack/2/Light_attack-14-4.png" id="77_rks66"]
@@ -445,19 +446,22 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("3_704nj")
+"texture": ExtResource("70_v0jdk")
 }, {
 "duration": 1.0,
-"texture": ExtResource("4_a8anc")
+"texture": ExtResource("71_1w4ht")
 }, {
 "duration": 1.0,
-"texture": ExtResource("5_nqv15")
+"texture": ExtResource("72_15n1l")
 }, {
 "duration": 1.0,
-"texture": ExtResource("6_xwnqv")
+"texture": ExtResource("73_weqbp")
 }, {
 "duration": 1.0,
-"texture": ExtResource("7_vvfu3")
+"texture": ExtResource("74_irlr4")
+}, {
+"duration": 1.0,
+"texture": ExtResource("75_ebrd3")
 }],
 "loop": true,
 "name": &"idle",
@@ -752,23 +756,23 @@ animations = [{
 radius = 23.0
 height = 126.0
 
-[node name="Player" type="CharacterBody2D" groups=["Player"]]
+[node name="Player" type="CharacterBody2D" unique_id=1345854604 groups=["Player"]]
 z_index = 1
 collision_mask = 3
 script = ExtResource("1_gvikp")
 
-[node name="POINT" type="Node2D" parent="."]
+[node name="POINT" type="Node2D" parent="." unique_id=984331396]
 
-[node name="animator" type="AnimatedSprite2D" parent="POINT"]
+[node name="animator" type="AnimatedSprite2D" parent="POINT" unique_id=421565120]
 light_mask = 0
 z_index = 1
 texture_filter = 1
-position = Vector2(0, -76)
+position = Vector2(0, -94)
 sprite_frames = SubResource("SpriteFrames_gfeug")
 animation = &"idle"
 script = ExtResource("63_v21cv")
 
-[node name="slash_attack" type="AnimatedSprite2D" parent="POINT"]
+[node name="slash_attack" type="AnimatedSprite2D" parent="POINT" unique_id=1321397222]
 z_index = 1
 texture_filter = 1
 position = Vector2(57, -92)
@@ -778,14 +782,14 @@ animation = &"slash_3"
 frame = 9
 frame_progress = 1.0
 
-[node name="wall_right" type="RayCast2D" parent="POINT"]
+[node name="wall_right" type="RayCast2D" parent="POINT" unique_id=1476519546]
 visible = false
 position = Vector2(24, -64)
 exclude_parent = false
 target_position = Vector2(12, 0)
 hit_from_inside = true
 
-[node name="wall_left" type="RayCast2D" parent="POINT"]
+[node name="wall_left" type="RayCast2D" parent="POINT" unique_id=1034692413]
 visible = false
 position = Vector2(-27, -64)
 rotation = 3.14159
@@ -794,7 +798,7 @@ target_position = Vector2(36, 0)
 hit_from_inside = true
 collide_with_areas = true
 
-[node name="climbcast_right" type="RayCast2D" parent="POINT"]
+[node name="climbcast_right" type="RayCast2D" parent="POINT" unique_id=1203087324]
 visible = false
 position = Vector2(27, -64)
 exclude_parent = false
@@ -803,7 +807,7 @@ hit_from_inside = true
 collide_with_areas = true
 collide_with_bodies = false
 
-[node name="climbcast_left" type="RayCast2D" parent="POINT"]
+[node name="climbcast_left" type="RayCast2D" parent="POINT" unique_id=1521735545]
 visible = false
 position = Vector2(-27, -64)
 rotation = 3.14159
@@ -813,7 +817,7 @@ hit_from_inside = true
 collide_with_areas = true
 collide_with_bodies = false
 
-[node name="climbcast_up" type="RayCast2D" parent="POINT"]
+[node name="climbcast_up" type="RayCast2D" parent="POINT" unique_id=638735038]
 visible = false
 position = Vector2(0, -130)
 rotation = 3.14159
@@ -823,7 +827,7 @@ hit_from_inside = true
 collide_with_areas = true
 collide_with_bodies = false
 
-[node name="climbcast_down" type="RayCast2D" parent="POINT"]
+[node name="climbcast_down" type="RayCast2D" parent="POINT" unique_id=1561055431]
 visible = false
 position = Vector2(0, 6)
 rotation = 3.14159
@@ -832,23 +836,23 @@ target_position = Vector2(-2.36041e-06, -27)
 hit_from_inside = true
 collide_with_areas = true
 
-[node name="ANCRE_SOL_BACK" type="Node2D" parent="POINT"]
+[node name="ANCRE_SOL_BACK" type="Node2D" parent="POINT" unique_id=444125161]
 visible = false
 position = Vector2(-37, -29)
 
-[node name="ANCRE_SOL" type="Node2D" parent="POINT"]
+[node name="ANCRE_SOL" type="Node2D" parent="POINT" unique_id=1280331426]
 visible = false
 position = Vector2(0, -28)
 
-[node name="ANCRE_GRAB" type="Node2D" parent="POINT"]
+[node name="ANCRE_GRAB" type="Node2D" parent="POINT" unique_id=1022157804]
 visible = false
 position = Vector2(23, -149)
 
-[node name="ANCRE_WALL" type="Node2D" parent="POINT"]
+[node name="ANCRE_WALL" type="Node2D" parent="POINT" unique_id=1385640009]
 visible = false
 position = Vector2(-16, -64)
 
-[node name="GRAB" type="RayCast2D" parent="POINT"]
+[node name="GRAB" type="RayCast2D" parent="POINT" unique_id=891426353]
 visible = false
 position = Vector2(23, -113)
 target_position = Vector2(30, 0)
@@ -856,31 +860,31 @@ hit_from_inside = true
 collide_with_areas = true
 collide_with_bodies = false
 
-[node name="collision_attack" type="Area2D" parent="POINT"]
+[node name="collision_attack" type="Area2D" parent="POINT" unique_id=270165954]
 collision_layer = 4
 collision_mask = 4
 
-[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="POINT/collision_attack"]
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="POINT/collision_attack" unique_id=308645588]
 visible = false
 polygon = PackedVector2Array(14, -163, 74, -160, 146, -131, 181, -89, 181, -42, 146, -7, 64, 5, -11, 3, 49, -9, 54, -67, 39, -126, 19, -137, -4, -144, -42, -150, -13, -160)
 disabled = true
 
-[node name="CollisionPolygon2D2" type="CollisionPolygon2D" parent="POINT/collision_attack"]
+[node name="CollisionPolygon2D2" type="CollisionPolygon2D" parent="POINT/collision_attack" unique_id=1968370006]
 visible = false
 polygon = PackedVector2Array(-28, -168, 8, -178, 91, -163, 185, -92, 172, -24, 91, 4, -37, -2, -22, -20, 33, -52, 35, -122, 7, -140, -11, -142, -31, -144)
 disabled = true
 
-[node name="CollisionPolygon2D3" type="CollisionPolygon2D" parent="POINT/collision_attack"]
+[node name="CollisionPolygon2D3" type="CollisionPolygon2D" parent="POINT/collision_attack" unique_id=559021070]
 visible = false
 polygon = PackedVector2Array(-26, -140, 0, -159, 90, -156, 175, -123, 195, -79, 159, -39, 78, -13, -32, -6, 58, -25, 32, -82, 2, -130)
 disabled = true
 
-[node name="CollisionPolygon2D4" type="CollisionPolygon2D" parent="POINT/collision_attack"]
+[node name="CollisionPolygon2D4" type="CollisionPolygon2D" parent="POINT/collision_attack" unique_id=845099416]
 visible = false
 polygon = PackedVector2Array(-50, -227, 70, -212, 133, -155, 138, -58, 58, -1, 3, -2, 6, -108, -14, -164)
 disabled = true
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=845201783]
 visible = false
 position = Vector2(0, -63)
 shape = SubResource("CapsuleShape2D_gvikp")

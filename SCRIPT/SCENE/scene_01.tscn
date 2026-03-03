@@ -22,10 +22,19 @@
 [ext_resource type="Texture2D" uid="uid://clda7sgwbi0ju" path="res://MEDIA/scene1/pierrefond.png" id="15_wgl0l"]
 [ext_resource type="Texture2D" uid="uid://deliy3uihffxb" path="res://MEDIA/scene1/Calque 2.png" id="16_06s65"]
 [ext_resource type="Texture2D" uid="uid://bit74n8tnaoei" path="res://MEDIA/scene1/sol1.png" id="16_bxkm8"]
+[ext_resource type="Texture2D" uid="uid://br5vlwyip43xn" path="res://MEDIA/scene1/platforme.png" id="16_iilfq"]
 [ext_resource type="Texture2D" uid="uid://b5de3034t4l2o" path="res://MEDIA/scene1/pierredevant2.png" id="16_wgl0l"]
+[ext_resource type="Texture2D" uid="uid://bxvn6ihwbvxs7" path="res://MEDIA/scene1/sol3.png" id="17_2yiqe"]
 [ext_resource type="Texture2D" uid="uid://mgm6rn61fhhb" path="res://level_export.png" id="17_26mbw"]
 [ext_resource type="Texture2D" uid="uid://cboiebye62had" path="res://MEDIA/scene1/pierredevant3.png" id="17_bxkm8"]
 [ext_resource type="Texture2D" uid="uid://c15nofq0gy2w" path="res://MEDIA/scene1/pierredevant.png" id="18_b77l5"]
+[ext_resource type="Texture2D" uid="uid://4jxgcaf5ppmm" path="res://MEDIA/scene1/pierre4.png" id="19_ra0is"]
+[ext_resource type="Texture2D" uid="uid://bamhvo4r1atnp" path="res://MEDIA/scene1/colonne 1.png" id="20_k1x5j"]
+[ext_resource type="Texture2D" uid="uid://c3iw4qhks00vo" path="res://MEDIA/scene1/colonne 2.png" id="21_cwgr7"]
+[ext_resource type="Texture2D" uid="uid://utaimudnfn0f" path="res://MEDIA/scene1/pierre6.png" id="22_ra0is"]
+[ext_resource type="Texture2D" uid="uid://dvquwrvt8d7mc" path="res://MEDIA/scene1/pierre5.png" id="31_k1x5j"]
+[ext_resource type="Texture2D" uid="uid://btkg80xwen8vl" path="res://MEDIA/scene1/soleil.png" id="32_cwgr7"]
+[ext_resource type="Texture2D" uid="uid://epd47t6dmmnx" path="res://MEDIA/CHARACHTER/Idle.png" id="35_ra0is"]
 
 [sub_resource type="Gradient" id="Gradient_jri6e"]
 offsets = PackedFloat32Array(0, 0.542683, 1)
@@ -93,10 +102,10 @@ color_ramp = SubResource("Gradient_jri6e")
 [node name="CanvasLayer" parent="." unique_id=1860159449 instance=ExtResource("1_yo8g7")]
 
 [node name="CharacterBody2D" parent="." unique_id=410987151 instance=ExtResource("1_ck7e4")]
-position = Vector2(7982, 1462)
+position = Vector2(8149, 1210)
 
 [node name="Camera2D" type="Camera2D" parent="." unique_id=667411852]
-position = Vector2(7956, 1406)
+position = Vector2(8123, 1154)
 process_callback = 0
 limit_smoothed = true
 position_smoothing_enabled = true
@@ -125,6 +134,7 @@ one_way_collision = true
 polygon = PackedVector2Array(21160, 111, 21009, 119, 21002, 289, 21169, 280)
 
 [node name="classicsol" type="StaticBody2D" parent="." unique_id=930610937]
+z_index = 10
 
 [node name="CollisionPolygon2D3" type="CollisionPolygon2D" parent="classicsol" unique_id=1822155953]
 polygon = PackedVector2Array(8426, 1764, 8572, 1786, 8580, 1974, 8698, 2007, 8566, 2073, 8406, 2037, 8398, 1765)
@@ -178,7 +188,7 @@ polygon = PackedVector2Array(13527, 1745, 13315, 1742, 13314, 1813, 13526, 1811)
 polygon = PackedVector2Array(14851, 1346, 15686, 1268, 16008, 1309, 16383, 1354, 16752, 1330, 17150, 1247, 17544, 1296, 17859, 1331, 18118, 1340, 18589, 1263, 18801, 1195, 19216, 1305, 19561, 1329, 19555, 1578, 18122, 1624, 16059, 1596, 14770, 1535)
 
 [node name="CollisionPolygon2D15" type="CollisionPolygon2D" parent="classicsol" unique_id=1879948482]
-polygon = PackedVector2Array(19561, 1331, 19584, 1334, 19580, 1449, 19578, 1557, 19578, 1768, 19582, 2007, 19859, 2014, 20197, 2168, 20496, 2227, 20834, 2285, 21159, 2270, 21448, 2223, 21738, 2162, 21914, 2066, 22106, 1893, 22213, 1745, 22288, 1550, 22302, 1379, 22313, 1271, 22557, 1271, 22525, 2028, 22254, 2484, 20795, 2764, 19655, 2624, 19234, 2253, 19295, 1659, 19381, 1409)
+polygon = PackedVector2Array(19561, 1331, 19584, 1334, 19580, 1449, 19578, 1557, 19578, 1768, 19582, 2007, 19859, 2014, 20197, 2168, 20496, 2227, 20834, 2285, 21159, 2270, 21448, 2223, 21738, 2162, 21914, 2066, 22106, 1893, 22213, 1745, 22288, 1550, 22302, 1379, 22313, 1271, 22537, 1255, 23550, 1230, 23549, 1853, 23021, 2337, 22254, 2484, 20795, 2764, 19655, 2624, 19234, 2253, 19295, 1659, 19381, 1409)
 
 [node name="CollisionPolygon2D16" type="CollisionPolygon2D" parent="classicsol" unique_id=1397858580]
 polygon = PackedVector2Array(19943, 1318, 19945, 1381, 20252, 1383, 20254, 1311)
@@ -514,7 +524,7 @@ scale = Vector2(2, 2)
 texture = ExtResource("16_bxkm8")
 
 [node name="Sol2" type="Sprite2D" parent="Node2D2" unique_id=985231352]
-position = Vector2(16964, 2026)
+position = Vector2(18920, 2305)
 scale = Vector2(2, 2)
 texture = ExtResource("14_m3b65")
 
@@ -534,12 +544,68 @@ rotation = 3.1415927
 scale = Vector2(2, -2)
 texture = ExtResource("11_06s65")
 
+[node name="Platforme" type="Sprite2D" parent="Node2D2" unique_id=578556978]
+position = Vector2(19362, -569)
+scale = Vector2(2, 2)
+texture = ExtResource("16_iilfq")
+
+[node name="Sol3" type="Sprite2D" parent="Node2D2" unique_id=1858883840]
+z_index = -1
+position = Vector2(19570, -93)
+scale = Vector2(2, 2)
+texture = ExtResource("17_2yiqe")
+
+[node name="Pierre4" type="Sprite2D" parent="Node2D2" unique_id=1335762972]
+position = Vector2(7404, 1568)
+scale = Vector2(2, 2)
+texture = ExtResource("19_ra0is")
+
+[node name="Colonne1" type="Sprite2D" parent="Node2D2" unique_id=56301553]
+position = Vector2(19879, -327)
+scale = Vector2(2, 2)
+texture = ExtResource("20_k1x5j")
+
+[node name="Colonne2" type="Sprite2D" parent="Node2D2" unique_id=1159149401]
+position = Vector2(17047, -2171)
+scale = Vector2(2, 2)
+texture = ExtResource("21_cwgr7")
+
 [node name="Parallax2D2" type="Parallax2D" parent="Node2D2" unique_id=1202685695]
 scroll_scale = Vector2(0.2, 0.2)
+
+[node name="Pierre6" type="Sprite2D" parent="Node2D2/Parallax2D2" unique_id=109075909]
+z_index = -15
+position = Vector2(12032.836, 1871.4692)
+scale = Vector2(0.81, 0.81)
+texture = ExtResource("22_ra0is")
 
 [node name="Fond2" type="Sprite2D" parent="Node2D2/Parallax2D2" unique_id=1406330299]
 z_index = -15
 position = Vector2(10603.648, 2400.1777)
+scale = Vector2(2, 2)
+texture = ExtResource("15_26mbw")
+
+[node name="Fond3" type="Sprite2D" parent="Node2D2/Parallax2D2" unique_id=1022556825]
+z_index = -15
+position = Vector2(13220.553, 2252.0537)
+scale = Vector2(2, 2)
+texture = ExtResource("15_26mbw")
+
+[node name="Fond4" type="Sprite2D" parent="Node2D2/Parallax2D2" unique_id=1756213303]
+z_index = -15
+position = Vector2(12193.553, 2334.0537)
+scale = Vector2(2, 2)
+texture = ExtResource("15_26mbw")
+
+[node name="Fond5" type="Sprite2D" parent="Node2D2/Parallax2D2" unique_id=1788300663]
+z_index = -15
+position = Vector2(12395.553, 2543.0537)
+scale = Vector2(2, 2)
+texture = ExtResource("15_26mbw")
+
+[node name="Fond6" type="Sprite2D" parent="Node2D2/Parallax2D2" unique_id=344775848]
+z_index = -15
+position = Vector2(13667.485, 2367.2087)
 scale = Vector2(2, 2)
 texture = ExtResource("15_26mbw")
 
@@ -584,6 +650,12 @@ position = Vector2(10280.583, 2403.4922)
 scale = Vector2(2, 2)
 texture = ExtResource("15_26mbw")
 
+[node name="Fond2" type="Sprite2D" parent="Node2D2/Parallax2D" unique_id=1511997108]
+z_index = -10
+position = Vector2(10280.583, 2403.4922)
+scale = Vector2(2, 2)
+texture = ExtResource("15_26mbw")
+
 [node name="Parallax2D3" type="Parallax2D" parent="Node2D2" unique_id=1172504383]
 scroll_scale = Vector2(1.2, 1.2)
 
@@ -617,8 +689,21 @@ position = Vector2(7845.749, 2126.1238)
 scale = Vector2(2, 2)
 texture = ExtResource("18_b77l5")
 
+[node name="Pierre5" type="Sprite2D" parent="Node2D2/Parallax2D3" unique_id=1980015804]
+z_index = 15
+position = Vector2(19253.271, 2450.0842)
+rotation = 0.47996554
+scale = Vector2(2, 2)
+texture = ExtResource("31_k1x5j")
+
 [node name="Parallax2D4" type="Parallax2D" parent="Node2D2" unique_id=1852134000]
 scroll_scale = Vector2(0, 0)
+
+[node name="Soleil" type="Sprite2D" parent="Node2D2/Parallax2D4" unique_id=104095646]
+z_index = -100
+position = Vector2(9887.968, 1860.9734)
+scale = Vector2(0.845, 0.845)
+texture = ExtResource("32_cwgr7")
 
 [node name="Calque2" type="Sprite2D" parent="Node2D2/Parallax2D4" unique_id=1229174888]
 z_index = -1000
@@ -632,3 +717,7 @@ script = ExtResource("7_iy4gx")
 [node name="LevelExport" type="Sprite2D" parent="." unique_id=1843474899]
 position = Vector2(17070, 6206)
 texture = ExtResource("17_26mbw")
+
+[node name="Idle" type="Sprite2D" parent="." unique_id=2143307154]
+position = Vector2(8212, 1473)
+texture = ExtResource("35_ra0is")
