@@ -123,11 +123,8 @@ func apply_damage(amount: int, source_x) -> void:
 	if current_state in [States.ROLL, States.DEAD]:
 		return
 	if current_state != States.HIT:
-		print("j'ai pris les dégâts")
 		Player.changement_de_vie(-amount)
-		print("Player_vie", Player.hp)
 		if Player.hp <= 0:
-			print("ma vie est a zero ")
 			change_state(States.DEAD)
 			return
 		position_x_enemi = source_x
@@ -173,7 +170,7 @@ func _raycast_hits_group(rc: RayCast2D, group_name: String, body_only := false) 
 
 func calcule_falling_damage() -> int:
 	const SAFE_HEIGHT: float     = 850.0
-	const DAMAGE_PER_STEP: int   = 6
+	const DAMAGE_PER_STEP: int   = 30
 	const STEP_PX: float         = 100.0
 
 	var impact_point: float  = global_position.y
@@ -219,134 +216,28 @@ func _flip_from_input() -> void:
 		point.scale.x  = last_direction
 
 # ----------- Initialisation des états -------------------
+func _register_states(states_enum: Dictionary) -> void:
+	for state_name in states_enum:
+		var key: int = states_enum[state_name]
+		var name_lower: String = state_name.to_lower()
+		var dict := {}
+		for suffix in ["enter", "execute", "input", "exit", "animation_finished", "animation_looped"]:
+			var func_name: String = name_lower + "_" + suffix
+			if has_method(func_name):
+				dict[suffix] = Callable(self, func_name)
+		state_functions[key] = dict
+
 func initialize_states() -> void:
-	state_functions[States.IDLE] = {
-		"enter": idle_enter,
-		"execute": idle_execute,
-		"input": idle_input,
-		"exit": idle_exit
-	}
-	state_functions[States.RUN] = {
-		"enter": run_enter,
-		"execute": run_execute,
-		"input": run_input,
-		"exit": run_exit
-	}
-	state_functions[States.JUMP] = {
-		"enter": jump_enter,
-		"execute": jump_execute,
-		"input": jump_input,
-		"exit": jump_exit
-	}
-	state_functions[States.CHUTE] = {
-		"enter": chute_enter,
-		"execute": chute_execute,
-		"input": chute_input,      # FIX: les inputs just_pressed sont dans input, plus dans execute
-		"exit": chute_exit
-	}
-	state_functions[States.WALL_GRIFFE] = {
-		"enter": wall_griffe_enter,
-		"execute": wall_griffe_execute,
-		"exit": wall_griffe_exit
-	}
-	state_functions[States.WALL_JUMP] = {
-		"enter": wall_jump_enter,
-		"execute": wall_jump_execute,
-		"input": wall_jump_input,
-		"exit": wall_jump_exit
-	}
-	state_functions[States.CLIMB] = {
-		"enter": climb_enter,
-		"execute": climb_execute,
-		"input": climb_input,
-		"exit": climb_exit
-	}
-	state_functions[States.ROLL] = {
-		"enter": roll_enter,
-		"execute": roll_execute,
-		"input":  roll_input,
-		"exit":   roll_exit,
-		"animation_finished": _on_roll_animation_finished
-	}
-	state_functions[States.CHUTE_GRIFFE] = {
-		"enter": chute_griffe_enter,
-		"execute": chute_griffe_execute,
-		"input": chute_griffe_input,
-		"exit": chute_griffe_exit
-	}
-	state_functions[States.GRAB] = {
-		"enter": grab_enter,
-		"execute": grab_execute,
-		"input": grab_input,
-		"exit": grab_exit
-	}
-	state_functions[States.ATTACK_LIGHT_1] = {
-		"enter": attack_light_1_enter,
-		"execute": attack_light_1_execute,
-		"input": attack_light_1_input,
-		"exit": attack_light_1_exit,
-		"animation_finished": attack_light_1_animation_finished
-	}
-	state_functions[States.ATTACK_LIGHT_2] = {
-		"enter": attack_light_2_enter,
-		"execute": attack_light_2_execute,
-		"input": attack_light_2_input,
-		"exit": attack_light_2_exit,
-		"animation_finished": attack_light_2_animation_finished
-	}
-	state_functions[States.ATTACK_LIGHT_3] = {
-		"enter": attack_light_3_enter,
-		"execute": attack_light_3_execute,
-		"input": attack_light_3_input,
-		"exit": attack_light_3_exit,
-		"animation_finished": attack_light_3_animation_finished
-	}
-	state_functions[States.ATTACK_AIR] = {
-		"enter": attack_air_enter,
-		"execute": attack_air_execute,
-		"input": attack_air_input,
-		"exit": attack_air_exit,
-		"animation_finished": attack_air_animation_finished
-	}
-	state_functions[States.ATTACK_LOURDE] = {
-		"enter": attack_lourde_enter,
-		"execute": attack_lourde_execute,
-		"input": attack_lourde_input,
-		"exit": attack_lourde_exit,
-		"animation_finished": attack_lourde_animation_finished
-	}
-	state_functions[States.HEAL] = {
-		"enter": heal_enter,
-		"execute": heal_execute,
-		"input": heal_input,
-		"exit": heal_exit,
-		"animation_finished": heal_finished
-	}
-	state_functions[States.HIT] = {
-		"enter": hit_enter,
-		"execute": hit_execute,
-		"exit": hit_exit,
-	}
-	state_functions[States.DEAD] = {
-		"enter": dead_enter,
-		"execute": dead_execute,
-		"input": dead_input,
-		"exit": dead_exit,
-	}
-	state_functions[States.DROP] = {
-		"enter": drop_enter,
-		"execute": drop_execute,
-		"exit": drop_exit,
-	}
+	_register_states(States)
 
 # ----------- Gestion du changement d'état ---------------
 
 var _changing_now := false
 
 func change_state(new_state: States) -> void:
-	print("[", Engine.get_physics_frames(), "] ",
-		"STATE: ", current_state, " -> ", new_state,
-		" | on_floor=", is_on_floor(), " | vel=", velocity)
+	#print("[", Engine.get_physics_frames(), "] ",
+		#"STATE: ", current_state, " -> ", new_state,
+		#" | on_floor=", is_on_floor(), " | vel=", velocity)
 
 	if _changing_now or new_state == current_state:
 		return
@@ -828,7 +719,7 @@ func roll_input(event: InputEvent) -> void:
 func roll_exit() -> void:
 	pass
 
-func _on_roll_animation_finished() -> void:
+func roll_animation_finished() -> void:
 	var horiz := Input.get_action_strength("right_move") - Input.get_action_strength("left_move")
 
 	if horiz != 0.0:
@@ -843,7 +734,7 @@ func _on_roll_animation_finished() -> void:
 
 
 func chute_griffe_enter() -> void:
-	print("jegriffe")
+
 	animator.play("chute_griffe")
 	velocity.y = 250.0
 
@@ -976,7 +867,6 @@ func attack_light_1_exit() -> void:
 func attack_light_2_enter() -> void:
 	_flip_from_input()
 	combo_buffered = false
-	print("attack2")
 	animator.play("attack_02")
 
 func attack_light_2_execute(delta: float) -> void:
@@ -1023,7 +913,6 @@ func attack_light_2_exit() -> void:
 func attack_light_3_enter() -> void:
 	_flip_from_input()
 	combo_buffered = false
-	print("attack3")
 	animator.play("attack_03")
 
 func attack_light_3_execute(delta: float) -> void:
@@ -1120,7 +1009,7 @@ func heal_execute(delta: float) -> void:
 func heal_input(event: InputEvent) -> void:
 	pass
 
-func heal_finished() -> void:
+func heal_animation_finished() -> void:
 	match animator.animation:
 		"heal":
 			Player.heal_blood()
@@ -1185,7 +1074,7 @@ func hit_exit() -> void:
 func dead_enter() -> void:
 	animator.play("death")
 	velocity.x = 0.0            # FIX: stoppe le mouvement horizontal
-	print("enter_DEAD")
+
 
 
 func dead_execute(delta: float) -> void:
@@ -1201,8 +1090,11 @@ func dead_execute(delta: float) -> void:
 
 
 func dead_input(event: InputEvent) -> void:
-	# FIX: placeholder — tu pourras ajouter "appuie sur Start pour recommencer"
-	pass
+	if Input.is_action_just_pressed("jump"):
+		print("okkkkkkkje suis mort")
+		Player.hp = Player.MAX_HP
+		Player.en = Player.MAX_en
+		Loader.load_scene_with_loading(Loader._target_scene_path)
 
 func dead_exit() -> void:
 	velocity = Vector2.ZERO

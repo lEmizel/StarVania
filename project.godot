@@ -15,6 +15,7 @@ compatibility/default_parent_skeleton_in_mesh_instance_3d=true
 [application]
 
 config/name="SMILE_STAR"
+run/main_scene="uid://q73v1b80lt2r"
 config/features=PackedStringArray("4.6", "Forward Plus")
 config/icon="res://icon.svg"
 
@@ -43,6 +44,7 @@ wall_jump=""
 CLIMB=""
 CHUTE=""
 GRAB=""
+Checkpoint=""
 
 [gui]
 

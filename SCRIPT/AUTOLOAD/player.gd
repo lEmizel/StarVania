@@ -1,5 +1,7 @@
 extends Node
 
+var last_checkpoint_path: NodePath = NodePath()
+
 var blood := 0
 var hp := 570
 var MAX_HP := 570

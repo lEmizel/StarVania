@@ -1,6 +1,6 @@
-[gd_scene load_steps=31 format=3 uid="uid://bs1685hwv6d0w"]
+[gd_scene format=3 uid="uid://bs1685hwv6d0w"]
 
-[ext_resource type="Script" uid="uid://d1o462tapmycy" path="res://SCRIPT/MONSTER/ai desire.gd" id="1_xojby"]
+[ext_resource type="Script" uid="uid://crqgy4fgu2a8y" path="res://SCRIPT/MONSTER/skeleton.gd" id="1_536yp"]
 [ext_resource type="PackedScene" uid="uid://c8y35es6jse5x" path="res://SCRIPT/MENU/heatle_bare_monster.tscn" id="2_lo1ik"]
 [ext_resource type="Texture2D" uid="uid://de61gexsfn0we" path="res://MEDIA/MONSTER/SKELETON/dead/Skeleton_death-1.png" id="3_5h4l3"]
 [ext_resource type="Texture2D" uid="uid://d33q5udvg7roa" path="res://MEDIA/MONSTER/SKELETON/idle/Skeleton_Idle-1.png" id="3_h85yw"]
@@ -27,6 +27,8 @@
 [ext_resource type="Texture2D" uid="uid://bmjkyhe04g3xr" path="res://MEDIA/MONSTER/SKELETON/wallback/Skeleton_walkback-2.png" id="14_xir3a"]
 [ext_resource type="Texture2D" uid="uid://cdnjkfrelkr07" path="res://MEDIA/MONSTER/SKELETON/wallback/Skeleton_walkback-3.png" id="15_hg7ra"]
 [ext_resource type="Texture2D" uid="uid://b7me0rjqaho6v" path="res://MEDIA/MONSTER/SKELETON/wallback/Skeleton_walkback-4.png" id="16_cpoiv"]
+[ext_resource type="Texture2D" uid="uid://6u0fa2a6vgix" path="res://MEDIA/MONSTER/SKELETON/idle/Skeleton_Idle-5.png" id="18_hg7ra"]
+[ext_resource type="Texture2D" uid="uid://grdoj1jhlono" path="res://MEDIA/MONSTER/SKELETON/idle/Skeleton_Idle-6.png" id="19_cpoiv"]
 [ext_resource type="Script" uid="uid://cvetaerfouv2n" path="res://SCRIPT/MONSTER/animator.gd" id="28_536yp"]
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_7joub"]
@@ -56,7 +58,7 @@ animations = [{
 }],
 "loop": false,
 "name": &"attack",
-"speed": 16.0
+"speed": 12.0
 }, {
 "frames": [{
 "duration": 1.1,
@@ -95,6 +97,12 @@ animations = [{
 }, {
 "duration": 1.0,
 "texture": ExtResource("6_tpj1t")
+}, {
+"duration": 1.0,
+"texture": ExtResource("18_hg7ra")
+}, {
+"duration": 1.0,
+"texture": ExtResource("19_cpoiv")
 }],
 "loop": true,
 "name": &"idle",
@@ -141,47 +149,47 @@ animations = [{
 "speed": 6.0
 }]
 
-[node name="enemi" type="CharacterBody2D"]
+[node name="enemi" type="CharacterBody2D" unique_id=627255339]
 light_mask = 0
 collision_layer = 4
-collision_mask = 2
-script = ExtResource("1_xojby")
-ai_type = "SKELETON"
+collision_mask = 6
+script = ExtResource("1_536yp")
 
-[node name="bare_de_vie" parent="." instance=ExtResource("2_lo1ik")]
+[node name="bare_de_vie" parent="." unique_id=1882929594 instance=ExtResource("2_lo1ik")]
 light_mask = 0
 position = Vector2(-90, -232)
 scale = Vector2(0.37, 0.37)
 
-[node name="Collision" type="CollisionShape2D" parent="."]
+[node name="Collision" type="CollisionShape2D" parent="." unique_id=287775973]
 visible = false
 position = Vector2(0, -92)
 shape = SubResource("CapsuleShape2D_7joub")
 
-[node name="POINT" type="Node2D" parent="."]
+[node name="POINT" type="Node2D" parent="." unique_id=1327697225]
 
-[node name="animator" type="AnimatedSprite2D" parent="POINT"]
+[node name="animator" type="AnimatedSprite2D" parent="POINT" unique_id=1830194176]
 light_mask = 0
 texture_filter = 1
 position = Vector2(-1, -97)
 scale = Vector2(1.22, 1.22)
 sprite_frames = SubResource("SpriteFrames_dnpf1")
-animation = &"hit"
+animation = &"idle"
+frame_progress = 0.93752736
 script = ExtResource("28_536yp")
 
-[node name="vision" type="Area2D" parent="POINT"]
+[node name="vision" type="Area2D" parent="POINT" unique_id=1946126189]
 visible = false
 position = Vector2(-27, -93)
 
-[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="POINT/vision"]
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="POINT/vision" unique_id=1685665169]
 visible = false
 position = Vector2(80, -2)
 polygon = PackedVector2Array(-49, -16, 203, -152, 205, 148, -47, 25)
 
-[node name="collision_attack" type="Area2D" parent="POINT"]
+[node name="collision_attack" type="Area2D" parent="POINT" unique_id=371815366]
 visible = false
 
-[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="POINT/collision_attack"]
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="POINT/collision_attack" unique_id=74740681]
 visible = false
 position = Vector2(35, -59)
 polygon = PackedVector2Array(11, -150, 58, -133, 92, -75, 92, 1, 58, 53, -28, 65, -26, 0, -18, -57, -20, -89, -43, -106, -83, -100, -121, -137, -59, -157)

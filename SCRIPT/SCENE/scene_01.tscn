@@ -1,10 +1,8 @@
 [gd_scene format=3 uid="uid://q73v1b80lt2r"]
 
 [ext_resource type="Script" uid="uid://b2gdi5nrgeles" path="res://SCRIPT/SCENE/scene_01.gd" id="1_1b2e2"]
-[ext_resource type="PackedScene" uid="uid://vkm3ut4hytpr" path="res://SCRIPT/CHARACHTER/PLAYER.tscn" id="1_ck7e4"]
 [ext_resource type="Texture2D" uid="uid://cpe7t0bhvdn4w" path="res://MEDIA/test/Illustration_sans_titre 15.png" id="1_prjqu"]
 [ext_resource type="PackedScene" uid="uid://bqndjpts1oqr3" path="res://SCRIPT/MENU/heatle_bare.tscn" id="1_yo8g7"]
-[ext_resource type="Script" uid="uid://pcqotyxb20op" path="res://SCRIPT/camera2d.gd" id="2_lnqh0"]
 [ext_resource type="Script" uid="uid://cldc0dscj1uj1" path="res://SCRIPT/OUTILS/LEVEL_EXPORTER.gd" id="6_ww6ae"]
 [ext_resource type="Script" uid="uid://cqpdbfmlcuq38" path="res://SCRIPT/OUTILS/SpriteScaler.gd" id="7_iy4gx"]
 [ext_resource type="Texture2D" uid="uid://dcoehimdkota1" path="res://MEDIA/scene1/level_export.png" id="8_7mbse"]
@@ -34,7 +32,10 @@
 [ext_resource type="Texture2D" uid="uid://utaimudnfn0f" path="res://MEDIA/scene1/pierre6.png" id="22_ra0is"]
 [ext_resource type="Texture2D" uid="uid://dvquwrvt8d7mc" path="res://MEDIA/scene1/pierre5.png" id="31_k1x5j"]
 [ext_resource type="Texture2D" uid="uid://btkg80xwen8vl" path="res://MEDIA/scene1/soleil.png" id="32_cwgr7"]
-[ext_resource type="Texture2D" uid="uid://epd47t6dmmnx" path="res://MEDIA/CHARACHTER/Idle.png" id="35_ra0is"]
+[ext_resource type="PackedScene" uid="uid://bs1685hwv6d0w" path="res://SCRIPT/MONSTER/SKELETON.tscn" id="36_k1x5j"]
+[ext_resource type="PackedScene" uid="uid://ckxwmy0iav2h2" path="res://SCRIPT/INTERACTIBLE/Checkpoint.tscn" id="37_bsdtk"]
+[ext_resource type="PackedScene" uid="uid://lskntqxi822j" path="res://SCRIPT/MONSTER/Orbe.tscn" id="37_cwgr7"]
+[ext_resource type="Script" uid="uid://dftar4ptyhjxe" path="res://SCRIPT/UTILITAIRE/spawnplayer.gd" id="38_bsdtk"]
 
 [sub_resource type="Gradient" id="Gradient_jri6e"]
 offsets = PackedFloat32Array(0, 0.542683, 1)
@@ -69,6 +70,237 @@ size = Vector2(169, 2093)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_ixido"]
 
+[sub_resource type="Shader" id="Shader_k1x5j"]
+code = "shader_type canvas_item;
+render_mode blend_add;
+
+// === PARAMÈTRES ===
+uniform float flame_size : hint_range(0.05, 0.5) = 0.2;
+uniform float flame_height : hint_range(0.05, 0.4) = 0.18;
+uniform float speed : hint_range(0.1, 5.0) = 1.5;
+uniform float core_intensity : hint_range(0.5, 3.0) = 1.5;
+uniform float corona_strength : hint_range(0.0, 1.0) = 0.4;
+uniform vec3 color_core : source_color = vec3(1.0, 0.98, 0.9);
+uniform vec3 color_hot : source_color = vec3(1.0, 0.85, 0.3);
+uniform vec3 color_mid : source_color = vec3(1.0, 0.5, 0.1);
+uniform vec3 color_edge : source_color = vec3(0.9, 0.2, 0.05);
+uniform vec3 color_outer : source_color = vec3(0.5, 0.08, 0.02);
+
+// === BRUIT ===
+vec3 mod289_3(vec3 x) {
+	return x - floor(x * (1.0 / 289.0)) * 289.0;
+}
+
+vec4 mod289_4(vec4 x) {
+	return x - floor(x * (1.0 / 289.0)) * 289.0;
+}
+
+vec4 permute(vec4 x) {
+	return mod289_4(((x * 34.0) + 1.0) * x);
+}
+
+float noise(vec3 p) {
+	vec3 a = floor(p);
+	vec3 d = p - a;
+	d = d * d * (3.0 - 2.0 * d);
+
+	a = mod289_3(a);
+	vec4 b = a.xxyy + vec4(0.0, 1.0, 0.0, 1.0);
+	vec4 k1 = permute(b.xyxy);
+	vec4 k2 = permute(k1.xyxy + b.zzww);
+
+	vec4 c = k2 + a.zzzz;
+	vec4 k3 = permute(c);
+	vec4 k4 = permute(c + 1.0);
+
+	vec4 o1 = fract(k3 * (1.0 / 41.0));
+	vec4 o2 = fract(k4 * (1.0 / 41.0));
+	vec4 o3 = o2 * d.z + o1 * (1.0 - d.z);
+	vec2 o4 = o3.yw * d.x + o3.xz * (1.0 - d.x);
+
+	return o4.y * d.y + o4.x * (1.0 - d.y);
+}
+
+float fbm(vec3 p) {
+	float value = 0.0;
+	float amplitude = 0.5;
+	for (int i = 0; i < 5; i++) {
+		value += amplitude * noise(p);
+		p *= 2.01;
+		amplitude *= 0.5;
+	}
+	return value;
+}
+
+// === FRAGMENT ===
+void fragment() {
+	vec2 uv = UV - 0.5;
+	float dist = length(uv);
+	float angle = atan(uv.y, uv.x);
+	float t = TIME * speed;
+
+	// 3 couches de bruit pour les flammes
+	float n1 = fbm(vec3(angle * 3.0, dist * 4.0 - t * 2.0, t * 0.7)) * 0.5 + 0.5;
+	float n2 = fbm(vec3(angle * 5.0 + 10.0, dist * 6.0 - t * 3.0, t * 1.1)) * 0.5 + 0.5;
+	float n3 = fbm(vec3(angle * 8.0 + 20.0, dist * 8.0 - t * 4.0, t * 1.5)) * 0.5 + 0.5;
+
+	float flame_edge = flame_size + flame_height * (n1 * 0.5 + n2 * 0.3 + n3 * 0.2);
+	float flame = 1.0 - smoothstep(flame_size * 0.5, flame_edge, dist);
+
+	float core_glow = exp(-dist * dist / (flame_size * flame_size * 0.8)) * core_intensity;
+	float corona = exp(-max(0.0, dist - flame_size) * 8.0) * corona_strength * (0.3 + 0.2 * n1);
+	float outer_glow = exp(-max(0.0, dist - flame_edge) * 5.0) * 0.15 * n2;
+
+	// Gradient de température
+	float temp = flame * (0.6 + 0.4 * n1);
+	vec3 col = mix(color_outer, color_edge, smoothstep(0.0, 0.25, temp));
+	col = mix(col, color_mid, smoothstep(0.25, 0.5, temp));
+	col = mix(col, color_hot, smoothstep(0.5, 0.75, temp));
+	col = mix(col, color_core, smoothstep(0.75, 1.0, temp));
+
+	col = col * (flame + corona) + color_outer * outer_glow;
+	col += color_core * core_glow * 0.8;
+	col += vec3(1.0, 0.6, 0.2) * corona * 0.5;
+
+	float flicker = 0.95 + 0.05 * sin(t * 15.0 + angle * 3.0);
+	col *= flicker;
+	col = 1.0 - exp(-col * 1.5);
+
+	// En blend_add, l'alpha contrôle l'intensité de l'addition
+	float alpha = min(1.0, (flame + corona + outer_glow) * 2.0);
+
+	// Masque circulaire pour éviter le carré
+	float circle_mask = 1.0 - smoothstep(0.3, 0.48, dist);
+	alpha *= circle_mask;
+	col *= circle_mask;
+
+	COLOR = vec4(col, alpha);
+}
+"
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_cwgr7"]
+shader = SubResource("Shader_k1x5j")
+shader_parameter/flame_size = 0.16400000616006
+shader_parameter/flame_height = 0.40000000596046
+shader_parameter/speed = 1.61300007335762
+shader_parameter/core_intensity = 3.0
+shader_parameter/corona_strength = 0.0
+shader_parameter/color_core = Color(1, 0.98, 0.9, 1)
+shader_parameter/color_hot = Color(1, 0.85, 0.3, 1)
+shader_parameter/color_mid = Color(1, 0.5, 0.1, 1)
+shader_parameter/color_edge = Color(0.9, 0.2, 0.05, 1)
+shader_parameter/color_outer = Color(0.5, 0.08, 0.02, 1)
+
+[sub_resource type="Shader" id="Shader_cwgr7"]
+code = "shader_type canvas_item;
+
+// === PARAMÈTRES ===
+uniform float distortion_strength : hint_range(0.0, 0.05) = 0.012;
+uniform float speed : hint_range(0.1, 5.0) = 1.0;
+uniform float scale : hint_range(1.0, 30.0) = 12.0;
+uniform float vertical_bias : hint_range(0.0, 1.0) = 0.7;
+uniform float fade_top : hint_range(0.0, 1.0) = 0.1;
+uniform float fade_bottom : hint_range(0.0, 1.0) = 0.9;
+uniform bool circular_mode = false;
+uniform float circular_radius : hint_range(0.0, 0.5) = 0.4;
+
+uniform sampler2D screen_tex : hint_screen_texture, filter_linear_mipmap;
+
+// === BRUIT ===
+vec3 mod289_3(vec3 x) {
+	return x - floor(x * (1.0 / 289.0)) * 289.0;
+}
+
+vec4 mod289_4(vec4 x) {
+	return x - floor(x * (1.0 / 289.0)) * 289.0;
+}
+
+vec4 permute(vec4 x) {
+	return mod289_4(((x * 34.0) + 1.0) * x);
+}
+
+float noise(vec3 p) {
+	vec3 a = floor(p);
+	vec3 d = p - a;
+	d = d * d * (3.0 - 2.0 * d);
+
+	a = mod289_3(a);
+	vec4 b = a.xxyy + vec4(0.0, 1.0, 0.0, 1.0);
+	vec4 k1 = permute(b.xyxy);
+	vec4 k2 = permute(k1.xyxy + b.zzww);
+
+	vec4 c = k2 + a.zzzz;
+	vec4 k3 = permute(c);
+	vec4 k4 = permute(c + 1.0);
+
+	vec4 o1 = fract(k3 * (1.0 / 41.0));
+	vec4 o2 = fract(k4 * (1.0 / 41.0));
+	vec4 o3 = o2 * d.z + o1 * (1.0 - d.z);
+	vec2 o4 = o3.yw * d.x + o3.xz * (1.0 - d.x);
+
+	return o4.y * d.y + o4.x * (1.0 - d.y);
+}
+
+float fbm(vec3 p) {
+	float value = 0.0;
+	float amplitude = 0.5;
+	for (int i = 0; i < 4; i++) {
+		value += amplitude * noise(p);
+		p *= 2.03;
+		amplitude *= 0.5;
+	}
+	return value;
+}
+
+// === FRAGMENT ===
+void fragment() {
+	vec2 uv = SCREEN_UV;
+	float t = TIME * speed;
+
+	// Deux couches de bruit décalées pour X et Y
+	float noise_x = fbm(vec3(UV * scale, t * 0.8)) * 2.0 - 1.0;
+	float noise_y = fbm(vec3(UV * scale + 50.0, t * 1.1)) * 2.0 - 1.0;
+
+	// Bias vertical : la distortion monte (comme la chaleur)
+	noise_y = mix(noise_y, abs(noise_y), vertical_bias);
+
+	vec2 distortion = vec2(noise_x, noise_y) * distortion_strength;
+
+	// Masque de zone d'effet
+	float mask = 1.0;
+	if (circular_mode) {
+		// Mode circulaire : idéal autour du soleil / d'un feu
+		float dist = length(UV - 0.5);
+		mask = smoothstep(circular_radius, circular_radius * 0.3, dist);
+	} else {
+		// Mode rectangulaire avec fade haut/bas
+		mask = smoothstep(fade_top, fade_top + 0.15, UV.y);
+		mask *= smoothstep(fade_bottom, fade_bottom - 0.15, UV.y);
+	}
+
+	distortion *= mask;
+
+	// Échantillonne l'écran avec les UVs déformées
+	vec4 scene = texture(screen_tex, uv + distortion);
+
+	// Transparence : là où il n'y a pas de distortion, on est invisible
+	float alpha = length(distortion) > 0.0001 ? 1.0 : 0.0;
+
+	COLOR = vec4(scene.rgb, alpha);
+}
+"
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_bsdtk"]
+shader = SubResource("Shader_cwgr7")
+shader_parameter/distortion_strength = 0.0070000003325
+shader_parameter/speed = 0.60100002528762
+shader_parameter/scale = 14.730000652175
+shader_parameter/vertical_bias = 0.11200000532
+shader_parameter/fade_top = 0.0
+shader_parameter/fade_bottom = 1.0
+shader_parameter/circular_mode = false
+shader_parameter/circular_radius = 0.4
+
 [node name="SCENE_01" type="Node2D" unique_id=838830390]
 position = Vector2(-9431, -1648)
 script = ExtResource("1_1b2e2")
@@ -101,17 +333,8 @@ color_ramp = SubResource("Gradient_jri6e")
 
 [node name="CanvasLayer" parent="." unique_id=1860159449 instance=ExtResource("1_yo8g7")]
 
-[node name="CharacterBody2D" parent="." unique_id=410987151 instance=ExtResource("1_ck7e4")]
-position = Vector2(8149, 1210)
-
-[node name="Camera2D" type="Camera2D" parent="." unique_id=667411852]
-position = Vector2(8123, 1154)
-process_callback = 0
-limit_smoothed = true
-position_smoothing_enabled = true
-script = ExtResource("2_lnqh0")
-
 [node name="platforme" type="StaticBody2D" parent="." unique_id=1228680797]
+visible = false
 collision_layer = 2
 collision_mask = 0
 
@@ -134,7 +357,9 @@ one_way_collision = true
 polygon = PackedVector2Array(21160, 111, 21009, 119, 21002, 289, 21169, 280)
 
 [node name="classicsol" type="StaticBody2D" parent="." unique_id=930610937]
+visible = false
 z_index = 10
+collision_layer = 5
 
 [node name="CollisionPolygon2D3" type="CollisionPolygon2D" parent="classicsol" unique_id=1822155953]
 polygon = PackedVector2Array(8426, 1764, 8572, 1786, 8580, 1974, 8698, 2007, 8566, 2073, 8406, 2037, 8398, 1765)
@@ -207,10 +432,10 @@ polygon = PackedVector2Array(19943, 1318, 19945, 1381, 20252, 1383, 20254, 1311)
 
 [node name="CollisionPolygon2D20" type="CollisionPolygon2D" parent="classicsol" unique_id=21390781]
 position = Vector2(-75, 3)
-polygon = PackedVector2Array(21494, 466, 22017, 452, 22445, 440, 22427, 618, 21516, 620)
+polygon = PackedVector2Array(21494, 466, 22017, 452, 22436, 468, 22427, 618, 21516, 620)
 
 [node name="CollisionPolygon2D21" type="CollisionPolygon2D" parent="classicsol" unique_id=1347066071]
-polygon = PackedVector2Array(22099, -134, 21652, -136, 21170, -147, 21154, 10, 21975, 31, 22143, 19, 22143, -135, 22112, -135)
+polygon = PackedVector2Array(22099, -134, 21652, -136, 21170, -147, 21166, 6, 21975, 31, 22143, 19, 22143, -135, 22112, -135)
 
 [node name="CollisionPolygon2D22" type="CollisionPolygon2D" parent="classicsol" unique_id=1916615564]
 polygon = PackedVector2Array(20327, -145, 19949, -150, 19618, -152, 19622, 43, 20208, 37, 20348, 34)
@@ -236,6 +461,16 @@ position = Vector2(309, -542)
 polygon = PackedVector2Array(19842, -230, 19841, -298, 19618, -295, 19618, -239)
 one_way_collision = true
 
+[node name="CollisionPolygon2D46" type="CollisionPolygon2D" parent="classicsol" unique_id=1599853794]
+position = Vector2(1007, -2386)
+polygon = PackedVector2Array(19842, -230, 19841, -298, 19750.367, -296.781, 19618, -295, 19618, -239)
+one_way_collision = true
+
+[node name="CollisionPolygon2D47" type="CollisionPolygon2D" parent="classicsol" unique_id=2118883129]
+position = Vector2(1285, -2543)
+polygon = PackedVector2Array(19842, -230, 19841, -298, 19750.367, -296.781, 19618, -295, 19618, -239)
+one_way_collision = true
+
 [node name="CollisionPolygon2D29" type="CollisionPolygon2D" parent="classicsol" unique_id=1579457819]
 position = Vector2(309, -542)
 polygon = PackedVector2Array(18906, -240, 18905, -308, 18682, -305, 18682, -249)
@@ -254,6 +489,21 @@ one_way_collision = true
 [node name="CollisionPolygon2D36" type="CollisionPolygon2D" parent="classicsol" unique_id=7025136]
 position = Vector2(-1753, -1935)
 rotation = -0.00476219
+polygon = PackedVector2Array(18906, -240, 18905, -308, 18682, -305, 18682, -249)
+one_way_collision = true
+
+[node name="CollisionPolygon2D42" type="CollisionPolygon2D" parent="classicsol" unique_id=307914344]
+position = Vector2(4272.199, 1339.4)
+polygon = PackedVector2Array(18906, -240, 18902.8, -296.40002, 18679.8, -296.40002, 18682, -249)
+one_way_collision = true
+
+[node name="CollisionPolygon2D43" type="CollisionPolygon2D" parent="classicsol" unique_id=303383781]
+position = Vector2(3928.1992, 1171.4)
+polygon = PackedVector2Array(18906, -240, 18905, -308, 18682, -305, 18682, -249)
+one_way_collision = true
+
+[node name="CollisionPolygon2D44" type="CollisionPolygon2D" parent="classicsol" unique_id=425908366]
+position = Vector2(3656, 986)
 polygon = PackedVector2Array(18906, -240, 18905, -308, 18682, -305, 18682, -249)
 one_way_collision = true
 
@@ -291,6 +541,9 @@ position = Vector2(219, 240)
 polygon = PackedVector2Array(20195, -2715, 20202, -1864, 20284, -1869, 20269, -2714)
 
 [node name="CollisionPolygon2D41" type="CollisionPolygon2D" parent="classicsol" unique_id=1982733543]
+
+[node name="CollisionPolygon2D45" type="CollisionPolygon2D" parent="classicsol" unique_id=569066911]
+polygon = PackedVector2Array(20421, -2471, 20781, -2474, 21135.746, -2479.3345, 21113, -2945, 21289, -2939, 21303, -2409, 20783, -2392, 20520, -2379, 20418, -2390)
 
 [node name="GRIFFE" type="Area2D" parent="." unique_id=1599745582 groups=["GRIFFE"]]
 
@@ -701,7 +954,8 @@ scroll_scale = Vector2(0, 0)
 
 [node name="Soleil" type="Sprite2D" parent="Node2D2/Parallax2D4" unique_id=104095646]
 z_index = -100
-position = Vector2(9887.968, 1860.9734)
+material = SubResource("ShaderMaterial_cwgr7")
+position = Vector2(9939.001, 1827.0001)
 scale = Vector2(0.845, 0.845)
 texture = ExtResource("32_cwgr7")
 
@@ -709,6 +963,15 @@ texture = ExtResource("32_cwgr7")
 z_index = -1000
 position = Vector2(11265.254, 2265.3809)
 texture = ExtResource("16_06s65")
+
+[node name="ColorRect" type="ColorRect" parent="Node2D2/Parallax2D4" unique_id=1668120910]
+z_index = -9
+material = SubResource("ShaderMaterial_bsdtk")
+offset_left = 8685.001
+offset_top = 1586.0
+offset_right = 8725.001
+offset_bottom = 1626.0
+scale = Vector2(71.312096, 29.616442)
 
 [node name="Node2D" type="Node2D" parent="." unique_id=1103211323]
 z_index = -15
@@ -718,6 +981,25 @@ script = ExtResource("7_iy4gx")
 position = Vector2(17070, 6206)
 texture = ExtResource("17_26mbw")
 
-[node name="Idle" type="Sprite2D" parent="." unique_id=2143307154]
-position = Vector2(8212, 1473)
-texture = ExtResource("35_ra0is")
+[node name="enemi" parent="." unique_id=627255339 instance=ExtResource("36_k1x5j")]
+position = Vector2(8930, 1568)
+
+[node name="CharacterBody2D2" parent="." unique_id=485432489 instance=ExtResource("37_cwgr7")]
+position = Vector2(8853, 1312)
+speed = null
+speed_back = null
+HIT_STUN_TIME = null
+HIT_KNOCK_X = null
+HIT_KNOCK_Y = null
+HIT_X_DAMP = null
+
+[node name="checkpoint" parent="." unique_id=524856083 groups=["Checkpoint"] instance=ExtResource("37_bsdtk")]
+z_index = -5
+position = Vector2(8036, 1565)
+
+[node name="checkpoint2" parent="." unique_id=1775109711 groups=["Checkpoint"] instance=ExtResource("37_bsdtk")]
+z_index = -5
+position = Vector2(10067, 1574)
+
+[node name="spawnplayer" type="Node" parent="." unique_id=1230789018]
+script = ExtResource("38_bsdtk")
