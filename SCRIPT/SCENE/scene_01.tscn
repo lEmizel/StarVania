@@ -35,6 +35,7 @@
 [ext_resource type="PackedScene" uid="uid://bs1685hwv6d0w" path="res://SCRIPT/MONSTER/SKELETON.tscn" id="36_k1x5j"]
 [ext_resource type="PackedScene" uid="uid://ckxwmy0iav2h2" path="res://SCRIPT/INTERACTIBLE/Checkpoint.tscn" id="37_bsdtk"]
 [ext_resource type="PackedScene" uid="uid://lskntqxi822j" path="res://SCRIPT/MONSTER/Orbe.tscn" id="37_cwgr7"]
+[ext_resource type="PackedScene" uid="uid://cxw4a7pjhbq0m" path="res://SCRIPT/MONSTER/SKELETON_BOSS.tscn" id="37_mql5m"]
 [ext_resource type="Script" uid="uid://dftar4ptyhjxe" path="res://SCRIPT/UTILITAIRE/spawnplayer.gd" id="38_bsdtk"]
 
 [sub_resource type="Gradient" id="Gradient_jri6e"]
@@ -357,7 +358,6 @@ one_way_collision = true
 polygon = PackedVector2Array(21160, 111, 21009, 119, 21002, 289, 21169, 280)
 
 [node name="classicsol" type="StaticBody2D" parent="." unique_id=930610937]
-visible = false
 z_index = 10
 collision_layer = 5
 
@@ -995,7 +995,7 @@ HIT_X_DAMP = null
 
 [node name="checkpoint" parent="." unique_id=524856083 groups=["Checkpoint"] instance=ExtResource("37_bsdtk")]
 z_index = -5
-position = Vector2(8036, 1565)
+position = Vector2(17817, -2460)
 
 [node name="checkpoint2" parent="." unique_id=1775109711 groups=["Checkpoint"] instance=ExtResource("37_bsdtk")]
 z_index = -5
@@ -1003,3 +1003,6 @@ position = Vector2(10067, 1574)
 
 [node name="spawnplayer" type="Node" parent="." unique_id=1230789018]
 script = ExtResource("38_bsdtk")
+
+[node name="skeleton_boss" parent="." unique_id=959592071 instance=ExtResource("37_mql5m")]
+position = Vector2(19530, -2510)

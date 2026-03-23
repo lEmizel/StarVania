@@ -5,6 +5,10 @@ var offset_amount: Vector2 = Vector2(300, 220) # Décalage maximal
 var return_speed: float = 5.0 # Vitesse de retour à la position initiale
 var current_offset: Vector2 # Offset actuel de la caméra
 
+# Shake
+var _shake_intensity := 0.0
+var _shake_decay := 5.0
+
 func _ready():
 	make_current()
 	# On initialise l'offset actuel à la valeur souhaitée au départ
@@ -32,8 +36,17 @@ func _process(delta):
 
 	# Mise à jour de la position de la caméra avec le joueur comme centre
 	var target = _find_first_player()
+	# Shake decay
+	if _shake_intensity > 0.0:
+		_shake_intensity = lerp(_shake_intensity, 0.0, _shake_decay * delta)
+		if _shake_intensity < 0.5:
+			_shake_intensity = 0.0
+
 	if target:
-		global_position = (target.global_position + current_offset).floor()
+		var shake_offset := Vector2.ZERO
+		if _shake_intensity > 0.0:
+			shake_offset = Vector2(randf_range(-1, 1), randf_range(-1, 1)) * _shake_intensity
+		global_position = (target.global_position + current_offset + shake_offset).floor()
 
 # Fonction pour trouver le premier joueur dans le groupe "player"
 func _find_first_player():
@@ -41,3 +54,7 @@ func _find_first_player():
 	if players.size() > 0:
 		return players[0]
 	return null
+
+func shake(intensity: float = 10.0, decay: float = 5.0) -> void:
+	_shake_intensity = intensity
+	_shake_decay = decay

@@ -14,6 +14,7 @@ func _ready() -> void:
 		# Crée la caméra en frère du joueur
 		var camera := Camera2D.new()
 		camera.set_script(CAMERA_SCRIPT)
+		camera.add_to_group("Camera")
 		player_body.get_parent().add_child(camera)
 		print("[SPAWN] Joueur + caméra instanciés")
 

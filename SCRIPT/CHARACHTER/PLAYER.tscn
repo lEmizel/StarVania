@@ -60,8 +60,8 @@
 [ext_resource type="Texture2D" uid="uid://ji248xhx1td1" path="res://MEDIA/CHARACHTER/ANIMATION/ATTACK_LOURDE/Attack_lourde-5 2.png" id="30_ub8pg"]
 [ext_resource type="Texture2D" uid="uid://bpoh1o4opid6j" path="res://MEDIA/CHARACHTER/ANIMATION/ATTACK_LOURDE/Attack_lourde-6 2.png" id="31_pyboj"]
 [ext_resource type="Texture2D" uid="uid://dq3jjsedg883p" path="res://MEDIA/CHARACHTER/ANIMATION/ATTACK_LOURDE/Attack_lourde-7 2.png" id="32_4f1ak"]
-[ext_resource type="Texture2D" uid="uid://earwn0p0jhrr" path="res://MEDIA/CHARACHTER/ANIMATION/CHUTE/Chute-1.png" id="36_rforg"]
-[ext_resource type="Texture2D" uid="uid://ct2207js86o0y" path="res://MEDIA/CHARACHTER/ANIMATION/CHUTE/Chute-2.png" id="37_2850q"]
+[ext_resource type="Texture2D" uid="uid://7dxrb7drnumh" path="res://MEDIA/CHARACHTER/ANIMATION/CHUTE/Monster_chute-1.png" id="36_ebrd3"]
+[ext_resource type="Texture2D" uid="uid://cvs5ivvehc2xx" path="res://MEDIA/CHARACHTER/ANIMATION/CHUTE/Monster_chute-2.png" id="37_bgt45"]
 [ext_resource type="Texture2D" uid="uid://di746nl0bbwok" path="res://MEDIA/CHARACHTER/ANIMATION/FALL_GRIFFE/Fall_griffe-1.png" id="38_2fpxc"]
 [ext_resource type="Texture2D" uid="uid://4ifq1vh3lb5h" path="res://MEDIA/CHARACHTER/ANIMATION/FALL_GRIFFE/Fall_griffe-2.png" id="39_wknny"]
 [ext_resource type="Texture2D" uid="uid://d2hc57y83te71" path="res://MEDIA/CHARACHTER/ANIMATION/HIT/Hit.png" id="42_isx8k"]
@@ -298,10 +298,10 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("36_rforg")
+"texture": ExtResource("36_ebrd3")
 }, {
 "duration": 1.0,
-"texture": ExtResource("37_2850q")
+"texture": ExtResource("37_bgt45")
 }],
 "loop": true,
 "name": &"chute",
@@ -937,7 +937,7 @@ z_index = 1
 texture_filter = 1
 position = Vector2(-1, -74)
 sprite_frames = SubResource("SpriteFrames_gfeug")
-animation = &"jump"
+animation = &"chute"
 script = ExtResource("63_v21cv")
 
 [node name="slash_attack" type="AnimatedSprite2D" parent="POINT" unique_id=1321397222]

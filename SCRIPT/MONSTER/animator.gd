@@ -5,6 +5,7 @@ extends AnimatedSprite2D
 @onready var collision: Area2D = $"../collision_attack"
 
 @onready var hitbox_1: CollisionPolygon2D = $"../collision_attack/CollisionPolygon2D"
+@onready var hitbox_2: CollisionShape2D = $"../collision_attack/CollisionShape2D"
 
 
 var damage = 95

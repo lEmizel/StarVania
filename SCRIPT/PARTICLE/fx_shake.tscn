@@ -1,0 +1,65 @@
+[gd_scene format=3 uid="uid://bk7o3onokhfgt"]
+
+[ext_resource type="Texture2D" uid="uid://db7j6vbq7cb06" path="res://MEDIA/CHARACHTER/effect/SHAKE/Fx_tremblement-1.png" id="1_dnjn8"]
+[ext_resource type="Texture2D" uid="uid://bwu7myfhv2bw4" path="res://MEDIA/CHARACHTER/effect/SHAKE/Fx_tremblement-2.png" id="2_gtjty"]
+[ext_resource type="Texture2D" uid="uid://bjfx3c64qa167" path="res://MEDIA/CHARACHTER/effect/SHAKE/Fx_tremblement-3.png" id="3_lngb4"]
+[ext_resource type="Texture2D" uid="uid://xqvy6bca4jv3" path="res://MEDIA/CHARACHTER/effect/SHAKE/Fx_tremblement-4.png" id="4_hp8nk"]
+[ext_resource type="Texture2D" uid="uid://dagits2fcamyj" path="res://MEDIA/CHARACHTER/effect/SHAKE/Fx_tremblement-5.png" id="5_xu6p8"]
+[ext_resource type="Texture2D" uid="uid://un7kqn65ymj8" path="res://MEDIA/CHARACHTER/effect/SHAKE/Fx_tremblement-6.png" id="6_678rk"]
+[ext_resource type="Texture2D" uid="uid://dd2c7rg8iem2b" path="res://MEDIA/CHARACHTER/effect/SHAKE/Fx_tremblement-7.png" id="7_ilv0h"]
+[ext_resource type="Texture2D" uid="uid://yh06boafrqu6" path="res://MEDIA/CHARACHTER/effect/SHAKE/Fx_tremblement-8.png" id="8_n5y1t"]
+[ext_resource type="Texture2D" uid="uid://dcsj61cox6228" path="res://MEDIA/CHARACHTER/effect/SHAKE/Fx_tremblement-9.png" id="9_smmeo"]
+[ext_resource type="Script" uid="uid://b2k11hlbdu1dn" path="res://SCRIPT/PARTICLE/fx_shake.gd" id="11_gtjty"]
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_dplwh"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("1_dnjn8")
+}, {
+"duration": 1.0,
+"texture": ExtResource("2_gtjty")
+}, {
+"duration": 1.0,
+"texture": ExtResource("3_lngb4")
+}, {
+"duration": 1.0,
+"texture": ExtResource("4_hp8nk")
+}, {
+"duration": 1.0,
+"texture": ExtResource("5_xu6p8")
+}, {
+"duration": 1.0,
+"texture": ExtResource("6_678rk")
+}, {
+"duration": 1.0,
+"texture": ExtResource("7_ilv0h")
+}, {
+"duration": 1.0,
+"texture": ExtResource("8_n5y1t")
+}, {
+"duration": 1.0,
+"texture": ExtResource("9_smmeo")
+}],
+"loop": false,
+"name": &"shake_fx",
+"speed": 14.0
+}]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_dnjn8"]
+size = Vector2(385.15582, 47)
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" unique_id=1568519187]
+position = Vector2(-3.9999905, 0)
+scale = Vector2(2.884547, 1)
+sprite_frames = SubResource("SpriteFrames_dplwh")
+animation = &"shake_fx"
+frame = 8
+frame_progress = 1.0
+script = ExtResource("11_gtjty")
+
+[node name="Area2D" type="Area2D" parent="." unique_id=807536658]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D" unique_id=569132970]
+position = Vector2(0.8666878, -11)
+shape = SubResource("RectangleShape2D_dnjn8")
