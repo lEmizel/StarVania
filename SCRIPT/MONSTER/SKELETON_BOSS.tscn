@@ -72,10 +72,10 @@ animations = [{
 "duration": 1.0,
 "texture": ExtResource("5_m30dk")
 }, {
-"duration": 1.0,
+"duration": 1.5,
 "texture": ExtResource("6_eg6hj")
 }, {
-"duration": 1.0,
+"duration": 2.2,
 "texture": ExtResource("7_e5ujl")
 }],
 "loop": false,
@@ -101,10 +101,10 @@ animations = [{
 "duration": 1.0,
 "texture": ExtResource("13_yr737")
 }, {
-"duration": 1.0,
+"duration": 1.9,
 "texture": ExtResource("14_jxy1h")
 }, {
-"duration": 1.0,
+"duration": 2.8,
 "texture": ExtResource("15_nd0be")
 }],
 "loop": false,
@@ -213,7 +213,7 @@ animations = [{
 }],
 "loop": true,
 "name": &"idle",
-"speed": 8.0
+"speed": 5.0
 }, {
 "frames": [{
 "duration": 1.0,
@@ -295,7 +295,7 @@ texture_filter = 1
 position = Vector2(4, -188)
 scale = Vector2(-1, 1)
 sprite_frames = SubResource("SpriteFrames_dnpf1")
-animation = &"idle"
+animation = &"attack_02"
 script = ExtResource("30_e5ujl")
 
 [node name="vision" type="Area2D" parent="POINT" unique_id=1946126189]

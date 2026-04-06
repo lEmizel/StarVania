@@ -5,6 +5,7 @@ enum States { IDLE, WALK, APPROACH, RETREAT, ATTACK, RETURN, HIT, DEAD }
 
 @export var speed := 280.0
 @export var speed_back := 200.0
+@onready var detection_vide: RayCast2D = $detection_vide
 
 
 func _setup_states() -> void:
@@ -49,28 +50,41 @@ func decide() -> void:
 	var dist := distance_to_target()
 	var choice: int
 
+	# Check si retreat possible (sol derrière)
+	var dir_to_target := 1 if target and target.global_position.x > global_position.x else -1
+	detection_vide.position.x = absf(detection_vide.position.x) * -dir_to_target
+	detection_vide.force_raycast_update()
+	var can_retreat := detection_vide.is_colliding()
+	# Check si approach possible (sol devant)
+	detection_vide.position.x = absf(detection_vide.position.x) * dir_to_target
+	detection_vide.force_raycast_update()
+	var can_approach := detection_vide.is_colliding()
+
 	if dist < confort_zone_min:
 		choice = pick_weighted([
 			[States.ATTACK, 350],
-			[States.RETREAT, 30],
+			[States.RETREAT, 30 if can_retreat else 0],
 			[States.IDLE, 10],
 		])
 
 	elif dist < confort_zone_max:
 		choice = pick_weighted([
 			[States.ATTACK, 200],
-			[States.RETREAT, 20],
+			[States.RETREAT, 20 if can_retreat else 0],
 			[States.IDLE, 10],
 		])
 
 	else:
 		var in_dead_zone := target and absf(target.global_position.x - global_position.x) < HORIZONTAL_DEAD_ZONE
-		if in_dead_zone:
-			choice = States.IDLE
+		if in_dead_zone or not can_approach:
+			choice = pick_weighted([
+				[States.RETREAT, 20 if can_retreat else 0],
+				[States.IDLE, 50],
+			])
 		else:
 			choice = pick_weighted([
 				[States.APPROACH, 250],
-				[States.RETREAT, 20],
+				[States.RETREAT, 20 if can_retreat else 0],
 				[States.IDLE, 50],
 			])
 
@@ -115,24 +129,39 @@ func approach_execute(delta: float) -> void:
 		goto_state(States.IDLE)
 		return
 	move_toward_target(speed)
+	detection_vide.position.x = absf(detection_vide.position.x) * last_direction
+	if not detection_vide.is_colliding():
+		velocity.x = 0.0
+		goto_state(States.IDLE)
+		return
 	if distance_to_target() <= confort_zone_max:
 		decide()
 
 
 # --- RETREAT ---
+var _retreat_timer := 0.0
+var _retreat_duration := 0.0
 
 func retreat_enter() -> void:
 	animator.play("walk")
+	_retreat_timer = 0.0
+	_retreat_duration = randf_range(0.5, 2.0)
+	if target:
+		flip_toward(target.global_position.x)
+		detection_vide.position.x = absf(detection_vide.position.x) * -last_direction
 
 func retreat_execute(delta: float) -> void:
 	velocity.y += gravity * delta
-	if not target:
+	_retreat_timer += delta
+	if not target or _retreat_timer >= _retreat_duration:
+		decide()
+		return
+	detection_vide.position.x = absf(detection_vide.position.x) * -last_direction
+	if not detection_vide.is_colliding():
+		velocity.x = 0.0
 		goto_state(States.IDLE)
 		return
-	flip_toward(target.global_position.x)
 	velocity.x = -last_direction * speed_back
-	if distance_to_target() >= confort_zone_max:
-		decide()
 
 
 # --- ATTACK ---

@@ -62,35 +62,49 @@ func decide() -> void:
 	var dist := distance_to_target()
 	var choice: int
 
+	# Check si retreat/approach possible (sol derrière/devant)
+	var dir_to_target := 1 if target and target.global_position.x > global_position.x else -1
+	detection_vide.position.x = absf(detection_vide.position.x) * -dir_to_target
+	detection_vide.force_raycast_update()
+	var can_retreat := detection_vide.is_colliding()
+	detection_vide.position.x = absf(detection_vide.position.x) * dir_to_target
+	detection_vide.force_raycast_update()
+	var can_approach := detection_vide.is_colliding()
+
 	if dist < confort_zone_min:
 		# Très proche → attaques rapides ou recul
 		choice = pick_weighted([
 			[States.ATTACK_1, 100],
 			[States.ATTACK_2, 100],
-			[States.RETREAT, 450],
+			[States.RETREAT, 450 if can_retreat else 0],
 			[States.IDLE, 20],
 		])
 
 	elif dist < confort_zone_max:
 		# Zone de confort → mix d'attaques
 		choice = pick_weighted([
-			[States.ATTACK_1, 150],
+			[States.ATTACK_1, 180],
 			[States.ATTACK_2, 100],
 			#[States.ATTACK_3, 80],
-			[States.RETREAT, 100],
-			[States.IDLE, 40],
+			[States.RETREAT, 100 if can_retreat else 0],
+			[States.IDLE, 150],
 		])
 
 	else:
 		# Loin → approche ou grosse attaque
 		var in_dead_zone := target and absf(target.global_position.x - global_position.x) < HORIZONTAL_DEAD_ZONE
-		if in_dead_zone:
-			choice = States.IDLE
+		if in_dead_zone or not can_approach:
+			choice = pick_weighted([
+				[States.ATTACK_2, 150],
+				[States.RETREAT, 20 if can_retreat else 0],
+				[States.IDLE, 100],
+			])
 		else:
 			choice = pick_weighted([
 				[States.APPROACH, 250],
 				[States.ATTACK_2, 150],
 				#[States.ATTACK_3, 40],
+				[States.RETREAT, 20 if can_retreat else 0],
 				[States.IDLE, 100],
 			])
 
@@ -144,6 +158,9 @@ func retreat_enter() -> void:
 	animator.play("walk_back")
 	_retreat_timer = 0.0
 	_retreat_duration = randf_range(0.5, 2.0)
+	if target:
+		flip_toward(target.global_position.x)
+		detection_vide.position.x = absf(detection_vide.position.x) * -last_direction
 
 func retreat_execute(delta: float) -> void:
 	apply_gravity(delta)
@@ -151,7 +168,6 @@ func retreat_execute(delta: float) -> void:
 	if not target or _retreat_timer >= _retreat_duration:
 		decide()
 		return
-	flip_toward(target.global_position.x)
 	detection_vide.position.x = absf(detection_vide.position.x) * -last_direction
 	if not detection_vide.is_colliding():
 		velocity.x = 0.0

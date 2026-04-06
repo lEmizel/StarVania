@@ -50,10 +50,10 @@ animations = [{
 "duration": 1.0,
 "texture": ExtResource("6_xir3a")
 }, {
-"duration": 1.0,
+"duration": 1.7,
 "texture": ExtResource("7_hg7ra")
 }, {
-"duration": 1.0,
+"duration": 2.1,
 "texture": ExtResource("8_cpoiv")
 }],
 "loop": false,
@@ -155,6 +155,10 @@ collision_layer = 4
 collision_mask = 6
 script = ExtResource("1_536yp")
 
+[node name="detection_vide" type="RayCast2D" parent="." unique_id=1277015668]
+position = Vector2(45, -13)
+target_position = Vector2(1, 27)
+
 [node name="bare_de_vie" parent="." unique_id=1882929594 instance=ExtResource("2_lo1ik")]
 light_mask = 0
 position = Vector2(-90, -232)
@@ -173,8 +177,9 @@ texture_filter = 1
 position = Vector2(-1, -97)
 scale = Vector2(1.22, 1.22)
 sprite_frames = SubResource("SpriteFrames_dnpf1")
-animation = &"idle"
-frame_progress = 0.93752736
+animation = &"attack"
+frame = 5
+frame_progress = 1.0
 script = ExtResource("28_536yp")
 
 [node name="vision" type="Area2D" parent="POINT" unique_id=1946126189]

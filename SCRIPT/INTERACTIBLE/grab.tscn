@@ -1,0 +1,8 @@
+[gd_scene format=3 uid="uid://byskgrt4gnfm7"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_ixido"]
+
+[node name="GRAB" type="Area2D" unique_id=499494625 groups=["GRAB"]]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=495343042]
+shape = SubResource("RectangleShape2D_ixido")

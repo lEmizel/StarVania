@@ -1,0 +1,24 @@
+[gd_scene format=3 uid="uid://btmh4asuesscq"]
+
+[ext_resource type="Script" uid="uid://dftar4ptyhjxe" path="res://SCRIPT/UTILITAIRE/spawnplayer.gd" id="1_a4l3l"]
+[ext_resource type="PackedScene" uid="uid://ckxwmy0iav2h2" path="res://SCRIPT/INTERACTIBLE/Checkpoint.tscn" id="1_osf8h"]
+[ext_resource type="PackedScene" uid="uid://buwunuey57xf7" path="res://SCRIPT/INTERACTIBLE/porte.tscn" id="3_b2tcf"]
+
+[node name="scene_02_GROTTE" type="Node2D" unique_id=1666417749]
+
+[node name="spawnplayer" type="Node" parent="." unique_id=1282559085]
+script = ExtResource("1_a4l3l")
+
+[node name="classicsol" type="StaticBody2D" parent="." unique_id=601210135]
+z_index = 10
+collision_layer = 5
+
+[node name="CollisionPolygon2D3" type="CollisionPolygon2D" parent="classicsol" unique_id=2020311002]
+polygon = PackedVector2Array(-91, 0, 72, 0, 701, -3, 702, 111, -124, 118, -429, 120, -394, 0)
+
+[node name="checkpoint" parent="." unique_id=524856083 instance=ExtResource("1_osf8h")]
+position = Vector2(165, -1)
+
+[node name="porte" parent="." unique_id=1292859230 instance=ExtResource("3_b2tcf")]
+position = Vector2(-18, 5)
+target_scene = "uid://q73v1b80lt2r"

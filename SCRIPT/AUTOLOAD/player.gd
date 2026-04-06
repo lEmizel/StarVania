@@ -1,6 +1,7 @@
 extends Node
 
 var last_checkpoint_path: NodePath = NodePath()
+var last_door_id: int = -1
 
 var blood := 0
 var hp := 570
