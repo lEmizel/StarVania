@@ -1,7 +1,7 @@
 [gd_scene format=3 uid="uid://1xlgeshmkw51"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_oo8qs"]
-size = Vector2(203.5, 470.5)
+size = Vector2(203.5, 454.1875)
 
 [node name="CLIMB" type="Area2D" unique_id=1311425675 groups=["CLIMB"]]
 

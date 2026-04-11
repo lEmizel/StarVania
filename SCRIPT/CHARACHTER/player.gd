@@ -479,9 +479,10 @@ func chute_execute(delta: float) -> void:
 	_coyote_timer = max(_coyote_timer - delta, 0.0)
 	_jump_buffer_timer = max(_jump_buffer_timer - delta, 0.0)
 
-	if direction != 0 and previous_state != States.WALL_JUMP:
-		last_direction = sign(direction)
-		point.scale.x = last_direction
+	if direction != 0:
+		if previous_state != States.WALL_JUMP or absf(velocity.x) < 100.0:
+			last_direction = sign(direction)
+			point.scale.x = last_direction
 
 	velocity.y += gravity * delta
 

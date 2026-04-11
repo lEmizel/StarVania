@@ -11,7 +11,6 @@
 [ext_resource type="Script" uid="uid://cldc0dscj1uj1" path="res://SCRIPT/OUTILS/LEVEL_EXPORTER.gd" id="9_syais"]
 [ext_resource type="Script" uid="uid://cqpdbfmlcuq38" path="res://SCRIPT/OUTILS/SpriteScaler.gd" id="10_ua7uj"]
 [ext_resource type="Texture2D" uid="uid://4q3ly5t5fttt" path="res://MEDIA/scene 2 grotte/porte2.png" id="11_0yoo8"]
-[ext_resource type="Texture2D" uid="uid://eenjyh8dpi63" path="res://MEDIA/scene 2 grotte/mur.png" id="11_o5ghy"]
 [ext_resource type="Texture2D" uid="uid://23iweg2r2fm2" path="res://MEDIA/scene 2 grotte/murdefond.png" id="12_0yoo8"]
 [ext_resource type="Texture2D" uid="uid://dsgt0qxpwbowc" path="res://MEDIA/scene 2 grotte/porte.png" id="13_1af6x"]
 [ext_resource type="Texture2D" uid="uid://x5egxogam8mw" path="res://MEDIA/scene 2 grotte/sol1.png" id="14_hverl"]
@@ -23,7 +22,13 @@
 [ext_resource type="Texture2D" uid="uid://c5d5qanx61l14" path="res://MEDIA/scene 2 grotte/pierre2.png" id="20_esvr6"]
 [ext_resource type="Texture2D" uid="uid://cpe7t0bhvdn4w" path="res://MEDIA/test/Illustration_sans_titre 15.png" id="22_4fkb2"]
 
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_gqq6u"]
+size = Vector2(75, 613)
+
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_06s65"]
+size = Vector2(89, 856)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_4fkb2"]
 size = Vector2(89, 856)
 
 [sub_resource type="FastNoiseLite" id="FastNoiseLite_pp4km"]
@@ -46,95 +51,6 @@ shader_parameter/noise_speed = 0.081
 shader_parameter/noise_mix = 0.589
 shader_parameter/edge_focus = 0.0
 shader_parameter/edge_boost = 66.36
-shader_parameter/wrap_uv = false
-
-[sub_resource type="Shader" id="Shader_4fkb2"]
-code = "shader_type canvas_item;
-
-/* ----------- Contrôle du warp principal (onde) ----------- */
-uniform float amp_px      : hint_range(0.0, 64.0) = 6.0; // amplitude en pixels
-uniform vec2  freq_cyles  = vec2(6.0, 3.0);              // cycles (X déforme sur Y, Y déforme sur X)
-uniform vec2  speed       = vec2(1.2, 0.0);               // vitesse (rad/s) de chaque onde
-
-/* ----------- Bruit optionnel (domain warp léger) ----------- */
-uniform sampler2D noise_tex;
-uniform vec2  noise_scale = vec2(2.0, 2.0);
-uniform float noise_speed = 0.4;
-uniform float noise_mix   : hint_range(0.0, 1.0) = 0.35;  // 0 = sans bruit, 1 = max bruit
-
-/* ----------- Limiter l’effet aux bords (0 = partout) ------- */
-uniform float edge_focus  : hint_range(0.0, 1.0) = 0.0;   // 1 = warp surtout autour des contours
-uniform float edge_boost  = 40.0;                         // gain du détecteur de bord
-
-/* ----------- UV wrap (si tu vois des bords noirs, active Repeat sur la texture) --- */
-uniform bool wrap_uv = false;
-
-
-void fragment() {
-    vec2 uv = UV;
-
-    // Amplitude en UV (convertit des px vers UV)
-    vec2 amp_uv = TEXTURE_PIXEL_SIZE * amp_px;
-
-    // Onde sinusoïdale bidirectionnelle (déforme X en fonction de Y, et Y en fonction de X)
-    vec2 sine_off = vec2(
-        sin(uv.y * TAU * freq_cyles.x + TIME * speed.x),
-        sin(uv.x * TAU * freq_cyles.y + TIME * speed.y)
-    ) * amp_uv;
-
-    // Domain warp avec bruit (optionnel)
-    vec2 wuv = uv;
-    if (noise_mix > 0.0) {
-        vec2 nuv = uv * noise_scale + vec2(TIME * noise_speed, 0.0);
-        // vectorise avec 2 canaux déphasés
-        vec2 nvec = texture(noise_tex, fract(nuv)).rg;
-        nvec = (nvec - 0.5) * 2.0; // [-1..1]
-        vec2 noise_off = nvec * amp_uv * 0.8; // amplitude du bruit ~80% de l’onde
-        wuv += mix(vec2(0.0), noise_off, noise_mix);
-    }
-
-    // UV final
-    vec2 final_uv = wuv + sine_off;
-    if (wrap_uv) {
-        final_uv = fract(final_uv); // nécessite la texture en Repeat pour être parfait
-    }
-
-    // Echantillons « original » (non déformé) et « warpé »
-    vec4 col_base  = texture(TEXTURE, uv);
-    vec4 col_warp  = texture(TEXTURE, final_uv);
-
-    // Masque de bords : gradient sur l’alpha original
-    float a0  = col_base.a;
-    float dax = texture(TEXTURE, uv + vec2(TEXTURE_PIXEL_SIZE.x, 0.0)).a - a0;
-    float day = texture(TEXTURE, uv + vec2(0.0, TEXTURE_PIXEL_SIZE.y)).a - a0;
-    float edge = clamp(edge_boost * length(vec2(dax, day)), 0.0, 1.0);
-
-    // Force de mélange : 0→ warp partout ; 1→ warp surtout au bord
-    float mix_strength = mix(1.0, edge, edge_focus);
-
-    vec4 col = mix(col_base, col_warp, mix_strength);
-
-    // On garde l’alpha du sample warpé pour que la silhouette se déforme vraiment
-    COLOR = vec4(col.rgb, col.a);
-}"
-
-[sub_resource type="FastNoiseLite" id="FastNoiseLite_fjm2u"]
-frequency = 0.0087
-
-[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_esvr6"]
-noise = SubResource("FastNoiseLite_fjm2u")
-
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_dc8ep"]
-shader = SubResource("Shader_4fkb2")
-shader_parameter/amp_px = 1.3030000618925
-shader_parameter/freq_cyles = Vector2(6, 3)
-shader_parameter/speed = Vector2(1.45, 0)
-shader_parameter/noise_tex = SubResource("NoiseTexture2D_esvr6")
-shader_parameter/noise_scale = Vector2(5.125, 2)
-shader_parameter/noise_speed = 0.435
-shader_parameter/noise_mix = 0.942000044745
-shader_parameter/edge_focus = 0.4630000219925
-shader_parameter/edge_boost = 40.0
 shader_parameter/wrap_uv = false
 
 [sub_resource type="Shader" id="Shader_1af6x"]
@@ -162,7 +78,7 @@ void fragment() {
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_vmt6a"]
 shader = SubResource("Shader_1af6x")
-shader_parameter/blur_amount = 2.394000113715
+shader_parameter/blur_amount = 2.96400014079
 shader_parameter/iterations = 5
 
 [sub_resource type="Shader" id="Shader_hverl"]
@@ -281,7 +197,7 @@ rotation = -3.1415925
 scale = Vector2(2, -2)
 texture = ExtResource("2_owu4f")
 
-[node name="classicsol" type="StaticBody2D" parent="." unique_id=601210135]
+[node name="classicsol" type="StaticBody2D" parent="." unique_id=601210135 groups=["wall_jump"]]
 visible = false
 z_index = 10
 collision_layer = 5
@@ -355,32 +271,41 @@ polygon = PackedVector2Array(1715, -1348, 1262, -1346, 1266, -1269, 1719, -1270)
 position = Vector2(-15, -2346)
 polygon = PackedVector2Array(1711, -1406, -251, -1423, -249, -1307, 1719, -1270)
 
+[node name="CollisionPolygon2D24" type="CollisionPolygon2D" parent="classicsol" unique_id=800831852]
+position = Vector2(-15, -2346)
+polygon = PackedVector2Array(-245, -1418, -331, -1418, -475, -1444, -509, -1588, -542, -1750, -539, -1904, -456, -2200, -373, -2540, -556, -2815, -947, -2878, -1163, -2601, -1682, -1759, -1723, -822, -1792, -260, -1001, -204, -918, -315, -831, -483, -627, -879, -546, -927, -321, -899, -46, -981, 125, -962, 542, -630, 825, -486, 870, -830, 865, -1292, -53, -1347)
+
 [node name="CollisionPolygon2D6" type="CollisionPolygon2D" parent="classicsol" unique_id=1396681601]
 polygon = PackedVector2Array(2948, -1324, 2948, -1500, 3019, -1507, 3020, -1635, 3160, -1635, 4031, -1641, 4028, -1227, 3154, -1220, 3022, -1228)
 
-[node name="CollisionPolygon2D16" type="CollisionPolygon2D" parent="classicsol" unique_id=1912710216]
-polygon = PackedVector2Array(4008, -1638, 4006, -2246, 4004, -2754, 4272, -2744, 4444, -2631, 4582, -2058, 4587, -1590, 4537, -1281, 4229, -1170, 4014, -1224)
-
 [node name="CollisionPolygon2D20" type="CollisionPolygon2D" parent="classicsol" unique_id=730398436]
 position = Vector2(-1169, -1538)
-polygon = PackedVector2Array(4008, -1638, 4006, -2246, 4004, -2754, 4272, -2744, 4444, -2631, 4582, -2058, 4587, -1590, 4537, -1281, 4229, -1170, 4014, -1224)
-
-[node name="CollisionPolygon2D17" type="CollisionPolygon2D" parent="classicsol" unique_id=1533081199]
-position = Vector2(-4953, 1388)
 polygon = PackedVector2Array(4008, -1638, 4006, -2246, 4004, -2754, 4272, -2744, 4444, -2631, 4582, -2058, 4587, -1590, 4537, -1281, 4229, -1170, 4014, -1224)
 
 [node name="CollisionPolygon2D12" type="CollisionPolygon2D" parent="classicsol" unique_id=219531399]
 position = Vector2(-4173, -876)
 polygon = PackedVector2Array(3025, -1355, 3023, -1532, 3022, -1688, 3165, -1680, 3154, -1220, 3022, -1228)
 
-[node name="wall_jump" parent="classicsol" unique_id=1103647211 instance=ExtResource("2_wi8lr")]
+[node name="wall_jump" type="StaticBody2D" parent="classicsol" unique_id=1103647211 groups=["wall_jump"]]
 position = Vector2(1240, -386)
+collision_layer = 3
+collision_mask = 3
 
-[node name="CollisionShape2D" parent="classicsol/wall_jump" index="0" unique_id=1178610160]
+[node name="CollisionPolygon2D16" type="CollisionPolygon2D" parent="classicsol/wall_jump" unique_id=1912710216 groups=["wall_jump"]]
+position = Vector2(-1240, 386)
+polygon = PackedVector2Array(4008, -1638, 4006, -2246, 4004, -2754, 4272, -2744, 4444, -2631, 4582, -2058, 4587, -1590, 4537, -1281, 4229, -1170, 4014, -1224)
+
+[node name="CollisionPolygon2D17" type="CollisionPolygon2D" parent="classicsol/wall_jump" unique_id=1533081199 groups=["wall_jump"]]
+position = Vector2(-6193, 1774)
+polygon = PackedVector2Array(4008, -1638, 4006, -2246, 4004, -2754, 4272, -2744, 4444, -2631, 4582, -2058, 4587, -1590, 4537, -1281, 4229, -1170, 4014, -1224)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="classicsol/wall_jump" unique_id=1178610160 groups=["wall_jump"]]
 position = Vector2(1047, -645)
+shape = SubResource("RectangleShape2D_gqq6u")
 
-[node name="CollisionShape2D2" parent="classicsol/wall_jump" index="1" unique_id=436258281]
+[node name="CollisionShape2D2" type="CollisionShape2D" parent="classicsol/wall_jump" unique_id=436258281 groups=["wall_jump"]]
 position = Vector2(1344.5, -517)
+shape = SubResource("RectangleShape2D_06s65")
 
 [node name="wall_jump2" parent="classicsol" unique_id=2017835529 instance=ExtResource("2_wi8lr")]
 position = Vector2(-1725, -1256)
@@ -393,7 +318,7 @@ position = Vector2(1083, -517)
 
 [node name="CollisionShape2D3" type="CollisionShape2D" parent="classicsol/wall_jump2" unique_id=1629069611 groups=["wall_jump"]]
 position = Vector2(2612, -1983)
-shape = SubResource("RectangleShape2D_06s65")
+shape = SubResource("RectangleShape2D_4fkb2")
 
 [node name="CLIMB" parent="classicsol" unique_id=1311425675 instance=ExtResource("4_cdmp5")]
 position = Vector2(3808, -2030)
@@ -477,37 +402,6 @@ position = Vector2(3811, 1160)
 scale = Vector2(2, 2)
 texture = ExtResource("11_0yoo8")
 
-[node name="Mur" type="Sprite2D" parent="Node2D" unique_id=635780009]
-z_index = -5
-material = SubResource("ShaderMaterial_dc8ep")
-position = Vector2(6371, 478)
-scale = Vector2(2, 2)
-texture = ExtResource("11_o5ghy")
-
-[node name="Mur2" type="Sprite2D" parent="Node2D" unique_id=308640985]
-z_index = -5
-position = Vector2(3141, -389)
-scale = Vector2(2, 2)
-texture = ExtResource("11_o5ghy")
-
-[node name="Mur6" type="Sprite2D" parent="Node2D" unique_id=1223527490]
-z_index = -5
-position = Vector2(4674, -1853)
-scale = Vector2(2, 2)
-texture = ExtResource("11_o5ghy")
-
-[node name="Mur4" type="Sprite2D" parent="Node2D" unique_id=1255970071]
-z_index = -5
-position = Vector2(3407, -515.5)
-scale = Vector2(2, 1.4647576)
-texture = ExtResource("11_o5ghy")
-
-[node name="Mur5" type="Sprite2D" parent="Node2D" unique_id=687147712]
-z_index = -5
-position = Vector2(6072, 355.5)
-scale = Vector2(2, 1.4339206)
-texture = ExtResource("11_o5ghy")
-
 [node name="Murdefond" type="Sprite2D" parent="Node2D" unique_id=326521544]
 z_index = -5
 position = Vector2(6421, -1054)
@@ -527,7 +421,7 @@ scale = Vector2(2, 2)
 texture = ExtResource("13_1af6x")
 
 [node name="Sol1" type="Sprite2D" parent="Node2D" unique_id=870471744]
-position = Vector2(5499, -133)
+position = Vector2(5195, -631)
 scale = Vector2(2, 2)
 texture = ExtResource("14_hverl")
 
@@ -594,9 +488,10 @@ scale = Vector2(2, 2)
 scroll_scale = Vector2(0, 0)
 
 [node name="Fond" type="Sprite2D" parent="Node2D/Parallax2D4" unique_id=760323344]
+modulate = Color(0.44806695, 0.44806695, 0.44806695, 1)
 z_index = -4096
-position = Vector2(2321.859, 2797)
-scale = Vector2(2, 2)
+position = Vector2(2373.4536, 858.99316)
+scale = Vector2(0.22, 0.22)
 texture = ExtResource("16_jsm2b")
 
 [node name="ColorRect" type="ColorRect" parent="Node2D/Parallax2D4" unique_id=348624102]
@@ -902,14 +797,13 @@ position = Vector2(-3785, -1387)
 script = ExtResource("10_ua7uj")
 
 [node name="GPUParticles2D" type="GPUParticles2D" parent="." unique_id=1971777555]
-position = Vector2(1074, 49)
-scale = Vector2(15.325, 15.325)
-amount = 98
+position = Vector2(1044.0001, -1345.9999)
+scale = Vector2(31.125, 31.125)
+amount = 294
 texture = ExtResource("22_4fkb2")
 lifetime = 1.46
 explosiveness = 0.2
 process_material = SubResource("ParticleProcessMaterial_fjm2u")
 
-[editable path="classicsol/wall_jump"]
 [editable path="classicsol/wall_jump2"]
 [editable path="classicsol/CLIMB"]

@@ -236,7 +236,7 @@ animations = [{
 }],
 "loop": true,
 "name": &"walk",
-"speed": 8.0
+"speed": 7.0
 }, {
 "frames": [{
 "duration": 1.0,
@@ -292,10 +292,11 @@ scale = Vector2(1, -1)
 [node name="animator" type="AnimatedSprite2D" parent="POINT" unique_id=1830194176]
 light_mask = 0
 texture_filter = 1
-position = Vector2(4, -188)
+position = Vector2(2, -197)
 scale = Vector2(-1, 1)
 sprite_frames = SubResource("SpriteFrames_dnpf1")
-animation = &"attack"
+animation = &"walk"
+frame_progress = 0.7600369
 script = ExtResource("30_e5ujl")
 
 [node name="vision" type="Area2D" parent="POINT" unique_id=1946126189]

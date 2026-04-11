@@ -272,6 +272,9 @@ shader_parameter/fade_bottom = 1.0
 shader_parameter/circular_mode = false
 shader_parameter/circular_radius = 0.4
 
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_6qg1y"]
+size = Vector2(203.5, 530)
+
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_iilfq"]
 size = Vector2(216.5, 564)
 
@@ -311,7 +314,7 @@ position = Vector2(-3692, -663)
 polygon = PackedVector2Array(14153, 1660, 14383, 1657, 14383, 1666, 14150, 1676)
 one_way_collision = true
 
-[node name="classicsol" type="StaticBody2D" parent="collision" unique_id=930610937]
+[node name="classicsol" type="StaticBody2D" parent="collision" unique_id=930610937 groups=["wall_jump"]]
 z_index = 10
 position = Vector2(-14267, -1610)
 collision_layer = 5
@@ -875,13 +878,14 @@ position = Vector2(14267, 1610)
 [node name="CLIMB" parent="interactible/CLIMB" unique_id=1311425675 instance=ExtResource("29_lybfi")]
 
 [node name="CollisionShape2D" parent="interactible/CLIMB/CLIMB" index="0" unique_id=1513909115]
-position = Vector2(4, -0.5)
+position = Vector2(4, -12)
+shape = SubResource("RectangleShape2D_6qg1y")
 
 [node name="CLIMB2" parent="interactible/CLIMB" unique_id=339568371 instance=ExtResource("29_lybfi")]
 position = Vector2(-3695, -341)
 
 [node name="CollisionShape2D" parent="interactible/CLIMB/CLIMB2" index="0" unique_id=1513909115]
-position = Vector2(14.75, -35.5)
+position = Vector2(14.75, -23.90625)
 
 [node name="CollisionShape2D3" type="CollisionShape2D" parent="interactible/CLIMB/CLIMB2" unique_id=490724233]
 position = Vector2(10737.25, -513)
@@ -895,7 +899,7 @@ shape = SubResource("RectangleShape2D_lybfi")
 position = Vector2(-3298, -334)
 
 [node name="CollisionShape2D" parent="interactible/CLIMB/CLIMB3" index="0" unique_id=1513909115]
-position = Vector2(14.75, -37)
+position = Vector2(14.75, -18.3125)
 
 [node name="checkpoint" parent="interactible" unique_id=524856083 groups=["Checkpoint"] instance=ExtResource("37_bsdtk")]
 z_index = -4
