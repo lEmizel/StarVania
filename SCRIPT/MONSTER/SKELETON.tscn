@@ -166,13 +166,13 @@ scale = Vector2(0.37, 0.37)
 
 [node name="Collision" type="CollisionShape2D" parent="." unique_id=287775973]
 visible = false
+light_mask = 0
 position = Vector2(0, -92)
 shape = SubResource("CapsuleShape2D_7joub")
 
 [node name="POINT" type="Node2D" parent="." unique_id=1327697225]
 
 [node name="animator" type="AnimatedSprite2D" parent="POINT" unique_id=1830194176]
-light_mask = 0
 texture_filter = 1
 position = Vector2(-1, -97)
 scale = Vector2(1.22, 1.22)

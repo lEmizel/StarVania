@@ -119,6 +119,10 @@ func _export_level() -> void:
 # ============================================================
 
 func _collect_shapes(node: Node, result: Array) -> void:
+	# Ignore les nodes cachés et tous leurs enfants
+	if node is CanvasItem and not node.visible:
+		return
+
 	if node is CollisionShape2D:
 		var cs: CollisionShape2D = node
 		if cs.shape != null and not cs.disabled:
@@ -127,7 +131,7 @@ func _collect_shapes(node: Node, result: Array) -> void:
 				"shape": cs.shape,
 				"transform": cs.global_transform,
 			})
-	
+
 	elif node is CollisionPolygon2D:
 		var cp: CollisionPolygon2D = node
 		if not cp.disabled and cp.polygon.size() >= 3:
@@ -136,7 +140,7 @@ func _collect_shapes(node: Node, result: Array) -> void:
 				"polygon": cp.polygon,
 				"transform": cp.global_transform,
 			})
-	
+
 	for child in node.get_children():
 		_collect_shapes(child, result)
 

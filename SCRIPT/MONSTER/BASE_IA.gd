@@ -163,6 +163,7 @@ func change_state(new_state: int) -> void:
 	_changing_now = true
 	if current_state >= 0 and state_functions[current_state].has("exit"):
 		state_functions[current_state]["exit"].call()
+	velocity.x = 0.0
 	previous_state = current_state
 	current_state = new_state
 	state_functions[current_state]["enter"].call()
@@ -210,6 +211,7 @@ func force_reenter_state() -> void:
 	_changing_now = true
 	if state_functions[current_state].has("exit"):
 		state_functions[current_state]["exit"].call()
+	velocity.x = 0.0
 	state_functions[current_state]["enter"].call()
 	_changing_now = false
 

@@ -45,6 +45,8 @@ func _on_hit() -> void:
 # ============================================================
 
 func decide() -> void:
+	if current_state == States.DEAD:
+		return
 	if not check_tracking():
 		goto_state(States.RETURN)
 		return

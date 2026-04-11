@@ -43,6 +43,8 @@ func _on_hit() -> void:
 # ============================================================
 
 func decide() -> void:
+	if current_state == States.DEAD:
+		return
 	if not check_tracking():
 		goto_state(States.RETURN)
 		return
@@ -128,14 +130,16 @@ func approach_execute(delta: float) -> void:
 		velocity.x = 0.0
 		goto_state(States.IDLE)
 		return
-	move_toward_target(speed)
+	if distance_to_target() <= confort_zone_max:
+		velocity.x = 0.0
+		decide()
+		return
 	detection_vide.position.x = absf(detection_vide.position.x) * last_direction
 	if not detection_vide.is_colliding():
 		velocity.x = 0.0
 		goto_state(States.IDLE)
 		return
-	if distance_to_target() <= confort_zone_max:
-		decide()
+	move_toward_target(speed)
 
 
 # --- RETREAT ---

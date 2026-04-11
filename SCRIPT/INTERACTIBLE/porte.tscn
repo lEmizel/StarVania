@@ -3,7 +3,7 @@
 [ext_resource type="Script" uid="uid://ct0g82e6oj288" path="res://SCRIPT/INTERACTIBLE/porte.gd" id="1_n8wd3"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_l7spv"]
-size = Vector2(249, 237)
+size = Vector2(388, 397)
 
 [node name="porte" type="Area2D" unique_id=1292859230 groups=["Porte"]]
 script = ExtResource("1_n8wd3")

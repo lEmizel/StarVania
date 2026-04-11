@@ -162,6 +162,8 @@ scale = Vector2(0.37, 0.37)
 
 [node name="Collision" type="CollisionShape2D" parent="." unique_id=273910692]
 visible = false
+light_mask = 0
+visibility_layer = 2
 position = Vector2(12, -50)
 shape = SubResource("CapsuleShape2D_p2oq4")
 
@@ -169,10 +171,9 @@ shape = SubResource("CapsuleShape2D_p2oq4")
 position = Vector2(0, -64)
 
 [node name="animator" type="AnimatedSprite2D" parent="POINT" unique_id=207791315]
-light_mask = 0
 texture_filter = 1
 sprite_frames = SubResource("SpriteFrames_mdjyn")
-animation = &"attack"
+animation = &"idle"
 script = ExtResource("30_ys8th")
 
 [node name="vision" type="Area2D" parent="POINT" unique_id=1199829117]

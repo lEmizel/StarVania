@@ -8,9 +8,12 @@
 [ext_resource type="Texture2D" uid="uid://6igjidyprdjl" path="res://MEDIA/scene1/plante1.png" id="9_qmwan"]
 [ext_resource type="Texture2D" uid="uid://dc6tcsyjomg7s" path="res://MEDIA/scene1/plante2.png" id="10_mc83m"]
 [ext_resource type="Texture2D" uid="uid://d3v3b8v73s5l5" path="res://MEDIA/scene1/palmier1.png" id="11_0dxxj"]
+[ext_resource type="Texture2D" uid="uid://bedtvw5i0n6my" path="res://MEDIA/scene1/colonne.png" id="11_6qg1y"]
 [ext_resource type="Texture2D" uid="uid://0ce03uawvs4t" path="res://MEDIA/scene1/planche.png" id="11_06s65"]
 [ext_resource type="Texture2D" uid="uid://if028xvwubhw" path="res://MEDIA/scene1/plante3.png" id="12_atsee"]
 [ext_resource type="Texture2D" uid="uid://x1xhhjnqawxw" path="res://MEDIA/scene1/pierre.png" id="12_hjvkj"]
+[ext_resource type="Texture2D" uid="uid://qpkghplj023h" path="res://MEDIA/scene1/entrée2.png" id="12_ktn18"]
+[ext_resource type="Texture2D" uid="uid://ku58cwl6im6" path="res://MEDIA/scene1/muraille.png" id="13_ake4n"]
 [ext_resource type="Texture2D" uid="uid://58e5vxap5iau" path="res://MEDIA/scene1/pierrefond2.png" id="13_lr8rl"]
 [ext_resource type="Texture2D" uid="uid://diashs3gwpu8u" path="res://MEDIA/scene1/pierrefond3.png" id="14_ahag3"]
 [ext_resource type="Texture2D" uid="uid://ce6l32wmb0lw2" path="res://MEDIA/scene1/sol2.png" id="14_m3b65"]
@@ -24,15 +27,21 @@
 [ext_resource type="Texture2D" uid="uid://c15nofq0gy2w" path="res://MEDIA/scene1/pierredevant.png" id="18_b77l5"]
 [ext_resource type="Texture2D" uid="uid://4jxgcaf5ppmm" path="res://MEDIA/scene1/pierre4.png" id="19_ra0is"]
 [ext_resource type="Texture2D" uid="uid://utaimudnfn0f" path="res://MEDIA/scene1/pierre6.png" id="22_ra0is"]
+[ext_resource type="Texture2D" uid="uid://ngooeoq073gb" path="res://MEDIA/scene1/montagne.png" id="25_2yiqe"]
+[ext_resource type="Texture2D" uid="uid://b1m5ts6hnwiwn" path="res://MEDIA/scene1/colonneplatforme1.png" id="26_425hf"]
+[ext_resource type="PackedScene" uid="uid://cxw4a7pjhbq0m" path="res://SCRIPT/MONSTER/SKELETON_BOSS.tscn" id="29_cwgr7"]
 [ext_resource type="PackedScene" uid="uid://1xlgeshmkw51" path="res://SCRIPT/INTERACTIBLE/climb.tscn" id="29_lybfi"]
+[ext_resource type="PackedScene" uid="uid://byskgrt4gnfm7" path="res://SCRIPT/INTERACTIBLE/grab.tscn" id="31_425hf"]
 [ext_resource type="Texture2D" uid="uid://dvquwrvt8d7mc" path="res://MEDIA/scene1/pierre5.png" id="31_k1x5j"]
+[ext_resource type="PackedScene" uid="uid://b7y2j407oomwx" path="res://SCRIPT/INTERACTIBLE/griffe.tscn" id="32_bsdtk"]
 [ext_resource type="Texture2D" uid="uid://btkg80xwen8vl" path="res://MEDIA/scene1/soleil.png" id="32_cwgr7"]
 [ext_resource type="PackedScene" uid="uid://bs1685hwv6d0w" path="res://SCRIPT/MONSTER/SKELETON.tscn" id="36_k1x5j"]
+[ext_resource type="Texture2D" uid="uid://drlrvo2y6rik8" path="res://MEDIA/INTERACTIBLE/Checkpoint.png" id="36_mql5m"]
 [ext_resource type="PackedScene" uid="uid://ckxwmy0iav2h2" path="res://SCRIPT/INTERACTIBLE/Checkpoint.tscn" id="37_bsdtk"]
 [ext_resource type="PackedScene" uid="uid://lskntqxi822j" path="res://SCRIPT/MONSTER/Orbe.tscn" id="37_cwgr7"]
 [ext_resource type="Script" uid="uid://dftar4ptyhjxe" path="res://SCRIPT/UTILITAIRE/spawnplayer.gd" id="38_bsdtk"]
 
-[sub_resource type="Shader" id="Shader_k1x5j"]
+[sub_resource type="Shader" id="Shader_6qg1y"]
 code = "shader_type canvas_item;
 render_mode blend_add;
 
@@ -141,7 +150,7 @@ void fragment() {
 "
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_cwgr7"]
-shader = SubResource("Shader_k1x5j")
+shader = SubResource("Shader_6qg1y")
 shader_parameter/flame_size = 0.16400000616006
 shader_parameter/flame_height = 0.40000000596046
 shader_parameter/speed = 1.61300007335762
@@ -153,7 +162,7 @@ shader_parameter/color_mid = Color(1, 0.5, 0.1, 1)
 shader_parameter/color_edge = Color(0.9, 0.2, 0.05, 1)
 shader_parameter/color_outer = Color(0.5, 0.08, 0.02, 1)
 
-[sub_resource type="Shader" id="Shader_cwgr7"]
+[sub_resource type="Shader" id="Shader_ktn18"]
 code = "shader_type canvas_item;
 
 // === PARAMÈTRES ===
@@ -253,7 +262,7 @@ void fragment() {
 "
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_bsdtk"]
-shader = SubResource("Shader_cwgr7")
+shader = SubResource("Shader_ktn18")
 shader_parameter/distortion_strength = 0.0070000003325
 shader_parameter/speed = 0.60100002528762
 shader_parameter/scale = 14.730000652175
@@ -263,27 +272,32 @@ shader_parameter/fade_bottom = 1.0
 shader_parameter/circular_mode = false
 shader_parameter/circular_radius = 0.4
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_lybfi"]
-size = Vector2(217, 557)
-
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_iilfq"]
 size = Vector2(216.5, 564)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_lybfi"]
+size = Vector2(217, 557)
 
 [node name="SCENE_01" type="Node2D" unique_id=838830390]
 position = Vector2(-9431, -1648)
 script = ExtResource("1_1b2e2")
 
 [node name="collision" type="Node2D" parent="." unique_id=1975112513]
+visible = false
 position = Vector2(14267, 1610)
 
 [node name="platforme" type="StaticBody2D" parent="collision" unique_id=1228680797]
-visible = false
 position = Vector2(-14267, -1610)
 collision_layer = 2
 collision_mask = 0
 
 [node name="CollisionPolygon2D12" type="CollisionPolygon2D" parent="collision/platforme" unique_id=1043510596]
 position = Vector2(0, -320)
+polygon = PackedVector2Array(14153, 1660, 14383, 1657, 14383, 1666, 14150, 1676)
+one_way_collision = true
+
+[node name="CollisionPolygon2D15" type="CollisionPolygon2D" parent="collision/platforme" unique_id=2050959676]
+position = Vector2(7037, -1188)
 polygon = PackedVector2Array(14153, 1660, 14383, 1657, 14383, 1666, 14150, 1676)
 one_way_collision = true
 
@@ -297,9 +311,6 @@ position = Vector2(-3692, -663)
 polygon = PackedVector2Array(14153, 1660, 14383, 1657, 14383, 1666, 14150, 1676)
 one_way_collision = true
 
-[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="collision/platforme" unique_id=1999325504]
-polygon = PackedVector2Array(21160, 111, 21009, 119, 21002, 289, 21169, 280)
-
 [node name="classicsol" type="StaticBody2D" parent="collision" unique_id=930610937]
 z_index = 10
 position = Vector2(-14267, -1610)
@@ -307,6 +318,14 @@ collision_layer = 5
 
 [node name="CollisionPolygon2D3" type="CollisionPolygon2D" parent="collision/classicsol" unique_id=1822155953]
 polygon = PackedVector2Array(8426, 1764, 8572, 1786, 8580, 1974, 8698, 2007, 8566, 2073, 8406, 2037, 8398, 1765)
+
+[node name="CollisionPolygon2D21" type="CollisionPolygon2D" parent="collision/classicsol" unique_id=85513805]
+position = Vector2(11323, -5188)
+polygon = PackedVector2Array(10563, 329, 9710, 320, 8932, 318, 8483, 308, 8498, 540, 9411, 612, 10513, 593, 10630, 610, 10646, 441)
+
+[node name="CollisionPolygon2D22" type="CollisionPolygon2D" parent="collision/classicsol" unique_id=1237129488]
+position = Vector2(8367, -5232)
+polygon = PackedVector2Array(10563, 329, 9710, 320, 8932, 318, 6946, 307, 6958, 564, 9411, 612, 10513, 593, 10630, 610, 10646, 441)
 
 [node name="CollisionPolygon2D2" type="CollisionPolygon2D" parent="collision/classicsol" unique_id=1356238742]
 polygon = PackedVector2Array(9406, 1645, 9404, 1858, 9301, 1958, 9107, 2003, 8848, 1993, 8627, 1978, 8501, 1926, 8468, 1692, 8460, 1594, 8223, 1583, 7967, 1586, 7738, 1597, 7695, 1781, 7714, 2009, 7767, 2145, 8166, 2248, 9060, 2313, 9487, 2275, 9618, 2040, 9625, 1614)
@@ -379,7 +398,7 @@ position = Vector2(-75, 3)
 polygon = PackedVector2Array(21494, 466, 22017, 452, 22436, 468, 22427, 618, 21516, 620)
 
 [node name="CollisionPolygon2D42" type="CollisionPolygon2D" parent="collision/classicsol" unique_id=307914344]
-position = Vector2(4272.199, 1339.4)
+position = Vector2(4272, 1347)
 polygon = PackedVector2Array(18906, -240, 18902.8, -296.40002, 18679.8, -296.40002, 18682, -249)
 one_way_collision = true
 
@@ -399,6 +418,7 @@ one_way_collision = true
 script = ExtResource("6_ww6ae")
 export_scale = 0.5
 bg_color = Color(0.101960786, 0.101960786, 0.101960786, 0)
+margin = 50
 
 [node name="decord" type="Node2D" parent="." unique_id=1522053362]
 
@@ -420,6 +440,24 @@ position = Vector2(8341, 1506)
 scale = Vector2(2, 2)
 texture = ExtResource("9_qmwan")
 
+[node name="Plante11" type="Sprite2D" parent="decord" unique_id=431966787]
+z_index = -5
+position = Vector2(20759, -4934)
+scale = Vector2(2, 2)
+texture = ExtResource("9_qmwan")
+
+[node name="Plante12" type="Sprite2D" parent="decord" unique_id=1872816404]
+z_index = -5
+position = Vector2(19922, -4922)
+scale = Vector2(2, 2)
+texture = ExtResource("9_qmwan")
+
+[node name="Plante13" type="Sprite2D" parent="decord" unique_id=858577876]
+z_index = -5
+position = Vector2(18271, -4964)
+scale = Vector2(-2, 2)
+texture = ExtResource("9_qmwan")
+
 [node name="Plante5" type="Sprite2D" parent="decord" unique_id=1527968557]
 z_index = -5
 position = Vector2(10775, 939)
@@ -436,6 +474,72 @@ texture = ExtResource("9_qmwan")
 z_index = -5
 position = Vector2(9645, 1523)
 scale = Vector2(2, 2)
+texture = ExtResource("10_mc83m")
+
+[node name="Plante14" type="Sprite2D" parent="decord" unique_id=1400529176]
+z_index = -5
+position = Vector2(17885, -4957)
+scale = Vector2(2, 2)
+texture = ExtResource("10_mc83m")
+
+[node name="Plante15" type="Sprite2D" parent="decord" unique_id=1323158334]
+z_index = -5
+position = Vector2(16971, -4959)
+scale = Vector2(2, 2)
+texture = ExtResource("10_mc83m")
+
+[node name="Plante16" type="Sprite2D" parent="decord" unique_id=1044647622]
+z_index = -5
+position = Vector2(18866, -4952)
+scale = Vector2(2, 2)
+texture = ExtResource("10_mc83m")
+
+[node name="Plante17" type="Sprite2D" parent="decord" unique_id=1112152722]
+z_index = -5
+position = Vector2(20116, -4901)
+scale = Vector2(2, 2)
+texture = ExtResource("10_mc83m")
+
+[node name="Plante18" type="Sprite2D" parent="decord" unique_id=735461654]
+z_index = -5
+position = Vector2(21809, -4896)
+scale = Vector2(-2, 2)
+texture = ExtResource("10_mc83m")
+
+[node name="Plante19" type="Sprite2D" parent="decord" unique_id=182813563]
+z_index = -5
+position = Vector2(20218, -4904)
+scale = Vector2(-2, 2)
+texture = ExtResource("10_mc83m")
+
+[node name="Plante20" type="Sprite2D" parent="decord" unique_id=525631747]
+z_index = -5
+position = Vector2(19852, -4921)
+scale = Vector2(-2, 2)
+texture = ExtResource("10_mc83m")
+
+[node name="Plante21" type="Sprite2D" parent="decord" unique_id=2060181886]
+z_index = -5
+position = Vector2(18810, -4942)
+scale = Vector2(-2, 2)
+texture = ExtResource("10_mc83m")
+
+[node name="Plante22" type="Sprite2D" parent="decord" unique_id=1109276734]
+z_index = -5
+position = Vector2(18387, -4945)
+scale = Vector2(-2, 2)
+texture = ExtResource("10_mc83m")
+
+[node name="Plante23" type="Sprite2D" parent="decord" unique_id=1753658460]
+z_index = -5
+position = Vector2(17952, -4955)
+scale = Vector2(-2, 2)
+texture = ExtResource("10_mc83m")
+
+[node name="Plante24" type="Sprite2D" parent="decord" unique_id=1426238833]
+z_index = -5
+position = Vector2(17517, -4954)
+scale = Vector2(-2, 2)
 texture = ExtResource("10_mc83m")
 
 [node name="Plante4" type="Sprite2D" parent="decord" unique_id=1535981166]
@@ -480,6 +584,26 @@ position = Vector2(13035, 1301)
 scale = Vector2(1.875, 1.875)
 texture = ExtResource("11_0dxxj")
 
+[node name="Palmier6" type="Sprite2D" parent="decord" unique_id=141484379]
+z_index = -5
+position = Vector2(20391.002, -5083.0005)
+scale = Vector2(1.875, 1.875)
+texture = ExtResource("11_0dxxj")
+
+[node name="Palmier7" type="Sprite2D" parent="decord" unique_id=113929474]
+z_index = -5
+position = Vector2(20558.975, -5358.9375)
+rotation = 0.12185532
+scale = Vector2(3.5547192, 3.610454)
+texture = ExtResource("11_0dxxj")
+
+[node name="Palmier8" type="Sprite2D" parent="decord" unique_id=1741790870]
+z_index = -5
+position = Vector2(18168, -5331)
+rotation = 0.12185532
+scale = Vector2(-3.555, 3.61)
+texture = ExtResource("11_0dxxj")
+
 [node name="Palmier5" type="Sprite2D" parent="decord" unique_id=1092160735]
 z_index = -5
 position = Vector2(13939, 1138)
@@ -514,6 +638,24 @@ position = Vector2(18920, 2305)
 scale = Vector2(2, 2)
 texture = ExtResource("14_m3b65")
 
+[node name="Colonne" type="Sprite2D" parent="decord" unique_id=888609606]
+z_index = -6
+position = Vector2(16687, -5307)
+scale = Vector2(2, 2)
+texture = ExtResource("11_6qg1y")
+
+[node name="Entrée2" type="Sprite2D" parent="decord" unique_id=2145373860]
+z_index = -6
+position = Vector2(21368, -4443)
+scale = Vector2(2, 2)
+texture = ExtResource("12_ktn18")
+
+[node name="Muraille" type="Sprite2D" parent="decord" unique_id=696276463]
+z_index = -6
+position = Vector2(19360, -5434)
+scale = Vector2(2, 2)
+texture = ExtResource("13_ake4n")
+
 [node name="Planche" type="Sprite2D" parent="decord" unique_id=611018953]
 position = Vector2(10985, 1017)
 scale = Vector2(2, 2)
@@ -526,6 +668,12 @@ texture = ExtResource("11_06s65")
 
 [node name="Planche2" type="Sprite2D" parent="decord" unique_id=1991347425]
 position = Vector2(10572, 1003)
+rotation = 3.1415927
+scale = Vector2(2, -2)
+texture = ExtResource("11_06s65")
+
+[node name="Planche4" type="Sprite2D" parent="decord" unique_id=1479509388]
+position = Vector2(21300, 481)
 rotation = 3.1415927
 scale = Vector2(2, -2)
 texture = ExtResource("11_06s65")
@@ -685,6 +833,18 @@ offset_right = 8725.001
 offset_bottom = 1626.0
 scale = Vector2(71.312096, 29.616442)
 
+[node name="Montagne" type="Sprite2D" parent="decord" unique_id=1961816465]
+z_index = -5
+position = Vector2(19990, -995)
+scale = Vector2(2, 2)
+texture = ExtResource("25_2yiqe")
+
+[node name="Colonneplatforme1" type="Sprite2D" parent="decord" unique_id=1721667458]
+z_index = -2
+position = Vector2(22741, 1131)
+scale = Vector2(2, 2)
+texture = ExtResource("26_425hf")
+
 [node name="scaler" type="Node2D" parent="." unique_id=1103211323]
 z_index = -15
 script = ExtResource("7_iy4gx")
@@ -692,24 +852,30 @@ script = ExtResource("7_iy4gx")
 [node name="enemi" parent="." unique_id=627255339 instance=ExtResource("36_k1x5j")]
 position = Vector2(8930, 1568)
 
+[node name="skeleton_boss" parent="." unique_id=2079408895 instance=ExtResource("29_cwgr7")]
+position = Vector2(16042, -4929)
+
 [node name="CharacterBody2D2" parent="." unique_id=485432489 instance=ExtResource("37_cwgr7")]
-position = Vector2(8853, 1312)
-speed = null
-speed_back = null
-HIT_STUN_TIME = null
-HIT_KNOCK_X = null
-HIT_KNOCK_Y = null
-HIT_X_DAMP = null
+position = Vector2(9782, 1351)
 
 [node name="spawnplayer" type="Node" parent="." unique_id=1230789018]
 script = ExtResource("38_bsdtk")
 
 [node name="interactible" type="Node2D" parent="." unique_id=568907341]
 
+[node name="GRIFFE" parent="interactible" unique_id=431780804 instance=ExtResource("32_bsdtk")]
+position = Vector2(19342, -5096)
+
+[node name="GRAB" parent="interactible" unique_id=499494625 instance=ExtResource("31_425hf")]
+position = Vector2(13164, 1311)
+
 [node name="CLIMB" type="Node2D" parent="interactible" unique_id=238272768]
 position = Vector2(14267, 1610)
 
 [node name="CLIMB" parent="interactible/CLIMB" unique_id=1311425675 instance=ExtResource("29_lybfi")]
+
+[node name="CollisionShape2D" parent="interactible/CLIMB/CLIMB" index="0" unique_id=1513909115]
+position = Vector2(4, -0.5)
 
 [node name="CLIMB2" parent="interactible/CLIMB" unique_id=339568371 instance=ExtResource("29_lybfi")]
 position = Vector2(-3695, -341)
@@ -717,13 +883,13 @@ position = Vector2(-3695, -341)
 [node name="CollisionShape2D" parent="interactible/CLIMB/CLIMB2" index="0" unique_id=1513909115]
 position = Vector2(14.75, -35.5)
 
+[node name="CollisionShape2D3" type="CollisionShape2D" parent="interactible/CLIMB/CLIMB2" unique_id=490724233]
+position = Vector2(10737.25, -513)
+shape = SubResource("RectangleShape2D_iilfq")
+
 [node name="CollisionShape2D2" type="CollisionShape2D" parent="interactible/CLIMB/CLIMB2" unique_id=2099747934]
 position = Vector2(9118.5, 344.5)
 shape = SubResource("RectangleShape2D_lybfi")
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="interactible/CLIMB/CLIMB2/CollisionShape2D2" unique_id=490724233]
-position = Vector2(1618.75, -857.5)
-shape = SubResource("RectangleShape2D_iilfq")
 
 [node name="CLIMB3" parent="interactible/CLIMB" unique_id=1448555198 instance=ExtResource("29_lybfi")]
 position = Vector2(-3298, -334)
@@ -732,16 +898,34 @@ position = Vector2(-3298, -334)
 position = Vector2(14.75, -37)
 
 [node name="checkpoint" parent="interactible" unique_id=524856083 groups=["Checkpoint"] instance=ExtResource("37_bsdtk")]
-z_index = -5
-position = Vector2(23320, 1256)
+z_index = -4
+position = Vector2(22157, 314)
+
+[node name="Checkpoint" type="Sprite2D" parent="interactible" unique_id=1644752575]
+position = Vector2(21041, -4980)
+texture = ExtResource("36_mql5m")
 
 [node name="checkpoint2" parent="interactible" unique_id=1775109711 groups=["Checkpoint"] instance=ExtResource("37_bsdtk")]
 z_index = -5
 position = Vector2(10067, 1574)
 
 [node name="porte" parent="interactible" unique_id=1292859230 instance=ExtResource("4_bsdtk")]
-position = Vector2(23831, 1270)
+position = Vector2(21876, 462)
 target_scene = "uid://btmh4asuesscq"
 
+[node name="CollisionShape2D" parent="interactible/porte" index="0" unique_id=120814710]
+position = Vector2(-16, -198.5)
+
+[node name="porte2" parent="interactible" unique_id=1135151744 instance=ExtResource("4_bsdtk")]
+position = Vector2(21574, -4854)
+id = 1
+target_scene = "uid://btmh4asuesscq"
+
+[node name="CollisionShape2D" parent="interactible/porte2" index="0" unique_id=120814710]
+position = Vector2(-16, -198.5)
+
+[editable path="interactible/CLIMB/CLIMB"]
 [editable path="interactible/CLIMB/CLIMB2"]
 [editable path="interactible/CLIMB/CLIMB3"]
+[editable path="interactible/porte"]
+[editable path="interactible/porte2"]
