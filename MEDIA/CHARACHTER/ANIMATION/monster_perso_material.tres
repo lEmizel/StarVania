@@ -1,0 +1,20 @@
+[gd_resource type="ShaderMaterial" format=3 uid="uid://bxp438rbnk6xq"]
+
+[ext_resource type="Shader" uid="uid://xjny5s8lc545" path="res://MEDIA/CHARACHTER/monster_color_replace.gdshader" id="1_bbaks"]
+
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_1"]
+frequency = 0.02
+
+[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_1"]
+noise = SubResource("FastNoiseLite_1")
+seamless = true
+
+[resource]
+shader = ExtResource("1_bbaks")
+shader_parameter/target_color = Color(0.235294, 0.843137, 0.219608, 1)
+shader_parameter/tolerance = 0.52800002508
+shader_parameter/background_color = Color(0, 0, 0, 1)
+shader_parameter/noise_color = Color(0.9068129, 0.1596382, 0.27319708, 1)
+shader_parameter/noise_texture = SubResource("NoiseTexture2D_1")
+shader_parameter/noise_scale = 0.45600001840012
+shader_parameter/noise_speed = Vector2(0, 0)

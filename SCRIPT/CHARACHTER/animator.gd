@@ -32,6 +32,12 @@ func _on_body_entered(body):
 		if HPDega > 0:
 			Player.demande_rally_heal(HPDega)
 
+# play() ne redémarre pas une anim déjà en cours de lecture —
+# on force le stop pour que le slash reparte toujours de la frame 0
+func _play_slash(anim_name: String) -> void:
+	slash_attack.stop()
+	slash_attack.play(anim_name)
+
 func _disable_all_hitboxes() -> void:
 	hitbox_1.set_deferred("disabled", true)
 	hitbox_2.set_deferred("disabled", true)
@@ -41,8 +47,22 @@ func _disable_all_hitboxes() -> void:
 	
 func _on_animation_changed() -> void:
 	_disable_all_hitboxes()
+	# frame_changed n'est pas émis quand on passe d'une anim en frame 0
+	# à une nouvelle anim en frame 0 (la valeur ne change pas) —
+	# on rattrape donc la frame 0 ici, au changement d'animation
+	_process_frame_logic()
 
 func _on_frame_changed():
+	_process_frame_logic()
+
+# garde-fou pour ne pas traiter deux fois la même frame de la même anim
+var _last_frame_key := ""
+
+func _process_frame_logic() -> void:
+	var key := str(animation) + ":" + str(frame)
+	if key == _last_frame_key:
+		return
+	_last_frame_key = key
 	var current_animation = animation
 	match current_animation:
 		"attack":
@@ -50,24 +70,21 @@ func _on_frame_changed():
 				0:
 					_disable_all_hitboxes()
 				1:
-					pass
+					_play_slash("griffe_1")
 				2:
 					hitbox_1.set_deferred("disabled", false)
-					slash_attack.play("slash_1")
-					player.velocity.x = player.point.scale.x * 200
+					player.velocity.x = player.point.scale.x * 280
 				3:
-					pass
-				4:
 					_disable_all_hitboxes()
 					player.velocity.x = 0
 		"attack_02":
 			match frame:
 				0:
-					player.velocity.x = player.point.scale.x * 200
-				1:
-					hitbox_2.set_deferred("disabled", false)
-					slash_attack.play("slash_2")
+					player.velocity.x = player.point.scale.x * 280
 				2:
+					hitbox_2.set_deferred("disabled", false)
+					_play_slash("griffe_1")
+				3:
 					_disable_all_hitboxes()
 					player.velocity.x = 0
 
@@ -78,7 +95,7 @@ func _on_frame_changed():
 					player.velocity.x = player.point.scale.x * 250
 				1:
 					hitbox_3.set_deferred("disabled", false)
-					slash_attack.play("slash_3")
+					_play_slash("slash_3")
 				2:
 					pass
 				3:
@@ -100,7 +117,7 @@ func _on_frame_changed():
 				2:
 					player.velocity.x = player.point.scale.x * 250
 				3:
-					slash_attack.play("slash_h")
+					_play_slash("slash_h")
 				4:
 					pass
 				5:

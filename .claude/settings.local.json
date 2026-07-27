@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(\"C:\\\\Users\\\\kaoru\\\\AppData\\\\Local\\\\Microsoft\\\\WinGet\\\\Packages\\\\Ridgecrop.fat32format_Microsoft.Winget.Source_8wekyb3d8bbwe\\\\fat32format.exe\" G:)",
+      "Bash(\"C:\\\\Users\\\\kaoru\\\\AppData\\\\Local\\\\Microsoft\\\\WinGet\\\\Packages\\\\Ridgecrop.fat32format_Microsoft.Winget.Source_8wekyb3d8bbwe\\\\fat32format.exe\" F:)"
+    ]
+  }
+}

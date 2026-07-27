@@ -1,7 +1,7 @@
 extends Node
 
 const PLAYER_SCENE := preload("uid://vkm3ut4hytpr")
-const CAMERA_SCRIPT := preload("uid://pcqotyxb20op")
+const CAMERA_SCENE := preload("uid://bcr77cmqqqma4")
 
 func _ready() -> void:
 	# Calcule la position de spawn avant d'instancier le joueur
@@ -44,8 +44,7 @@ func _instantiate_player(spawn_pos) -> CharacterBody2D:
 		player_body.global_position = spawn_pos
 	parent.add_child(player_body)
 
-	var camera := Camera2D.new()
-	camera.set_script(CAMERA_SCRIPT)
+	var camera: Camera2D = CAMERA_SCENE.instantiate()
 	camera.add_to_group("Camera")
 	parent.add_child(camera)
 

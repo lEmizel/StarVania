@@ -772,6 +772,27 @@ position = Vector2(10280.583, 2403.4922)
 scale = Vector2(2, 2)
 texture = ExtResource("15_26mbw")
 
+[node name="Parallax2D5" type="Parallax2D" parent="decord" unique_id=1202764534]
+scroll_scale = Vector2(0.7, 0.7)
+
+[node name="Pierredevant5" type="Sprite2D" parent="decord/Parallax2D5" unique_id=1918372056]
+z_index = -20
+position = Vector2(15564.281, -2790.8936)
+scale = Vector2(0.845, 0.845)
+texture = ExtResource("16_wgl0l")
+
+[node name="Pierredevant6" type="Sprite2D" parent="decord/Parallax2D5" unique_id=1818732954]
+z_index = -20
+position = Vector2(15339.646, -2619.0703)
+scale = Vector2(0.845, 0.845)
+texture = ExtResource("16_wgl0l")
+
+[node name="Pierredevant7" type="Sprite2D" parent="decord/Parallax2D5" unique_id=1404297793]
+z_index = -20
+position = Vector2(14593.27, -2632.0347)
+scale = Vector2(0.845, 0.845)
+texture = ExtResource("17_bxkm8")
+
 [node name="Parallax2D3" type="Parallax2D" parent="decord" unique_id=1172504383]
 scroll_scale = Vector2(1.2, 1.2)
 
@@ -903,7 +924,7 @@ position = Vector2(14.75, -18.3125)
 
 [node name="checkpoint" parent="interactible" unique_id=524856083 groups=["Checkpoint"] instance=ExtResource("37_bsdtk")]
 z_index = -4
-position = Vector2(22157, 314)
+position = Vector2(20814, -4890)
 
 [node name="Checkpoint" type="Sprite2D" parent="interactible" unique_id=1644752575]
 position = Vector2(21041, -4980)

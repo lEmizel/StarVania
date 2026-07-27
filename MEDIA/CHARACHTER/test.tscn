@@ -1,0 +1,149 @@
+[gd_scene format=3 uid="uid://db5kkmqyfxq83"]
+
+[ext_resource type="Material" uid="uid://bxp438rbnk6xq" path="res://MEDIA/CHARACHTER/ANIMATION/monster_perso_material.tres" id="1_qn714"]
+[ext_resource type="Texture2D" uid="uid://coifmbek7huka" path="res://MEDIA/CHARACHTER/ANIMATION/Monster_idle.png" id="1_rrgts"]
+[ext_resource type="Texture2D" uid="uid://dc5314f418mhb" path="res://MEDIA/CHARACHTER/Monster_idle.png" id="3_uwu80"]
+[ext_resource type="Texture2D" path="res://MEDIA/CHARACHTER/ANIMATION/0000.png" id="4_2d2se"]
+[ext_resource type="Texture2D" path="res://MEDIA/CHARACHTER/ANIMATION/0001.png" id="5_byfgj"]
+[ext_resource type="Texture2D" path="res://MEDIA/CHARACHTER/ANIMATION/0002.png" id="6_1pb8r"]
+[ext_resource type="Texture2D" path="res://MEDIA/CHARACHTER/ANIMATION/0003.png" id="7_aejl3"]
+[ext_resource type="Texture2D" path="res://MEDIA/CHARACHTER/ANIMATION/0004.png" id="8_xtyiu"]
+[ext_resource type="Texture2D" path="res://MEDIA/CHARACHTER/ANIMATION/0005.png" id="9_gsmst"]
+[ext_resource type="Texture2D" path="res://MEDIA/CHARACHTER/ANIMATION/0006.png" id="10_5dna6"]
+[ext_resource type="Texture2D" path="res://MEDIA/CHARACHTER/ANIMATION/0007.png" id="11_mogte"]
+[ext_resource type="Texture2D" path="res://MEDIA/CHARACHTER/ANIMATION/0008.png" id="12_wi8tf"]
+[ext_resource type="Texture2D" path="res://MEDIA/CHARACHTER/ANIMATION/0009.png" id="13_ghdc7"]
+[ext_resource type="Texture2D" path="res://MEDIA/CHARACHTER/ANIMATION/0010.png" id="14_qd2ur"]
+[ext_resource type="Texture2D" path="res://MEDIA/CHARACHTER/ANIMATION/0011.png" id="15_cw5vn"]
+[ext_resource type="Texture2D" path="res://MEDIA/CHARACHTER/ANIMATION/0012.png" id="16_alnkw"]
+[ext_resource type="Texture2D" path="res://MEDIA/CHARACHTER/ANIMATION/0013.png" id="17_250eq"]
+[ext_resource type="Texture2D" path="res://MEDIA/CHARACHTER/ANIMATION/0014.png" id="18_tfts7"]
+[ext_resource type="Texture2D" path="res://MEDIA/CHARACHTER/ANIMATION/0015.png" id="19_at22v"]
+[ext_resource type="Texture2D" path="res://MEDIA/CHARACHTER/ANIMATION/0016.png" id="20_iv10j"]
+[ext_resource type="Texture2D" path="res://MEDIA/CHARACHTER/ANIMATION/0017.png" id="21_w4ugc"]
+[ext_resource type="Texture2D" path="res://MEDIA/CHARACHTER/ANIMATION/0018.png" id="22_qia0p"]
+[ext_resource type="Texture2D" path="res://MEDIA/CHARACHTER/ANIMATION/0019.png" id="23_8v8ee"]
+[ext_resource type="Texture2D" path="res://MEDIA/CHARACHTER/ANIMATION/0020.png" id="24_orvt5"]
+[ext_resource type="Texture2D" path="res://MEDIA/CHARACHTER/ANIMATION/0021.png" id="25_mfmfw"]
+[ext_resource type="Texture2D" path="res://MEDIA/CHARACHTER/ANIMATION/0022.png" id="26_8xnaa"]
+[ext_resource type="Texture2D" path="res://MEDIA/CHARACHTER/ANIMATION/0023.png" id="27_0xas6"]
+[ext_resource type="Texture2D" uid="uid://ccj0kf1jh8e2t" path="res://MEDIA/CHARACHTER/ANIMATION/IDLE/Bones_Monster_idle-1.png" id="28_byfgj"]
+[ext_resource type="Texture2D" uid="uid://ds2io8n374xgb" path="res://MEDIA/CHARACHTER/ANIMATION/IDLE/Demon_idle-1.png" id="29_xtyiu"]
+[ext_resource type="Texture2D" uid="uid://bhgwsvrpoq5y8" path="res://MEDIA/CHARACHTER/ANIMATION/IDLE/Idle-1.png" id="30_gsmst"]
+[ext_resource type="Texture2D" uid="uid://dj7ne52burmh3" path="res://MEDIA/CHARACHTER/ANIMATION/IDLE/Monster_idle-1.png" id="31_5dna6"]
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_35hhg"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("4_2d2se")
+}, {
+"duration": 1.0,
+"texture": ExtResource("5_byfgj")
+}, {
+"duration": 1.0,
+"texture": ExtResource("6_1pb8r")
+}, {
+"duration": 1.0,
+"texture": ExtResource("7_aejl3")
+}, {
+"duration": 1.0,
+"texture": ExtResource("8_xtyiu")
+}, {
+"duration": 1.0,
+"texture": ExtResource("9_gsmst")
+}, {
+"duration": 1.0,
+"texture": ExtResource("10_5dna6")
+}, {
+"duration": 1.0,
+"texture": ExtResource("11_mogte")
+}, {
+"duration": 1.0,
+"texture": ExtResource("12_wi8tf")
+}, {
+"duration": 1.0,
+"texture": ExtResource("13_ghdc7")
+}, {
+"duration": 1.0,
+"texture": ExtResource("14_qd2ur")
+}, {
+"duration": 1.0,
+"texture": ExtResource("15_cw5vn")
+}, {
+"duration": 1.0,
+"texture": ExtResource("16_alnkw")
+}, {
+"duration": 1.0,
+"texture": ExtResource("17_250eq")
+}, {
+"duration": 1.0,
+"texture": ExtResource("18_tfts7")
+}, {
+"duration": 1.0,
+"texture": ExtResource("19_at22v")
+}, {
+"duration": 1.0,
+"texture": ExtResource("20_iv10j")
+}, {
+"duration": 1.0,
+"texture": ExtResource("21_w4ugc")
+}, {
+"duration": 1.0,
+"texture": ExtResource("22_qia0p")
+}, {
+"duration": 1.0,
+"texture": ExtResource("23_8v8ee")
+}, {
+"duration": 1.0,
+"texture": ExtResource("24_orvt5")
+}, {
+"duration": 1.0,
+"texture": ExtResource("25_mfmfw")
+}, {
+"duration": 1.0,
+"texture": ExtResource("26_8xnaa")
+}, {
+"duration": 1.0,
+"texture": ExtResource("27_0xas6")
+}],
+"loop": 1,
+"name": &"default",
+"speed": 24.0
+}]
+
+[node name="Node2D" type="Node2D" unique_id=260645986]
+
+[node name="MonsterIdle" type="Sprite2D" parent="." unique_id=1453347230]
+material = ExtResource("1_qn714")
+position = Vector2(-105, -68)
+texture = ExtResource("1_rrgts")
+
+[node name="MonsterIdle2" type="Sprite2D" parent="." unique_id=417753965]
+material = ExtResource("1_qn714")
+position = Vector2(-438, -66)
+texture = ExtResource("3_uwu80")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=192472356]
+material = ExtResource("1_qn714")
+position = Vector2(-273, -86)
+scale = Vector2(0.654, 0.588)
+sprite_frames = SubResource("SpriteFrames_35hhg")
+frame_progress = 0.6504801
+
+[node name="BonesMonsterIdle1" type="Sprite2D" parent="." unique_id=1545560252]
+material = ExtResource("1_qn714")
+position = Vector2(122, -177)
+texture = ExtResource("28_byfgj")
+
+[node name="DemonIdle1" type="Sprite2D" parent="." unique_id=416706237]
+position = Vector2(295, -86)
+texture = ExtResource("29_xtyiu")
+
+[node name="Idle1" type="Sprite2D" parent="." unique_id=2004351531]
+position = Vector2(445, -72)
+texture = ExtResource("30_gsmst")
+
+[node name="MonsterIdle1" type="Sprite2D" parent="." unique_id=1105107222]
+position = Vector2(583, -70)
+texture = ExtResource("31_5dna6")

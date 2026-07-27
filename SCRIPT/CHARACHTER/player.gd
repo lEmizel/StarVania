@@ -38,7 +38,7 @@ var previous_state : States = States.IDLE
 var state_functions: Dictionary = {}
 var position_x_enemi = null
 
-const GROUND_SPEED = 650            # FIX: renommé pour clarté
+const GROUND_SPEED = 850            # FIX: renommé pour clarté
 const AIR_SPEED    = 400            # FIX: anciennement var SPEED locale shadowed
 var last_direction := 1  # 1 = droite, -1 = gauche
 
@@ -817,7 +817,7 @@ func grab_exit() -> void:
 # - animation_finished: si combo_buffered → chaîne, sinon → recovery (anim _r)
 
 func attack_light_1_enter() -> void:
-	slash_attack.position = Vector2(57, -92)
+	slash_attack.position = Vector2(00, -63)
 	_flip_from_input()
 	combo_buffered = false
 	animator.play("attack")
@@ -870,6 +870,7 @@ func attack_light_2_enter() -> void:
 	combo_buffered = false
 	animator.play("attack_02")
 
+
 func attack_light_2_execute(delta: float) -> void:
 	velocity.y += gravity * delta
 	if not is_on_floor():
@@ -883,7 +884,7 @@ func attack_light_2_input(event: InputEvent) -> void:
 		combo_buffered = true
 	if animator.animation == "attack_02_r":
 		if Input.is_action_just_pressed("light_attack"):
-			change_state(States.ATTACK_LIGHT_3)
+			change_state(States.ATTACK_LIGHT_1)
 		elif Input.is_action_pressed("right_move") or Input.is_action_pressed("left_move"):
 			change_state(States.RUN)
 		elif Input.is_action_just_pressed("jump"):
@@ -893,7 +894,7 @@ func attack_light_2_animation_finished() -> void:
 	match animator.animation:
 		"attack_02":
 			if combo_buffered:
-				change_state(States.ATTACK_LIGHT_3)
+				change_state(States.ATTACK_LIGHT_1)
 				return
 			else:
 				animator.play("attack_02_r")

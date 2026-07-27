@@ -1,1 +1,10 @@
-res://SCRIPT/SCENE/scene_2.tscn
+res://SCRIPT/CHARACHTER/PLAYER.tscn
+res://MEDIA/CHARACHTER/monster_color_replace.gdshader
+res://MEDIA/CHARACHTER/ANIMATION/monster_perso_material.tres
+res://SCRIPT/SCENE/ss.gdshader
+res://SCRIPT/SHADER/BLUR.gdshader
+res://SCRIPT/SHADER/hollographgique.gdshader
+res://SCRIPT/SHADER/swap_color.gdshader
+res://SCRIPT/CHARACHTER/animator.gd
+res://SCRIPT/SCENE/scene_3.tscn
+res://MEDIA/CHARACHTER/test.tscn

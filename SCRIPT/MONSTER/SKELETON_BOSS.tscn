@@ -8,6 +8,7 @@
 [ext_resource type="Texture2D" uid="uid://3d1jo5ebeygt" path="res://MEDIA/MONSTER/SKELETON_BOSS/attaque_01/Boss-attack01-4.png" id="6_eg6hj"]
 [ext_resource type="Texture2D" uid="uid://djbf8otjvl3qh" path="res://MEDIA/MONSTER/SKELETON_BOSS/attaque_01/Boss-attack01-5.png" id="7_e5ujl"]
 [ext_resource type="Texture2D" uid="uid://wjwq2acksoxi" path="res://MEDIA/MONSTER/SKELETON_BOSS/attaque_02/Boss-attack02-1.png" id="8_k81em"]
+[ext_resource type="Texture2D" uid="uid://m5v3ra68kn3a" path="res://MEDIA/MONSTER/SKELETON_BOSS/attaque_01/Boss-attack01-6.png" id="8_m30dk"]
 [ext_resource type="Texture2D" uid="uid://dtslu4kwn14ls" path="res://MEDIA/MONSTER/SKELETON_BOSS/attaque_02/Boss-attack02-2.png" id="9_b5cui"]
 [ext_resource type="Texture2D" uid="uid://bjer4mrr6ib3y" path="res://MEDIA/MONSTER/SKELETON_BOSS/attaque_02/Boss-attack02-3.png" id="10_nqjai"]
 [ext_resource type="Texture2D" uid="uid://w8pckr7yv2re" path="res://MEDIA/MONSTER/SKELETON_BOSS/attaque_02/Boss-attack02-4.png" id="11_mtblt"]
@@ -16,6 +17,7 @@
 [ext_resource type="Texture2D" uid="uid://w1dppm51igbc" path="res://MEDIA/MONSTER/SKELETON_BOSS/attaque_02/Boss-attack02-7.png" id="14_jxy1h"]
 [ext_resource type="Texture2D" uid="uid://bf1t6iksq6k4t" path="res://MEDIA/MONSTER/SKELETON_BOSS/attaque_02/Boss-attack02-8.png" id="15_nd0be"]
 [ext_resource type="Texture2D" uid="uid://bsjosxbhpdjft" path="res://MEDIA/MONSTER/SKELETON_BOSS/attaque_03/Boss-attack03-1.png" id="16_cygpq"]
+[ext_resource type="Texture2D" uid="uid://bq65gu13gw3fn" path="res://MEDIA/MONSTER/SKELETON_BOSS/attaque_02/Boss-attack02-9.png" id="17_eg6hj"]
 [ext_resource type="Texture2D" uid="uid://0dqk8eol3mww" path="res://MEDIA/MONSTER/SKELETON_BOSS/attaque_03/Boss-attack03-2.png" id="17_o4tmj"]
 [ext_resource type="Texture2D" uid="uid://1twlrvy0uf6o" path="res://MEDIA/MONSTER/SKELETON_BOSS/attaque_03/Boss-attack03-3.png" id="18_3a6l5"]
 [ext_resource type="Texture2D" uid="uid://btl12q34dyp6u" path="res://MEDIA/MONSTER/SKELETON_BOSS/attaque_03/Boss-attack03-4.png" id="19_6dvyo"]
@@ -77,6 +79,9 @@ animations = [{
 }, {
 "duration": 4.2,
 "texture": ExtResource("7_e5ujl")
+}, {
+"duration": 1.0,
+"texture": ExtResource("8_m30dk")
 }],
 "loop": false,
 "name": &"attack",
@@ -104,8 +109,11 @@ animations = [{
 "duration": 3.1,
 "texture": ExtResource("14_jxy1h")
 }, {
-"duration": 4.7,
+"duration": 4.0,
 "texture": ExtResource("15_nd0be")
+}, {
+"duration": 2.4,
+"texture": ExtResource("17_eg6hj")
 }],
 "loop": false,
 "name": &"attack_02",
@@ -295,8 +303,7 @@ texture_filter = 1
 position = Vector2(2, -197)
 scale = Vector2(-1, 1)
 sprite_frames = SubResource("SpriteFrames_dnpf1")
-animation = &"walk"
-frame_progress = 0.7600369
+animation = &"attack_02"
 script = ExtResource("30_e5ujl")
 
 [node name="vision" type="Area2D" parent="POINT" unique_id=1946126189]
