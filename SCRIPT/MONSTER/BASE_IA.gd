@@ -22,19 +22,28 @@ var initial_position: Vector2
 var hp: int = 100
 var max_hp: int = 100
 var attack_power: int = 10
-var position_x_attacker = null
 
 # Distance & tracking
 var max_tracking_distance: float = 1000.0
 var confort_zone_max: float = 200.0
 var confort_zone_min: float = 50.0
 
-# Knockback
-@export var HIT_STUN_TIME: float = 0.25
-@export var HIT_KNOCK_X: float = 500.0
-@export var HIT_KNOCK_Y: float = -180.0
+# Knockback — pas un état : un effet superposé au mouvement de l'état courant
+@export var HIT_KNOCK_X: float = 1300.0
+@export var HIT_KNOCK_Y: float = 0.0
 @export var HIT_X_DAMP: float = 8.0
-var _hit_elapsed := 0.0
+var _knock := Vector2.ZERO
+
+# Flash blanc quand le monstre est touché
+const HIT_FLASH_SHADER := preload("res://SCRIPT/MONSTER/hit_flash.gdshader")
+@export var FLASH_DURATION: float = 0.15
+var _flash_material: ShaderMaterial
+var _flash_tween: Tween
+
+# Dégâts de contact : toucher le corps d'un monstre vivant blesse le joueur
+# (aligné sur les dégâts d'attaque actuels du squelette — animator damage)
+@export var contact_damage: int = 95
+var _contact_area: Area2D
 
 
 # ============================================================
@@ -43,6 +52,12 @@ var _hit_elapsed := 0.0
 
 func _ready() -> void:
 	initial_position = global_position
+	# Material créé par code → unique par instance (deux monstres touchés
+	# ne clignotent pas ensemble), et aucune scène à modifier
+	_flash_material = ShaderMaterial.new()
+	_flash_material.shader = HIT_FLASH_SHADER
+	animator.material = _flash_material
+	_setup_contact_area()
 	animator.connect("animation_finished", Callable(self, "_on_animation_finished"))
 	animator.connect("animation_looped", Callable(self, "_on_animation_looped"))
 	vision.connect("body_entered", Callable(self, "_on_vision_body_entered"))
@@ -57,7 +72,53 @@ func _physics_process(delta: float) -> void:
 	if current_state < 0:
 		return
 	state_functions[current_state]["execute"].call(delta)
+	# Knockback absolu : tant qu'il est actif, il REMPLACE le déplacement
+	# horizontal de l'état (l'ennemi ne peut pas compenser en marchant contre).
+	# Injecté dans velocity pour que move_and_slide glisse le long du sol,
+	# au lieu de move_and_collide qui se bloquait sur les jointures de tiles.
+	if _knock != Vector2.ZERO:
+		velocity.x = _knock.x
 	move_and_slide()
+	_decay_knockback(delta)
+	_check_contact_damage()
+
+
+# ============================================================
+#  DÉGÂTS DE CONTACT
+# ============================================================
+
+## Zone de contact créée par code : copie la forme de $Collision,
+## détecte le corps du joueur (layer 1)
+func _setup_contact_area() -> void:
+	_contact_area = Area2D.new()
+	_contact_area.collision_layer = 0
+	_contact_area.collision_mask = 1
+	var cs := CollisionShape2D.new()
+	cs.shape = collision.shape
+	cs.position = collision.position
+	cs.rotation = collision.rotation
+	cs.scale = collision.scale
+	_contact_area.add_child(cs)
+	add_child(_contact_area)
+
+
+func _check_contact_damage() -> void:
+	if _is_dead():
+		return
+	for body in _contact_area.get_overlapping_bodies():
+		if body.is_in_group("Player") and body.has_method("apply_damage"):
+			# L'invulnérabilité du joueur (état HIT / ROLL) limite la cadence
+			body.apply_damage(contact_damage, global_position.x)
+
+
+## Décroissance du knockback ; à la fin, on purge la vitesse résiduelle
+func _decay_knockback(delta: float) -> void:
+	if _knock == Vector2.ZERO:
+		return
+	_knock = _knock.lerp(Vector2.ZERO, clamp(HIT_X_DAMP * delta, 0.0, 1.0))
+	if _knock.length_squared() < 25.0:
+		_knock = Vector2.ZERO
+		velocity.x = 0.0
 
 
 func _on_animation_finished() -> void:
@@ -98,30 +159,36 @@ func check_tracking() -> bool:
 #  DÉGÂTS
 # ============================================================
 
+func _flash_white() -> void:
+	if _flash_tween and _flash_tween.is_valid():
+		_flash_tween.kill()
+	_flash_material.set_shader_parameter("flash_amount", 1.0)
+	_flash_tween = create_tween()
+	_flash_tween.tween_property(_flash_material,
+		"shader_parameter/flash_amount", 0.0, FLASH_DURATION)
+
+
 func apply_damage(amount: int, source_x) -> void:
 	if _is_dead():
-		return
-	if _is_hit():
 		return
 	hp -= amount
 	vie.emit_signal("health_request", -amount)
 	vie.apparition_temp()
+	_flash_white()
 	if hp <= 0:
+		_knock = Vector2.ZERO
 		_on_dead()
 		return
-	position_x_attacker = source_x
-	_on_hit()
+	# Knockback appliqué par-dessus l'état courant, sans l'interrompre
+	var dir := 0
+	if source_x != null:
+		dir = 1 if (global_position.x - source_x) > 0 else -1
+	_knock = Vector2(dir * HIT_KNOCK_X, HIT_KNOCK_Y)
 
 func _is_dead() -> bool:
 	return false
 
-func _is_hit() -> bool:
-	return false
-
 func _on_dead() -> void:
-	pass
-
-func _on_hit() -> void:
 	pass
 
 
@@ -156,9 +223,24 @@ func _register_states(states_enum: Dictionary) -> void:
 
 		state_functions[key] = dict
 
+		# L'enum est un contrat : tout état déclaré doit être implémenté.
+		# enter + execute sont obligatoires (appelés sans vérification) —
+		# on le signale dès le lancement plutôt que de crasher le jour
+		# où l'état est sélectionné (cf. l'ancien état WALK fantôme)
+		if not dict.has("enter") or not dict.has("execute"):
+			push_error("[%s] État '%s' déclaré dans l'enum mais incomplet : il manque %s%s" % [
+				name, state_name,
+				"" if dict.has("enter") else "%s_enter() " % name_lower,
+				"" if dict.has("execute") else "%s_execute()" % name_lower,
+			])
+
 
 func change_state(new_state: int) -> void:
 	if _changing_now or new_state == current_state:
+		return
+	# Garde-fou : refuse un état inconnu ou incomplet au lieu de crasher
+	if not state_functions.has(new_state) or not state_functions[new_state].has("enter"):
+		push_error("[%s] change_state vers un état invalide ou non implémenté : %d" % [name, new_state])
 		return
 	_changing_now = true
 	if current_state >= 0 and state_functions[current_state].has("exit"):

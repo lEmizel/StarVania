@@ -876,6 +876,12 @@ script = ExtResource("7_iy4gx")
 [node name="enemi" parent="." unique_id=627255339 instance=ExtResource("36_k1x5j")]
 position = Vector2(8930, 1568)
 
+[node name="enemi2" parent="." unique_id=971136270 instance=ExtResource("36_k1x5j")]
+position = Vector2(19879, -4906)
+
+[node name="enemi3" parent="." unique_id=1529779360 instance=ExtResource("36_k1x5j")]
+position = Vector2(21706, -4854)
+
 [node name="skeleton_boss" parent="." unique_id=2079408895 instance=ExtResource("29_cwgr7")]
 position = Vector2(16042, -4929)
 

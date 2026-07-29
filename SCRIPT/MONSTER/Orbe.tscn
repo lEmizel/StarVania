@@ -57,7 +57,7 @@ animations = [{
 "duration": 1.0,
 "texture": ExtResource("8_sliy2")
 }],
-"loop": false,
+"loop": 0,
 "name": &"attack",
 "speed": 11.0
 }, {
@@ -92,7 +92,7 @@ animations = [{
 "duration": 1.0,
 "texture": ExtResource("18_68lg3")
 }],
-"loop": false,
+"loop": 0,
 "name": &"dead",
 "speed": 9.0
 }, {
@@ -106,7 +106,7 @@ animations = [{
 "duration": 1.0,
 "texture": ExtResource("11_w0ja5")
 }],
-"loop": false,
+"loop": 0,
 "name": &"hit",
 "speed": 7.0
 }, {
@@ -138,12 +138,12 @@ animations = [{
 "duration": 1.0,
 "texture": ExtResource("29_qy5kg")
 }],
-"loop": true,
+"loop": 1,
 "name": &"idle",
 "speed": 10.0
 }, {
 "frames": [],
-"loop": true,
+"loop": 1,
 "name": &"walk",
 "speed": 5.0
 }]
@@ -152,7 +152,7 @@ animations = [{
 radius = 455.133
 
 [node name="CharacterBody2D" type="CharacterBody2D" unique_id=485432489]
-collision_layer = 4
+collision_layer = 8
 collision_mask = 2
 script = ExtResource("1_68lg3")
 

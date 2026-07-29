@@ -59,31 +59,31 @@
 [ext_resource type="Texture2D" uid="uid://cfigmoy587gxx" path="res://MEDIA/MONSTER/SKELETON_BOSS/walk_back/Boss-walkback-6.png" id="54_ih0j6"]
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_7joub"]
-radius = 34.0
-height = 182.0
+radius = 59.0
+height = 346.0
 
 [sub_resource type="SpriteFrames" id="SpriteFrames_dnpf1"]
 animations = [{
 "frames": [{
-"duration": 2.5,
+"duration": 2.2,
 "texture": ExtResource("3_l0njf")
 }, {
-"duration": 1.0,
+"duration": 1.8,
 "texture": ExtResource("4_0c0mc")
 }, {
 "duration": 1.0,
 "texture": ExtResource("5_m30dk")
 }, {
-"duration": 2.3,
+"duration": 1.5,
 "texture": ExtResource("6_eg6hj")
 }, {
-"duration": 4.2,
+"duration": 1.5,
 "texture": ExtResource("7_e5ujl")
 }, {
 "duration": 1.0,
 "texture": ExtResource("8_m30dk")
 }],
-"loop": false,
+"loop": 0,
 "name": &"attack",
 "speed": 12.0
 }, {
@@ -97,25 +97,25 @@ animations = [{
 "duration": 1.0,
 "texture": ExtResource("10_nqjai")
 }, {
-"duration": 4.0,
+"duration": 2.9,
 "texture": ExtResource("11_mtblt")
 }, {
-"duration": 3.5,
+"duration": 3.1,
 "texture": ExtResource("12_h1yip")
 }, {
 "duration": 1.0,
 "texture": ExtResource("13_yr737")
 }, {
-"duration": 3.1,
+"duration": 1.1,
 "texture": ExtResource("14_jxy1h")
 }, {
-"duration": 4.0,
+"duration": 1.0,
 "texture": ExtResource("15_nd0be")
 }, {
-"duration": 2.4,
+"duration": 1.5,
 "texture": ExtResource("17_eg6hj")
 }],
-"loop": false,
+"loop": 0,
 "name": &"attack_02",
 "speed": 12.0
 }, {
@@ -165,7 +165,7 @@ animations = [{
 "duration": 1.0,
 "texture": ExtResource("30_t8fjw")
 }],
-"loop": false,
+"loop": 0,
 "name": &"attack_03",
 "speed": 5.0
 }, {
@@ -194,7 +194,7 @@ animations = [{
 "duration": 1.0,
 "texture": ExtResource("38_xqprp")
 }],
-"loop": false,
+"loop": 0,
 "name": &"dead",
 "speed": 10.0
 }, {
@@ -202,7 +202,7 @@ animations = [{
 "duration": 1.0,
 "texture": ExtResource("39_0lqy6")
 }],
-"loop": false,
+"loop": 0,
 "name": &"hit",
 "speed": 2.0
 }, {
@@ -219,7 +219,7 @@ animations = [{
 "duration": 1.0,
 "texture": ExtResource("42_ufk8b")
 }],
-"loop": true,
+"loop": 1,
 "name": &"idle",
 "speed": 5.0
 }, {
@@ -242,7 +242,7 @@ animations = [{
 "duration": 1.0,
 "texture": ExtResource("48_go6py")
 }],
-"loop": true,
+"loop": 1,
 "name": &"walk",
 "speed": 7.0
 }, {
@@ -265,14 +265,14 @@ animations = [{
 "duration": 1.0,
 "texture": ExtResource("54_ih0j6")
 }],
-"loop": true,
+"loop": 1,
 "name": &"walk_back",
 "speed": 6.0
 }]
 
 [node name="skeleton_boss" type="CharacterBody2D" unique_id=627255339]
 light_mask = 0
-collision_layer = 4
+collision_layer = 8
 collision_mask = 6
 script = ExtResource("1_l0njf")
 
@@ -286,8 +286,7 @@ position = Vector2(-175.00002, -451)
 scale = Vector2(0.77, 0.77)
 
 [node name="Collision" type="CollisionShape2D" parent="." unique_id=287775973]
-visible = false
-position = Vector2(0, -92)
+position = Vector2(-1, -172)
 shape = SubResource("CapsuleShape2D_7joub")
 
 [node name="POINT" type="Node2D" parent="." unique_id=1327697225]
@@ -303,7 +302,7 @@ texture_filter = 1
 position = Vector2(2, -197)
 scale = Vector2(-1, 1)
 sprite_frames = SubResource("SpriteFrames_dnpf1")
-animation = &"attack_02"
+animation = &"attack"
 script = ExtResource("30_e5ujl")
 
 [node name="vision" type="Area2D" parent="POINT" unique_id=1946126189]
@@ -318,6 +317,7 @@ polygon = PackedVector2Array(-49, -16, 203, -152, 205, 148, -47, 25)
 [node name="collision_attack" type="Area2D" parent="POINT" unique_id=371815366]
 
 [node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="POINT/collision_attack" unique_id=74740681]
+visible = false
 position = Vector2(159, -289)
-polygon = PackedVector2Array(43, -181, 110, -153, 145, -82, 163, 246, 124, 283, -91, 283, -26, 0, -18, -57, -20, -89, -43, -106, -83, -100, -135, -148, -74, -178)
+polygon = PackedVector2Array(43, -181, 159, -167, 224, 14, 227, 268, 124, 283, -103, 279, -107, 2, -18, -57, -20, -89, -43, -106, -83, -100, -135, -148, -74, -178)
 disabled = true

@@ -7,8 +7,6 @@ extends AnimatedSprite2D
 @onready var hitbox_1: CollisionPolygon2D = $"../collision_attack/CollisionPolygon2D"
 
 
-var damage = 95
-
 func _ready() -> void:
 	# 1) on connecte une fois les deux signaux
 	SignalUtils.connect_signal(self, "frame_changed",    self, "_on_frame_changed")
@@ -30,8 +28,8 @@ func _on_body_entered(body: Node) -> void:
 	if not body.has_method("apply_damage"):
 		return
 	print("je touche le joueur")
-	# 3) Applique les dégâts en lui passant aussi la position X du joueur
-	body.apply_damage(damage, enemi.global_position.x)
+	# 3) Applique les dégâts (attack_power du monstre) + la position X de la source
+	body.apply_damage(enemi.attack_power, enemi.global_position.x)
 	
 
 func _disable_all_hitboxes() -> void:

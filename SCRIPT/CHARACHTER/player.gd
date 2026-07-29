@@ -36,10 +36,10 @@ var gravity = ProjectSettings.get_setting("physics/2d/default_gravity")
 var current_state : States = States.IDLE
 var previous_state : States = States.IDLE
 var state_functions: Dictionary = {}
-var position_x_enemi = null
 
-const GROUND_SPEED = 850            # FIX: renommé pour clarté
+const GROUND_SPEED = 550            # FIX: renommé pour clarté
 const AIR_SPEED    = 400            # FIX: anciennement var SPEED locale shadowed
+@export var GROUND_SPEED_ATTACK: float = 450.0  # vitesse de course pendant les attaques
 var last_direction := 1  # 1 = droite, -1 = gauche
 
 const CLIMB_SPEED := 200.0
@@ -74,9 +74,51 @@ func _ready() -> void:
 	change_state(States.IDLE)
 
 
+var _facing_prev := 1.0
+
 func _physics_process(delta: float) -> void:
 	state_functions[current_state]["execute"].call(delta)
+	# Le slash FX est enfant de POINT : si le perso se retourne pendant que
+	# la traînée joue, elle partirait en miroir avec lui → on la coupe.
+	# Détection centralisée ici pour couvrir tous les flips (run, jump, chute...)
+	if signf(point.scale.x) != signf(_facing_prev):
+		_cut_slash_fx()
+	_facing_prev = point.scale.x
+	# Knockback absolu — même principe que les monstres (BASE_IA) : tant qu'il
+	# est actif, il remplace le déplacement horizontal, via velocity pour que
+	# move_and_slide glisse le long du sol
+	if _knock != Vector2.ZERO:
+		velocity.x = _knock.x
 	move_and_slide()
+	_decay_knockback(delta)
+
+
+var _knock := Vector2.ZERO
+
+func _decay_knockback(delta: float) -> void:
+	if _knock == Vector2.ZERO:
+		return
+	_knock = _knock.lerp(Vector2.ZERO, clamp(HIT_X_DAMP * delta, 0.0, 1.0))
+	# Seuil de coupure haut (150 px/s) : dès que la poussée devient faible,
+	# le joueur reprend IMMÉDIATEMENT le contrôle — pas de queue de knockback
+	# qui écrase sa vitesse de course et donne une sensation de ralenti
+	if _knock.length_squared() < 22500.0:
+		_knock = Vector2.ZERO
+		velocity.x = 0.0
+
+
+## Contrecoup quand le joueur frappe un ennemi inébranlable (sans knockback) :
+## si le joueur est en mouvement, une contre-poussée inverse annule son élan
+func cancel_movement_recoil() -> void:
+	if absf(velocity.x) < 1.0:
+		return
+	_knock.x = -velocity.x * 1.56  # contrecoup amplifié : 1.2 × 1.3 (+30%)
+	velocity.x = 0.0
+
+
+func _cut_slash_fx() -> void:
+	slash_attack.stop()
+	slash_attack.visible = false
 
 
 ### GESTION DES INPUTS ###
@@ -125,10 +167,18 @@ func apply_damage(amount: int, source_x) -> void:
 	if current_state != States.HIT:
 		Player.changement_de_vie(-amount)
 		if Player.hp <= 0:
+			_knock = Vector2.ZERO
 			change_state(States.DEAD)
 			return
-		position_x_enemi = source_x
+		# Knockback horizontal absolu, l'état HIT gère stun + anim
+		var dir := 0
+		if source_x != null:
+			dir = 1 if (global_position.x - source_x) > 0 else -1
+		_knock = Vector2(dir * HIT_KNOCK_X, 0.0)
 		change_state(States.HIT)
+		# Soulèvement : impulsion verticale one-shot, appliquée APRÈS hit_enter
+		# (qui remet velocity à zéro) — la gravité gère la retombée
+		velocity.y = HIT_KNOCK_Y
 
 
 func goto_state(s: States) -> void:
@@ -816,16 +866,34 @@ func grab_exit() -> void:
 # - input: si le joueur appuie pendant l'anim principale → combo_buffered = true
 # - animation_finished: si combo_buffered → chaîne, sinon → recovery (anim _r)
 
+## Déplacement type RUN pendant les attaques : contrôle au stick, même vitesse
+## et même inertie que run_execute. Pas de flip — le perso garde la direction
+## de son attaque (il peut donc reculer en marche arrière pendant le coup).
+func _attack_run_movement(delta: float) -> void:
+	velocity.y += gravity * delta
+	if not is_on_floor():
+		change_state(States.CHUTE)
+		return
+	var direction := Input.get_axis("left_move", "right_move")
+	var target_speed := float(direction) * GROUND_SPEED_ATTACK
+	velocity.x = lerp(velocity.x, target_speed, 0.15)
+
+
+## Le perso est-il en mouvement pendant une attaque ? (direction maintenue)
+## Détermine si le combo peut sauter l'animation de retour (recovery) :
+## en mouvement → enchaînement direct ; immobile → recovery obligatoire.
+func _attack_is_moving() -> bool:
+	return Input.get_axis("left_move", "right_move") != 0.0
+
+
 func attack_light_1_enter() -> void:
-	slash_attack.position = Vector2(00, -63)
+	slash_attack.position = Vector2(98, -88)
 	_flip_from_input()
 	combo_buffered = false
 	animator.play("attack")
 
 func attack_light_1_execute(delta: float) -> void:
-	velocity.y += gravity * delta
-	if not is_on_floor():
-		change_state(States.CHUTE)
+	_attack_run_movement(delta)
 
 func attack_light_1_input(event: InputEvent) -> void:
 	# Buffer pendant l'anim principale
@@ -837,7 +905,10 @@ func attack_light_1_input(event: InputEvent) -> void:
 	# Pendant la recovery
 	if animator.animation == "attack_r":
 		if Input.is_action_just_pressed("light_attack"):
-			change_state(States.ATTACK_LIGHT_2)
+			if _attack_is_moving():
+				change_state(States.ATTACK_LIGHT_2)  # en mouvement : cancel direct
+			else:
+				combo_buffered = true  # immobile : partira à la fin de la recovery
 		elif Input.is_action_pressed("right_move") or Input.is_action_pressed("left_move"):
 			change_state(States.RUN)
 		elif Input.is_action_just_pressed("jump"):
@@ -846,13 +917,16 @@ func attack_light_1_input(event: InputEvent) -> void:
 func attack_light_1_animation_finished() -> void:
 	match animator.animation:
 		"attack":
+			# Skip de la recovery uniquement si le perso est en mouvement
+			if combo_buffered and _attack_is_moving():
+				change_state(States.ATTACK_LIGHT_2)
+				return
+			# Immobile : recovery obligatoire (le combo bufferisé reste en attente)
+			animator.play("attack_r")
+		"attack_r":
 			if combo_buffered:
 				change_state(States.ATTACK_LIGHT_2)
 				return
-			else:
-				animator.play("attack_r")
-		"attack_r":
-			combo_buffered = false
 			if Input.is_action_pressed("right_move") or Input.is_action_pressed("left_move"):
 				change_state(States.RUN)
 				return
@@ -861,7 +935,7 @@ func attack_light_1_animation_finished() -> void:
 
 func attack_light_1_exit() -> void:
 	combo_buffered = false
-	velocity.x = 0
+
 
 
 
@@ -872,9 +946,7 @@ func attack_light_2_enter() -> void:
 
 
 func attack_light_2_execute(delta: float) -> void:
-	velocity.y += gravity * delta
-	if not is_on_floor():
-		change_state(States.CHUTE)
+	_attack_run_movement(delta)
 
 func attack_light_2_input(event: InputEvent) -> void:
 	if event.is_action("light_attack") \
@@ -884,7 +956,10 @@ func attack_light_2_input(event: InputEvent) -> void:
 		combo_buffered = true
 	if animator.animation == "attack_02_r":
 		if Input.is_action_just_pressed("light_attack"):
-			change_state(States.ATTACK_LIGHT_1)
+			if _attack_is_moving():
+				change_state(States.ATTACK_LIGHT_1)  # en mouvement : cancel direct
+			else:
+				combo_buffered = true  # immobile : partira à la fin de la recovery
 		elif Input.is_action_pressed("right_move") or Input.is_action_pressed("left_move"):
 			change_state(States.RUN)
 		elif Input.is_action_just_pressed("jump"):
@@ -893,13 +968,16 @@ func attack_light_2_input(event: InputEvent) -> void:
 func attack_light_2_animation_finished() -> void:
 	match animator.animation:
 		"attack_02":
+			# Skip de la recovery uniquement si le perso est en mouvement
+			if combo_buffered and _attack_is_moving():
+				change_state(States.ATTACK_LIGHT_1)
+				return
+			# Immobile : recovery obligatoire (le combo bufferisé reste en attente)
+			animator.play("attack_02_r")
+		"attack_02_r":
 			if combo_buffered:
 				change_state(States.ATTACK_LIGHT_1)
 				return
-			else:
-				animator.play("attack_02_r")
-		"attack_02_r":
-			combo_buffered = false
 			if Input.is_action_pressed("right_move") or Input.is_action_pressed("left_move"):
 				change_state(States.RUN)
 				return
@@ -908,7 +986,7 @@ func attack_light_2_animation_finished() -> void:
 
 func attack_light_2_exit() -> void:
 	combo_buffered = false
-	velocity.x = 0
+
 
 
 
@@ -946,7 +1024,6 @@ func attack_light_3_animation_finished() -> void:
 				return
 
 func attack_light_3_exit() -> void:
-	velocity.x = 0
 	combo_buffered = false
 
 
@@ -972,7 +1049,7 @@ func attack_lourde_animation_finished() -> void:
 				change_state(States.IDLE)
 
 func attack_lourde_exit() -> void:
-	velocity.x = 0
+	pass
 
 
 
@@ -1033,32 +1110,23 @@ func heal_exit() -> void:
 
 
 @export var HIT_STUN_TIME: float = 0.25
-@export var HIT_KNOCK_X:  float = 500.0
+@export var HIT_KNOCK_X:  float = 1300.0
 @export var HIT_KNOCK_Y:  float = -180.0
 @export var HIT_X_DAMP:   float = 8.0
 
 var _hit_elapsed := 0.0
 
 func hit_enter() -> void:
+	# Le déplacement est géré par le knockback superposé (_knock) ;
+	# l'état HIT ne s'occupe que du stun et de l'animation
 	velocity = Vector2.ZERO
 	animator.play("hit")
 	_hit_elapsed = 0.0
 
-	if position_x_enemi != null:
-		var dir := 1 if (global_position.x - position_x_enemi) > 0 else -1
-		velocity.x = dir * HIT_KNOCK_X
-	else:
-		velocity.x = 0.0
-
-	velocity.y = HIT_KNOCK_Y
-	position_x_enemi = null
-
 
 func hit_execute(delta: float) -> void:
 	_hit_elapsed += delta
-
 	velocity.y += gravity * delta
-	velocity.x = lerp(velocity.x, 0.0, clamp(HIT_X_DAMP * delta, 0.0, 1.0))
 
 	if _hit_elapsed >= HIT_STUN_TIME:
 		if is_on_floor():
@@ -1068,6 +1136,7 @@ func hit_execute(delta: float) -> void:
 
 func hit_exit() -> void:
 	velocity = Vector2.ZERO
+	_knock = Vector2.ZERO  # fin du stun = contrôle rendu, aucune poussée résiduelle
 
 
 # -------------------------------------------------

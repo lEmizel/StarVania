@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bad4ice44jnsn"
-path="res://.godot/imported/Bones_Monster_idle-6.png-65350100bff150498f652583d8ad1007.ctex"
+uid="uid://8m6ojuwkbjfi"
+path="res://.godot/imported/AttackH1-3.png-0ba9c04973e04756bf04d3f0a9ca00d3.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://MEDIA/CHARACHTER/ANIMATION/Bones_Monster_idle-6.png"
-dest_files=["res://.godot/imported/Bones_Monster_idle-6.png-65350100bff150498f652583d8ad1007.ctex"]
+source_file="res://MEDIA/CHARACHTER/ANIMATION/ATTACK/AttackH1/AttackH1-3.png"
+dest_files=["res://.godot/imported/AttackH1-3.png-0ba9c04973e04756bf04d3f0a9ca00d3.ctex"]
 
 [params]
 
@@ -23,7 +23,7 @@ compress/rdo_quality_loss=0.0
 compress/hdr_compression=1
 compress/normal_map=0
 compress/channel_pack=0
-mipmaps/generate=true
+mipmaps/generate=false
 mipmaps/limit=-1
 roughness/mode=0
 roughness/src_normal=""

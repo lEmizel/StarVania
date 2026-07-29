@@ -56,7 +56,7 @@ animations = [{
 "duration": 2.1,
 "texture": ExtResource("8_cpoiv")
 }],
-"loop": false,
+"loop": 0,
 "name": &"attack",
 "speed": 12.0
 }, {
@@ -73,7 +73,7 @@ animations = [{
 "duration": 2.5,
 "texture": ExtResource("6_csm5o")
 }],
-"loop": false,
+"loop": 0,
 "name": &"dead",
 "speed": 10.0
 }, {
@@ -81,7 +81,7 @@ animations = [{
 "duration": 1.0,
 "texture": ExtResource("13_hnb1h")
 }],
-"loop": false,
+"loop": 0,
 "name": &"hit",
 "speed": 2.0
 }, {
@@ -104,7 +104,7 @@ animations = [{
 "duration": 1.0,
 "texture": ExtResource("19_cpoiv")
 }],
-"loop": true,
+"loop": 1,
 "name": &"idle",
 "speed": 8.0
 }, {
@@ -127,7 +127,7 @@ animations = [{
 "duration": 1.0,
 "texture": ExtResource("12_hnb1h")
 }],
-"loop": true,
+"loop": 1,
 "name": &"walk",
 "speed": 8.0
 }, {
@@ -144,14 +144,14 @@ animations = [{
 "duration": 1.0,
 "texture": ExtResource("16_cpoiv")
 }],
-"loop": true,
+"loop": 1,
 "name": &"walk_back",
 "speed": 6.0
 }]
 
 [node name="enemi" type="CharacterBody2D" unique_id=627255339]
 light_mask = 0
-collision_layer = 4
+collision_layer = 8
 collision_mask = 6
 script = ExtResource("1_536yp")
 

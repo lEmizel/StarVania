@@ -31,11 +31,16 @@ func _on_body_entered(body):
 		body.apply_damage(damage, player.global_position.x)
 		if HPDega > 0:
 			Player.demande_rally_heal(HPDega)
+		# Ennemi inébranlable (aucun knockback) : le contrecoup annule
+		# l'élan du joueur au lieu de faire reculer l'ennemi
+		if body is BaseAI and body.HIT_KNOCK_X == 0.0:
+			player.cancel_movement_recoil()
 
 # play() ne redémarre pas une anim déjà en cours de lecture —
 # on force le stop pour que le slash reparte toujours de la frame 0
 func _play_slash(anim_name: String) -> void:
 	slash_attack.stop()
+	slash_attack.visible = true  # peut avoir été masqué par un retournement du perso
 	slash_attack.play(anim_name)
 
 func _disable_all_hitboxes() -> void:
@@ -70,23 +75,19 @@ func _process_frame_logic() -> void:
 				0:
 					_disable_all_hitboxes()
 				1:
-					_play_slash("griffe_1")
-				2:
-					hitbox_1.set_deferred("disabled", false)
-					player.velocity.x = player.point.scale.x * 280
+					pass
 				3:
 					_disable_all_hitboxes()
-					player.velocity.x = 0
+					_play_slash("slash_1")
+					hitbox_1.set_deferred("disabled", false)
 		"attack_02":
 			match frame:
-				0:
-					player.velocity.x = player.point.scale.x * 280
+				1:
+					_play_slash("slash_2")
 				2:
 					hitbox_2.set_deferred("disabled", false)
-					_play_slash("griffe_1")
 				3:
 					_disable_all_hitboxes()
-					player.velocity.x = 0
 
 	
 		"attack_03":

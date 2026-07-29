@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bad4ice44jnsn"
-path="res://.godot/imported/Bones_Monster_idle-6.png-65350100bff150498f652583d8ad1007.ctex"
+uid="uid://bep6xwxr6y80b"
+path="res://.godot/imported/Bones_Monster_idle.png-a6a73a5745f5cac66766ef11e1bbf31a.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://MEDIA/CHARACHTER/ANIMATION/Bones_Monster_idle-6.png"
-dest_files=["res://.godot/imported/Bones_Monster_idle-6.png-65350100bff150498f652583d8ad1007.ctex"]
+source_file="res://MEDIA/CHARACHTER/ANIMATION/Bones_Monster_idle.png"
+dest_files=["res://.godot/imported/Bones_Monster_idle.png-a6a73a5745f5cac66766ef11e1bbf31a.ctex"]
 
 [params]
 

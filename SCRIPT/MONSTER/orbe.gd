@@ -1,7 +1,7 @@
 # orbe.gd
 extends BaseAI
 
-enum States { IDLE, APPROACH, RETREAT, ATTACK, RETURN, HIT, DEAD }
+enum States { IDLE, APPROACH, RETREAT, ATTACK, RETURN, DEAD }
 
 @export var speed := 400.0
 @export var speed_back := 100.0
@@ -16,7 +16,7 @@ func _setup_states() -> void:
 func _start() -> void:
 	max_hp = 230
 	hp = 230
-	attack_power = 10
+	attack_power = 95  # valeur réelle reprise de l'ancien animator (damage = 95)
 	max_tracking_distance = 1500.0
 	confort_zone_max = 120.0
 	confort_zone_min = 20.0
@@ -30,14 +30,8 @@ func _start() -> void:
 func _is_dead() -> bool:
 	return current_state == States.DEAD
 
-func _is_hit() -> bool:
-	return current_state == States.HIT
-
 func _on_dead() -> void:
 	change_state(States.DEAD)
-
-func _on_hit() -> void:
-	change_state(States.HIT)
 
 
 # ============================================================
@@ -167,31 +161,6 @@ func return_execute(_delta: float) -> void:
 	var dir := (initial_position - global_position).normalized()
 	velocity = dir * speed
 	point.scale.x = sign(dir.x)
-
-
-# --- HIT ---
-
-func hit_enter() -> void:
-	animator.play("hit")
-	velocity = Vector2.ZERO
-	_hit_elapsed = 0.0
-
-	if position_x_attacker != null:
-		var dir := 1 if (global_position.x - position_x_attacker) > 0 else -1
-		velocity.x = dir * HIT_KNOCK_X
-	velocity.y = HIT_KNOCK_Y
-	position_x_attacker = null
-
-func hit_execute(delta: float) -> void:
-	_hit_elapsed += delta
-	velocity.x = lerp(velocity.x, 0.0, clamp(HIT_X_DAMP * delta, 0.0, 1.0))
-	velocity.y = lerp(velocity.y, 0.0, clamp(HIT_X_DAMP * delta, 0.0, 1.0))
-
-	if _hit_elapsed >= HIT_STUN_TIME:
-		decide()
-
-func hit_exit() -> void:
-	velocity = Vector2.ZERO
 
 
 # --- DEAD ---
