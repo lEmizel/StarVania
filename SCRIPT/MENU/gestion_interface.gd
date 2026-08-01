@@ -19,8 +19,22 @@ signal rally_heal_request(amount: float)
 
 @onready var front_bar : TextureProgressBar       = $barre_de_vie
 @onready var back_bar  : TextureProgressBar       = $Under_barre_de_vie
-@onready var front_bar_endu: TextureProgressBar   = $barre_endurence
-@onready var back_bar_endu : TextureProgressBar   = $Under_endurence
+@onready var front_bar_endu: TextureProgressBar   = $barre_de_sang
+@onready var back_bar_endu : TextureProgressBar   = $Under_sang
+
+# --- Système de cœurs ---
+@onready var _vie_container: Node = $VIE
+@onready var _heart_template_full: TextureRect = $VIE/coeur_1
+@onready var _heart_template_broken: TextureRect = $VIE/coeur_1_broken
+@onready var _heart_template_empty: TextureRect = $VIE/coeur_1_noir
+## Décalage horizontal entre deux cœurs
+@export var HEART_SPACING: float = 45.0
+## Temps d'affichage du cœur brisé avant son fondu
+@export var BROKEN_LINGER_TIME: float = 0.33
+## Durée du fondu de disparition du cœur brisé
+@export var BROKEN_FADE_DURATION: float = 0.5
+# chaque entrée : { "full", "broken", "empty" : TextureRect, "tw" : Tween }
+var _hearts: Array = []
 
 ## ---------------- Réglages (éditables) ----------------
 @export var BACK_TWEEN_DURATION: float = 1.0    # durée du tween (vie & endu)
@@ -31,9 +45,6 @@ var _max_hp: float
 var _max_en: float
 var _cur_en: float
 
-
-func _physics_process(delta: float) -> void:
-	endurance_recup()
 
 func _ready() -> void:
 	# Groupes utilisés par Player (pour la vie)
@@ -57,12 +68,86 @@ func _ready() -> void:
 		bar.value     = _cur_en
 
 	# Connexions
+	_build_hearts()
+
 	connect("health_request", Callable(self, "_on_health_request"))
 	connect("endurance_request", Callable(self, "_on_endurance_request"))
 	connect("bar_max_request", Callable(self, "_on_bar_max_request"))
 	connect("rally_heal_request", Callable(self, "_on_rally_heal_request"))
 	_apply_bar_max_generic("hp", _max_hp, false)
 	_apply_bar_max_generic("en", _max_en, false)  # si tu veux aussi pour l’endurance
+
+## Construit la rangée de cœurs en dupliquant le trio template (noir / brisé /
+## rouge) selon Player.max_hearts, avec un décalage horizontal par cœur.
+## Ré-appelable si le nombre de cœurs max change en cours de partie.
+func _build_hearts() -> void:
+	# purge les duplicats d'une construction précédente (on garde les templates)
+	for h in _hearts:
+		if h["full"] != _heart_template_full:
+			h["full"].queue_free()
+			h["broken"].queue_free()
+			h["empty"].queue_free()
+	_hearts.clear()
+
+	_hearts.append({
+		"full": _heart_template_full,
+		"broken": _heart_template_broken,
+		"empty": _heart_template_empty,
+	})
+	for i in range(1, Player.max_hearts):
+		var empty: TextureRect = _heart_template_empty.duplicate()
+		var broken: TextureRect = _heart_template_broken.duplicate()
+		var full: TextureRect = _heart_template_full.duplicate()
+		for node in [empty, broken, full]:
+			node.position.x += HEART_SPACING * float(i)
+		# même ordre que les templates : noir, puis brisé, puis rouge par-dessus
+		_vie_container.add_child(empty)
+		_vie_container.add_child(broken)
+		_vie_container.add_child(full)
+		_hearts.append({"full": full, "broken": broken, "empty": empty})
+
+	# état initial : rouges selon les PV, brisés cachés
+	for i in _hearts.size():
+		_hearts[i]["full"].visible = i < int(Player.hp)
+		_hearts[i]["broken"].visible = false
+
+
+## Met à jour l'affichage des cœurs après un changement de PV.
+## Dégât : le rouge disparaît instantanément, le brisé apparaît instantanément,
+## puis (après BROKEN_LINGER_TIME) le brisé se fond en douceur.
+func _refresh_hearts(old_hp: int, new_hp: int) -> void:
+	for i in _hearts.size():
+		_hearts[i]["full"].visible = i < new_hp
+
+	if new_hp < old_hp:
+		for i in range(maxi(new_hp, 0), mini(old_hp, _hearts.size())):
+			_show_broken(i)
+	elif new_hp > old_hp:
+		# soin : les brisés des cœurs récupérés disparaissent immédiatement
+		for i in range(maxi(old_hp, 0), mini(new_hp, _hearts.size())):
+			_hide_broken_now(i)
+
+
+func _show_broken(i: int) -> void:
+	var h: Dictionary = _hearts[i]
+	var broken: TextureRect = h["broken"]
+	if h.has("tw") and h["tw"] != null and h["tw"].is_valid():
+		h["tw"].kill()
+	broken.modulate.a = 1.0
+	broken.visible = true
+	var tw := create_tween()
+	tw.tween_interval(BROKEN_LINGER_TIME)
+	tw.tween_property(broken, "modulate:a", 0.0, BROKEN_FADE_DURATION)
+	tw.tween_callback(func () -> void: broken.visible = false)
+	h["tw"] = tw
+
+
+func _hide_broken_now(i: int) -> void:
+	var h: Dictionary = _hearts[i]
+	if h.has("tw") and h["tw"] != null and h["tw"].is_valid():
+		h["tw"].kill()
+	h["broken"].visible = false
+
 
 func _bar_width_from_points(points: float, base_points: float, base_width: float, px_per_point: float) -> float:
 	return base_width + (points - base_points) * px_per_point
@@ -129,6 +214,12 @@ var _hp_back_tween: Tween = null
 
 
 func _on_health_request(amount: float) -> void:
+	# --- Cœurs : Player.hp est déjà à jour, on en déduit l'ancien total ---
+	var new_hp := int(Player.hp)
+	var old_hp := int(round(float(new_hp) - amount))
+	_refresh_hearts(old_hp, new_hp)
+
+	# --- Ancien système de barres (masqué mais conservé) ---
 	var before: float = front_bar.value
 	var after:  float = clamp(before + amount, 0, _max_hp)
 
@@ -195,64 +286,87 @@ func _on_rally_heal_request(amount: float) -> void:
 ## --------------------------------------------------
 ## ENDURANCE (même logique que la vie, sans regen)
 ## --------------------------------------------------
-func _on_endurance_request(amount: float) -> void:
-	if amount < 0.0:
-		set_meta("dbg_delay", 0.0)
-		set_meta("dbg_t", 0.0)
-	var old_val = front_bar_endu.value
-	var new_val = clamp(old_val + amount, 0, _max_en)
+## Durée de la montée de jauge lors d'un gain de sang (courte = nerveuse)
+@export var EN_GAIN_TWEEN_DURATION: float = 0.3
+var _endu_gain_tween: Tween = null
 
-	# Comportement identique à la vie : front instant, back suit en tween
-	front_bar_endu.value = new_val
-	back_bar_endu.value  = old_val
-	back_bar_endu.create_tween() \
-		.set_trans(Tween.TRANS_QUAD) \
-		.set_ease(Tween.EASE_OUT) \
-		.tween_property(back_bar_endu, "value", new_val, BACK_TWEEN_DURATION)
+func _on_endurance_request(amount: float) -> void:
+	# cible = la vérité du singleton (déjà mis à jour), robuste même si un
+	# tween de gain précédent est encore en vol
+	var new_val: float = clampf(float(Player.en), 0.0, _max_en)
+	var old_val: float = front_bar_endu.value
+
+	if amount >= 0.0:
+		# GAIN : montée progressive et rapide, pas de "pop" instantané
+		if _endu_gain_tween != null and _endu_gain_tween.is_valid():
+			_endu_gain_tween.kill()
+		_endu_gain_tween = create_tween() \
+			.set_trans(Tween.TRANS_QUAD) \
+			.set_ease(Tween.EASE_OUT)
+		_endu_gain_tween.tween_property(front_bar_endu, "value", new_val, EN_GAIN_TWEEN_DURATION)
+		_endu_gain_tween.parallel().tween_property(back_bar_endu, "value", new_val, EN_GAIN_TWEEN_DURATION)
+	else:
+		# DÉPENSE : front instant, back suit en tween (effet fantôme, comme la vie)
+		front_bar_endu.value = new_val
+		back_bar_endu.value  = old_val
+		back_bar_endu.create_tween() \
+			.set_trans(Tween.TRANS_QUAD) \
+			.set_ease(Tween.EASE_OUT) \
+			.tween_property(back_bar_endu, "value", new_val, BACK_TWEEN_DURATION)
 
 	_cur_en = new_val
 
 
-@export var ENDURANCE_REGEN_STEP: float = 1.0  # valeur configurable (1, 2, 3...)
-@export var DBG_COUNT_INTERVAL: float = 0.5 # secondes entre deux incréments (augmente = plus lent)
-@export var ENDURANCE_REGEN_DELAY: float = 1.0 # secondes à attendre avant de commencer la regen
+# NOTE : la jauge de sang ne se régénère PAS toute seule (contrairement à
+# l'ancienne endurance) — elle se remplit uniquement via les récoltes de sang
 
-func endurance_recup() -> void:
-	# si déjà au max, on ne fait rien
-	if front_bar_endu.value >= _max_en:
-		return
 
-	# récupérer ou init le timer de délai
-	var delay: float = float(get_meta("dbg_delay")) if has_meta("dbg_delay") else 0.0
-	if delay < ENDURANCE_REGEN_DELAY:
-		delay += get_physics_process_delta_time()
-		set_meta("dbg_delay", delay)
-		return # on sort tant que le délai n’est pas fini
+## --------------------------------------------------
+## FEEDBACK "pas assez de sang" : la jauge tremble et clignote en rouge
+## (appelé par le player quand un sort est refusé faute de réserve)
+## --------------------------------------------------
+var _blood_fb_shake: Tween = null
+var _blood_fb_flash: Tween = null
+var _endu_front_base_x := 0.0
+var _endu_back_base_x := 0.0
+var _endu_base_captured := false
 
-	# --- une fois le délai atteint, on fait la logique normale ---
-	var t: float = float(get_meta("dbg_t")) if has_meta("dbg_t") else 0.0
-	t += get_physics_process_delta_time()
-	var interval: float = DBG_COUNT_INTERVAL
+func blood_insufficient_feedback() -> void:
+	# capture des positions d'origine au premier appel (layout déjà posé)
+	if not _endu_base_captured:
+		_endu_front_base_x = front_bar_endu.position.x
+		_endu_back_base_x = back_bar_endu.position.x
+		_endu_base_captured = true
 
-	if t >= interval:
-		var count: int = int(get_meta("dbg_count")) if has_meta("dbg_count") else 0
-		var steps: int = int(floor(t / interval))
-		if steps > 0:
-			count += steps
-			set_meta("dbg_count", count)
-			
+	# feedback déjà en cours : on remet tout en place avant de relancer
+	if _blood_fb_shake != null and _blood_fb_shake.is_valid():
+		_blood_fb_shake.kill()
+	if _blood_fb_flash != null and _blood_fb_flash.is_valid():
+		_blood_fb_flash.kill()
+	front_bar_endu.position.x = _endu_front_base_x
+	back_bar_endu.position.x = _endu_back_base_x
+	front_bar_endu.modulate = Color.WHITE
+	back_bar_endu.modulate = Color.WHITE
 
-			var add: float = float(steps) * ENDURANCE_REGEN_STEP
-			var en_new: float = clamp(front_bar_endu.value + add, 0.0, _max_en)
-			front_bar_endu.value = en_new
-			back_bar_endu.value  = en_new
-			_cur_en = en_new
-			Player.en = int(en_new)
+	# tremblement : oscillations décroissantes des deux barres ensemble
+	_blood_fb_shake = create_tween()
+	var amp := 7.0
+	for i in range(3):
+		_blood_fb_shake.tween_property(front_bar_endu, "position:x", _endu_front_base_x + amp, 0.04)
+		_blood_fb_shake.parallel().tween_property(back_bar_endu, "position:x", _endu_back_base_x + amp, 0.04)
+		_blood_fb_shake.tween_property(front_bar_endu, "position:x", _endu_front_base_x - amp, 0.04)
+		_blood_fb_shake.parallel().tween_property(back_bar_endu, "position:x", _endu_back_base_x - amp, 0.04)
+		amp *= 0.55
+	_blood_fb_shake.tween_property(front_bar_endu, "position:x", _endu_front_base_x, 0.04)
+	_blood_fb_shake.parallel().tween_property(back_bar_endu, "position:x", _endu_back_base_x, 0.04)
 
-			t -= interval * steps
-
-	set_meta("dbg_t", t)
-
+	# clignotement rouge vif, en parallèle du tremblement
+	_blood_fb_flash = create_tween()
+	for i in range(2):
+		_blood_fb_flash.tween_property(front_bar_endu, "modulate", Color(1.0, 0.15, 0.15), 0.07)
+		_blood_fb_flash.parallel().tween_property(back_bar_endu, "modulate", Color(1.0, 0.15, 0.15), 0.07)
+		_blood_fb_flash.tween_property(front_bar_endu, "modulate", Color.WHITE, 0.10)
+		_blood_fb_flash.parallel().tween_property(back_bar_endu, "modulate", Color.WHITE, 0.10)
 
 
 ## --------------------------------------------------

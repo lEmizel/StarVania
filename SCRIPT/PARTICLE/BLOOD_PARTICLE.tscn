@@ -1,4 +1,4 @@
-[gd_scene load_steps=8 format=3 uid="uid://c283fbr082sr"]
+[gd_scene format=3 uid="uid://c283fbr082sr"]
 
 [ext_resource type="Texture2D" uid="uid://cnhr4pynig8rh" path="res://MEDIA/PARTICULE/blood_particle_petite.png" id="1_m3nu8"]
 [ext_resource type="Script" uid="uid://cx41dkcdldxya" path="res://gpu_particles_2d.gd" id="2_x56yi"]
@@ -38,10 +38,10 @@ turbulence_noise_speed = Vector3(5.93, 0, 0)
 turbulence_noise_speed_random = 1.94
 turbulence_influence_max = 0.362
 
-[node name="Node2D" type="Node2D"]
+[node name="bloodparticule" type="Node2D" unique_id=1851122890]
 z_index = 3
 
-[node name="GPUParticles2D" type="GPUParticles2D" parent="."]
+[node name="GPUParticles2D" type="GPUParticles2D" parent="." unique_id=549287097]
 light_mask = 0
 z_index = 3
 position = Vector2(-1, -1)
@@ -51,5 +51,4 @@ randomness = 0.89
 collision_base_size = 0.0
 process_material = SubResource("ParticleProcessMaterial_5tiwl")
 script = ExtResource("2_x56yi")
-seek_speed = 680.0
 target_y_offset = -60.0

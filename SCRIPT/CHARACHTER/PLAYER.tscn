@@ -84,7 +84,6 @@
 [ext_resource type="Texture2D" uid="uid://bpfcfu2df63j8" path="res://MEDIA/CHARACHTER/effect/slash_attack/2/Light_attack-14-7.png" id="74_68vd3"]
 [ext_resource type="Texture2D" uid="uid://dfagqvypeiypt" path="res://MEDIA/CHARACHTER/effect/slash_attack/2/Light_attack-14-6.png" id="75_hmwec"]
 [ext_resource type="Texture2D" uid="uid://b483oi4d4bl5l" path="res://MEDIA/CHARACHTER/ANIMATION/IDLE/Monster_idle-5.png" id="75_pev5r"]
-[ext_resource type="Texture2D" uid="uid://bhgwsvrpoq5y8" path="res://MEDIA/CHARACHTER/ANIMATION/IDLE/Idle-1.png" id="76_ebrd3"]
 [ext_resource type="Texture2D" uid="uid://cbnxvbu7f3jso" path="res://MEDIA/CHARACHTER/effect/slash_attack/2/Light_attack-14-5.png" id="76_srkq8"]
 [ext_resource type="Texture2D" uid="uid://clah7ubljj8in" path="res://MEDIA/CHARACHTER/effect/slash_attack/2/Light_attack-14-4.png" id="77_rks66"]
 [ext_resource type="Texture2D" uid="uid://cr7sghjhwwchi" path="res://MEDIA/CHARACHTER/effect/slash_attack/2/Light_attack-14-3.png" id="78_ci4v6"]
@@ -1021,10 +1020,14 @@ shader_parameter/hue_tolerance_c = 0.06
 z_index = 1
 collision_mask = 3
 script = ExtResource("1_gvikp")
+MAX_HEARTS = 3
 JUMP_VELOCITY = -750.0
 double_jump_enabled = false
 
 [node name="POINT" type="Node2D" parent="." unique_id=984331396]
+
+[node name="SPELLCAST" type="Marker2D" parent="POINT" unique_id=782008180]
+position = Vector2(44, -78)
 
 [node name="animator" type="AnimatedSprite2D" parent="POINT" unique_id=421565120]
 light_mask = 0
@@ -1147,14 +1150,6 @@ disabled = true
 visible = false
 polygon = PackedVector2Array(-50, -227, 98, -216, 162, -162, 181, -49, 78, -1, 3, -2, 6, -108, -14, -164)
 disabled = true
-
-[node name="Idle1" type="Sprite2D" parent="POINT" unique_id=687669926]
-visible = false
-position = Vector2(121, -76)
-texture = ExtResource("76_ebrd3")
-
-[node name="SPELL-CAST" type="Marker2D" parent="POINT" unique_id=782008180]
-position = Vector2(44, -78)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=845201783]
 position = Vector2(0, -63)

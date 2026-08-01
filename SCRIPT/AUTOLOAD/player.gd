@@ -4,9 +4,12 @@ var last_checkpoint_path: NodePath = NodePath()
 var last_door_id: int = -1
 
 var blood := 0
-var hp := 570
-var MAX_HP := 570
-var en := 95
+# La vie est comptée en CŒURS : 1 dégât = 1 cœur perdu.
+# (garder hp/MAX_HP synchronisés avec max_hearts)
+var hp := 5
+var MAX_HP := 5
+var max_hearts := 5  # nombre de cœurs affichés
+var en := 0  # la jauge de sang commence vide (se remplit via les récoltes)
 var MAX_en := 195
 
 # Soigne un pourcentage des PV max (par défaut 40%) et émet le signal via changement_de_vie

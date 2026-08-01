@@ -1,25 +1,67 @@
-[gd_scene load_steps=9 format=3 uid="uid://bqndjpts1oqr3"]
+[gd_scene format=3 uid="uid://bqndjpts1oqr3"]
 
 [ext_resource type="Texture2D" uid="uid://b4dum1u5n5lp0" path="res://MEDIA/INTERFACE/LIFE/barre de vie_2.png" id="1_2nv3c"]
 [ext_resource type="Script" uid="uid://cx4wwxs1vi63p" path="res://SCRIPT/MENU/gestion_interface.gd" id="1_thk5q"]
+[ext_resource type="Texture2D" uid="uid://dvh40ckeo6twe" path="res://MEDIA/INTERFACE/LIFE/coeur noir.png" id="2_k68d4"]
 [ext_resource type="Texture2D" uid="uid://cf1akc700blvy" path="res://MEDIA/INTERFACE/LIFE/barre de vie_1.png" id="2_thk5q"]
 [ext_resource type="Texture2D" uid="uid://cshedngp5p540" path="res://MEDIA/INTERFACE/LIFE/barre de vie_3.png" id="3_2kld3"]
-[ext_resource type="Texture2D" uid="uid://l660dral3o4s" path="res://MEDIA/INTERFACE/LIFE/barre endurence.png" id="5_2kld3"]
+[ext_resource type="Texture2D" uid="uid://cs4pw6poqwgar" path="res://MEDIA/INTERFACE/LIFE/coeur borken.png" id="3_3pv0o"]
+[ext_resource type="Texture2D" uid="uid://y00blegxt4ns" path="res://MEDIA/INTERFACE/LIFE/coeur.png" id="3_l21g5"]
+[ext_resource type="Texture2D" uid="uid://bkf1ocl4k7xfq" path="res://MEDIA/INTERFACE/LIFE/blood_bare.png" id="5_meh65"]
 [ext_resource type="Texture2D" uid="uid://bjq4d0hj335x8" path="res://MEDIA/INTERFACE/bloodBare.png" id="6_33wgg"]
 [ext_resource type="Script" uid="uid://bubpno8tf3eu0" path="res://SCRIPT/MENU/label.gd" id="7_meh65"]
 
 [sub_resource type="LabelSettings" id="LabelSettings_6788f"]
 font_size = 20
 
-[node name="CanvasLayer" type="CanvasLayer"]
+[node name="CanvasLayer" type="CanvasLayer" unique_id=1695585978]
 script = ExtResource("1_thk5q")
 HP_PX_PER_POINT = 1.8
 HP_BACK_START_DELAY = 2.3
-EN_PX_PER_POINT = 7.0
-DBG_COUNT_INTERVAL = 0.025
-ENDURANCE_REGEN_DELAY = 1.2
+EN_PX_PER_POINT = 4.0
 
-[node name="barre_de_vie" type="TextureProgressBar" parent="."]
+[node name="VIE" type="Control" parent="." unique_id=1379439860]
+layout_mode = 3
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="coeur_1_noir" type="TextureRect" parent="VIE" unique_id=990910402]
+texture_filter = 3
+layout_mode = 0
+offset_left = -290.0
+offset_top = -296.0
+offset_right = 480.0
+offset_bottom = 421.0
+offset_transform_enabled = true
+offset_transform_scale = Vector2(0.045, 0.045)
+texture = ExtResource("2_k68d4")
+
+[node name="coeur_1_broken" type="TextureRect" parent="VIE" unique_id=1198471161]
+visible = false
+texture_filter = 3
+layout_mode = 0
+offset_left = -361.0
+offset_top = -296.0
+offset_right = 557.0
+offset_bottom = 421.0
+offset_transform_enabled = true
+offset_transform_scale = Vector2(0.045, 0.045)
+texture = ExtResource("3_3pv0o")
+
+[node name="coeur_1" type="TextureRect" parent="VIE" unique_id=234148020]
+texture_filter = 3
+layout_mode = 0
+offset_left = -290.0
+offset_top = -296.0
+offset_right = 480.0
+offset_bottom = 421.0
+offset_transform_enabled = true
+offset_transform_scale = Vector2(0.045, 0.045)
+texture = ExtResource("3_l21g5")
+
+[node name="barre_de_vie" type="TextureProgressBar" parent="." unique_id=1954616470]
+visible = false
 offset_left = 69.0
 offset_top = 48.0
 offset_right = 1366.0
@@ -34,7 +76,8 @@ stretch_margin_right = 60
 texture_over = ExtResource("2_thk5q")
 texture_progress = ExtResource("3_2kld3")
 
-[node name="Under_barre_de_vie" type="TextureProgressBar" parent="."]
+[node name="Under_barre_de_vie" type="TextureProgressBar" parent="." unique_id=345930051]
+visible = false
 z_index = -1
 offset_left = 69.0
 offset_top = 49.0
@@ -49,7 +92,7 @@ stretch_margin_top = 150
 stretch_margin_right = 60
 texture_progress = ExtResource("1_2nv3c")
 
-[node name="barre_endurence" type="TextureProgressBar" parent="."]
+[node name="barre_de_sang" type="TextureProgressBar" parent="." unique_id=1384708096]
 offset_left = 69.0
 offset_top = 92.0
 offset_right = 1363.0
@@ -62,9 +105,9 @@ stretch_margin_left = 60
 stretch_margin_top = 150
 stretch_margin_right = 60
 texture_over = ExtResource("2_thk5q")
-texture_progress = ExtResource("5_2kld3")
+texture_progress = ExtResource("5_meh65")
 
-[node name="Under_endurence" type="TextureProgressBar" parent="."]
+[node name="Under_sang" type="TextureProgressBar" parent="." unique_id=1671706044]
 z_index = -1
 offset_left = 69.0
 offset_top = 92.0
@@ -79,7 +122,7 @@ stretch_margin_top = 150
 stretch_margin_right = 60
 texture_progress = ExtResource("1_2nv3c")
 
-[node name="TextureRect" type="TextureProgressBar" parent="."]
+[node name="TextureRect" type="TextureProgressBar" parent="." unique_id=908306860]
 offset_left = 1706.0
 offset_top = 52.0
 offset_right = 3045.0
@@ -92,7 +135,7 @@ stretch_margin_right = 100
 stretch_margin_bottom = 100
 texture_over = ExtResource("6_33wgg")
 
-[node name="Label" type="Label" parent="." groups=["UI_Blood"]]
+[node name="Label" type="Label" parent="." unique_id=1991936324 groups=["UI_Blood"]]
 offset_left = 1712.0
 offset_top = 51.0
 offset_right = 1856.0
@@ -102,7 +145,7 @@ label_settings = SubResource("LabelSettings_6788f")
 horizontal_alignment = 2
 script = ExtResource("7_meh65")
 
-[node name="postive_number" type="Label" parent="Label"]
+[node name="postive_number" type="Label" parent="Label" unique_id=642532066]
 layout_mode = 0
 offset_left = -10.0
 offset_top = -23.0

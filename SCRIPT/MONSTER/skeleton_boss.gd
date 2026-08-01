@@ -11,8 +11,8 @@ enum States { IDLE, APPROACH, ATTACK_1, ATTACK_2, ATTACK_3, RETURN, DEAD }
 
 ## Dégâts par attaque (chaque enter charge sa valeur dans attack_power,
 ## que l'animator applique au moment du coup)
-@export var attack_1_damage: int = 95
-@export var attack_2_damage: int = 150  # le slam / onde de choc
+@export var attack_1_damage: int = 1
+@export var attack_2_damage: int = 1  # le slam / onde de choc
 
 var _shake_triggered := false
 var _idle_loops := 0

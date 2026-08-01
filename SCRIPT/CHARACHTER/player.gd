@@ -1,7 +1,7 @@
 extends CharacterBody2D
 
 
-enum States { IDLE, RUN, CHUTE, JUMP, WALL_GRIFFE, WALL_JUMP, CLIMB, ROLL, CHUTE_GRIFFE, GRAB, ATTACK_LIGHT_1, ATTACK_LIGHT_2, ATTACK_LIGHT_3, ATTACK_AIR, ATTACK_LOURDE, DEAD, HIT, HEAL, DROP }
+enum States { IDLE, RUN, CHUTE, JUMP, WALL_GRIFFE, WALL_JUMP, CLIMB, ROLL, CHUTE_GRIFFE, GRAB, ATTACK_LIGHT_1, ATTACK_LIGHT_2, ATTACK_LIGHT_3, ATTACK_AIR, ATTACK_LOURDE, DEAD, HIT, HEAL, DROP, BLOODBALL }
 const STATE_STAMINA_COSTS := {
 	States.ROLL:            0,
 	States.ATTACK_LIGHT_1:  0,
@@ -32,6 +32,7 @@ func _get_state_cost(s: States) -> int:
 
 @onready var point: Node2D = $POINT # le node 2d qui sert a flip le personnage
 @onready var animator = $POINT/animator
+@onready var spellcast: Marker2D = $POINT/SPELLCAST
 @onready var collision_normale: CollisionShape2D = $CollisionShape2D
 @onready var collision_roulade: CollisionShape2D = $CollisionShaperoulage
 var gravity = ProjectSettings.get_setting("physics/2d/default_gravity")
@@ -42,6 +43,8 @@ var state_functions: Dictionary = {}
 const GROUND_SPEED = 550            # FIX: renommé pour clarté
 const AIR_SPEED    = 400            # FIX: anciennement var SPEED locale shadowed
 @export var GROUND_SPEED_ATTACK: float = 450.0  # vitesse de course pendant les attaques
+## Nombre de cœurs de vie max — synchronisé vers le singleton Player au spawn
+@export var MAX_HEARTS: int = 5
 var last_direction := 1  # 1 = droite, -1 = gauche
 
 const CLIMB_SPEED := 200.0
@@ -65,6 +68,14 @@ var combo_buffered := false   # true si le joueur a appuyé pendant l'anim en co
 
 
 
+
+
+func _enter_tree() -> void:
+	# Synchro AVANT le _ready des enfants : le HUD (enfant de cette scène)
+	# lit ces valeurs pour construire sa rangée de cœurs
+	Player.max_hearts = MAX_HEARTS
+	Player.MAX_HP = MAX_HEARTS
+	Player.hp = mini(Player.hp, MAX_HEARTS)
 
 
 func _ready() -> void:
@@ -141,6 +152,9 @@ func _cut_slash_fx() -> void:
 
 ### GESTION DES INPUTS ###
 func _input(event):
+	# DEBUG spell : l'événement arrive-t-il jusqu'au player, et dans quel état ?
+	if event.is_action_pressed("spell"):
+		print("[SPELL] événement reçu — état=", States.keys()[current_state])
 	if state_functions[current_state].has("input"):
 		state_functions[current_state]["input"].call(event)
 
@@ -255,6 +269,8 @@ func _raycast_hits_group(rc: RayCast2D, group_name: String, body_only := false) 
 
 
 
+const FALL_DAMAGE_ENABLED := false  # à réactiver quand l'échelle en cœurs sera décidée
+
 func calcule_falling_damage() -> int:
 	const SAFE_HEIGHT: float     = 850.0
 	const DAMAGE_PER_STEP: int   = 30
@@ -273,7 +289,10 @@ func calcule_falling_damage() -> int:
 
 	var excess: float  = fall_distance - SAFE_HEIGHT
 	var damage: int    = int(ceil(excess / STEP_PX)) * DAMAGE_PER_STEP
-	apply_damage(damage, null, "chute")
+	# Dégâts de chute DÉSACTIVÉS pour l'instant (échelle en cœurs à définir) —
+	# toute la logique de calcul est conservée pour réactivation future
+	if FALL_DAMAGE_ENABLED:
+		apply_damage(damage, null, "chute")
 	print("Dégâts de chute :", damage,
 		" | hauteur totale :", fall_distance, " px",
 		" | excès :", excess, " px")
@@ -388,8 +407,8 @@ func idle_input(event: InputEvent) -> void:
 	elif Input.is_action_just_pressed("light_attack"):
 		change_state(States.ATTACK_LIGHT_1)
 		return
-	elif Input.is_action_just_pressed("lourde_attack"):
-		change_state(States.ATTACK_LOURDE)
+	elif Input.is_action_just_pressed("spell"):
+		_try_cast_bloodball()
 		return
 	elif Input.is_action_just_pressed("down_move") and is_on_floor():
 		change_state(States.DROP)
@@ -449,8 +468,8 @@ func run_input(event: InputEvent) -> void:
 	elif Input.is_action_just_pressed("light_attack"):
 		change_state(States.ATTACK_LIGHT_1)
 		return
-	elif Input.is_action_just_pressed("lourde_attack"):
-		change_state(States.ATTACK_LOURDE)
+	elif Input.is_action_just_pressed("spell"):
+		_try_cast_bloodball()
 		return
 	elif Input.is_action_just_pressed("down_move") and is_on_floor():
 		change_state(States.DROP)
@@ -560,6 +579,9 @@ func jump_input(event: InputEvent) -> void:
 	if Input.is_action_just_pressed("jump"):
 		if _try_double_jump():
 			return
+	if Input.is_action_just_pressed("spell"):
+		_try_cast_bloodball()
+		return
 	if Input.is_action_just_pressed("light_attack"):
 		change_state(States.ATTACK_AIR)
 		return
@@ -638,6 +660,10 @@ func chute_input(event: InputEvent) -> void:
 		else:
 			_jump_buffer_timer = JUMP_BUFFER_TIME
 		
+	if Input.is_action_just_pressed("spell"):
+		_try_cast_bloodball()
+		return
+
 	if Input.is_action_just_pressed("light_attack"):
 		change_state(States.ATTACK_AIR)
 		return
@@ -1227,6 +1253,59 @@ func heal_animation_finished() -> void:
 
 func heal_exit() -> void:
 	velocity.x = 0
+
+
+# =====================  BLOODBALL (sort de boule de sang)  ==================
+#region BLOODBALL
+
+const BLOODBALL_SCENE := preload("res://SCRIPT/SPELL/bloodball.tscn")
+## Durée du lancer avant de rendre la main (en attendant une anim de cast dédiée)
+@export var BLOODBALL_CAST_TIME: float = 0.25
+## Coût en sang d'une boule
+@export var BLOODBALL_COST: int = 55
+var _cast_timer := 0.0
+
+
+## Tente de lancer le sort : vérifie la jauge de sang ; si insuffisante,
+## déclenche le feedback UI (jauge qui tremble + clignote rouge) sans caster
+func _try_cast_bloodball() -> void:
+	if Player.en < BLOODBALL_COST:
+		var bars := get_tree().get_nodes_in_group("UI_Endu")
+		if not bars.is_empty() and bars[0].has_method("blood_insufficient_feedback"):
+			bars[0].blood_insufficient_feedback()
+		return
+	change_state(States.BLOODBALL)
+
+func bloodball_enter() -> void:
+	print("[SPELL] cast ! spawn de la boule au marker ", spellcast.global_position)
+	Player.changement_d_endurance(-BLOODBALL_COST)  # le sort boit son sang
+	# TODO : remplacer par une vraie animation de cast quand elle existera
+	animator.play("idle")
+	# Au sol : le perso se plante pour lancer. En l'air : comme l'attaque
+	# aérienne, le cast ne touche pas à l'élan du saut
+	if is_on_floor():
+		velocity.x = 0.0
+	_cast_timer = 0.0
+
+	var ball := BLOODBALL_SCENE.instantiate()
+	ball.dir = int(signf(point.scale.x))
+	get_tree().current_scene.add_child(ball)
+	ball.global_position = spellcast.global_position
+
+func bloodball_execute(delta: float) -> void:
+	velocity.y += gravity * delta
+	_cast_timer += delta
+	if _cast_timer >= BLOODBALL_CAST_TIME:
+		if not is_on_floor():
+			goto_state(States.CHUTE)
+		elif Input.is_action_pressed("right_move") or Input.is_action_pressed("left_move"):
+			goto_state(States.RUN)
+		else:
+			goto_state(States.IDLE)
+
+func bloodball_exit() -> void:
+	pass
+#endregion
 
 
 

@@ -21,8 +21,8 @@ var initial_position: Vector2
 # Stats communes
 var hp: int = 100
 var max_hp: int = 100
-## Dégâts des attaques (lu par l'animator au moment où la hitbox touche)
-@export var attack_power: int = 95
+## Dégâts des attaques, EN CŒURS (lu par l'animator au moment du coup)
+@export var attack_power: int = 1
 
 # Distance & tracking
 var max_tracking_distance: float = 1000.0
@@ -41,10 +41,13 @@ const HIT_FLASH_SHADER := preload("res://SCRIPT/MONSTER/hit_flash.gdshader")
 var _flash_material: ShaderMaterial
 var _flash_tween: Tween
 
-# Dégâts de contact : toucher le corps d'un monstre vivant blesse le joueur
-# (aligné sur les dégâts d'attaque actuels du squelette — animator damage)
-@export var contact_damage: int = 95
+# Dégâts de contact : toucher le corps d'un monstre vivant blesse le joueur (en cœurs)
+@export var contact_damage: int = 1
 var _contact_area: Area2D
+
+# Récolte de sang lâchée à la mort (les particules volent vers le joueur
+# et créditent du blood à l'arrivée)
+const BLOOD_PARTICLE_SCENE := preload("res://SCRIPT/PARTICLE/BLOOD_PARTICLE.tscn")
 
 
 # ============================================================
@@ -169,7 +172,9 @@ func _flash_white() -> void:
 		"shader_parameter/flash_amount", 0.0, FLASH_DURATION)
 
 
-func apply_damage(amount: int, source_x) -> void:
+## _source_tag : étiquette de provenance optionnelle (parité avec le player,
+## utilisée par les logs de debug — sans effet sur la logique)
+func apply_damage(amount: int, source_x, _source_tag := "?") -> void:
 	if _is_dead():
 		return
 	hp -= amount
@@ -178,6 +183,15 @@ func apply_damage(amount: int, source_x) -> void:
 	_flash_white()
 	if hp <= 0:
 		_knock = Vector2.ZERO
+		# Cadavre inerte : plus détectable ni bloquant (layer 0), mais il garde
+		# son mask pour continuer de reposer sur le sol
+		set_deferred("collision_layer", 0)
+		if _contact_area != null:
+			_contact_area.set_deferred("monitoring", false)
+		# Récolte de sang à l'endroit de la mort
+		var blood := BLOOD_PARTICLE_SCENE.instantiate()
+		get_tree().current_scene.add_child(blood)
+		blood.global_position = global_position
 		_on_dead()
 		return
 	# Knockback appliqué par-dessus l'état courant, sans l'interrompre

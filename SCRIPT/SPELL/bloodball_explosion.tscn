@@ -1,0 +1,21 @@
+[gd_scene format=3 uid="uid://dw0l4rbryk4vl"]
+
+[ext_resource type="Script" uid="uid://bwxffojmefx3i" path="res://SCRIPT/SPELL/bloodball_explosion.gd" id="1_script"]
+[ext_resource type="Shader" uid="uid://dp8pt0lhvhu8p" path="res://SCRIPT/SPELL/bloodball_explosion.gdshader" id="2_shader"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_expl"]
+resource_local_to_scene = true
+shader = ExtResource("2_shader")
+shader_parameter/progress = 0.0
+shader_parameter/core_color = Color(1, 0.88, 0.6, 1)
+shader_parameter/blood_color = Color(0.8, 0.05, 0.05, 1)
+shader_parameter/dark_color = Color(0.28, 0, 0.05, 1)
+
+[node name="BloodBallExplosion" type="ColorRect" unique_id=220386228]
+material = SubResource("ShaderMaterial_expl")
+offset_left = -80.0
+offset_top = -80.0
+offset_right = 80.0
+offset_bottom = 80.0
+mouse_filter = 2
+script = ExtResource("1_script")

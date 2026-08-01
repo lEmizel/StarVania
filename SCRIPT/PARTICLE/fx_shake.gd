@@ -3,7 +3,7 @@ extends AnimatedSprite2D
 @onready var area: Area2D = $Area2D
 @onready var collision_shape_2d: CollisionShape2D = $Area2D/CollisionShape2D
 
-var damage: int = 150
+var damage: int = 1
 
 func _ready() -> void:
 	collision_shape_2d.disabled = true
