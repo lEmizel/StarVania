@@ -47,30 +47,28 @@
 [ext_resource type="Texture2D" uid="uid://cld1np2svncx3" path="res://MEDIA/CHARACHTER/ANIMATION/DEATH/Monster_Death-6.png" id="49_cdn23"]
 [ext_resource type="Texture2D" uid="uid://b3t6gdgbq8nbk" path="res://MEDIA/CHARACHTER/ANIMATION/DEATH/Monster_Death-7.png" id="50_7m0eg"]
 [ext_resource type="Texture2D" uid="uid://bybhy4ed4jyht" path="res://MEDIA/CHARACHTER/ANIMATION/DEATH/Monster_Death-8.png" id="51_nr0yv"]
+[ext_resource type="Texture2D" uid="uid://cyjg2kqs47v5b" path="res://MEDIA/CHARACHTER/ANIMATION/HEAL/Monster_HEAL-1.png" id="52_cdn23"]
 [ext_resource type="Texture2D" uid="uid://cw31rxq7ujfnx" path="res://MEDIA/CHARACHTER/ANIMATION/DEATH/Monster_Death-9.png" id="52_nt8wr"]
+[ext_resource type="Texture2D" uid="uid://dawjqfwuxx40" path="res://MEDIA/CHARACHTER/ANIMATION/HEAL/Monster_HEAL-2.png" id="53_7m0eg"]
 [ext_resource type="Texture2D" uid="uid://cdjqafg2o2lpy" path="res://MEDIA/CHARACHTER/ANIMATION/DEATH/Monster_Death-10.png" id="53_mn0hx"]
+[ext_resource type="Texture2D" uid="uid://bc63075sqcr5d" path="res://MEDIA/CHARACHTER/ANIMATION/HEAL/Monster_HEAL-3.png" id="54_nr0yv"]
 [ext_resource type="Texture2D" uid="uid://cgvjp74xl1vk2" path="res://MEDIA/CHARACHTER/ANIMATION/DEATH/Monster_Death-11.png" id="54_r741y"]
 [ext_resource type="Texture2D" uid="uid://oifudobyky0n" path="res://MEDIA/CHARACHTER/ANIMATION/DEATH/Monster_Death-12.png" id="55_ijyow"]
-[ext_resource type="Texture2D" uid="uid://tjbciuduxa6j" path="res://MEDIA/CHARACHTER/ANIMATION/HEAL/HEAL-1.png" id="56_ltlmg"]
-[ext_resource type="Texture2D" uid="uid://did62bath548v" path="res://MEDIA/CHARACHTER/ANIMATION/HEAL/HEAL-2.png" id="57_v0jdk"]
-[ext_resource type="Texture2D" uid="uid://c5jgkyvwxr5hu" path="res://MEDIA/CHARACHTER/ANIMATION/HEAL/HEAL-3.png" id="58_1w4ht"]
-[ext_resource type="Texture2D" uid="uid://c8yxms4k8iy3n" path="res://MEDIA/CHARACHTER/ANIMATION/HEAL/HEAL-4.png" id="59_15n1l"]
-[ext_resource type="Texture2D" uid="uid://d20pjo2o3k07j" path="res://MEDIA/CHARACHTER/ANIMATION/HEAL/HEAL-5.png" id="60_weqbp"]
-[ext_resource type="Texture2D" uid="uid://ca7imey1d1k21" path="res://MEDIA/CHARACHTER/ANIMATION/HEAL/HEAL-6.png" id="61_irlr4"]
-[ext_resource type="Texture2D" uid="uid://6moq3gqfgo87" path="res://MEDIA/CHARACHTER/ANIMATION/HEAL/HEAL-7.png" id="62_ebrd3"]
-[ext_resource type="Texture2D" uid="uid://e8nmowj2mg2m" path="res://MEDIA/CHARACHTER/ANIMATION/HEAL/HEAL-8.png" id="63_bgt45"]
+[ext_resource type="Texture2D" uid="uid://catxhoxqy7jh6" path="res://MEDIA/CHARACHTER/ANIMATION/HEAL/Monster_HEAL-4.png" id="55_nt8wr"]
+[ext_resource type="Texture2D" uid="uid://bxpngdjb0iiur" path="res://MEDIA/CHARACHTER/ANIMATION/HEAL/Monster_HEAL-5.png" id="56_mn0hx"]
+[ext_resource type="Texture2D" uid="uid://c8qyp60rh1p4o" path="res://MEDIA/CHARACHTER/ANIMATION/HEAL/Monster_HEAL-6.png" id="57_r741y"]
+[ext_resource type="Texture2D" uid="uid://dxkwe6kbtkujr" path="res://MEDIA/CHARACHTER/ANIMATION/HEAL/Monster_HEAL-7.png" id="58_ijyow"]
+[ext_resource type="Texture2D" uid="uid://c3rlnqoic0our" path="res://MEDIA/CHARACHTER/ANIMATION/HEAL/Monster_HEAL-8.png" id="59_2uwbu"]
+[ext_resource type="Texture2D" uid="uid://mk762qgcnk4v" path="res://MEDIA/CHARACHTER/ANIMATION/HEAL/Monster_HEAL-9.png" id="60_kqgep"]
+[ext_resource type="Texture2D" uid="uid://b02ki75goravk" path="res://MEDIA/CHARACHTER/ANIMATION/HEAL/Monster_HEAL-10.png" id="61_lwpav"]
+[ext_resource type="Texture2D" uid="uid://bmbwjvn70tf3l" path="res://MEDIA/CHARACHTER/ANIMATION/HEAL/Monster_HEAL-11.png" id="62_sny4y"]
 [ext_resource type="Script" uid="uid://c2740bn5xjykn" path="res://SCRIPT/CHARACHTER/animator.gd" id="63_v21cv"]
 [ext_resource type="Texture2D" uid="uid://c5x83ixa5o8in" path="res://MEDIA/vide.png" id="64_765c3"]
 [ext_resource type="Texture2D" uid="uid://84d5m4f5x1ip" path="res://MEDIA/CHARACHTER/effect/slash_attack/1/Light_attack-14-2.png" id="64_elvui"]
-[ext_resource type="Texture2D" uid="uid://dm3chig1u2wuc" path="res://MEDIA/CHARACHTER/ANIMATION/HEAL/HEAL-9.png" id="64_em58j"]
 [ext_resource type="Texture2D" uid="uid://dmekuvjnmr4y3" path="res://MEDIA/CHARACHTER/effect/slash_attack/1/Light_attack-14-3.png" id="65_765c3"]
-[ext_resource type="Texture2D" uid="uid://bb8hebrkyogwe" path="res://MEDIA/CHARACHTER/ANIMATION/HEAL/HEAL-10.png" id="65_ydewi"]
-[ext_resource type="Texture2D" uid="uid://c1dmitt86phv4" path="res://MEDIA/CHARACHTER/ANIMATION/HEAL/HEAL-11.png" id="66_cdn23"]
 [ext_resource type="Texture2D" uid="uid://biei54fc2smdd" path="res://MEDIA/CHARACHTER/effect/slash_attack/1/Light_attack-14-4.png" id="66_jw47m"]
-[ext_resource type="Texture2D" uid="uid://b47kj1xwblhdg" path="res://MEDIA/CHARACHTER/ANIMATION/HEAL/HEAL-12.png" id="67_7m0eg"]
 [ext_resource type="Texture2D" uid="uid://dblhalv54fefi" path="res://MEDIA/CHARACHTER/effect/slash_attack/1/Light_attack-14-5.png" id="67_15ud5"]
 [ext_resource type="Texture2D" uid="uid://dliyfiu1mk010" path="res://MEDIA/CHARACHTER/effect/slash_attack/1/Light_attack-14-6.png" id="68_ll8uo"]
-[ext_resource type="Texture2D" uid="uid://g6rnusp8uike" path="res://MEDIA/CHARACHTER/ANIMATION/HEAL/HEAL-13.png" id="68_nr0yv"]
 [ext_resource type="Texture2D" uid="uid://b641rsfv3ajua" path="res://MEDIA/CHARACHTER/ANIMATION/HIT/Monster_Hit.png" id="69_2uwbu"]
 [ext_resource type="Texture2D" uid="uid://bvkq47ehkqcfp" path="res://MEDIA/CHARACHTER/effect/slash_attack/1/Light_attack-14-7.png" id="69_v8iao"]
 [ext_resource type="Texture2D" uid="uid://ckuattqqho62w" path="res://MEDIA/CHARACHTER/effect/slash_attack/1/Light_attack-14-8.png" id="70_wcjl6"]
@@ -399,47 +397,41 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("56_ltlmg")
+"texture": ExtResource("52_cdn23")
 }, {
 "duration": 1.0,
-"texture": ExtResource("57_v0jdk")
+"texture": ExtResource("53_7m0eg")
 }, {
 "duration": 1.0,
-"texture": ExtResource("58_1w4ht")
+"texture": ExtResource("54_nr0yv")
 }, {
 "duration": 1.0,
-"texture": ExtResource("59_15n1l")
+"texture": ExtResource("55_nt8wr")
 }, {
 "duration": 1.0,
-"texture": ExtResource("60_weqbp")
+"texture": ExtResource("56_mn0hx")
 }, {
 "duration": 1.0,
-"texture": ExtResource("61_irlr4")
+"texture": ExtResource("57_r741y")
 }, {
 "duration": 1.0,
-"texture": ExtResource("62_ebrd3")
+"texture": ExtResource("58_ijyow")
 }, {
 "duration": 1.0,
-"texture": ExtResource("63_bgt45")
+"texture": ExtResource("59_2uwbu")
 }, {
 "duration": 1.0,
-"texture": ExtResource("64_em58j")
+"texture": ExtResource("60_kqgep")
 }, {
 "duration": 1.0,
-"texture": ExtResource("65_ydewi")
+"texture": ExtResource("61_lwpav")
 }, {
 "duration": 1.0,
-"texture": ExtResource("66_cdn23")
-}, {
-"duration": 1.0,
-"texture": ExtResource("67_7m0eg")
-}, {
-"duration": 1.0,
-"texture": ExtResource("68_nr0yv")
+"texture": ExtResource("62_sny4y")
 }],
 "loop": 0,
 "name": &"heal",
-"speed": 10.0
+"speed": 15.0
 }, {
 "frames": [{
 "duration": 1.0,
@@ -1022,7 +1014,6 @@ collision_mask = 3
 script = ExtResource("1_gvikp")
 MAX_HEARTS = 3
 JUMP_VELOCITY = -750.0
-double_jump_enabled = false
 
 [node name="POINT" type="Node2D" parent="." unique_id=984331396]
 
@@ -1035,7 +1026,7 @@ z_index = 1
 texture_filter = 1
 position = Vector2(-1.5019855, -75.50198)
 sprite_frames = SubResource("SpriteFrames_gfeug")
-animation = &"idle"
+animation = &"heal"
 script = ExtResource("63_v21cv")
 
 [node name="slash_attack" type="AnimatedSprite2D" parent="POINT" unique_id=1321397222]

@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://do5h5hu50g7x5"
-path="res://.godot/imported/Bones_Monster_idle-2.png-1f180b5cf70ce013d0478e707baf340e.ctex"
+uid="uid://b84leyjigtr5r"
+path="res://.godot/imported/coeur broken.png-a5179a3b3640f9e36f9afd5429504e38.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://MEDIA/CHARACHTER/ANIMATION/Bones_Monster_idle-2.png"
-dest_files=["res://.godot/imported/Bones_Monster_idle-2.png-1f180b5cf70ce013d0478e707baf340e.ctex"]
+source_file="res://MEDIA/INTERFACE/LIFE/coeur broken.png"
+dest_files=["res://.godot/imported/coeur broken.png-a5179a3b3640f9e36f9afd5429504e38.ctex"]
 
 [params]
 
@@ -23,7 +23,7 @@ compress/rdo_quality_loss=0.0
 compress/hdr_compression=1
 compress/normal_map=0
 compress/channel_pack=0
-mipmaps/generate=true
+mipmaps/generate=false
 mipmaps/limit=-1
 roughness/mode=0
 roughness/src_normal=""

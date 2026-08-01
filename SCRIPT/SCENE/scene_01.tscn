@@ -1,6 +1,7 @@
 [gd_scene format=3 uid="uid://q73v1b80lt2r"]
 
 [ext_resource type="Script" uid="uid://b2gdi5nrgeles" path="res://SCRIPT/SCENE/scene_01.gd" id="1_1b2e2"]
+[ext_resource type="PackedScene" uid="uid://deajggaeh7111" path="res://SCRIPT/INTERACTIBLE/platforme.tscn" id="2_ktn18"]
 [ext_resource type="PackedScene" uid="uid://buwunuey57xf7" path="res://SCRIPT/INTERACTIBLE/porte.tscn" id="4_bsdtk"]
 [ext_resource type="Script" uid="uid://cldc0dscj1uj1" path="res://SCRIPT/OUTILS/LEVEL_EXPORTER.gd" id="6_ww6ae"]
 [ext_resource type="Script" uid="uid://cqpdbfmlcuq38" path="res://SCRIPT/OUTILS/SpriteScaler.gd" id="7_iy4gx"]
@@ -286,33 +287,10 @@ position = Vector2(-9431, -1648)
 script = ExtResource("1_1b2e2")
 
 [node name="collision" type="Node2D" parent="." unique_id=1975112513]
-visible = false
 position = Vector2(14267, 1610)
 
-[node name="platforme" type="StaticBody2D" parent="collision" unique_id=1228680797]
+[node name="platforme" parent="collision" unique_id=856894921 instance=ExtResource("2_ktn18")]
 position = Vector2(-14267, -1610)
-collision_layer = 2
-collision_mask = 0
-
-[node name="CollisionPolygon2D12" type="CollisionPolygon2D" parent="collision/platforme" unique_id=1043510596]
-position = Vector2(0, -320)
-polygon = PackedVector2Array(14153, 1660, 14383, 1657, 14383, 1666, 14150, 1676)
-one_way_collision = true
-
-[node name="CollisionPolygon2D15" type="CollisionPolygon2D" parent="collision/platforme" unique_id=2050959676]
-position = Vector2(7037, -1188)
-polygon = PackedVector2Array(14153, 1660, 14383, 1657, 14383, 1666, 14150, 1676)
-one_way_collision = true
-
-[node name="CollisionPolygon2D13" type="CollisionPolygon2D" parent="collision/platforme" unique_id=882266858]
-position = Vector2(-3283, -653)
-polygon = PackedVector2Array(14153, 1660, 14383, 1657, 14383, 1666, 14150, 1676)
-one_way_collision = true
-
-[node name="CollisionPolygon2D14" type="CollisionPolygon2D" parent="collision/platforme" unique_id=501906113]
-position = Vector2(-3692, -663)
-polygon = PackedVector2Array(14153, 1660, 14383, 1657, 14383, 1666, 14150, 1676)
-one_way_collision = true
 
 [node name="classicsol" type="StaticBody2D" parent="collision" unique_id=930610937 groups=["wall_jump"]]
 z_index = 10
@@ -424,6 +402,7 @@ bg_color = Color(0.101960786, 0.101960786, 0.101960786, 0)
 margin = 50
 
 [node name="decord" type="Node2D" parent="." unique_id=1522053362]
+visible = false
 
 [node name="LevelExport" type="Sprite2D" parent="decord" unique_id=2035351058]
 visible = false

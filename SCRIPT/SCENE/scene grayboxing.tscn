@@ -27,11 +27,20 @@
 [ext_resource type="Texture2D" uid="uid://45qodlfwwkds" path="res://MEDIA/greyboxing/prison/400x100.png" id="25_2oji1"]
 [ext_resource type="Texture2D" uid="uid://c2qx36eew7h1l" path="res://MEDIA/greyboxing/prison/400x200 Bas 2.png" id="25_ghkls"]
 [ext_resource type="Texture2D" uid="uid://b1u8b0s23cjl" path="res://MEDIA/greyboxing/prison/400x200 Slide Sol 2.png" id="26_2oji1"]
+[ext_resource type="PackedScene" uid="uid://deajggaeh7111" path="res://SCRIPT/INTERACTIBLE/platforme.tscn" id="28_2oji1"]
 
 [node name="Node2D" type="Node2D" unique_id=782786777]
 position = Vector2(0, 50)
 
-[node name="checkpoint" parent="." unique_id=524856083 groups=["Checkpoint"] instance=ExtResource("1_xq5vh")]
+[node name="spawnplayer" type="Node" parent="." unique_id=864481049]
+script = ExtResource("2_8v41f")
+
+[node name="interactible" type="Node2D" parent="." unique_id=1701277718]
+
+[node name="platforme" parent="interactible" unique_id=856894921 instance=ExtResource("28_2oji1")]
+position = Vector2(3450, -1089)
+
+[node name="checkpoint" parent="interactible" unique_id=524856083 groups=["Checkpoint"] instance=ExtResource("1_xq5vh")]
 z_index = -4
 position = Vector2(4, -98)
 
@@ -91,13 +100,13 @@ position = Vector2(3200, 100)
 position = Vector2(3575, -700)
 
 [node name="50x200" parent="grayboxing" unique_id=161806470 instance=ExtResource("9_ko8od")]
-position = Vector2(3314, -800)
+position = Vector2(3325, -801)
 
 [node name="50x401" parent="grayboxing" unique_id=231838243 instance=ExtResource("8_6252t")]
 position = Vector2(3575, -1100)
 
 [node name="50x201" parent="grayboxing" unique_id=946551239 instance=ExtResource("9_ko8od")]
-position = Vector2(3314, -1000)
+position = Vector2(3325, -1001)
 
 [node name="50x402" parent="grayboxing" unique_id=1943680729 instance=ExtResource("8_6252t")]
 position = Vector2(3575, -1500)
@@ -106,20 +115,20 @@ position = Vector2(3575, -1500)
 position = Vector2(3350, -1600)
 
 [node name="400x103" parent="grayboxing" unique_id=1835468486 instance=ExtResource("3_jojol")]
-position = Vector2(3089, -1050)
+position = Vector2(3100, -1051)
 
 [node name="400x104" parent="grayboxing" unique_id=740296157 instance=ExtResource("3_jojol")]
-position = Vector2(2689, -1050)
+position = Vector2(2700, -1051)
 
 [node name="400x200 slide2" parent="grayboxing" unique_id=1188374187 instance=ExtResource("6_a4ihq")]
-position = Vector2(2689, -1200)
+position = Vector2(2700, -1201)
 
 [node name="400x200 slide3" parent="grayboxing" unique_id=992863835 instance=ExtResource("6_a4ihq")]
-position = Vector2(3089, -900)
+position = Vector2(3100, -901)
 rotation = 3.1415927
 
 [node name="400x206" parent="grayboxing" unique_id=324388949 instance=ExtResource("5_55v8t")]
-position = Vector2(2289, -1200)
+position = Vector2(2300, -1201)
 
 [node name="200x50" parent="grayboxing" unique_id=1253489084 instance=ExtResource("8_q46gg")]
 position = Vector2(1611, -1275)
@@ -159,7 +168,7 @@ position = Vector2(-868, -950)
 rotation = 3.1415927
 
 [node name="400x100 slide2" parent="grayboxing" unique_id=405885944 instance=ExtResource("11_55v8t")]
-position = Vector2(2289, -1050)
+position = Vector2(2300, -1051)
 rotation = 3.1415927
 
 [node name="200x402" parent="grayboxing" unique_id=403260781 instance=ExtResource("7_mnbwy")]
@@ -248,7 +257,11 @@ position = Vector2(-4349, -2450)
 [node name="400x112" parent="grayboxing" unique_id=2002857676 instance=ExtResource("3_jojol")]
 position = Vector2(-3619, -2450)
 
+[node name="200x406" parent="grayboxing" unique_id=117799705 instance=ExtResource("7_mnbwy")]
+position = Vector2(256, -396)
+
 [node name="VISUAL" type="Node2D" parent="." unique_id=2143756758]
+visible = false
 
 [node name="400x200Sol" type="Sprite2D" parent="VISUAL" unique_id=354839486]
 position = Vector2(-6226, -1800)
@@ -355,7 +368,7 @@ position = Vector2(2000, -200)
 texture = ExtResource("14_nxmfr")
 
 [node name="400x2002" type="Sprite2D" parent="VISUAL" unique_id=1468323606]
-position = Vector2(3089, -900)
+position = Vector2(3100, -901)
 rotation = 3.1415927
 scale = Vector2(1, -1)
 texture = ExtResource("22_x63i7")
@@ -381,11 +394,11 @@ position = Vector2(-5515, -2300)
 texture = ExtResource("22_x63i7")
 
 [node name="400x200Sol10" type="Sprite2D" parent="VISUAL" unique_id=2071522266]
-position = Vector2(2290, -1200)
+position = Vector2(2301, -1201)
 texture = ExtResource("14_nxmfr")
 
 [node name="400x100SolPlateForme" type="Sprite2D" parent="VISUAL" unique_id=700823834]
-position = Vector2(3090, -1050)
+position = Vector2(3101, -1051)
 texture = ExtResource("21_4bxjh")
 
 [node name="200x50" type="Sprite2D" parent="VISUAL" unique_id=1665990107]
@@ -433,7 +446,7 @@ position = Vector2(3200, 100)
 texture = ExtResource("24_t4uqw")
 
 [node name="400x100SolPlateForme6" type="Sprite2D" parent="VISUAL" unique_id=1784865156]
-position = Vector2(2690, -1050)
+position = Vector2(2701, -1051)
 texture = ExtResource("21_4bxjh")
 
 [node name="400x100SolPlateForme7" type="Sprite2D" parent="VISUAL" unique_id=1924980543]
@@ -459,11 +472,11 @@ position = Vector2(-1486, -1075)
 texture = ExtResource("22_isp6a")
 
 [node name="400x200SlideSol3" type="Sprite2D" parent="VISUAL" unique_id=720571179]
-position = Vector2(2689, -1196)
+position = Vector2(2700, -1197)
 texture = ExtResource("26_2oji1")
 
 [node name="400x100" type="Sprite2D" parent="VISUAL" unique_id=283299778]
-position = Vector2(2290, -1050)
+position = Vector2(2301, -1051)
 rotation = 3.1415927
 scale = Vector2(1, -1)
 texture = ExtResource("25_2oji1")
@@ -478,38 +491,34 @@ texture = ExtResource("25_2oji1")
 position = Vector2(-5915, -2250)
 texture = ExtResource("21_4bxjh")
 
-[node name="200x400" parent="VISUAL" unique_id=117799705 instance=ExtResource("7_mnbwy")]
-position = Vector2(256, -396)
+[node name="enemi4" type="Node2D" parent="." unique_id=707226753]
 
-[node name="spawnplayer" type="Node" parent="." unique_id=864481049]
-script = ExtResource("2_8v41f")
-
-[node name="enemi" parent="." unique_id=627255339 instance=ExtResource("13_a4ihq")]
+[node name="enemi" parent="enemi4" unique_id=627255339 instance=ExtResource("13_a4ihq")]
 position = Vector2(1271, -302)
 
-[node name="enemi2" parent="." unique_id=1534327780 instance=ExtResource("13_a4ihq")]
+[node name="enemi2" parent="enemi4" unique_id=1534327780 instance=ExtResource("13_a4ihq")]
 position = Vector2(2339, -503)
 
-[node name="enemi3" parent="." unique_id=1629459866 instance=ExtResource("13_a4ihq")]
+[node name="enemi3" parent="enemi4" unique_id=1629459866 instance=ExtResource("13_a4ihq")]
 position = Vector2(3031, -504)
 
-[node name="enemi5" parent="." unique_id=1957176117 instance=ExtResource("13_a4ihq")]
+[node name="enemi5" parent="enemi4" unique_id=1957176117 instance=ExtResource("13_a4ihq")]
 position = Vector2(2258, -1313)
 
-[node name="enemi6" parent="." unique_id=44772268 instance=ExtResource("13_a4ihq")]
+[node name="enemi6" parent="enemi4" unique_id=44772268 instance=ExtResource("13_a4ihq")]
 position = Vector2(-21, -1316)
 
-[node name="enemi7" parent="." unique_id=145895648 instance=ExtResource("13_a4ihq")]
+[node name="enemi7" parent="enemi4" unique_id=145895648 instance=ExtResource("13_a4ihq")]
 position = Vector2(-2558, -1302)
 
-[node name="enemi8" parent="." unique_id=1365309088 instance=ExtResource("13_a4ihq")]
+[node name="enemi8" parent="enemi4" unique_id=1365309088 instance=ExtResource("13_a4ihq")]
 position = Vector2(-2814, -1302)
 
-[node name="enemi9" parent="." unique_id=285266546 instance=ExtResource("13_a4ihq")]
+[node name="enemi9" parent="enemi4" unique_id=285266546 instance=ExtResource("13_a4ihq")]
 position = Vector2(-4414, -1696)
 
-[node name="enemi10" parent="." unique_id=1745181124 instance=ExtResource("13_a4ihq")]
+[node name="enemi10" parent="enemi4" unique_id=1745181124 instance=ExtResource("13_a4ihq")]
 position = Vector2(-5973, -1892)
 
-[node name="enemi11" parent="." unique_id=1823507915 instance=ExtResource("13_a4ihq")]
+[node name="enemi11" parent="enemi4" unique_id=1823507915 instance=ExtResource("13_a4ihq")]
 position = Vector2(-5629, -2521)

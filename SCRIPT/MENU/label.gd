@@ -86,9 +86,3 @@ func _clear_popup() -> void:
 		add_number.visible = false
 		add_number.self_modulate.a = 1.0
 
-# ----------------- Debug via touches -----------------
-func _input(event: InputEvent) -> void:
-	if event.is_action_pressed("up_menu"):
-		emit_signal("souls_request", 10000)   # +100 (déclenche aussi le popup)
-	elif event.is_action_pressed("down_menu"):
-		emit_signal("souls_request", -100)  # -100 (popup ignoré)

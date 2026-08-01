@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dg0bjlr44cgxp"
-path="res://.godot/imported/Bones_Monster_idle-4.png-c9b46aa152ebe0e0e6ad1aebaa85d158.ctex"
+uid="uid://b02ki75goravk"
+path="res://.godot/imported/Monster_HEAL-10.png-d097aa1874e939dbdb31ab4219362afd.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://MEDIA/CHARACHTER/ANIMATION/Bones_Monster_idle-4.png"
-dest_files=["res://.godot/imported/Bones_Monster_idle-4.png-c9b46aa152ebe0e0e6ad1aebaa85d158.ctex"]
+source_file="res://MEDIA/CHARACHTER/ANIMATION/HEAL/Monster_HEAL-10.png"
+dest_files=["res://.godot/imported/Monster_HEAL-10.png-d097aa1874e939dbdb31ab4219362afd.ctex"]
 
 [params]
 
@@ -23,7 +23,7 @@ compress/rdo_quality_loss=0.0
 compress/hdr_compression=1
 compress/normal_map=0
 compress/channel_pack=0
-mipmaps/generate=true
+mipmaps/generate=false
 mipmaps/limit=-1
 roughness/mode=0
 roughness/src_normal=""

@@ -157,7 +157,7 @@ script = ExtResource("1_536yp")
 
 [node name="detection_vide" type="RayCast2D" parent="." unique_id=1277015668]
 position = Vector2(45, -13)
-target_position = Vector2(1, 27)
+target_position = Vector2(0, 150)
 
 [node name="bare_de_vie" parent="." unique_id=1882929594 instance=ExtResource("2_lo1ik")]
 light_mask = 0

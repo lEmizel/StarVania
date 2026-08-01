@@ -99,7 +99,7 @@ func _start_fade() -> void:
 	tw.tween_property(self, "self_modulate:a", 0.0, fade_duration)
 	tw.finished.connect(func () -> void:
 		Player.changement_de_blood(blood_reward)
-		Player.changement_d_endurance(gauge_fill)  # remplit la jauge de sang
+		Player.changement_de_sang(gauge_fill)  # remplit la jauge de sang
 		var p := get_parent()
 		if is_instance_valid(p):
 			p.queue_free()  # libère aussi cette particule

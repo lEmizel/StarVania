@@ -1,0 +1,21 @@
+[gd_scene format=3 uid="uid://i6pp48vi48h"]
+
+[ext_resource type="Script" uid="uid://dftar4ptyhjxe" path="res://SCRIPT/UTILITAIRE/spawnplayer.gd" id="1_kudm0"]
+[ext_resource type="PackedScene" uid="uid://ckxwmy0iav2h2" path="res://SCRIPT/INTERACTIBLE/Checkpoint.tscn" id="2_o3jev"]
+[ext_resource type="Script" uid="uid://bdg501rlhpcul" path="res://SCRIPT/INTERACTIBLE/checkpoint.gd" id="3_ql4b5"]
+
+[node name="scene_05" type="Node2D" unique_id=1083121648]
+
+[node name="spawnplayer" type="Node" parent="." unique_id=889173970]
+script = ExtResource("1_kudm0")
+
+[node name="interactible" type="Node2D" parent="." unique_id=580635241]
+
+[node name="checkpoint" type="Node2D" parent="interactible" unique_id=524856083 groups=["Checkpoint"] instance=ExtResource("2_o3jev")]
+script = ExtResource("3_ql4b5")
+
+[node name="grayboxing" type="Node2D" parent="." unique_id=1122596716]
+
+[node name="VISUAL" type="Node2D" parent="." unique_id=1269986088]
+
+[node name="enemi" type="Node2D" parent="." unique_id=402220558]

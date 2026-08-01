@@ -11,7 +11,6 @@ extends AnimatedSprite2D
 
 
 var damage = 70
-@export var HPDega: int = 40  # PV rendus via rally sur coup réussi
 
 func _ready() -> void:
 	# 1) on connecte une fois les deux signaux
@@ -29,8 +28,6 @@ func _on_body_entered(body):
 	# on passe en paramètre amount ET la position X du joueur
 	if body.has_method("apply_damage"):
 		body.apply_damage(damage, player.global_position.x)
-		if HPDega > 0:
-			Player.demande_rally_heal(HPDega)
 		# Ennemi inébranlable (aucun knockback) : le contrecoup annule
 		# l'élan du joueur au lieu de faire reculer l'ennemi
 		if body is BaseAI and body.HIT_KNOCK_X == 0.0:

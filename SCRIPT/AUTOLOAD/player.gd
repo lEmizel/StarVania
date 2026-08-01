@@ -9,15 +9,8 @@ var blood := 0
 var hp := 5
 var MAX_HP := 5
 var max_hearts := 5  # nombre de cœurs affichés
-var en := 0  # la jauge de sang commence vide (se remplit via les récoltes)
-var MAX_en := 195
-
-# Soigne un pourcentage des PV max (par défaut 40%) et émet le signal via changement_de_vie
-func heal_blood(pct: float = 0.40) -> void:
-	var amount := int(round(MAX_HP * pct))
-	if amount <= 0:
-		return
-	changement_de_vie(amount)
+var sang := 0  # la jauge de sang commence vide (se remplit via les récoltes)
+var MAX_SANG := 195
 
 func changement_de_vie(amount: int) -> void:
 	var old := hp
@@ -27,13 +20,13 @@ func changement_de_vie(amount: int) -> void:
 	if !bars.is_empty():
 		bars[0].emit_signal("health_request", float(delta))
 
-func changement_d_endurance(amount: int) -> void:
-	var old := en
-	en = clamp(en + amount, 0, MAX_en)
-	var delta := en - old
-	var bars := get_tree().get_nodes_in_group("UI_Endu")
+func changement_de_sang(amount: int) -> void:
+	var old := sang
+	sang = clamp(sang + amount, 0, MAX_SANG)
+	var delta := sang - old
+	var bars := get_tree().get_nodes_in_group("UI_Sang")
 	if !bars.is_empty():
-		bars[0].emit_signal("endurance_request", float(delta))
+		bars[0].emit_signal("sang_request", float(delta))
 
 func changement_de_blood(amount: int) -> void:
 	if amount == 0:
@@ -48,15 +41,6 @@ func changement_de_blood(amount: int) -> void:
 
 # ---------- MAX HP / EN ----------
 
-
-# --- SOIN via la barre orange (rally) ---
-func demande_rally_heal(amount: int) -> void:
-	if amount <= 0:
-		return
-	var ui := get_tree().get_nodes_in_group("UI_Health")
-	if not ui.is_empty():
-		ui[0].emit_signal("rally_heal_request", float(amount))
-		
 
 # --- MAX HP ---
 func set_max_hp(new_max: int) -> void:
@@ -75,22 +59,21 @@ func set_max_hp(new_max: int) -> void:
 func add_max_hp(delta: int) -> void:
 	set_max_hp(MAX_HP + delta)  # <-- aucune mise à l’échelle
 
-# --- MAX EN ---
-func set_max_en(new_max: int) -> void:
+# --- MAX SANG ---
+func set_max_sang(new_max: int) -> void:
 	new_max = max(1, new_max)
-	if new_max == MAX_en:
+	if new_max == MAX_SANG:
 		return
-	var old_en := en
-	MAX_en = new_max
-	en = min(old_en, MAX_en)
+	var old_sang := sang
+	MAX_SANG = new_max
+	sang = min(old_sang, MAX_SANG)
 
-	var ui := get_tree().get_nodes_in_group("UI_Endu")
+	var ui := get_tree().get_nodes_in_group("UI_Sang")
 	if not ui.is_empty():
-		ui[0].emit_signal("bar_max_request", "en", float(MAX_en))
+		ui[0].emit_signal("bar_max_request", "sang", float(MAX_SANG))
 
-func add_max_en(delta: int) -> void:
-	set_max_en(MAX_en + delta)
+func add_max_sang(delta: int) -> void:
+	set_max_sang(MAX_SANG + delta)
 
 
-#Player.set_max_hp(120)         # agrandit la barre HP + ajuste hp au même %
-#Player.add_max_en(50)          # +50 max endu, conserve le pourcentage courant
+#Player.add_max_sang(50)        # +50 de capacité de jauge de sang (la barre s'allonge)

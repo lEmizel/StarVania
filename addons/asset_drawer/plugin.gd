@@ -51,6 +51,12 @@ func _enter_tree() -> void:
 	flip_y.pressed.connect(_flip_selection.bind(1))
 	toolbar.add_child(flip_y)
 
+	var new_scene_btn := Button.new()
+	new_scene_btn.text = "+ Scène"
+	new_scene_btn.tooltip_text = "Crée une scène de niveau pré-câblée :\nspawnplayer, interactible (+ checkpoint), grayboxing, VISUAL, enemi"
+	new_scene_btn.pressed.connect(_on_new_level_scene_pressed)
+	toolbar.add_child(new_scene_btn)
+
 	dock.add_child(toolbar)
 	dock.move_child(toolbar, 0)
 
@@ -113,6 +119,75 @@ func _reparent_keep_position(node: Node2D, new_parent: Node) -> void:
 	# regarde à nouveau le nœud dans l'arbre de scène
 	EditorInterface.get_selection().clear()
 	EditorInterface.get_selection().add_node(node)
+
+
+# ------------------------------------------------------------------
+#  NOUVELLE SCÈNE DE NIVEAU — squelette pré-câblé prêt à construire
+# ------------------------------------------------------------------
+
+const SPAWNPLAYER_SCRIPT_PATH := "res://SCRIPT/UTILITAIRE/spawnplayer.gd"
+const CHECKPOINT_SCENE_PATH := "res://SCRIPT/INTERACTIBLE/Checkpoint.tscn"
+
+var _new_scene_dialog: EditorFileDialog = null
+
+func _on_new_level_scene_pressed() -> void:
+	if _new_scene_dialog == null:
+		_new_scene_dialog = EditorFileDialog.new()
+		_new_scene_dialog.file_mode = EditorFileDialog.FILE_MODE_SAVE_FILE
+		_new_scene_dialog.access = EditorFileDialog.ACCESS_RESOURCES
+		_new_scene_dialog.add_filter("*.tscn", "Scène Godot")
+		_new_scene_dialog.current_dir = "res://SCRIPT/SCENE"
+		_new_scene_dialog.current_file = "nouveau_niveau.tscn"
+		_new_scene_dialog.file_selected.connect(_create_level_scene)
+		EditorInterface.get_base_control().add_child(_new_scene_dialog)
+	_new_scene_dialog.popup_centered_ratio(0.6)
+
+
+func _create_level_scene(path: String) -> void:
+	var root := Node2D.new()
+	root.name = path.get_file().get_basename()
+
+	# spawnplayer : le nœud qui instancie player + caméra au chargement
+	var spawn := Node.new()
+	spawn.name = "spawnplayer"
+	spawn.set_script(load(SPAWNPLAYER_SCRIPT_PATH))
+	root.add_child(spawn)
+	spawn.owner = root
+
+	# conteneurs d'organisation
+	var interactible: Node2D = null
+	for container_name in ["interactible", "grayboxing", "VISUAL", "enemi"]:
+		var container := Node2D.new()
+		container.name = container_name
+		root.add_child(container)
+		container.owner = root
+		if container_name == "interactible":
+			interactible = container
+
+	# checkpoint de départ, rangé sous interactible (groupe attendu par spawnplayer)
+	var checkpoint_scene: PackedScene = load(CHECKPOINT_SCENE_PATH)
+	if checkpoint_scene != null and interactible != null:
+		var checkpoint := checkpoint_scene.instantiate()
+		checkpoint.name = "checkpoint"
+		checkpoint.add_to_group("Checkpoint", true)
+		interactible.add_child(checkpoint)
+		checkpoint.owner = root
+
+	var packed := PackedScene.new()
+	var pack_err := packed.pack(root)
+	root.free()
+	if pack_err != OK:
+		push_error("[Asset Drawer] échec du pack de la scène : %s" % pack_err)
+		return
+
+	var save_err := ResourceSaver.save(packed, path)
+	if save_err != OK:
+		push_error("[Asset Drawer] échec de la sauvegarde : %s" % save_err)
+		return
+
+	EditorInterface.get_resource_filesystem().scan()
+	EditorInterface.open_scene_from_path(path)
+	print("[Asset Drawer] scène de niveau créée : ", path)
 
 
 # ------------------------------------------------------------------

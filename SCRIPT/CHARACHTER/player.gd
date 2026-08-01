@@ -2,17 +2,6 @@ extends CharacterBody2D
 
 
 enum States { IDLE, RUN, CHUTE, JUMP, WALL_GRIFFE, WALL_JUMP, CLIMB, ROLL, CHUTE_GRIFFE, GRAB, ATTACK_LIGHT_1, ATTACK_LIGHT_2, ATTACK_LIGHT_3, ATTACK_AIR, ATTACK_LOURDE, DEAD, HIT, HEAL, DROP, BLOODBALL }
-const STATE_STAMINA_COSTS := {
-	States.ROLL:            0,
-	States.ATTACK_LIGHT_1:  0,
-	States.ATTACK_LIGHT_2:  0,
-	States.ATTACK_LIGHT_3:  0,
-	States.ATTACK_AIR:      0,
-	States.ATTACK_LOURDE:   0,
-}
-
-func _get_state_cost(s: States) -> int:
-	return int(STATE_STAMINA_COSTS.get(s, 0))
 
 
 
@@ -269,12 +258,17 @@ func _raycast_hits_group(rc: RayCast2D, group_name: String, body_only := false) 
 
 
 
-const FALL_DAMAGE_ENABLED := false  # à réactiver quand l'échelle en cœurs sera décidée
+const FALL_DAMAGE_ENABLED := true
 
+## Dégâts de chute, à l'échelle CŒURS :
+## - en dessous de SAFE_HEIGHT : rien
+## - au-delà : 1 cœur, +1 par tranche de STEP_PX supplémentaire
+## - plafonné à LETHAL_DAMAGE (10) : une très grande chute reste mortelle
+##   quel que soit le nombre de cœurs du joueur
 func calcule_falling_damage() -> int:
-	const SAFE_HEIGHT: float     = 850.0
-	const DAMAGE_PER_STEP: int   = 30
-	const STEP_PX: float         = 100.0
+	const SAFE_HEIGHT: float   = 850.0
+	const STEP_PX: float       = 250.0
+	const LETHAL_DAMAGE: int   = 10
 
 	# Sentinelle : aucun départ de chute enregistré → pas de dégâts possibles
 	if FALL_POINT <= -1e8:
@@ -284,18 +278,13 @@ func calcule_falling_damage() -> int:
 	var fall_distance: float = max(0.0, impact_point - FALL_POINT)
 
 	if fall_distance <= SAFE_HEIGHT:
-		print("Chute sans dégâts (", fall_distance, " px )")
 		return 0
 
-	var excess: float  = fall_distance - SAFE_HEIGHT
-	var damage: int    = int(ceil(excess / STEP_PX)) * DAMAGE_PER_STEP
-	# Dégâts de chute DÉSACTIVÉS pour l'instant (échelle en cœurs à définir) —
-	# toute la logique de calcul est conservée pour réactivation future
+	var excess: float = fall_distance - SAFE_HEIGHT
+	var damage: int = clampi(1 + int(excess / STEP_PX), 1, LETHAL_DAMAGE)
 	if FALL_DAMAGE_ENABLED:
 		apply_damage(damage, null, "chute")
-	print("Dégâts de chute :", damage,
-		" | hauteur totale :", fall_distance, " px",
-		" | excès :", excess, " px")
+	print("Dégâts de chute : ", damage, " cœur(s) | hauteur : ", int(fall_distance), " px")
 	return damage
 
 
@@ -352,28 +341,6 @@ func change_state(new_state: States) -> void:
 	if _changing_now or new_state == current_state:
 		return
 
-	var cost := _get_state_cost(new_state)
-	var skip_check := (new_state == States.ROLL)
-	var force_idle_on_fail := (
-		current_state == States.ATTACK_LIGHT_1
-		or current_state == States.ATTACK_LIGHT_2
-		or current_state == States.ATTACK_LIGHT_3
-	)
-
-	var requires_stamina := (cost > 0) and (not skip_check)
-	if requires_stamina and Player.en < 1:
-		if force_idle_on_fail and current_state != States.IDLE:
-			_changing_now = true
-			state_functions[current_state]["exit"].call()
-			previous_state = current_state
-			current_state  = States.IDLE
-			state_functions[current_state]["enter"].call()
-			_changing_now = false
-		return
-
-	if cost > 0:
-		Player.changement_d_endurance(-cost)
-
 	_changing_now = true
 	state_functions[current_state]["exit"].call()
 	previous_state = current_state
@@ -402,7 +369,7 @@ func idle_input(event: InputEvent) -> void:
 		change_state(States.JUMP)
 		return
 	elif Input.is_action_just_pressed("heal"):
-		change_state(States.HEAL)
+		_try_heal()
 		return
 	elif Input.is_action_just_pressed("light_attack"):
 		change_state(States.ATTACK_LIGHT_1)
@@ -460,7 +427,7 @@ func run_input(event: InputEvent) -> void:
 		change_state(States.JUMP)
 		return
 	elif Input.is_action_just_pressed("heal"):
-		change_state(States.HEAL)
+		_try_heal()
 		return
 	elif Input.is_action_just_pressed("esquive"):
 		change_state(States.ROLL)
@@ -1231,6 +1198,22 @@ func attack_air_exit() -> void:
 
 
 
+## Coût du soin, en SANG (la jauge remplie par les récoltes)
+@export var HEAL_COST: int = 100
+## Cœurs rendus par un soin complet
+@export var HEAL_AMOUNT: int = 2
+
+## Tente de lancer le soin : refuse si pas assez de sang ou déjà plein PV.
+## Le coût n'est débité qu'à la FIN de l'animation (soin interrompu = gratuit)
+func _try_heal() -> void:
+	if Player.hp >= Player.MAX_HP:
+		return
+	if Player.sang < HEAL_COST:
+		_notify_insufficient("sang")
+		return
+	change_state(States.HEAL)
+
+
 func heal_enter() -> void:
 	animator.play("heal")
 
@@ -1245,7 +1228,8 @@ func heal_input(event: InputEvent) -> void:
 func heal_animation_finished() -> void:
 	match animator.animation:
 		"heal":
-			Player.heal_blood()
+			Player.changement_de_sang(-HEAL_COST)
+			Player.changement_de_vie(HEAL_AMOUNT)
 			if Input.is_action_pressed("right_move") or Input.is_action_pressed("left_move"):
 				change_state(States.RUN)
 			else:
@@ -1269,16 +1253,22 @@ var _cast_timer := 0.0
 ## Tente de lancer le sort : vérifie la jauge de sang ; si insuffisante,
 ## déclenche le feedback UI (jauge qui tremble + clignote rouge) sans caster
 func _try_cast_bloodball() -> void:
-	if Player.en < BLOODBALL_COST:
-		var bars := get_tree().get_nodes_in_group("UI_Endu")
-		if not bars.is_empty() and bars[0].has_method("blood_insufficient_feedback"):
-			bars[0].blood_insufficient_feedback()
+	if Player.sang < BLOODBALL_COST:
+		_notify_insufficient("sang")
 		return
 	change_state(States.BLOODBALL)
 
+
+## Feedback universel de coût refusé : fait trembler/clignoter l'UI de la
+## ressource concernée ("sang" = jauge, "blood" = compteur)
+func _notify_insufficient(kind: String) -> void:
+	var huds := get_tree().get_nodes_in_group("UI_Sang")
+	if not huds.is_empty() and huds[0].has_method("insufficient_feedback"):
+		huds[0].insufficient_feedback(kind)
+
 func bloodball_enter() -> void:
 	print("[SPELL] cast ! spawn de la boule au marker ", spellcast.global_position)
-	Player.changement_d_endurance(-BLOODBALL_COST)  # le sort boit son sang
+	Player.changement_de_sang(-BLOODBALL_COST)  # le sort boit son sang
 	# TODO : remplacer par une vraie animation de cast quand elle existera
 	animator.play("idle")
 	# Au sol : le perso se plante pour lancer. En l'air : comme l'attaque
@@ -1371,7 +1361,7 @@ func dead_input(event: InputEvent) -> void:
 	if Input.is_action_just_pressed("jump"):
 		print("okkkkkkkje suis mort")
 		Player.hp = Player.MAX_HP
-		Player.en = Player.MAX_en
+		Player.sang = Player.MAX_SANG
 		Loader.load_scene_with_loading(Loader._target_scene_path)
 
 func dead_exit() -> void:
