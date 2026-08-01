@@ -21,7 +21,8 @@ var initial_position: Vector2
 # Stats communes
 var hp: int = 100
 var max_hp: int = 100
-var attack_power: int = 10
+## Dégâts des attaques (lu par l'animator au moment où la hitbox touche)
+@export var attack_power: int = 95
 
 # Distance & tracking
 var max_tracking_distance: float = 1000.0
@@ -108,7 +109,7 @@ func _check_contact_damage() -> void:
 	for body in _contact_area.get_overlapping_bodies():
 		if body.is_in_group("Player") and body.has_method("apply_damage"):
 			# L'invulnérabilité du joueur (état HIT / ROLL) limite la cadence
-			body.apply_damage(contact_damage, global_position.x)
+			body.apply_damage(contact_damage, global_position.x, "contact:" + name)
 
 
 ## Décroissance du knockback ; à la fin, on purge la vitesse résiduelle

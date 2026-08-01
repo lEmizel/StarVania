@@ -16,7 +16,6 @@ func _setup_states() -> void:
 func _start() -> void:
 	max_hp = 230
 	hp = 230
-	attack_power = 95  # valeur réelle reprise de l'ancien animator (damage = 95)
 	max_tracking_distance = 1500.0
 	confort_zone_max = 120.0
 	confort_zone_min = 20.0

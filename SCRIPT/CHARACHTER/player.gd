@@ -32,6 +32,8 @@ func _get_state_cost(s: States) -> int:
 
 @onready var point: Node2D = $POINT # le node 2d qui sert a flip le personnage
 @onready var animator = $POINT/animator
+@onready var collision_normale: CollisionShape2D = $CollisionShape2D
+@onready var collision_roulade: CollisionShape2D = $CollisionShaperoulage
 var gravity = ProjectSettings.get_setting("physics/2d/default_gravity")
 var current_state : States = States.IDLE
 var previous_state : States = States.IDLE
@@ -66,6 +68,14 @@ var combo_buffered := false   # true si le joueur a appuyé pendant l'anim en co
 
 
 func _ready() -> void:
+	# Les raycasts de mur ne détectent QUE les corps solides : une Area2D
+	# (checkpoint, grab, porte...) qui chevauche un mur arrêterait le rayon
+	# avant le mur et ferait clignoter l'accroche du wall jump
+	wall_right.collide_with_areas = false
+	wall_left.collide_with_areas = false
+	wall_right.collide_with_bodies = true
+	wall_left.collide_with_bodies = true
+
 	animator.connect("animation_finished", Callable(self, "_on_animation_finished"))
 	set_floor_max_angle(deg_to_rad(60))
 	set_floor_snap_length(6.0)
@@ -84,6 +94,14 @@ func _physics_process(delta: float) -> void:
 	if signf(point.scale.x) != signf(_facing_prev):
 		_cut_slash_fx()
 	_facing_prev = point.scale.x
+	# Recharge du double saut + référence des dégâts de chute : au sol elle
+	# suit le perso ; en l'air elle garde le point le PLUS HAUT du vol —
+	# un double saut ne peut donc jamais effacer une chute accumulée
+	if is_on_floor():
+		_double_jump_used = false
+		FALL_POINT = global_position.y
+	else:
+		FALL_POINT = minf(FALL_POINT, global_position.y)
 	# Knockback absolu — même principe que les monstres (BASE_IA) : tant qu'il
 	# est actif, il remplace le déplacement horizontal, via velocity pour que
 	# move_and_slide glisse le long du sol
@@ -161,30 +179,49 @@ func _handle_landing() -> void:
 	else:
 		goto_state(States.IDLE)
 
-func apply_damage(amount: int, source_x) -> void:
+func apply_damage(amount: int, source_x, source_tag := "?") -> void:
 	if current_state in [States.ROLL, States.DEAD]:
 		return
-	if current_state != States.HIT:
-		Player.changement_de_vie(-amount)
-		if Player.hp <= 0:
-			_knock = Vector2.ZERO
-			change_state(States.DEAD)
-			return
-		# Knockback horizontal absolu, l'état HIT gère stun + anim
-		var dir := 0
-		if source_x != null:
-			dir = 1 if (global_position.x - source_x) > 0 else -1
-		_knock = Vector2(dir * HIT_KNOCK_X, 0.0)
-		change_state(States.HIT)
-		# Soulèvement : impulsion verticale one-shot, appliquée APRÈS hit_enter
-		# (qui remet velocity à zéro) — la gravité gère la retombée
-		velocity.y = HIT_KNOCK_Y
+	if current_state == States.HIT:
+		# DEBUG dégâts : coup ignoré pendant le stun
+		print("[DMG bloqué/stun] f=", Engine.get_physics_frames(),
+			" src=", source_tag, " amount=", amount)
+		return
+	print("[DMG] f=", Engine.get_physics_frames(),
+		" src=", source_tag, " amount=", amount,
+		" état=", States.keys()[current_state],
+		" hp ", Player.hp, " -> ", Player.hp - amount)
+	Player.changement_de_vie(-amount)
+	if Player.hp <= 0:
+		_knock = Vector2.ZERO
+		change_state(States.DEAD)
+		return
+	# Knockback horizontal absolu, l'état HIT gère stun + anim
+	var dir := 0
+	if source_x != null:
+		dir = 1 if (global_position.x - source_x) > 0 else -1
+	_knock = Vector2(dir * HIT_KNOCK_X, 0.0)
+	change_state(States.HIT)
+	# Soulèvement : impulsion verticale one-shot, appliquée APRÈS hit_enter
+	# (qui remet velocity à zéro) — la gravité gère la retombée
+	velocity.y = HIT_KNOCK_Y
 
 
 func goto_state(s: States) -> void:
 	if current_state == s:
 		return
 	call_deferred("change_state", s)
+
+## Détection de mur pour le wall jump : TOUT mur solide compte
+## (StaticBody2D et TileMap), sans groupe requis. Les CharacterBody2D
+## (monstres) sont volontairement exclus.
+func _raycast_hits_wall(rc: RayCast2D) -> bool:
+	rc.force_raycast_update()
+	if not rc.is_colliding():
+		return false
+	var col := rc.get_collider()
+	return col is StaticBody2D or col is TileMap or col is TileMapLayer
+
 
 func _raycast_hits_group(rc: RayCast2D, group_name: String, body_only := false) -> bool:
 	# AMÉLIORATION: note — cette fonction peut faire plusieurs force_raycast_update
@@ -223,6 +260,10 @@ func calcule_falling_damage() -> int:
 	const DAMAGE_PER_STEP: int   = 30
 	const STEP_PX: float         = 100.0
 
+	# Sentinelle : aucun départ de chute enregistré → pas de dégâts possibles
+	if FALL_POINT <= -1e8:
+		return 0
+
 	var impact_point: float  = global_position.y
 	var fall_distance: float = max(0.0, impact_point - FALL_POINT)
 
@@ -232,7 +273,7 @@ func calcule_falling_damage() -> int:
 
 	var excess: float  = fall_distance - SAFE_HEIGHT
 	var damage: int    = int(ceil(excess / STEP_PX)) * DAMAGE_PER_STEP
-	apply_damage(damage, null)
+	apply_damage(damage, null, "chute")
 	print("Dégâts de chute :", damage,
 		" | hauteur totale :", fall_distance, " px",
 		" | excès :", excess, " px")
@@ -421,7 +462,9 @@ func run_exit() -> void:
 
 #region JUMP
 
-const JUMP_VELOCITY   = -700.0   # retour à l'original
+## Impulsion de saut (négatif = vers le haut). Plus la valeur est grande
+## en absolu, plus le saut monte haut.
+@export var JUMP_VELOCITY: float = -700.0
 const MIN_JUMP_TIME   := 0.01
 const MAX_JUMP_HOLD   := 0.25
 const GRAVITY_RISE    := 0.45    # hold long → monte bien haut
@@ -434,15 +477,44 @@ var _jump_timer := 0.0
 var _climb_auto_exit := false
 const CLIMB_EXIT_VELOCITY := -1000.0  # plus fort que JUMP_VELOCITY (-700)
 
+# --- DOUBLE SAUT ---
+## Capacité metroidvania : désactivable tant qu'elle n'est pas débloquée
+@export var double_jump_enabled := true
+## Impulsion du second saut (souvent un peu plus faible que le premier)
+@export var DOUBLE_JUMP_VELOCITY: float = -650.0
+var _double_jump_used := false
+var _dj_pending := false  # signal pour jump_enter : c'est un double saut
+
+
+## Tente le double saut (appelé depuis JUMP et CHUTE sur appui de saut en l'air)
+func _try_double_jump() -> bool:
+	if not double_jump_enabled or _double_jump_used or is_on_floor():
+		return false
+	_double_jump_used = true
+	if current_state == States.JUMP:
+		# déjà dans l'état JUMP : on ré-applique l'impulsion directement
+		velocity.y = DOUBLE_JUMP_VELOCITY
+		_jump_timer = 0.0            # ré-arme la fenêtre de hold du saut
+		animator.play("jump")
+	else:
+		_dj_pending = true
+		change_state(States.JUMP)
+	return true
+
 func jump_enter():
 	animator.play("jump")
 	_jump_timer = 0.0
-	
+	# (FALL_POINT est géré en continu dans _physics_process : suivi au sol,
+	# point le plus haut conservé en vol)
+
 	if _climb_auto_exit:
 		velocity.y = CLIMB_EXIT_VELOCITY
 		velocity.x = 0.0
 		_climb_auto_exit = false
 		_jump_timer = MAX_JUMP_HOLD  # ← désactive le hold, gravité normale immédiate
+	elif _dj_pending:
+		_dj_pending = false
+		velocity.y = DOUBLE_JUMP_VELOCITY
 	else:
 		velocity.y = JUMP_VELOCITY
 
@@ -485,6 +557,9 @@ func jump_execute(delta):
 		change_state(States.CHUTE)
 
 func jump_input(event: InputEvent) -> void:
+	if Input.is_action_just_pressed("jump"):
+		if _try_double_jump():
+			return
 	if Input.is_action_just_pressed("light_attack"):
 		change_state(States.ATTACK_AIR)
 		return
@@ -514,8 +589,6 @@ func jump_exit():
 var FALL_POINT: float = -1e9
 
 func chute_enter() -> void:
-	if previous_state != States.ATTACK_AIR:
-		FALL_POINT = global_position.y
 	if previous_state in [States.RUN, States.IDLE]:
 		_coyote_timer = COYOTE_TIME
 	else:
@@ -546,7 +619,7 @@ func chute_execute(delta: float) -> void:
 		change_state(States.GRAB)
 		return
 
-	if _raycast_hits_group(wall_right, "wall_jump", true):
+	if _raycast_hits_wall(wall_right):
 		change_state(States.WALL_JUMP)
 		return
 
@@ -559,6 +632,8 @@ func chute_input(event: InputEvent) -> void:
 		if _coyote_timer > 0.0:
 			_coyote_timer = 0.0
 			change_state(States.JUMP)
+			return
+		elif _try_double_jump():
 			return
 		else:
 			_jump_buffer_timer = JUMP_BUFFER_TIME
@@ -609,6 +684,7 @@ func wall_griffe_enter():
 	velocity.x = 500.0 * last_direction
 
 func wall_griffe_execute(_delta: float) -> void:
+	FALL_POINT = global_position.y  # appui légitime : accroché au mur
 	if _raycast_hits_group(climbcast_right, "GRIFFE"):
 		return
 	change_state(States.CHUTE)
@@ -639,16 +715,27 @@ func wall_jump_enter():
 	_flip_facing_on_wall()
 	velocity = Vector2.ZERO
 	_wj_phase = WallJumpPhase.SLIDING
+	_double_jump_used = false  # s'accrocher à un mur recharge le double saut
 	animator.play("wall_jump")
 
 func wall_jump_execute(delta: float) -> void:
 	match _wj_phase:
 		WallJumpPhase.SLIDING:
-			# Vérif mur (wall_left = côté mur car on a flippé)
-			var on_wall := _raycast_hits_group(wall_left, "wall_jump", true)
+			# Vérif mur des DEUX côtés : les deux raycasts ne sont pas des
+			# jumeaux parfaits (hauteur/longueur), et selon le point d'accroche
+			# l'un peut rater là où l'autre touche → clignotement CHUTE↔WALL_JUMP.
+			# Le test symétrique est insensible au flip et à leurs différences.
+			var on_wall := _raycast_hits_wall(wall_left) or _raycast_hits_wall(wall_right)
 			if not on_wall:
 				change_state(States.CHUTE)
 				return
+			# Plaque le perso contre le mur (même technique que wall_griffe) :
+			# le mur bloque le déplacement réel, mais le contact physique et
+			# les raycasts restent stables — sans ça, il flotte à quelques px
+			# du mur et l'accroche peut osciller frame à frame
+			velocity.x = -last_direction * 150.0
+			# Appui légitime : la glissade murale remet la chute à zéro
+			FALL_POINT = global_position.y
 			# Glissement
 			velocity.y = lerp(velocity.y, WALL_GLIDE_SPEED, 0.05)
 			if is_on_floor():
@@ -685,6 +772,7 @@ func climb_enter() -> void:
 	animator.play("climbidle")
 
 func climb_execute(delta: float) -> void:
+	FALL_POINT = global_position.y  # appui légitime : en escalade
 	var dir := Input.get_vector("left_move", "right_move",
 		"up_move",   "down_move")
 
@@ -747,7 +835,10 @@ func climb_exit() -> void:
 
 
 
+var _roll_forced := false  # roulade relancée faute de place pour se relever
+
 func roll_enter() -> void:
+	_roll_forced = false
 	var dir := Input.get_axis("left_move", "right_move")
 
 	if dir != 0.0:
@@ -756,21 +847,55 @@ func roll_enter() -> void:
 		point.scale.x  = dir
 		velocity.x     = dir * ROLL_SPEED
 		animator.play("roll")
+		# Hitbox compacte pendant la roulade (la normale est restaurée par roll_exit)
+		collision_normale.set_deferred("disabled", true)
+		collision_roulade.set_deferred("disabled", false)
 	else:
 		# Pas de direction → on ne roll pas, retour IDLE
 		call_deferred("change_state", States.IDLE)
 
 func roll_execute(delta: float) -> void:
 	velocity.y += gravity * delta
+	# Réaffirme la vitesse à chaque frame : move_and_slide l'annule sur une
+	# collision frontale (ex. obstacle à hauteur de tête percuté à la frame 1,
+	# quand l'ancienne hitbox est encore active) — sans ça, roulade sur place.
+	# Les roulades forcées (sous un plafond bas) avancent 2× moins vite.
+	velocity.x = last_direction * ROLL_SPEED * (0.5 if _roll_forced else 1.0)
+
+## Y a-t-il la place de se relever ici ? Teste la capsule debout contre les
+## murs solides (layer 1 uniquement : les one-way ne bloquent pas le relevé)
+func _can_stand_up() -> bool:
+	var params := PhysicsShapeQueryParameters2D.new()
+	params.shape = collision_normale.shape
+	var xf := collision_normale.global_transform
+	xf.origin.y -= 4.0  # léger décalage vers le haut pour ignorer le contact au sol
+	params.transform = xf
+	params.collision_mask = 1
+	params.exclude = [get_rid()]
+	return get_world_2d().direct_space_state.intersect_shape(params, 1).is_empty()
+
 
 func roll_input(event: InputEvent) -> void:
-	if Input.is_action_just_pressed("jump"):
+	if Input.is_action_just_pressed("jump") and _can_stand_up():
 		change_state(States.JUMP)
 
 func roll_exit() -> void:
-	pass
+	collision_normale.set_deferred("disabled", false)
+	collision_roulade.set_deferred("disabled", true)
 
 func roll_animation_finished() -> void:
+	# Pas la place de se relever (fin de roulade sous un passage bas) :
+	# on repart pour une roulade, en laissant le joueur choisir la direction
+	# (maintenir la direction opposée permet de faire demi-tour)
+	if not _can_stand_up():
+		_roll_forced = true  # les relances avancent à demi-vitesse
+		var dir := Input.get_axis("left_move", "right_move")
+		if dir != 0.0:
+			last_direction = sign(dir)
+			point.scale.x = last_direction
+		animator.play("roll")
+		return
+
 	var horiz := Input.get_action_strength("right_move") - Input.get_action_strength("left_move")
 
 	if horiz != 0.0:
@@ -790,6 +915,7 @@ func chute_griffe_enter() -> void:
 	velocity.y = 250.0
 
 func chute_griffe_execute(delta: float) -> void:
+	FALL_POINT = global_position.y  # descente contrôlée : pas de chute accumulée
 	const GLIDE_Y   := 250.0
 	const GLIDE_X   := 150.0
 	const DECELRATE := 0.50
@@ -824,9 +950,11 @@ var _grab_locked := false          # true quand le perso a atteint le point
 func grab_enter() -> void:
 	velocity = Vector2.ZERO
 	_grab_locked = false
+	_double_jump_used = false  # s'accrocher à un point recharge le double saut
 	animator.play("chute")  # on garde l'anim de chute pendant l'approche
 
 func grab_execute(delta: float) -> void:
+	FALL_POINT = global_position.y  # appui légitime : accroché à un point
 	if not current_grab_area:
 		change_state(States.CHUTE)
 		return
@@ -1181,7 +1309,6 @@ func drop_enter() -> void:
 	set_collision_mask_value(ONEWAY_LAYER, false)
 	animator.play("chute")
 	velocity.y = 50.0
-	FALL_POINT = global_position.y
 
 func drop_execute(delta: float) -> void:
 	_drop_timer -= delta

@@ -183,13 +183,11 @@ frame_progress = 1.0
 script = ExtResource("28_536yp")
 
 [node name="vision" type="Area2D" parent="POINT" unique_id=1946126189]
-visible = false
 position = Vector2(-27, -93)
 
 [node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="POINT/vision" unique_id=1685665169]
-visible = false
 position = Vector2(80, -2)
-polygon = PackedVector2Array(-49, -16, 203, -152, 205, 148, -47, 25)
+polygon = PackedVector2Array(-49, -16, 410, -176, 417, 137, -47, 25)
 
 [node name="collision_attack" type="Area2D" parent="POINT" unique_id=371815366]
 visible = false

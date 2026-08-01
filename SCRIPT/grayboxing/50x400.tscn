@@ -1,0 +1,16 @@
+[gd_scene format=3 uid="uid://cuk0nckn13kwe"]
+
+[ext_resource type="Texture2D" uid="uid://dejd8rvpv28i5" path="res://MEDIA/greyboxing/50x400.png" id="1_01kjl"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_35hhg"]
+size = Vector2(50, 400)
+
+[node name="50x400" type="Sprite2D" unique_id=436297158]
+texture = ExtResource("1_01kjl")
+
+[node name="StaticBody2D" type="StaticBody2D" parent="." unique_id=1966514217]
+collision_layer = 3
+collision_mask = 3
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="StaticBody2D" unique_id=1422399730]
+shape = SubResource("RectangleShape2D_35hhg")

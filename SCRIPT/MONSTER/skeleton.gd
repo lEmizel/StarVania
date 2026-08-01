@@ -4,6 +4,10 @@ extends BaseAI
 enum States { IDLE, APPROACH, ATTACK, RETURN, DEAD }
 
 @export var speed := 280.0
+## Temps de réflexion en idle avant la prochaine décision (indépendant
+## de la durée de l'animation d'idle, qui fait 0.75s par boucle)
+@export var reaction_time := 0.3
+var _idle_wait := 0.0
 @onready var detection_vide: RayCast2D = $detection_vide
 
 
@@ -13,7 +17,6 @@ func _setup_states() -> void:
 func _start() -> void:
 	max_hp = 180
 	hp = 180
-	attack_power = 95  # valeur réelle reprise de l'ancien animator (damage = 95)
 	max_tracking_distance = 1500.0
 	confort_zone_max = 150.0
 	confort_zone_min = 30.0
@@ -88,15 +91,15 @@ func decide() -> void:
 func idle_enter() -> void:
 	animator.play("idle")
 	velocity.x = 0.0
+	_idle_wait = 0.0
 
 func idle_execute(delta: float) -> void:
 	velocity.y += gravity * delta
 	if target:
 		flip_toward(target.global_position.x)
-
-func idle_animation_looped() -> void:
-	if target:
-		decide()
+		_idle_wait += delta
+		if _idle_wait >= reaction_time:
+			decide()
 
 
 # --- APPROACH ---
@@ -148,6 +151,13 @@ func return_enter() -> void:
 func return_execute(delta: float) -> void:
 	velocity.y += gravity * delta
 	var dir := 1 if initial_position.x > global_position.x else -1
+	# Même garde-fou que APPROACH : pas de sol devant → on s'arrête
+	detection_vide.position.x = absf(detection_vide.position.x) * dir
+	detection_vide.force_raycast_update()
+	if not detection_vide.is_colliding():
+		velocity.x = 0.0
+		goto_state(States.IDLE)
+		return
 	velocity.x = dir * speed
 	point.scale.x = dir
 	if global_position.distance_to(initial_position) < 20.0:

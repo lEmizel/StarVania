@@ -5,9 +5,14 @@ enum States { IDLE, APPROACH, ATTACK_1, ATTACK_2, ATTACK_3, RETURN, DEAD }
 
 @export var speed := 200.0
 ## Nombre de boucles d'idle imposées entre chaque action du boss
-## (tiré aléatoirement entre min et max à chaque pause)
-@export var idle_cycles_min := 1
+## (tiré aléatoirement entre min et max à chaque pause ; 0 = enchaîne sans pause)
+@export var idle_cycles_min := 0
 @export var idle_cycles_max := 2
+
+## Dégâts par attaque (chaque enter charge sa valeur dans attack_power,
+## que l'animator applique au moment du coup)
+@export var attack_1_damage: int = 95
+@export var attack_2_damage: int = 150  # le slam / onde de choc
 
 var _shake_triggered := false
 var _idle_loops := 0
@@ -26,7 +31,6 @@ func _setup_states() -> void:
 func _start() -> void:
 	max_hp = 600
 	hp = 600
-	attack_power = 95  # valeur réelle reprise de l'ancien animator (damage = 95)
 	max_tracking_distance = 2000.0
 	confort_zone_max = 200.0
 	confort_zone_min = 60.0
@@ -109,6 +113,10 @@ func idle_enter() -> void:
 	velocity.x = 0.0
 	_idle_loops = 0
 	_idle_loops_needed = randi_range(idle_cycles_min, idle_cycles_max)
+	# Tirage à 0 : pas de pause du tout — on décide dès la fin de la
+	# transition (deferred, car on est encore en plein change_state)
+	if _idle_loops_needed == 0 and target:
+		call_deferred("decide")
 
 func idle_execute(delta: float) -> void:
 	apply_gravity(delta)
@@ -147,6 +155,7 @@ func approach_execute(delta: float) -> void:
 
 # --- ATTACK_1 (rapide) ---
 func attack_1_enter() -> void:
+	attack_power = attack_1_damage
 	animator.play("attack")
 	velocity.x = 0.0
 	if target:
@@ -160,6 +169,7 @@ func attack_1_animation_finished() -> void:
 
 # --- ATTACK_2 (moyen) ---
 func attack_2_enter() -> void:
+	attack_power = attack_2_damage
 	animator.play("attack_02")
 	velocity.x = 0.0
 	_shake_triggered = false
@@ -173,10 +183,10 @@ func attack_2_execute(delta: float) -> void:
 		var cam = get_tree().get_first_node_in_group("Camera")
 		if cam and cam.has_method("shake"):
 			cam.shake(15.0, 4.0)
-		# Effet visuel
+		# Effet visuel + dégâts de l'onde de choc
 		var fx = FX_SHAKE_SCENE.instantiate()
 		fx.global_position = ancre_fx.global_position
-		#fx.damage = attack_power
+		fx.damage = attack_2_damage
 		get_tree().current_scene.add_child(fx)
 
 func attack_2_animation_finished() -> void:
@@ -202,6 +212,13 @@ func return_enter() -> void:
 func return_execute(delta: float) -> void:
 	apply_gravity(delta)
 	var dir := 1 if initial_position.x > global_position.x else -1
+	# Même garde-fou que APPROACH : pas de sol devant → on s'arrête
+	detection_vide.position.x = absf(detection_vide.position.x) * dir
+	detection_vide.force_raycast_update()
+	if not detection_vide.is_colliding():
+		velocity.x = 0.0
+		goto_state(States.IDLE)
+		return
 	velocity.x = dir * speed
 	point.scale.x = dir
 	if global_position.distance_to(initial_position) < 20.0:

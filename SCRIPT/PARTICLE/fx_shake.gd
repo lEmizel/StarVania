@@ -23,4 +23,4 @@ func _on_body_entered(body: Node) -> void:
 		return
 	if not body.has_method("apply_damage"):
 		return
-	body.apply_damage(damage, global_position.x)
+	body.apply_damage(damage, global_position.x, "onde_de_choc")

@@ -27,9 +27,8 @@ func _on_body_entered(body: Node) -> void:
 	# 2) Vérifie que l'objet sait recevoir des dégâts
 	if not body.has_method("apply_damage"):
 		return
-	print("je touche le joueur")
 	# 3) Applique les dégâts (attack_power du monstre) + la position X de la source
-	body.apply_damage(enemi.attack_power, enemi.global_position.x)
+	body.apply_damage(enemi.attack_power, enemi.global_position.x, "attaque:" + enemi.name)
 	
 
 func _disable_all_hitboxes() -> void:
