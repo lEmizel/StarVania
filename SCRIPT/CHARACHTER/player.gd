@@ -260,7 +260,9 @@ func _raycast_hits_group(rc: RayCast2D, group_name: String, body_only := false) 
 
 
 
-const FALL_DAMAGE_ENABLED := true
+## Dégâts de chute activables/désactivables depuis l'inspecteur
+## (désactivés pour le moment — la logique reste calculée et loguée)
+@export var FALL_DAMAGE_ENABLED := false
 
 ## Dégâts de chute, à l'échelle CŒURS :
 ## - en dessous de SAFE_HEIGHT : rien
@@ -396,7 +398,8 @@ func idle_input(event: InputEvent) -> void:
 	elif (Input.is_action_just_pressed("up_move") or Input.is_action_just_pressed("down_move")) \
 		and _try_echelle():
 		return
-	elif Input.is_action_just_pressed("down_move") and is_on_floor():
+	elif Input.is_action_just_pressed("down_move") and is_on_floor() \
+		and _standing_on_oneway():
 		change_state(States.DROP)
 		return
 
@@ -460,7 +463,8 @@ func run_input(event: InputEvent) -> void:
 	elif (Input.is_action_just_pressed("up_move") or Input.is_action_just_pressed("down_move")) \
 		and _try_echelle():
 		return
-	elif Input.is_action_just_pressed("down_move") and is_on_floor():
+	elif Input.is_action_just_pressed("down_move") and is_on_floor() \
+		and _standing_on_oneway():
 		change_state(States.DROP)
 		return
 
@@ -499,6 +503,7 @@ func _try_double_jump() -> bool:
 	if not double_jump_enabled or _double_jump_used or is_on_floor():
 		return false
 	_double_jump_used = true
+	_wj_lock_timer = 0.0  # le double saut interrompt le verrou du saut mural
 	if current_state == States.JUMP:
 		# déjà dans l'état JUMP : on ré-applique l'impulsion directement
 		velocity.y = DOUBLE_JUMP_VELOCITY
@@ -528,6 +533,13 @@ func jump_enter():
 	elif _dj_pending:
 		_dj_pending = false
 		velocity.y = DOUBLE_JUMP_VELOCITY
+	elif _wj_pending:
+		# saut mural : impulsion verticale normale + diagonale imposée
+		_wj_pending = false
+		velocity.y = JUMP_VELOCITY
+		_wj_lock_dir = last_direction
+		_wj_lock_timer = WALL_JUMP_LOCK_TIME
+		velocity.x = WALL_JUMP_PUSH_X * _wj_lock_dir
 	else:
 		velocity.y = JUMP_VELOCITY
 
@@ -537,11 +549,19 @@ func jump_execute(delta):
 	_grab_cooldown_timer = max(_grab_cooldown_timer - delta, 0.0)
 
 	var direction = Input.get_axis("left_move", "right_move")
-	_flip_from_input()
-	if direction != 0:
-		velocity.x = lerp(velocity.x, direction * AIR_SPEED, AIR_CONTROL)
+	if _wj_lock_timer > 0.0:
+		# verrou du saut mural : diagonale imposée, stick ignoré.
+		# Interruptible : toute action qui quitte JUMP (dash, coup, griffe,
+		# échelle…) passe par jump_exit qui coupe le verrou, et le double
+		# saut le coupe dans _try_double_jump.
+		_wj_lock_timer = maxf(_wj_lock_timer - delta, 0.0)
+		velocity.x = WALL_JUMP_PUSH_X * _wj_lock_dir
 	else:
-		velocity.x = lerp(velocity.x, 0.0, DECELERATION_RATE * delta)
+		_flip_from_input()
+		if direction != 0:
+			velocity.x = lerp(velocity.x, direction * AIR_SPEED, AIR_CONTROL)
+		else:
+			velocity.x = lerp(velocity.x, 0.0, DECELERATION_RATE * delta)
 
 	if is_on_ceiling():
 		velocity.y = 0.0
@@ -597,7 +617,9 @@ func jump_input(event: InputEvent) -> void:
 		return
 
 func jump_exit():
-	pass
+	# quitter JUMP (dash, coup, griffe, échelle, chute…) libère toujours
+	# la trajectoire imposée du saut mural
+	_wj_lock_timer = 0.0
 #endregion
 
 
@@ -744,64 +766,63 @@ func wall_griffe_exit():
 
 
 #region WALL_JUMP
-enum WallJumpPhase { SLIDING, JUMPING }
-var _wj_phase: WallJumpPhase = WallJumpPhase.SLIDING
-const WALL_YJUMP := -500.0
-const WALL_XJUMP := 290.0
 const WALL_GLIDE_SPEED := 300.0
+
+# --- Saut mural façon Hollow Knight : LÉGÈRE impulsion diagonale imposée,
+# purement cosmétique (éviter de "baver" le long du mur en remontant) —
+# on peut re-spammer le même mur juste après ---
+## Poussée horizontale d'éloignement du mur pendant le verrou du saut mural
+@export var WALL_JUMP_PUSH_X: float = 300.0
+## Durée (s) du verrou : trajectoire diagonale incontrôlable au stick,
+## mais interruptible par toute action aérienne (dash, coup, double saut…)
+@export var WALL_JUMP_LOCK_TIME: float = 0.2
+var _wj_pending := false     # signal pour jump_enter : saut depuis un mur
+var _wj_lock_timer := 0.0
+var _wj_lock_dir := 0.0
 
 func wall_jump_enter():
 	_flip_facing_on_wall()
 	velocity = Vector2.ZERO
-	_wj_phase = WallJumpPhase.SLIDING
 	_recharge_air_moves()
 	animator.play("wall_jump")
 
-func wall_jump_execute(delta: float) -> void:
-	match _wj_phase:
-		WallJumpPhase.SLIDING:
-			# Vérif mur des DEUX côtés : les deux raycasts ne sont pas des
-			# jumeaux parfaits (hauteur/longueur), et selon le point d'accroche
-			# l'un peut rater là où l'autre touche → clignotement CHUTE↔WALL_JUMP.
-			# Le test symétrique est insensible au flip et à leurs différences.
-			var on_wall := _raycast_hits_wall(wall_left) or _raycast_hits_wall(wall_right)
-			if not on_wall:
-				change_state(States.CHUTE)
-				return
-			# Plaque le perso contre le mur (même technique que wall_griffe) :
-			# le mur bloque le déplacement réel, mais le contact physique et
-			# les raycasts restent stables — sans ça, il flotte à quelques px
-			# du mur et l'accroche peut osciller frame à frame
-			velocity.x = -last_direction * 150.0
-			# Appui légitime : la glissade murale remet la chute à zéro
-			FALL_POINT = global_position.y
-			# Glissement
-			velocity.y = lerp(velocity.y, WALL_GLIDE_SPEED, 0.05)
-			if is_on_floor():
-				change_state(States.IDLE)
+func wall_jump_execute(_delta: float) -> void:
+	# Vérif mur des DEUX côtés : les deux raycasts ne sont pas des
+	# jumeaux parfaits (hauteur/longueur), et selon le point d'accroche
+	# l'un peut rater là où l'autre touche → clignotement CHUTE↔WALL_JUMP.
+	# Le test symétrique est insensible au flip et à leurs différences.
+	var on_wall := _raycast_hits_wall(wall_left) or _raycast_hits_wall(wall_right)
+	if not on_wall:
+		change_state(States.CHUTE)
+		return
+	# Plaque le perso contre le mur (même technique que wall_griffe) :
+	# le mur bloque le déplacement réel, mais le contact physique et
+	# les raycasts restent stables — sans ça, il flotte à quelques px
+	# du mur et l'accroche peut osciller frame à frame
+	velocity.x = -last_direction * 150.0
+	# Appui légitime : la glissade murale remet la chute à zéro
+	FALL_POINT = global_position.y
+	# Glissement
+	velocity.y = lerp(velocity.y, WALL_GLIDE_SPEED, 0.05)
+	if is_on_floor():
+		change_state(States.IDLE)
 
-		WallJumpPhase.JUMPING:
-			velocity.y += gravity * delta
-			if velocity.y > 0:
-				change_state(States.CHUTE)
-
-func wall_jump_input(event: InputEvent) -> void:
-	if _wj_phase == WallJumpPhase.SLIDING:
-		if Input.is_action_just_pressed("jump"):
-			_wj_phase = WallJumpPhase.JUMPING
-			var land_fx = instantiate_scene(WALL_JUMP_SCENE)
-			land_fx.global_position = ANCRE_WALL.global_position
-			land_fx.scale.x *= point.scale.x
-			if land_fx is AnimatedSprite2D:
-				land_fx.play()
-			animator.play("jump")
-			velocity.y = WALL_YJUMP
-			velocity.x = WALL_XJUMP * last_direction
-		elif Input.is_action_just_pressed("esquive"):
-			change_state(States.CHUTE)
+func wall_jump_input(_event: InputEvent) -> void:
+	if Input.is_action_just_pressed("jump"):
+		# saut mural = un VRAI saut via l'état JUMP normal, mais avec un
+		# verrou diagonal façon Hollow Knight (voir jump_enter/_execute)
+		var land_fx = instantiate_scene(WALL_JUMP_SCENE)
+		land_fx.global_position = ANCRE_WALL.global_position
+		land_fx.scale.x *= point.scale.x
+		if land_fx is AnimatedSprite2D:
+			land_fx.play()
+		_wj_pending = true
+		change_state(States.JUMP)
+	elif Input.is_action_just_pressed("esquive"):
+		change_state(States.CHUTE)
 
 func wall_jump_exit():
-	pass
+	velocity.x = 0.0  # annule la pression plaquée contre le mur
 #endregion
 
 
@@ -1127,6 +1148,12 @@ func roll_execute(delta: float) -> void:
 	# Les roulades forcées (sous un plafond bas) avancent 2× moins vite.
 	velocity.x = last_direction * ROLL_SPEED * (0.5 if _roll_forced else 1.0)
 
+	# percuter un mur stoppe la roulade — sauf si pas la place de se relever
+	# (tunnel bas : on reste en roulade, quitte à pousser contre le mur)
+	if _raycast_hits_wall(wall_right) and _can_stand_up():
+		goto_state(States.IDLE)
+		return
+
 ## Y a-t-il la place de se relever ici ? Teste la capsule debout contre les
 ## murs solides (layer 1 uniquement : les one-way ne bloquent pas le relevé)
 func _can_stand_up() -> bool:
@@ -1191,6 +1218,11 @@ func dash_execute(delta: float) -> void:
 	velocity.x = last_direction * DASH_SPEED
 	velocity.y = 0.0
 
+	# percuter un mur interrompt le dash : accroche immédiate en glissade
+	# (raycast avant uniquement — l'arrière raccrocherait le mur qu'on quitte)
+	if _raycast_hits_wall(wall_right):
+		change_state(States.WALL_JUMP)
+		return
 	if is_on_floor():
 		_handle_landing()
 		return
@@ -1542,6 +1574,8 @@ func _try_heal() -> void:
 
 
 func heal_enter() -> void:
+	# se soigner exige l'immobilité : on coupe tout élan résiduel
+	velocity.x = 0.0
 	animator.play("heal")
 
 func heal_execute(delta: float) -> void:
@@ -1699,9 +1733,32 @@ func dead_exit() -> void:
 const ONEWAY_LAYER := 2
 const DROP_THROUGH_TIME := 0.25
 var _drop_timer := 0.0
+var _drop_airborne := false  # vrai dès qu'on a réellement quitté le sol
+
+## Le sol sous les pieds est-il RÉELLEMENT traversable ? Un DROP n'a de sens
+## que si, une fois la couche one-way ignorée, plus rien ne retient le perso.
+## Un bloc qui a coché couche 1 ET couche 2 reste solide → pas de DROP
+## (sinon : anim de chute sur place + particules d'atterrissage fantômes).
+func _standing_on_oneway() -> bool:
+	var params := PhysicsShapeQueryParameters2D.new()
+	params.shape = collision_normale.shape
+	var xf := collision_normale.global_transform
+	xf.origin.y += 6.0  # léger décalage vers le bas : ce qu'il y a sous les pieds
+	params.transform = xf
+	params.collision_mask = 1 << (ONEWAY_LAYER - 1)
+	params.exclude = [get_rid()]
+	# masque restant pendant le DROP : ce qui colle encore n'est pas traversable
+	var mask_apres_drop: int = collision_mask & ~(1 << (ONEWAY_LAYER - 1))
+	for hit in get_world_2d().direct_space_state.intersect_shape(params, 8):
+		var body = hit.get("collider")
+		if body is StaticBody2D and (body.collision_layer & mask_apres_drop) == 0:
+			return true
+	return false
+
 
 func drop_enter() -> void:
 	_drop_timer = DROP_THROUGH_TIME
+	_drop_airborne = false
 	set_collision_mask_value(ONEWAY_LAYER, false)
 	animator.play("chute")
 	velocity.y = 50.0
@@ -1717,11 +1774,16 @@ func drop_execute(delta: float) -> void:
 	else:
 		velocity.x = lerp(velocity.x, 0.0, DECELERATION_RATE * delta)
 
+	if not is_on_floor():
+		_drop_airborne = true
+
 	if _drop_timer <= 0.0:
 		change_state(States.CHUTE)
 		return
 
-	if is_on_floor():
+	# n'atterrit (particules, sortie d'état) qu'après avoir vraiment décollé :
+	# au 1er frame is_on_floor() date encore du tick où on était posé
+	if is_on_floor() and _drop_airborne:
 		_handle_landing()
 
 func drop_exit() -> void:
