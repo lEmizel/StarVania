@@ -12,6 +12,10 @@ extends VBoxContainer
 ## Émis quand un asset du tiroir vient d'être déposé avec succès dans
 ## l'éditeur (le plugin s'en sert pour aimanter le nœud fraîchement créé)
 signal asset_dropped
+## Émis dès qu'un drag démarre depuis une vignette : permet au plugin de
+## photographier la sélection AVANT le dépôt (pour ne reparenter que le
+## nœud fraîchement instancié, jamais une vieille sélection)
+signal asset_drag_begun
 
 ## Nœud parent cible : tout asset déposé depuis le tiroir devient son enfant.
 ## Défini en glissant un nœud de l'arbre de scène sur la case "Parent :",
@@ -280,6 +284,7 @@ func _populate() -> void:
 			continue
 		var item := DrawerItem.new(path)
 		item.dropped.connect(func() -> void: asset_dropped.emit())
+		item.drag_begun.connect(func() -> void: asset_drag_begun.emit())
 		item.set_display_size(_thumb_size)
 		_grid.add_child(item)
 
@@ -439,6 +444,8 @@ class DrawerItem extends VBoxContainer:
 	## Émis quand le drag initié depuis cette vignette s'est terminé
 	## par un dépôt réussi quelque part dans l'éditeur
 	signal dropped
+	## émis au démarrage du drag (voir asset_drag_begun du dock)
+	signal drag_begun
 
 	var path: String
 	var _icon: TextureRect
@@ -489,6 +496,7 @@ class DrawerItem extends VBoxContainer:
 	## instancier une .tscn ou créer un Sprite2D depuis une image
 	func _get_drag_data(_pos: Vector2) -> Variant:
 		_dragging = true
+		drag_begun.emit()
 		var preview := TextureRect.new()
 		preview.texture = _icon.texture
 		preview.custom_minimum_size = Vector2(48, 48)

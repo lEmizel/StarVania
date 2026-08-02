@@ -56,6 +56,14 @@ const BLOOD_PARTICLE_SCENE := preload("res://SCRIPT/PARTICLE/BLOOD_PARTICLE.tscn
 
 func _ready() -> void:
 	initial_position = global_position
+	# Miroir posé dans l'éditeur (tiroir d'assets, scale.x négatif) : la
+	# physique n'aime pas les échelles négatives et l'IA marcherait à
+	# l'envers → on normalise la racine et on convertit le miroir en
+	# orientation de départ (regard + visuel à gauche)
+	if scale.x < 0.0:
+		scale.x = absf(scale.x)
+		last_direction = -1
+		point.scale.x = -1
 	# Material créé par code → unique par instance (deux monstres touchés
 	# ne clignotent pas ensemble), et aucune scène à modifier
 	_flash_material = ShaderMaterial.new()
@@ -194,6 +202,14 @@ func apply_damage(amount: int, source_x, _source_tag := "?") -> void:
 		blood.global_position = global_position
 		_on_dead()
 		return
+	# Attaqué — même de dos, même hors vision : le monstre se retourne
+	# vers la source et prend le joueur pour cible
+	if target == null:
+		var players := get_tree().get_nodes_in_group("Player")
+		if players.size() > 0:
+			target = players[0]
+	if source_x != null:
+		flip_toward(source_x)
 	# Knockback appliqué par-dessus l'état courant, sans l'interrompre
 	var dir := 0
 	if source_x != null:
@@ -278,6 +294,30 @@ func goto_state(new_state: int) -> void:
 # ============================================================
 
 const HORIZONTAL_DEAD_ZONE := 25.0
+
+## Y a-t-il un danger d'environnement (Area2D du groupe DEGATS — piques…)
+## sur le trajet de ce raycast de détection de vide ? Les terrestres le
+## traitent comme un trou : demi-tour au lieu d'y marcher.
+## (le groupe peut être sur l'Area2D ou sur son CollisionShape2D enfant)
+func danger_devant(rc: RayCast2D) -> bool:
+	var params := PhysicsShapeQueryParameters2D.new()
+	var seg := SegmentShape2D.new()
+	seg.a = rc.global_position
+	seg.b = rc.to_global(rc.target_position)
+	params.shape = seg
+	params.transform = Transform2D.IDENTITY
+	params.collide_with_areas = true
+	params.collide_with_bodies = false
+	for hit in get_world_2d().direct_space_state.intersect_shape(params, 8):
+		var col = hit.get("collider")
+		if col is Area2D:
+			if col.is_in_group("DEGATS"):
+				return true
+			for child in col.get_children():
+				if child.is_in_group("DEGATS"):
+					return true
+	return false
+
 
 func flip_toward(target_x: float) -> void:
 	var diff := target_x - global_position.x

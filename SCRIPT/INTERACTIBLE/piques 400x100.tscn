@@ -1,0 +1,18 @@
+[gd_scene format=3 uid="uid://mluwyom1v02y"]
+
+[ext_resource type="Texture2D" uid="uid://bbhwqhwspdnqm" path="res://MEDIA/INTERACTIBLE/Pique 400x200.png" id="1_i4i7l"]
+[ext_resource type="Script" uid="uid://bspu2lkfojat0" path="res://SCRIPT/INTERACTIBLE/piques.gd" id="2_piques"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_35hhg"]
+size = Vector2(399, 83)
+
+[node name="piques 400x100" type="Sprite2D" unique_id=1466333129]
+texture = ExtResource("1_i4i7l")
+
+[node name="Area2D" type="Area2D" parent="." unique_id=1358010486]
+script = ExtResource("2_piques")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D" unique_id=846342606 groups=["DEGATS"]]
+visible = false
+position = Vector2(0.5, 5.5)
+shape = SubResource("RectangleShape2D_35hhg")

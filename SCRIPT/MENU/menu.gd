@@ -6,7 +6,7 @@ extends Control
 
 # ordre logique pour le focus
 @onready var _buttons : Array[Button] = [btn_play, btn_load, btn_quit]
-const TARGET_SCENE := "uid://q73v1b80lt2r"
+const TARGET_SCENE := "uid://dsq0ieef7wjgl"
 
 func _ready() -> void:
 	# signaux

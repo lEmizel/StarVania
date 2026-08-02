@@ -8,6 +8,7 @@ size = Vector2(91, 404)
 [node name="ECHELLE" type="Area2D" unique_id=1311425675 groups=["ECHELLE"]]
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1513909115]
+visible = false
 position = Vector2(-0.5, -4)
 shape = SubResource("RectangleShape2D_oo8qs")
 

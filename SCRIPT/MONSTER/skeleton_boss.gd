@@ -53,7 +53,8 @@ func decide() -> void:
 	if current_state == States.DEAD:
 		return
 	if not check_tracking():
-		goto_state(States.RETURN)
+		# cible perdue : le boss reste sur place (plus de retour au poste)
+		goto_state(States.IDLE)
 		return
 
 	var dist := distance_to_target()
@@ -63,7 +64,7 @@ func decide() -> void:
 	var dir_to_target := 1 if target and target.global_position.x > global_position.x else -1
 	detection_vide.position.x = absf(detection_vide.position.x) * dir_to_target
 	detection_vide.force_raycast_update()
-	var can_approach := detection_vide.is_colliding()
+	var can_approach := detection_vide.is_colliding() and not danger_devant(detection_vide)
 
 	if dist < confort_zone_min:
 		# Très proche → attaques rapides
@@ -147,7 +148,7 @@ func approach_execute(delta: float) -> void:
 		]))
 		return
 	detection_vide.position.x = absf(detection_vide.position.x) * last_direction
-	if not detection_vide.is_colliding():
+	if not detection_vide.is_colliding() or danger_devant(detection_vide):
 		velocity.x = 0.0
 		goto_state(States.IDLE)
 		return

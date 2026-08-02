@@ -1,6 +1,10 @@
 extends Node
 
-var last_checkpoint_path: NodePath = NodePath()
+# Dernier checkpoint croisé : position + scène — un NodePath ne survivrait
+# pas au rechargement de la scène après la mort (ancien bug de respawn)
+var last_checkpoint_pos := Vector2.ZERO
+var last_checkpoint_scene := ""
+var has_checkpoint := false
 var last_door_id: int = -1
 
 var blood := 0

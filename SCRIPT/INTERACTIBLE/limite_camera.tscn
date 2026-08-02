@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://SCRIPT/INTERACTIBLE/limite_camera.gd" id="1_limcam"]
+
+[node name="LIMITE_CAMERA" type="Node2D" groups=["CAMERA_LIMIT"]]
+script = ExtResource("1_limcam")

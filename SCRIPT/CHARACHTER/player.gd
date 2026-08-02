@@ -40,6 +40,10 @@ const CLIMB_SPEED := 200.0
 const ROLL_SPEED := 700.0
 
 const COYOTE_TIME := 0.08
+## Coyote élargi pour les chutes SUBIES depuis une accroche (griffe qui
+## expire, échelle, grab…) : la chute n'étant pas choisie, la pression de
+## saut du joueur arrive naturellement plus tard
+@export var GRIP_COYOTE_TIME: float = 0.3
 var _coyote_timer := 0.0
 const JUMP_BUFFER_TIME := 0.12  # très court — juste un filet de sécurité
 var _jump_buffer_timer := 0.0
@@ -209,6 +213,31 @@ func apply_damage(amount: int, source_x, source_tag := "?") -> void:
 	# Soulèvement : impulsion verticale one-shot, appliquée APRÈS hit_enter
 	# (qui remet velocity à zéro) — la gravité gère la retombée
 	velocity.y = HIT_KNOCK_Y
+
+
+## Renvoi vertical des dégâts d'environnement (piques…)
+@export var ENV_KNOCK_Y: float = -1100.0
+
+## Dégâts d'environnement (piques & co) : perte de cœur(s), renvoi VERTICAL
+## fort — pas de poussée horizontale — et recharge du double saut + dash
+## pour pouvoir se rattraper. Roulade et dash rendent invulnérable,
+## comme contre les ennemis.
+func apply_environment_damage(amount: int) -> void:
+	if current_state in [States.DEAD, States.HIT, States.ROLL, States.DASH]:
+		return
+	print("[DMG] f=", Engine.get_physics_frames(),
+		" src=environnement amount=", amount,
+		" état=", States.keys()[current_state],
+		" hp ", Player.hp, " -> ", Player.hp - amount)
+	Player.changement_de_vie(-amount)
+	if Player.hp <= 0:
+		_knock = Vector2.ZERO
+		change_state(States.DEAD)
+		return
+	_knock = Vector2.ZERO
+	change_state(States.HIT)
+	velocity.y = ENV_KNOCK_Y   # après hit_enter (qui remet velocity à zéro)
+	_recharge_air_moves()
 
 
 func goto_state(s: States) -> void:
@@ -501,8 +530,17 @@ var _dj_pending := false  # signal pour jump_enter : c'est un double saut
 ## Tente le double saut (appelé depuis JUMP et CHUTE sur appui de saut en l'air)
 func _try_double_jump() -> bool:
 	if not double_jump_enabled or _double_jump_used or is_on_floor():
+		print("[DJ] refusé  deja_utilise=", _double_jump_used,
+			" au_sol=", is_on_floor(), " état=", States.keys()[current_state])
 		return false
+	# grâce anti-spam post-saut mural : pression ignorée, double saut intact
+	if _wj_lock_timer > WALL_JUMP_LOCK_TIME - WALL_JUMP_DJ_GRACE:
+		print("[WJ] pression saut ignorée (grâce anti-spam)")
+		return false
+	print("[DJ] double saut  depuis=", States.keys()[current_state])
 	_double_jump_used = true
+	if _wj_lock_timer > 0.0:
+		print("[WJ] verrou coupé par DOUBLE SAUT")
 	_wj_lock_timer = 0.0  # le double saut interrompt le verrou du saut mural
 	if current_state == States.JUMP:
 		# déjà dans l'état JUMP : on ré-applique l'impulsion directement
@@ -525,11 +563,6 @@ func jump_enter():
 		velocity.x = 0.0
 		_climb_auto_exit = false
 		_jump_timer = MAX_JUMP_HOLD  # ← désactive le hold, gravité normale immédiate
-	elif _echelle_top_exit:
-		_echelle_top_exit = false
-		velocity.y = ECHELLE_TOP_JUMP_VELOCITY
-		velocity.x = 0.0
-		_jump_timer = MAX_JUMP_HOLD  # hissage sec, sans hold
 	elif _dj_pending:
 		_dj_pending = false
 		velocity.y = DOUBLE_JUMP_VELOCITY
@@ -540,6 +573,8 @@ func jump_enter():
 		_wj_lock_dir = last_direction
 		_wj_lock_timer = WALL_JUMP_LOCK_TIME
 		velocity.x = WALL_JUMP_PUSH_X * _wj_lock_dir
+		print("[WJ] saut mural  dir_verrou=", _wj_lock_dir,
+			" vx=", velocity.x, " verrou=", WALL_JUMP_LOCK_TIME, "s")
 	else:
 		velocity.y = JUMP_VELOCITY
 
@@ -556,6 +591,8 @@ func jump_execute(delta):
 		# saut le coupe dans _try_double_jump.
 		_wj_lock_timer = maxf(_wj_lock_timer - delta, 0.0)
 		velocity.x = WALL_JUMP_PUSH_X * _wj_lock_dir
+		if _wj_lock_timer == 0.0:
+			print("[WJ] verrou expiré naturellement (", WALL_JUMP_LOCK_TIME, "s)")
 	else:
 		_flip_from_input()
 		if direction != 0:
@@ -619,6 +656,9 @@ func jump_input(event: InputEvent) -> void:
 func jump_exit():
 	# quitter JUMP (dash, coup, griffe, échelle, chute…) libère toujours
 	# la trajectoire imposée du saut mural
+	if _wj_lock_timer > 0.0:
+		print("[WJ] verrou coupé par SORTIE de JUMP (reste ",
+			snappedf(_wj_lock_timer, 0.01), "s)")
 	_wj_lock_timer = 0.0
 #endregion
 
@@ -631,7 +671,15 @@ func jump_exit():
 var FALL_POINT: float = -1e9
 
 func chute_enter() -> void:
-	if previous_state in [States.RUN, States.IDLE]:
+	# coyote accordé en quittant le sol OU une surface d'accroche : sans ça,
+	# tomber d'une griffe/échelle/mur faisait de la 1re pression un DOUBLE
+	# saut ("la griffe ne recharge pas" — si, mais le saut normal sautait).
+	# Les chutes SUBIES (griffe qui expire…) ont une fenêtre élargie :
+	# le joueur n'a pas choisi de tomber, sa pression arrive plus tard
+	if previous_state in [States.WALL_GRIFFE, States.CHUTE_GRIFFE,
+		States.CLIMB, States.GRAB, States.ECHELLE, States.WALL_JUMP]:
+		_coyote_timer = GRIP_COYOTE_TIME
+	elif previous_state in [States.RUN, States.IDLE]:
 		_coyote_timer = COYOTE_TIME
 	else:
 		_coyote_timer = 0.0
@@ -721,6 +769,8 @@ func chute_exit() -> void:
 ## S'accrocher à quelque chose (mur, griffe, échelle, point de grab…)
 ## recharge le double saut et le dash aérien
 func _recharge_air_moves() -> void:
+	if _double_jump_used or _air_dash_used:
+		print("[DJ] recharge par accroche  état=", States.keys()[current_state])
 	_double_jump_used = false
 	_air_dash_used = false
 
@@ -776,12 +826,42 @@ const WALL_GLIDE_SPEED := 300.0
 ## Durée (s) du verrou : trajectoire diagonale incontrôlable au stick,
 ## mais interruptible par toute action aérienne (dash, coup, double saut…)
 @export var WALL_JUMP_LOCK_TIME: float = 0.2
+## Fenêtre (s) après un saut mural où une pression de saut est IGNORÉE (sans
+## consommer le double saut) : évite que le spam du bouton transforme chaque
+## saut mural en double saut vertical collé au mur
+@export var WALL_JUMP_DJ_GRACE: float = 0.15
+
+
+## De quel côté est le mur ? +1 droite, -1 gauche, 0 aucun.
+## Rayons lancés au niveau du torse, en coordonnées MONDE — contrairement à
+## une inversion aveugle du regard, le résultat est toujours fiable
+func _wall_side() -> int:
+	var space := get_world_2d().direct_space_state
+	var origin := global_position + Vector2(0.0, -60.0)
+	for side in [1, -1]:
+		var q := PhysicsRayQueryParameters2D.create(
+			origin, origin + Vector2(side * 45.0, 0.0), 1)
+		q.exclude = [get_rid()]
+		var hit := space.intersect_ray(q)
+		if hit and hit.collider is StaticBody2D:
+			return side
+	return 0
 var _wj_pending := false     # signal pour jump_enter : saut depuis un mur
 var _wj_lock_timer := 0.0
 var _wj_lock_dir := 0.0
 
 func wall_jump_enter():
-	_flip_facing_on_wall()
+	# regard DOS AU MUR déduit de la position réelle du mur — l'inversion
+	# aveugle (_flip_facing_on_wall) se trompait quand on re-accrochait un
+	# mur sans s'être retourné, et le saut opposé partait DANS le mur
+	var side := _wall_side()
+	if side != 0:
+		last_direction = -side
+		point.scale.x = last_direction
+	else:
+		_flip_facing_on_wall()  # secours si aucun rayon ne confirme le mur
+	print("[WJ] accroche  mur_cote=", side, " regard=", last_direction,
+		" depuis=", States.keys()[previous_state])
 	velocity = Vector2.ZERO
 	_recharge_air_moves()
 	animator.play("wall_jump")
@@ -901,8 +981,6 @@ func climb_exit() -> void:
 ## "ECHELLE") : on ne peut QUE monter et descendre. Seule échappatoire : sauter.
 
 @export var ECHELLE_SPEED: float = 250.0
-## Impulsion du saut automatique de hissage en sortie haute d'échelle
-@export var ECHELLE_TOP_JUMP_VELOCITY: float = -1200.0
 ## Butée haute de grimpe : distance (px) entre le sommet de la ZONE de
 ## l'échelle et l'origine du perso au maximum de la montée. Plus grand =
 ## le perso s'arrête plus bas. À régler à l'œil dans l'inspecteur.
@@ -914,7 +992,6 @@ func climb_exit() -> void:
 ## deux échelles empilées
 @export var ECHELLE_BELOW_REACH: float = 120.0
 var _current_echelle: Area2D = null
-var _echelle_top_exit := false  # signal pour jump_enter : hissage de sommet
 
 
 ## Bord haut (y global) de la zone d'une échelle, lu depuis son CollisionShape2D
@@ -1023,10 +1100,12 @@ func echelle_execute(_delta: float) -> void:
 					_current_echelle = next
 					global_position.x = next.global_position.x  # ré-aimante en x
 				else:
-					# butée atteinte en montant, rien au-dessus : hissage
-					print("[ECH] sortie HAUT (butée)  perso_y=", snappedf(global_position.y, 0.1))
-					_echelle_top_exit = true
-					goto_state(States.JUMP)
+					# butée atteinte en montant, rien au-dessus : on pose le
+					# perso debout au sommet, directement en idle (plus de saut)
+					global_position.y = _echelle_zone_top(_current_echelle)
+					print("[ECH] sortie HAUT (pose au sommet)  perso_y=",
+						snappedf(global_position.y, 0.1))
+					goto_state(States.IDLE)
 					return
 			elif ladder != null:
 				# (si ladder == null on est en transit de raccord descendant :
@@ -1084,10 +1163,12 @@ func echelle_execute(_delta: float) -> void:
 				_current_echelle = next_haut
 				global_position.x = next_haut.global_position.x  # ré-aimante en x
 				return
-			# sortie par le HAUT en montant : saut automatique pour se hisser
-			print("[ECH] sortie HAUT (sonde)  perso_y=", snappedf(global_position.y, 0.1))
-			_echelle_top_exit = true
-			goto_state(States.JUMP)
+			# sortie par le HAUT en montant : pose debout au sommet
+			if _current_echelle != null:
+				global_position.y = _echelle_zone_top(_current_echelle)
+			print("[ECH] sortie HAUT (sonde, pose au sommet)  perso_y=",
+				snappedf(global_position.y, 0.1))
+			goto_state(States.IDLE)
 		elif is_on_floor():
 			print("[ECH] sortie SOL  perso_y=", snappedf(global_position.y, 0.1))
 			goto_state(States.IDLE)
@@ -1607,7 +1688,7 @@ const BLOODBALL_SCENE := preload("res://SCRIPT/SPELL/bloodball.tscn")
 ## Durée du lancer avant de rendre la main (en attendant une anim de cast dédiée)
 @export var BLOODBALL_CAST_TIME: float = 0.25
 ## Coût en sang d'une boule
-@export var BLOODBALL_COST: int = 55
+@export var BLOODBALL_COST: int = 25
 var _cast_timer := 0.0
 
 
@@ -1723,7 +1804,12 @@ func dead_input(event: InputEvent) -> void:
 		print("okkkkkkkje suis mort")
 		Player.hp = Player.MAX_HP
 		Player.sang = Player.MAX_SANG
-		Loader.load_scene_with_loading(Loader._target_scene_path)
+		# respawn dans la scène du dernier checkpoint croisé (peut être une
+		# autre scène que celle où on est mort)
+		var scene_path: String = Loader._target_scene_path
+		if Player.has_checkpoint and Player.last_checkpoint_scene != "":
+			scene_path = Player.last_checkpoint_scene
+		Loader.load_scene_with_loading(scene_path)
 
 func dead_exit() -> void:
 	velocity = Vector2.ZERO

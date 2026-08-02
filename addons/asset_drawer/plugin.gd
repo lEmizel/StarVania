@@ -20,6 +20,7 @@ func _enter_tree() -> void:
 	dock.name = "Tiroir"
 	add_control_to_dock(EditorPlugin.DOCK_SLOT_LEFT_BR, dock)
 	dock.connect("asset_dropped", _on_drawer_asset_dropped)
+	dock.connect("asset_drag_begun", _on_drawer_drag_begun)
 
 	# Barre d'outils en haut du dock Tiroir : aimantation + miroirs
 	var toolbar := HBoxContainer.new()
@@ -68,28 +69,42 @@ func _exit_tree() -> void:
 	dock.free()  # l'interrupteur d'aimantation est un enfant du dock, libéré avec lui
 
 
-## Un asset du tiroir vient d'être déposé : l'éditeur a instancié le nœud
-## et l'a sélectionné → on le reparente sous la cible définie dans la case
-## "Parent :" du tiroir, puis on l'aimante
+# Sélection photographiée au DÉBUT du drag : seule une sélection qui a
+# changé depuis correspond à un nœud fraîchement instancié par l'éditeur
+var _pre_drag_selection: Array = []
+
+
+func _on_drawer_drag_begun() -> void:
+	_pre_drag_selection = EditorInterface.get_selection().get_selected_nodes()
+
+
+## Un asset du tiroir vient d'être déposé : l'éditeur instancie le nœud et
+## le sélectionne (parfois en plusieurs frames sur une grosse scène) → on
+## attend de voir apparaître un nœud NOUVEAU dans la sélection, puis on le
+## reparente sous la cible "Parent :" du tiroir et on l'aimante.
+## Sans le test de fraîcheur, un dépôt raté (lâché hors zone valide)
+## reparentait la sélection PRÉCÉDENTE — d'où les ratés aléatoires.
 func _on_drawer_asset_dropped() -> void:
-	# on laisse l'éditeur finir l'instanciation et la sélection
-	await get_tree().process_frame
-	await get_tree().process_frame
-	var sel := EditorInterface.get_selection().get_selected_nodes()
-	if sel.size() != 1 or not (sel[0] is Node2D):
-		return
-	var node: Node2D = sel[0]
-
-	_reparent_under_target(node, dock.get("target_parent"))
-
-	if _magnet_btn != null and _magnet_btn.button_pressed:
-		_apply_magnet(node)
+	for i in 15:
+		await get_tree().process_frame
+		var sel := EditorInterface.get_selection().get_selected_nodes()
+		if sel.size() == 1 and sel[0] is Node2D \
+			and not _pre_drag_selection.has(sel[0]):
+			var node: Node2D = sel[0]
+			_reparent_under_target(node, dock.get("target_parent"))
+			if _magnet_btn != null and _magnet_btn.button_pressed:
+				_apply_magnet(node)
+			return
 
 
 func _reparent_under_target(node: Node2D, target) -> void:
 	var root := EditorInterface.get_edited_scene_root()
-	if target == null or not is_instance_valid(target) or root == null:
+	if root == null:
 		return
+	# la case "Parent :" est la SEULE vérité : vide = "(racine)" → l'asset
+	# va sous la racine, jamais sous la sélection du moment de l'éditeur
+	if target == null or not is_instance_valid(target):
+		target = root
 	# cibles invalides : hors scène éditée, déjà parent, soi-même ou un ancêtre
 	if target != root and not root.is_ancestor_of(target):
 		return

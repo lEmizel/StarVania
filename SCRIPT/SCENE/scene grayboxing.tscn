@@ -3,7 +3,6 @@
 [ext_resource type="PackedScene" uid="uid://ckxwmy0iav2h2" path="res://SCRIPT/INTERACTIBLE/Checkpoint.tscn" id="1_xq5vh"]
 [ext_resource type="Script" uid="uid://dftar4ptyhjxe" path="res://SCRIPT/UTILITAIRE/spawnplayer.gd" id="2_8v41f"]
 [ext_resource type="PackedScene" uid="uid://jxp4cxeqdyhv" path="res://SCRIPT/grayboxing/400x100.tscn" id="3_jojol"]
-[ext_resource type="PackedScene" uid="uid://bqbrm320hgjkj" path="res://SCRIPT/INTERACTIBLE/echelle.tscn" id="4_8mm3h"]
 [ext_resource type="PackedScene" uid="uid://47qcpwpulk4y" path="res://SCRIPT/grayboxing/800x400.tscn" id="4_lrmlw"]
 [ext_resource type="PackedScene" uid="uid://dx851ijsrvbgf" path="res://SCRIPT/grayboxing/400x200.tscn" id="5_55v8t"]
 [ext_resource type="PackedScene" uid="uid://cxb1r4knfgy12" path="res://SCRIPT/grayboxing/400x200 slide.tscn" id="6_a4ihq"]
@@ -14,9 +13,13 @@
 [ext_resource type="PackedScene" uid="uid://d0g8jaoqx2mu6" path="res://SCRIPT/grayboxing/400x100 slide.tscn" id="11_55v8t"]
 [ext_resource type="PackedScene" uid="uid://caq8nkv6ng2f" path="res://SCRIPT/grayboxing/800x400 slide.tscn" id="12_a4ihq"]
 [ext_resource type="PackedScene" uid="uid://bs1685hwv6d0w" path="res://SCRIPT/MONSTER/SKELETON.tscn" id="13_a4ihq"]
+[ext_resource type="PackedScene" uid="uid://mluwyom1v02y" path="res://SCRIPT/INTERACTIBLE/piques 400x100.tscn" id="14_lio2t"]
 [ext_resource type="Texture2D" uid="uid://c3mdtyxjcxhwl" path="res://MEDIA/greyboxing/prison/400x200 Sol.png" id="14_nxmfr"]
 [ext_resource type="Texture2D" uid="uid://bunexu666k674" path="res://MEDIA/greyboxing/prison/200x400 Sol.png" id="15_58mg8"]
+[ext_resource type="PackedScene" uid="uid://c3x3w3o4in65b" path="res://SCRIPT/INTERACTIBLE/piques 200x100.tscn" id="16_dmb2g"]
 [ext_resource type="Texture2D" uid="uid://hesril1pivcc" path="res://MEDIA/greyboxing/prison/400x200.png" id="16_wugsl"]
+[ext_resource type="PackedScene" uid="uid://6c83u8ojkedm" path="res://SCRIPT/grayboxing/200x100.tscn" id="17_eqdw8"]
+[ext_resource type="PackedScene" uid="uid://jlttuetl123w" path="res://SCRIPT/grayboxing/200x100 slide.tscn" id="18_n5813"]
 [ext_resource type="Texture2D" uid="uid://dl108nup3q7ai" path="res://MEDIA/greyboxing/prison/400x100 Sol.png" id="18_vui85"]
 [ext_resource type="Texture2D" uid="uid://c522hrnvanpte" path="res://MEDIA/greyboxing/prison/400x200 Slide Sol.png" id="19_4bxjh"]
 [ext_resource type="Texture2D" uid="uid://qds3t7bx076g" path="res://MEDIA/greyboxing/prison/800x400 Sol.png" id="20_58mg8"]
@@ -29,6 +32,7 @@
 [ext_resource type="Texture2D" uid="uid://c2qx36eew7h1l" path="res://MEDIA/greyboxing/prison/400x200 Bas 2.png" id="25_ghkls"]
 [ext_resource type="Texture2D" uid="uid://b1u8b0s23cjl" path="res://MEDIA/greyboxing/prison/400x200 Slide Sol 2.png" id="26_2oji1"]
 [ext_resource type="PackedScene" uid="uid://deajggaeh7111" path="res://SCRIPT/INTERACTIBLE/platforme.tscn" id="28_2oji1"]
+[ext_resource type="PackedScene" uid="uid://lfopd74ueqri" path="res://SCRIPT/INTERACTIBLE/cadre_mur_griffe.tscn" id="29_8mm3h"]
 
 [node name="Node2D" type="Node2D" unique_id=782786777]
 position = Vector2(0, 50)
@@ -43,16 +47,7 @@ position = Vector2(3450, -1089)
 
 [node name="checkpoint" parent="interactible" unique_id=524856083 groups=["Checkpoint"] instance=ExtResource("1_xq5vh")]
 z_index = -4
-position = Vector2(4, -98)
-
-[node name="ECHELLE" parent="interactible" unique_id=1311425675 instance=ExtResource("4_8mm3h")]
-position = Vector2(407, -301)
-
-[node name="ECHELLE2" parent="interactible" unique_id=1468188508 instance=ExtResource("4_8mm3h")]
-position = Vector2(407, -702)
-
-[node name="platforme2" parent="interactible" unique_id=490779912 instance=ExtResource("28_2oji1")]
-position = Vector2(402, -800)
+position = Vector2(-101.00168, -138)
 
 [node name="grayboxing" type="Node2D" parent="." unique_id=1290048817]
 
@@ -205,6 +200,18 @@ position = Vector2(-2700, -1000)
 [node name="800x405" parent="grayboxing" unique_id=1838529397 instance=ExtResource("4_lrmlw")]
 position = Vector2(-3300, -1100)
 
+[node name="800x406" parent="grayboxing" unique_id=738629416 instance=ExtResource("4_lrmlw")]
+position = Vector2(200, -3085)
+
+[node name="800x408" parent="grayboxing" unique_id=1452037145 instance=ExtResource("4_lrmlw")]
+position = Vector2(-1000, -3085)
+
+[node name="800x409" parent="grayboxing" unique_id=1662785623 instance=ExtResource("4_lrmlw")]
+position = Vector2(-1000, -2685)
+
+[node name="800x407" parent="grayboxing" unique_id=1379873572 instance=ExtResource("4_lrmlw")]
+position = Vector2(600, -2685)
+
 [node name="800x400 slide" parent="grayboxing" unique_id=14914567 instance=ExtResource("12_a4ihq")]
 position = Vector2(-3300, -1500)
 
@@ -237,6 +244,21 @@ position = Vector2(-3900, -1200)
 [node name="50x403" parent="grayboxing" unique_id=989206038 instance=ExtResource("8_6252t")]
 position = Vector2(-6401, -2100)
 
+[node name="50x405" parent="grayboxing" unique_id=1147313371 instance=ExtResource("8_6252t")]
+position = Vector2(-1426, -2685)
+
+[node name="50x406" parent="grayboxing" unique_id=231308773 instance=ExtResource("8_6252t")]
+position = Vector2(-1426, -3085)
+
+[node name="50x409" parent="grayboxing" unique_id=1284546352 instance=ExtResource("8_6252t")]
+position = Vector2(-1426, -3485)
+
+[node name="50x407" parent="grayboxing" unique_id=1145183088 instance=ExtResource("8_6252t")]
+position = Vector2(-1718.4998, -3080)
+
+[node name="50x408" parent="grayboxing" unique_id=1616169395 instance=ExtResource("8_6252t")]
+position = Vector2(-1718.4998, -3480)
+
 [node name="50x404" parent="grayboxing" unique_id=150354397 instance=ExtResource("8_6252t")]
 position = Vector2(-6401, -2500)
 
@@ -267,8 +289,114 @@ position = Vector2(-4349, -2450)
 [node name="400x112" parent="grayboxing" unique_id=2002857676 instance=ExtResource("3_jojol")]
 position = Vector2(-3619, -2450)
 
+[node name="400x121" parent="grayboxing" unique_id=39553851 instance=ExtResource("3_jojol")]
+position = Vector2(2129, -2330)
+
+[node name="400x122" parent="grayboxing" unique_id=1857262974 instance=ExtResource("3_jojol")]
+position = Vector2(2529, -2330)
+
+[node name="400x113" parent="grayboxing" unique_id=451437225 instance=ExtResource("3_jojol")]
+position = Vector2(-1200, -3635)
+
+[node name="400x117" parent="grayboxing" unique_id=1188479673 instance=ExtResource("3_jojol")]
+position = Vector2(-400, -3635)
+
+[node name="400x118" parent="grayboxing" unique_id=14165104 instance=ExtResource("3_jojol")]
+position = Vector2(0, -3635)
+
+[node name="400x120" parent="grayboxing" unique_id=611216675 instance=ExtResource("3_jojol")]
+position = Vector2(400, -3335)
+
+[node name="400x119" parent="grayboxing" unique_id=1165296655 instance=ExtResource("3_jojol")]
+position = Vector2(0, -3535)
+
+[node name="400x114" parent="grayboxing" unique_id=1833789976 instance=ExtResource("3_jojol")]
+position = Vector2(-1200, -3535)
+
+[node name="400x115" parent="grayboxing" unique_id=1260826234 instance=ExtResource("3_jojol")]
+position = Vector2(-800, -3535)
+
+[node name="400x116" parent="grayboxing" unique_id=1297175474 instance=ExtResource("3_jojol")]
+position = Vector2(-400, -3535)
+
 [node name="200x406" parent="grayboxing" unique_id=117799705 instance=ExtResource("7_mnbwy")]
 position = Vector2(256, -396)
+
+[node name="piques 400x200" parent="grayboxing" unique_id=1466333129 instance=ExtResource("14_lio2t")]
+position = Vector2(-800, -3638)
+
+[node name="piques 400x202" parent="grayboxing" unique_id=694189984 instance=ExtResource("14_lio2t")]
+position = Vector2(2129, -2427)
+
+[node name="enemi" parent="grayboxing" unique_id=627255339 instance=ExtResource("13_a4ihq")]
+position = Vector2(-1221, -3700)
+scale = Vector2(-1, 1)
+
+[node name="piques 400x201" parent="grayboxing" unique_id=1473959740 instance=ExtResource("16_dmb2g")]
+position = Vector2(-101, -3732)
+
+[node name="200x100" parent="grayboxing" unique_id=479762211 instance=ExtResource("17_eqdw8")]
+position = Vector2(300, -3635)
+
+[node name="200x100 slide" parent="grayboxing" unique_id=1622496007 instance=ExtResource("18_n5813")]
+position = Vector2(500, -3635)
+
+[node name="200x100 slide2" parent="grayboxing" unique_id=1091164959 instance=ExtResource("18_n5813")]
+position = Vector2(700, -3535)
+
+[node name="200x100 slide3" parent="grayboxing" unique_id=1555898609 instance=ExtResource("18_n5813")]
+position = Vector2(900, -3435)
+
+[node name="200x103" parent="grayboxing" unique_id=2114922102 instance=ExtResource("17_eqdw8")]
+position = Vector2(700, -3435)
+
+[node name="200x104" parent="grayboxing" unique_id=728593213 instance=ExtResource("17_eqdw8")]
+position = Vector2(700, -3435)
+
+[node name="200x105" parent="grayboxing" unique_id=1316430633 instance=ExtResource("17_eqdw8")]
+position = Vector2(700, -3335)
+
+[node name="200x106" parent="grayboxing" unique_id=360313669 instance=ExtResource("17_eqdw8")]
+position = Vector2(900, -3335)
+
+[node name="400x218" parent="grayboxing" unique_id=235771979 instance=ExtResource("5_55v8t")]
+position = Vector2(0, -3385)
+
+[node name="400x222" parent="grayboxing" unique_id=1437550051 instance=ExtResource("5_55v8t")]
+position = Vector2(400, -3485)
+
+[node name="400x219" parent="grayboxing" unique_id=1952020676 instance=ExtResource("5_55v8t")]
+position = Vector2(-400, -3385)
+
+[node name="400x227" parent="grayboxing" unique_id=1441705989 instance=ExtResource("5_55v8t")]
+position = Vector2(-400, -3185)
+
+[node name="400x228" parent="grayboxing" unique_id=604950711 instance=ExtResource("5_55v8t")]
+position = Vector2(-400, -2985)
+
+[node name="400x229" parent="grayboxing" unique_id=230794877 instance=ExtResource("5_55v8t")]
+position = Vector2(-400, -2785)
+
+[node name="400x230" parent="grayboxing" unique_id=2113417213 instance=ExtResource("5_55v8t")]
+position = Vector2(-400, -2585)
+
+[node name="400x223" parent="grayboxing" unique_id=254110311 instance=ExtResource("5_55v8t")]
+position = Vector2(800, -3185)
+
+[node name="400x224" parent="grayboxing" unique_id=1155955242 instance=ExtResource("5_55v8t")]
+position = Vector2(800, -2985)
+
+[node name="400x225" parent="grayboxing" unique_id=174925478 instance=ExtResource("5_55v8t")]
+position = Vector2(0, -2785)
+
+[node name="400x226" parent="grayboxing" unique_id=1072138966 instance=ExtResource("5_55v8t")]
+position = Vector2(0, -2585)
+
+[node name="400x220" parent="grayboxing" unique_id=633199425 instance=ExtResource("5_55v8t")]
+position = Vector2(-800, -3385)
+
+[node name="400x221" parent="grayboxing" unique_id=1268533632 instance=ExtResource("5_55v8t")]
+position = Vector2(-1200, -3385)
 
 [node name="VISUAL" type="Node2D" parent="." unique_id=2143756758]
 visible = false
@@ -503,14 +631,17 @@ texture = ExtResource("21_4bxjh")
 
 [node name="enemi4" type="Node2D" parent="." unique_id=707226753]
 
-[node name="enemi" parent="enemi4" unique_id=627255339 instance=ExtResource("13_a4ihq")]
+[node name="enemi" parent="enemi4" unique_id=1640459783 instance=ExtResource("13_a4ihq")]
 position = Vector2(1271, -302)
+scale = Vector2(-1, 1)
 
 [node name="enemi2" parent="enemi4" unique_id=1534327780 instance=ExtResource("13_a4ihq")]
-position = Vector2(2339, -503)
+position = Vector2(2596, -506)
+scale = Vector2(-1, 1)
 
 [node name="enemi3" parent="enemi4" unique_id=1629459866 instance=ExtResource("13_a4ihq")]
 position = Vector2(3031, -504)
+scale = Vector2(-1, 1)
 
 [node name="enemi5" parent="enemi4" unique_id=1957176117 instance=ExtResource("13_a4ihq")]
 position = Vector2(2326, -1302)
@@ -532,3 +663,13 @@ position = Vector2(-5973, -1892)
 
 [node name="enemi11" parent="enemi4" unique_id=1823507915 instance=ExtResource("13_a4ihq")]
 position = Vector2(-5629, -2521)
+scale = Vector2(-1, 1)
+
+[node name="CadreMurGriffe" parent="." unique_id=138821927 instance=ExtResource("29_8mm3h")]
+position = Vector2(-2884, -2643)
+
+[node name="CadreMurGriffe2" parent="." unique_id=1269838692 instance=ExtResource("29_8mm3h")]
+position = Vector2(-1965, -2656)
+
+[node name="CadreMurGriffe3" parent="." unique_id=1216995975 instance=ExtResource("29_8mm3h")]
+position = Vector2(1580, -2649)

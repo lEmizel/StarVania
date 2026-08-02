@@ -33,8 +33,8 @@
 [ext_resource type="Script" uid="uid://d0bby4h8vgmww" path="res://SCRIPT/MONSTER/animator_ORBE.gd" id="30_ys8th"]
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_p2oq4"]
-radius = 70.0
-height = 140.0
+radius = 52.0
+height = 104.0
 
 [sub_resource type="SpriteFrames" id="SpriteFrames_mdjyn"]
 animations = [{
@@ -59,7 +59,7 @@ animations = [{
 }],
 "loop": 0,
 "name": &"attack",
-"speed": 11.0
+"speed": 24.0
 }, {
 "frames": [{
 "duration": 1.0,
@@ -161,7 +161,6 @@ position = Vector2(-88, -169)
 scale = Vector2(0.37, 0.37)
 
 [node name="Collision" type="CollisionShape2D" parent="." unique_id=273910692]
-visible = false
 light_mask = 0
 visibility_layer = 2
 position = Vector2(12, -50)
@@ -173,7 +172,9 @@ position = Vector2(0, -64)
 [node name="animator" type="AnimatedSprite2D" parent="POINT" unique_id=207791315]
 texture_filter = 1
 sprite_frames = SubResource("SpriteFrames_mdjyn")
-animation = &"idle"
+animation = &"attack"
+frame = 5
+frame_progress = 1.0
 script = ExtResource("30_ys8th")
 
 [node name="vision" type="Area2D" parent="POINT" unique_id=1199829117]

@@ -58,7 +58,7 @@ animations = [{
 }],
 "loop": 0,
 "name": &"attack",
-"speed": 12.0
+"speed": 18.0
 }, {
 "frames": [{
 "duration": 1.1,
@@ -157,7 +157,7 @@ script = ExtResource("1_536yp")
 
 [node name="detection_vide" type="RayCast2D" parent="." unique_id=1277015668]
 position = Vector2(45, -13)
-target_position = Vector2(0, 150)
+target_position = Vector2(1, 94)
 
 [node name="bare_de_vie" parent="." unique_id=1882929594 instance=ExtResource("2_lo1ik")]
 light_mask = 0
@@ -187,7 +187,7 @@ position = Vector2(-27, -93)
 
 [node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="POINT/vision" unique_id=1685665169]
 position = Vector2(80, -2)
-polygon = PackedVector2Array(-49, -16, 410, -176, 417, 137, -47, 25)
+polygon = PackedVector2Array(-49, -16, 229, -127, 230, 96, -47, 25)
 
 [node name="collision_attack" type="Area2D" parent="POINT" unique_id=371815366]
 visible = false

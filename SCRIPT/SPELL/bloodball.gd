@@ -6,7 +6,7 @@ extends Area2D
 const EXPLOSION_SCENE := preload("res://SCRIPT/SPELL/bloodball_explosion.tscn")
 
 @export var speed := 800.0
-@export var damage := 95
+@export var damage := 71  # 95 − 25 %
 @export var max_lifetime := 2.0  # au bout de 2 s sans impact : explose d'elle-même
 
 ## Direction horizontale (+1 droite, -1 gauche) — posée par le player au spawn

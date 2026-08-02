@@ -46,7 +46,19 @@ func _process(delta):
 		var shake_offset := Vector2.ZERO
 		if _shake_intensity > 0.0:
 			shake_offset = Vector2(randf_range(-1, 1), randf_range(-1, 1)) * _shake_intensity
-		global_position = (target.global_position + current_offset + shake_offset).floor()
+		var pos = target.global_position + current_offset + shake_offset
+		global_position = _clamp_to_barriers(pos).floor()
+
+
+## Applique les barrières LIMITE_CAMERA posées dans le niveau (groupe
+## "CAMERA_LIMIT") : chacune empêche un bord de l'écran de la franchir
+## quand la caméra est à sa hauteur
+func _clamp_to_barriers(pos: Vector2) -> Vector2:
+	var half := get_viewport_rect().size * 0.5 / zoom
+	for b in get_tree().get_nodes_in_group("CAMERA_LIMIT"):
+		if b is Node2D and b.has_method("clamp_camera"):
+			pos = b.clamp_camera(pos, half)
+	return pos
 
 # Fonction pour trouver le premier joueur dans le groupe "player"
 func _find_first_player():

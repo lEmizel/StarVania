@@ -1,0 +1,13 @@
+[gd_scene format=3 uid="uid://jlttuetl123w"]
+
+[ext_resource type="Texture2D" uid="uid://cv1qucs5mknd" path="res://MEDIA/greyboxing/200x100 slide.png" id="1_xj4hl"]
+
+[node name="200x100 slide" type="Sprite2D" unique_id=1783661972]
+texture = ExtResource("1_xj4hl")
+
+[node name="StaticBody2D" type="StaticBody2D" parent="." unique_id=1966364859]
+collision_layer = 3
+collision_mask = 3
+
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="StaticBody2D" unique_id=204540710]
+polygon = PackedVector2Array(-100, -50, 99, 50, -100, 50)

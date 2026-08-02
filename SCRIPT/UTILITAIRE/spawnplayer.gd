@@ -63,11 +63,12 @@ func _get_spawn_position():
 				return p.global_position
 		push_warning("[SPAWN] Aucune porte avec id=", door_id)
 
-	# 2) Dernier checkpoint visité
-	if Player.last_checkpoint_path != NodePath():
-		var cp := get_node_or_null(Player.last_checkpoint_path)
-		if cp:
-			return cp.global_position
+	# 2) Dernier checkpoint croisé (position mémorisée — un NodePath ne
+	# survivrait pas au rechargement de la scène après la mort).
+	# owner = racine du NIVEAU (current_scene serait le conteneur du Loader)
+	var niveau_path: String = owner.scene_file_path if owner != null else ""
+	if Player.has_checkpoint and Player.last_checkpoint_scene == niveau_path:
+		return Player.last_checkpoint_pos
 
 	# 3) Checkpoint marqué actif dans la scène
 	var checkpoints := get_tree().get_nodes_in_group("Checkpoint")
