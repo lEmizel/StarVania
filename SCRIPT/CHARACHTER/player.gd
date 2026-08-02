@@ -991,7 +991,11 @@ func climb_exit() -> void:
 ## Distance (px) sondée sous les pieds pour le raccord descendant entre
 ## deux échelles empilées
 @export var ECHELLE_BELOW_REACH: float = 120.0
+## Enfoncement immédiat (px) à l'accroche depuis une plateforme : sans lui,
+## le perso reste en pose de grimpe flottant au-dessus de la planche
+@export var ECHELLE_GRAB_SINK: float = 70.0
 var _current_echelle: Area2D = null
+var _echelle_enter_pframe := 0  # frame physique d'accroche (garde anti-éjection)
 
 
 ## Bord haut (y global) de la zone d'une échelle, lu depuis son CollisionShape2D
@@ -1000,6 +1004,35 @@ func _echelle_zone_top(ladder: Area2D) -> float:
 		if child is CollisionShape2D and child.shape is RectangleShape2D:
 			return child.global_position.y - child.shape.size.y * 0.5 * absf(child.global_scale.y)
 	return ladder.global_position.y
+
+
+## Sortie haute d'échelle : pose le perso DEBOUT sur le sol au-dessus du
+## sommet (l'échelle vit toujours sous une plateforme one-way dédiée).
+## On restaure d'abord le masque one-way (coupé pendant l'état), on cherche
+## la surface par rayon autour du sommet de la zone, puis on pose les pieds
+## dessus avec une micro-poussée vers le bas pour valider le contact au sol
+## dès le premier frame — ni chute parasite, ni particules d'atterrissage.
+func _echelle_pose_au_sommet() -> void:
+	set_collision_mask_value(ONEWAY_LAYER, true)
+	var top := _echelle_zone_top(_current_echelle) if _current_echelle != null \
+		else global_position.y
+	# cherche la surface du sol depuis au-dessus du sommet de zone jusqu'au
+	# niveau des pieds : couvre aussi bien une zone collée à la planche
+	# qu'une zone volontairement étirée bien au-dessus (réglage d'émergence)
+	var q := PhysicsRayQueryParameters2D.create(
+		Vector2(global_position.x, top - 80.0),
+		Vector2(global_position.x, global_position.y + 20.0),
+		collision_mask)
+	q.exclude = [get_rid()]
+	var hit := get_world_2d().direct_space_state.intersect_ray(q)
+	if hit:
+		global_position.y = hit.position.y
+	else:
+		global_position.y = top
+	velocity = Vector2(0.0, 50.0)  # micro-poussée : contact sol immédiat
+	print("[ECH] sortie HAUT (pose au sommet)  perso_y=",
+		snappedf(global_position.y, 0.1), " sol_trouve=", not hit.is_empty())
+	goto_state(States.IDLE)
 
 
 ## Bord bas (y global) de la zone d'une échelle
@@ -1035,6 +1068,11 @@ func _find_echelle() -> Area2D:
 func _try_echelle() -> bool:
 	var ladder := _find_echelle()
 	if ladder == null:
+		# secours au niveau des pieds : accroche depuis une plateforme dont
+		# la zone ne dépasse que peu au-dessus de la surface — l'échelle
+		# garde ainsi la priorité sur le DROP
+		ladder = _find_echelle_at(global_position + Vector2(0.0, -8.0))
+	if ladder == null:
 		return false
 	_current_echelle = ladder
 	change_state(States.ECHELLE)
@@ -1044,6 +1082,7 @@ func _try_echelle() -> bool:
 func echelle_enter() -> void:
 	velocity = Vector2.ZERO
 	_recharge_air_moves()
+	_echelle_enter_pframe = Engine.get_physics_frames()
 	# sur l'échelle, les plateformes traversables (one-way) ne bloquent plus :
 	# indispensable pour descendre depuis un rebord ou croiser une plateforme
 	set_collision_mask_value(ONEWAY_LAYER, false)
@@ -1051,15 +1090,15 @@ func echelle_enter() -> void:
 	if _current_echelle != null:
 		global_position.x = _current_echelle.global_position.x
 		var top := _echelle_zone_top(_current_echelle)
+		# accroche au-dessus de la butée (depuis une plateforme) : petit
+		# enfoncement immédiat pour empoigner l'échelle au lieu de flotter
+		var limite := top + ECHELLE_TOP_OFFSET
+		if global_position.y < limite:
+			global_position.y = minf(global_position.y + ECHELLE_GRAB_SINK, limite)
 		print("[ECH] enter  perso_y=", snappedf(global_position.y, 0.1),
 			" haut_zone=", snappedf(top, 0.1),
 			" ecart(perso-haut)=", snappedf(global_position.y - top, 0.1),
 			" au_sol=", is_on_floor())
-		# accroché au-dessus de la butée (depuis un rebord) : on tombe en anim
-		# de chute jusqu'à l'échelle, sinon pose de grimpe directe
-		if global_position.y < top + ECHELLE_TOP_OFFSET - 4.0:
-			animator.play("chute")
-			return
 	animator.play("climbidle")
 
 
@@ -1100,12 +1139,9 @@ func echelle_execute(_delta: float) -> void:
 					_current_echelle = next
 					global_position.x = next.global_position.x  # ré-aimante en x
 				else:
-					# butée atteinte en montant, rien au-dessus : on pose le
-					# perso debout au sommet, directement en idle (plus de saut)
-					global_position.y = _echelle_zone_top(_current_echelle)
-					print("[ECH] sortie HAUT (pose au sommet)  perso_y=",
-						snappedf(global_position.y, 0.1))
-					goto_state(States.IDLE)
+					# butée atteinte en montant, rien au-dessus : pose debout
+					# sur le sol au-dessus du sommet (plus de saut)
+					_echelle_pose_au_sommet()
 					return
 			elif ladder != null:
 				# (si ladder == null on est en transit de raccord descendant :
@@ -1117,12 +1153,9 @@ func echelle_execute(_delta: float) -> void:
 					global_position.y = limite
 					velocity.y = maxf(velocity.y, 0.0)
 
-	# animations : "chute" seulement en glisse d'accroche haute, jamais
-	# pendant un transit de raccord (ladder == null)
-	if au_dessus_butee and ladder != null:
-		if animator.animation != "chute":
-			animator.play("chute")
-	elif dir < 0.0:
+	# animations : toujours celles de l'échelle, même pendant la glisse
+	# vers la butée (plus d'anim de chute parasite à l'accroche haute)
+	if dir < 0.0:
 		if animator.animation != "climb_move_up":
 			animator.play("climb_move_up")
 	elif dir > 0.0:
@@ -1163,12 +1196,8 @@ func echelle_execute(_delta: float) -> void:
 				_current_echelle = next_haut
 				global_position.x = next_haut.global_position.x  # ré-aimante en x
 				return
-			# sortie par le HAUT en montant : pose debout au sommet
-			if _current_echelle != null:
-				global_position.y = _echelle_zone_top(_current_echelle)
-			print("[ECH] sortie HAUT (sonde, pose au sommet)  perso_y=",
-				snappedf(global_position.y, 0.1))
-			goto_state(States.IDLE)
+			# sortie par le HAUT en montant : pose debout sur le sol au-dessus
+			_echelle_pose_au_sommet()
 		elif is_on_floor():
 			print("[ECH] sortie SOL  perso_y=", snappedf(global_position.y, 0.1))
 			goto_state(States.IDLE)
@@ -1177,10 +1206,12 @@ func echelle_execute(_delta: float) -> void:
 			goto_state(States.CHUTE)
 		return
 
-	# pieds au sol en descendant → arrivé en bas
-	# (pas pendant la glisse depuis un rebord : is_on_floor y est encore
-	# "vrai" au premier frame et éjectait l'état aussitôt)
-	if is_on_floor() and dir > 0.0 and not au_dessus_butee:
+	# pieds au sol en descendant → arrivé en bas.
+	# Garde de 3 frames après l'accroche : en s'accrochant depuis une
+	# plateforme (appui bas au-dessus de l'échelle), is_on_floor est encore
+	# "vrai" au premier frame et éjectait l'état avant la descente
+	if is_on_floor() and dir > 0.0 and not au_dessus_butee \
+		and Engine.get_physics_frames() > _echelle_enter_pframe + 3:
 		goto_state(States.IDLE)
 
 

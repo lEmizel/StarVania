@@ -3,13 +3,12 @@
 [ext_resource type="Texture2D" uid="uid://cpsmi4vguo6qu" path="res://MEDIA/INTERACTIBLE/echelle.png" id="1_ssleb"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_oo8qs"]
-size = Vector2(91, 404)
+size = Vector2(153, 454)
 
 [node name="ECHELLE" type="Area2D" unique_id=1311425675 groups=["ECHELLE"]]
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1513909115]
-visible = false
-position = Vector2(-0.5, -4)
+position = Vector2(-0.5000038, -21)
 shape = SubResource("RectangleShape2D_oo8qs")
 
 [node name="Sprite2D" type="Sprite2D" parent="." unique_id=678762218]

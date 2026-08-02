@@ -9,6 +9,14 @@ var current_offset: Vector2 # Offset actuel de la caméra
 var _shake_intensity := 0.0
 var _shake_decay := 5.0
 
+# Rattrapage doux après une téléportation du joueur (pose d'échelle,
+# respawn…) : au-delà de ce saut en un frame, la caméra glisse au lieu
+# de claquer. Le mouvement normal (dash compris ≈ 23 px/frame) ne le
+# déclenche jamais.
+const TELEPORT_THRESHOLD := 60.0
+const CATCH_UP_SPEED := 6.0
+var _catching_up := false
+
 func _ready():
 	make_current()
 	# On initialise l'offset actuel à la valeur souhaitée au départ
@@ -47,7 +55,16 @@ func _process(delta):
 		if _shake_intensity > 0.0:
 			shake_offset = Vector2(randf_range(-1, 1), randf_range(-1, 1)) * _shake_intensity
 		var pos = target.global_position + current_offset + shake_offset
-		global_position = _clamp_to_barriers(pos).floor()
+		var desired: Vector2 = _clamp_to_barriers(pos)
+		if desired.distance_to(global_position) > TELEPORT_THRESHOLD:
+			_catching_up = true
+		if _catching_up:
+			# glisse rapide vers la cible, puis reprise du suivi au pixel
+			global_position = global_position.lerp(desired, CATCH_UP_SPEED * delta)
+			if global_position.distance_to(desired) < 2.0:
+				_catching_up = false
+		else:
+			global_position = desired.floor()
 
 
 ## Applique les barrières LIMITE_CAMERA posées dans le niveau (groupe
