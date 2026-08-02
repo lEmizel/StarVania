@@ -103,12 +103,6 @@ func _physics_process(delta: float) -> void:
 		FALL_POINT = global_position.y
 	else:
 		FALL_POINT = minf(FALL_POINT, global_position.y)
-	# accroche d'échelle en MAINTENU : le verrou posé en quittant une échelle
-	# ne saute qu'une fois haut/bas relâchés, sinon on s'y raccrocherait
-	# instantanément après un saut/esquive/hissage
-	if _echelle_regrab_lock and not Input.is_action_pressed("up_move") \
-		and not Input.is_action_pressed("down_move"):
-		_echelle_regrab_lock = false
 	# Knockback absolu — même principe que les monstres (BASE_IA) : tant qu'il
 	# est actif, il remplace le déplacement horizontal, via velocity pour que
 	# move_and_slide glisse le long du sol
@@ -230,7 +224,8 @@ func _raycast_hits_wall(rc: RayCast2D) -> bool:
 	if not rc.is_colliding():
 		return false
 	var col := rc.get_collider()
-	return col is StaticBody2D and col.is_in_group("wall_jump")
+	# wall jump universel (pour le moment) : tout mur StaticBody2D est valide
+	return col is StaticBody2D
 
 
 func _raycast_hits_group(rc: RayCast2D, group_name: String, body_only := false) -> bool:
@@ -398,7 +393,7 @@ func idle_input(event: InputEvent) -> void:
 	elif Input.is_action_just_pressed("spell"):
 		_try_cast_bloodball()
 		return
-	elif (Input.is_action_pressed("up_move") or Input.is_action_pressed("down_move")) \
+	elif (Input.is_action_just_pressed("up_move") or Input.is_action_just_pressed("down_move")) \
 		and _try_echelle():
 		return
 	elif Input.is_action_just_pressed("down_move") and is_on_floor():
@@ -462,7 +457,7 @@ func run_input(event: InputEvent) -> void:
 	elif Input.is_action_just_pressed("spell"):
 		_try_cast_bloodball()
 		return
-	elif (Input.is_action_pressed("up_move") or Input.is_action_pressed("down_move")) \
+	elif (Input.is_action_just_pressed("up_move") or Input.is_action_just_pressed("down_move")) \
 		and _try_echelle():
 		return
 	elif Input.is_action_just_pressed("down_move") and is_on_floor():
@@ -591,7 +586,7 @@ func jump_input(event: InputEvent) -> void:
 			return
 	if _fresh_press("esquive") and _try_air_dash():
 		return
-	if (Input.is_action_pressed("up_move") or Input.is_action_pressed("down_move")) \
+	if (Input.is_action_just_pressed("up_move") or Input.is_action_just_pressed("down_move")) \
 		and _try_echelle():
 		return
 	if Input.is_action_just_pressed("spell"):
@@ -681,7 +676,7 @@ func chute_input(event: InputEvent) -> void:
 	if _fresh_press("esquive") and _try_air_dash():
 		return
 
-	if (Input.is_action_pressed("up_move") or Input.is_action_pressed("down_move")) \
+	if (Input.is_action_just_pressed("up_move") or Input.is_action_just_pressed("down_move")) \
 		and _try_echelle():
 		return
 
@@ -899,7 +894,6 @@ func climb_exit() -> void:
 @export var ECHELLE_BELOW_REACH: float = 120.0
 var _current_echelle: Area2D = null
 var _echelle_top_exit := false  # signal pour jump_enter : hissage de sommet
-var _echelle_regrab_lock := false  # posé en quittant l'échelle, levé au relâché haut/bas
 
 
 ## Bord haut (y global) de la zone d'une échelle, lu depuis son CollisionShape2D
@@ -939,10 +933,8 @@ func _find_echelle() -> Area2D:
 	return _find_echelle_at(global_position + Vector2(0.0, -60.0))
 
 
-## Tente d'accrocher une échelle (haut/bas maintenu dans les états qui le permettent)
+## Tente d'accrocher une échelle (appui haut/bas dans les états qui le permettent)
 func _try_echelle() -> bool:
-	if _echelle_regrab_lock:
-		return false
 	var ladder := _find_echelle()
 	if ladder == null:
 		return false
@@ -1104,8 +1096,6 @@ func echelle_exit() -> void:
 	_current_echelle = null
 	velocity = Vector2.ZERO
 	set_collision_mask_value(ONEWAY_LAYER, true)
-	# pas de re-accroche tant que haut/bas n'est pas relâché (accroche maintenue)
-	_echelle_regrab_lock = true
 #endregion
 
 
@@ -1169,7 +1159,7 @@ func roll_exit() -> void:
 ## Vitesse du dash (2× la roulade — la distance reste identique grâce à
 ## la durée divisée par deux : ~509 px au total)
 @export var DASH_SPEED: float = 1400.0
-@export var DASH_DURATION: float = 0.3636
+@export var DASH_DURATION: float = 0.2363
 var _air_dash_used := false
 var _dash_timer := 0.0
 
