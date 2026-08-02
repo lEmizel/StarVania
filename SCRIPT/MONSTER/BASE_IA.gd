@@ -202,13 +202,19 @@ func apply_damage(amount: int, source_x, _source_tag := "?") -> void:
 		blood.global_position = global_position
 		_on_dead()
 		return
-	# Attaqué — même de dos, même hors vision : le monstre se retourne
-	# vers la source et prend le joueur pour cible
+	# Attaqué — même de dos, même hors vision, même par un projectile : le
+	# monstre prend le joueur pour cible, se retourne vers LUI (pas vers le
+	# projectile, qui est déjà au contact) et réagit immédiatement sans
+	# attendre le prochain cycle de décision de son état
 	if target == null:
 		var players := get_tree().get_nodes_in_group("Player")
 		if players.size() > 0:
 			target = players[0]
-	if source_x != null:
+			if has_method("decide"):
+				call_deferred("decide")
+	if target != null:
+		flip_toward(target.global_position.x)
+	elif source_x != null:
 		flip_toward(source_x)
 	# Knockback appliqué par-dessus l'état courant, sans l'interrompre
 	var dir := 0

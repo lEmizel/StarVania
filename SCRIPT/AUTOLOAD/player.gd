@@ -13,6 +13,14 @@ var blood := 0
 var hp := 5
 var MAX_HP := 5
 var max_hearts := 5  # nombre de cœurs affichés
+# vrai après le premier spawn : l'export MAX_HEARTS du player n'est que la
+# valeur de DÉPART, ensuite l'autoload fait foi (cœurs ramassés compris)
+var hearts_initialized := false
+# Registre des cœurs déjà ramassés (clé = scène niveau + position) : un
+# pickup présent ici se détruit à son chargement — sinon il renaîtrait à
+# chaque respawn (cœurs infinis). Vit le temps de la session ; à brancher
+# sur la vraie sauvegarde disque quand elle existera.
+var coeurs_ramasses := {}
 var sang := 0  # la jauge de sang commence vide (se remplit via les récoltes)
 var MAX_SANG := 195
 
@@ -53,6 +61,7 @@ func set_max_hp(new_max: int) -> void:
 		return
 	var old_hp := hp
 	MAX_HP = new_max
+	max_hearts = MAX_HP  # la rangée de cœurs affichée suit toujours le max
 	# Ne PAS rééchelonner : on garde la valeur et on clamp si besoin
 	hp = min(old_hp, MAX_HP)
 

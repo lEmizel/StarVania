@@ -192,9 +192,93 @@ func _apply_sang_bar_max(new_max: float, tween: bool = true) -> void:
 	sang_back_bar.value = float(Player.sang)
 
 
+# ==================================================
+#  FX de ramassage de cœur : gros plan en fondu au centre de l'écran, puis
+#  envol vers la rangée de cœurs en étoile filante rouge sang
+# ==================================================
+
+## Hauteur du gros plan de cœur ramassé : fraction de l'écran (0 = bord
+## haut, 0.5 = centre). À ajuster au feeling.
+@export var FX_COEUR_HAUTEUR: float = 0.25
+
+func heart_pickup_fx() -> void:
+	var big := Vector2(220.0, 220.0)
+	var fx := TextureRect.new()
+	fx.texture = _heart_template_full.texture
+	# TODO (asset) : la texture du cœur est à l'envers pour le moment —
+	# Kaoru corrigera le PNG plus tard ; RETIRER ce flip_v à ce moment-là
+	fx.flip_v = true
+	fx.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	fx.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	fx.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	fx.size = big
+	fx.pivot_offset = big * 0.5
+	var ecran := get_viewport().get_visible_rect().size
+	fx.position = Vector2((ecran.x - big.x) * 0.5,
+		ecran.y * FX_COEUR_HAUTEUR - big.y * 0.5)
+	fx.modulate = Color(1.0, 1.0, 1.0, 0.0)
+	fx.scale = Vector2(0.6, 0.6)
+	add_child(fx)
+
+	# traînée de comète rouge sang
+	var trail := CPUParticles2D.new()
+	trail.emitting = false
+	trail.amount = 60
+	trail.lifetime = 0.55
+	trail.local_coords = false
+	trail.direction = Vector2(0.0, 1.0)
+	trail.spread = 35.0
+	trail.gravity = Vector2.ZERO
+	trail.initial_velocity_min = 40.0
+	trail.initial_velocity_max = 140.0
+	trail.scale_amount_min = 3.0
+	trail.scale_amount_max = 7.0
+	var grad := Gradient.new()
+	grad.set_color(0, Color(1.0, 0.25, 0.3, 1.0))
+	grad.set_color(1, Color(0.45, 0.0, 0.06, 0.0))
+	trail.color_ramp = grad
+	trail.position = big * 0.5
+	fx.add_child(trail)
+
+	# cible : le centre du dernier cœur de la rangée (le tout nouveau)
+	var target_center: Vector2 = _hearts.back()["full"].get_global_rect().get_center()
+
+	var t := create_tween()
+	# 1) fondu rapide plein écran avec petit pop
+	t.tween_property(fx, "modulate:a", 1.0, 0.15)
+	t.parallel().tween_property(fx, "scale", Vector2.ONE, 0.2) \
+		.set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	t.tween_interval(0.35)
+	# 2) envol en comète vers la rangée de cœurs
+	t.tween_callback(func() -> void: trail.emitting = true)
+	t.tween_property(fx, "position", target_center - big * 0.5, 0.5) \
+		.set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
+	t.parallel().tween_property(fx, "scale", Vector2(0.18, 0.18), 0.5)
+	# 3) impact : pulsation du nouveau cœur, extinction de la comète
+	t.tween_callback(_heart_land_pulse)
+	t.tween_callback(func() -> void: trail.emitting = false)
+	t.tween_property(fx, "modulate:a", 0.0, 0.1)
+	t.tween_interval(0.6)  # laisse la traînée finir de mourir
+	t.tween_callback(fx.queue_free)
+
+
+func _heart_land_pulse() -> void:
+	if _hearts.is_empty():
+		return
+	var h: TextureRect = _hearts.back()["full"]
+	var base: Vector2 = h.scale
+	var pt := create_tween()
+	pt.tween_property(h, "scale", base * 1.35, 0.08)
+	pt.tween_property(h, "scale", base, 0.15)
+
+
 func _on_bar_max_request(kind: String, new_max: float) -> void:
 	if kind == "sang":
 		_apply_sang_bar_max(new_max, true)
+	elif kind == "hp":
+		# le nombre de cœurs max a changé (cœur ramassé…) : on reconstruit
+		# la rangée — _build_hearts lit Player.max_hearts et repeint selon hp
+		_build_hearts()
 
 
 # ==================================================

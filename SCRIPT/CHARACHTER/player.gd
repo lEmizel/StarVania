@@ -65,10 +65,14 @@ var combo_buffered := false   # true si le joueur a appuyé pendant l'anim en co
 
 func _enter_tree() -> void:
 	# Synchro AVANT le _ready des enfants : le HUD (enfant de cette scène)
-	# lit ces valeurs pour construire sa rangée de cœurs
-	Player.max_hearts = MAX_HEARTS
-	Player.MAX_HP = MAX_HEARTS
-	Player.hp = mini(Player.hp, MAX_HEARTS)
+	# lit ces valeurs pour construire sa rangée de cœurs.
+	# L'export n'est que la valeur de DÉPART : au premier spawn seulement —
+	# ensuite l'autoload fait foi, les cœurs ramassés survivent au respawn
+	if not Player.hearts_initialized:
+		Player.hearts_initialized = true
+		Player.max_hearts = MAX_HEARTS
+		Player.MAX_HP = MAX_HEARTS
+	Player.hp = mini(Player.hp, Player.MAX_HP)
 
 
 func _ready() -> void:

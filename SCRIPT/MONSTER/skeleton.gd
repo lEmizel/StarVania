@@ -11,8 +11,17 @@ enum States { IDLE, PATROL, APPROACH, ATTACK, RETURN, DEAD }
 ## proche à gauche, demi-tour, jusqu'à celui de droite, etc.
 @export var patrol_enabled := true
 @export var patrol_speed := 140.0
+## Abandon temporaire : si la cible reste inaccessible (bloqué à un bord…)
+## pendant ce temps cumulé d'idle frustré, le squelette lâche l'aggro et
+## reprend sa ronde — sa vision le re-déclenchera plus tard
+@export var abandon_time := 1.5
+## Délai de grâce après un abandon avant de pouvoir re-détecter le joueur
+## (sinon re-aggro instantané = yo-yo). Un coup reçu réveille toujours.
+@export var abandon_cooldown := 2.5
 var _idle_wait := 0.0
 var _patrol_dir := 1
+var _blocked_time := 0.0
+var _abandon_timer := 0.0
 @onready var detection_vide: RayCast2D = $detection_vide
 
 
@@ -104,14 +113,39 @@ func idle_execute(delta: float) -> void:
 	velocity.y += gravity * delta
 	if target:
 		flip_toward(target.global_position.x)
+		# idle AVEC cible = frustration (cible hors de portée) : au bout
+		# d'abandon_time cumulé, on lâche l'affaire et on reprend la ronde.
+		# (le compteur est remis à zéro par approach/attack)
+		_blocked_time += delta
+		if _blocked_time >= abandon_time:
+			_blocked_time = 0.0
+			_abandon_timer = abandon_cooldown
+			target = null
+			goto_state(States.PATROL)
+			return
 		_idle_wait += delta
 		if _idle_wait >= reaction_time:
 			decide()
-	elif patrol_enabled:
-		# personne en vue : après le temps de réflexion, on part en ronde
-		_idle_wait += delta
-		if _idle_wait >= reaction_time:
-			goto_state(States.PATROL)
+	else:
+		# re-détection : un joueur DÉJÀ dans la zone de vision ne re-émet
+		# jamais body_entered → on re-scanne, passé le délai de grâce
+		_abandon_timer = maxf(_abandon_timer - delta, 0.0)
+		if _abandon_timer <= 0.0:
+			_rescan_vision()
+		if patrol_enabled:
+			# personne en vue : après le temps de réflexion, on part en ronde
+			_idle_wait += delta
+			if _idle_wait >= reaction_time:
+				goto_state(States.PATROL)
+
+
+## Re-scan de la zone de vision (les corps déjà présents n'émettent pas
+## de signal d'entrée)
+func _rescan_vision() -> void:
+	for b in vision.get_overlapping_bodies():
+		if b.is_in_group("Player"):
+			target = b
+			return
 
 
 # --- PATROL (ronde entre les deux trous/murs les plus proches) ---
@@ -123,6 +157,10 @@ func patrol_enter() -> void:
 
 func patrol_execute(delta: float) -> void:
 	velocity.y += gravity * delta
+	# re-détection en ronde (voir _rescan_vision), passé le délai de grâce
+	_abandon_timer = maxf(_abandon_timer - delta, 0.0)
+	if target == null and _abandon_timer <= 0.0:
+		_rescan_vision()
 	# un joueur apparaît → on rend la main au cerveau de combat
 	if target:
 		velocity.x = 0.0
@@ -143,6 +181,7 @@ func patrol_execute(delta: float) -> void:
 
 func approach_enter() -> void:
 	animator.play("walk")
+	_blocked_time = 0.0  # la cible redevient accessible : frustration oubliée
 
 func approach_execute(delta: float) -> void:
 	apply_gravity(delta)
@@ -170,6 +209,7 @@ func approach_execute(delta: float) -> void:
 func attack_enter() -> void:
 	animator.play("attack")
 	velocity.x = 0.0
+	_blocked_time = 0.0  # on se bat : frustration oubliée
 	if target:
 		flip_toward(target.global_position.x)
 
