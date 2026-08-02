@@ -3,6 +3,7 @@
 [ext_resource type="PackedScene" uid="uid://ckxwmy0iav2h2" path="res://SCRIPT/INTERACTIBLE/Checkpoint.tscn" id="1_xq5vh"]
 [ext_resource type="Script" uid="uid://dftar4ptyhjxe" path="res://SCRIPT/UTILITAIRE/spawnplayer.gd" id="2_8v41f"]
 [ext_resource type="PackedScene" uid="uid://jxp4cxeqdyhv" path="res://SCRIPT/grayboxing/400x100.tscn" id="3_jojol"]
+[ext_resource type="PackedScene" uid="uid://bqbrm320hgjkj" path="res://SCRIPT/INTERACTIBLE/echelle.tscn" id="4_8mm3h"]
 [ext_resource type="PackedScene" uid="uid://47qcpwpulk4y" path="res://SCRIPT/grayboxing/800x400.tscn" id="4_lrmlw"]
 [ext_resource type="PackedScene" uid="uid://dx851ijsrvbgf" path="res://SCRIPT/grayboxing/400x200.tscn" id="5_55v8t"]
 [ext_resource type="PackedScene" uid="uid://cxb1r4knfgy12" path="res://SCRIPT/grayboxing/400x200 slide.tscn" id="6_a4ihq"]
@@ -43,6 +44,15 @@ position = Vector2(3450, -1089)
 [node name="checkpoint" parent="interactible" unique_id=524856083 groups=["Checkpoint"] instance=ExtResource("1_xq5vh")]
 z_index = -4
 position = Vector2(4, -98)
+
+[node name="ECHELLE" parent="interactible" unique_id=1311425675 instance=ExtResource("4_8mm3h")]
+position = Vector2(407, -301)
+
+[node name="ECHELLE2" parent="interactible" unique_id=1468188508 instance=ExtResource("4_8mm3h")]
+position = Vector2(407, -702)
+
+[node name="platforme2" parent="interactible" unique_id=490779912 instance=ExtResource("28_2oji1")]
+position = Vector2(402, -800)
 
 [node name="grayboxing" type="Node2D" parent="." unique_id=1290048817]
 
@@ -503,7 +513,7 @@ position = Vector2(2339, -503)
 position = Vector2(3031, -504)
 
 [node name="enemi5" parent="enemi4" unique_id=1957176117 instance=ExtResource("13_a4ihq")]
-position = Vector2(2258, -1313)
+position = Vector2(2326, -1302)
 
 [node name="enemi6" parent="enemi4" unique_id=44772268 instance=ExtResource("13_a4ihq")]
 position = Vector2(-21, -1316)

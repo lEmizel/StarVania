@@ -46,6 +46,7 @@ CHUTE=""
 GRAB=""
 Checkpoint=""
 Porte=""
+ECHELLE=""
 
 [gui]
 

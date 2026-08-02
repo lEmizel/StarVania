@@ -1,7 +1,7 @@
 extends CharacterBody2D
 
 
-enum States { IDLE, RUN, CHUTE, JUMP, WALL_GRIFFE, WALL_JUMP, CLIMB, ROLL, CHUTE_GRIFFE, GRAB, ATTACK_LIGHT_1, ATTACK_LIGHT_2, ATTACK_LIGHT_3, ATTACK_AIR, ATTACK_LOURDE, DEAD, HIT, HEAL, DROP, BLOODBALL }
+enum States { IDLE, RUN, CHUTE, JUMP, WALL_GRIFFE, WALL_JUMP, CLIMB, ROLL, CHUTE_GRIFFE, GRAB, ATTACK_LIGHT_1, ATTACK_LIGHT_2, ATTACK_LIGHT_3, ATTACK_AIR, ATTACK_LOURDE, DEAD, HIT, HEAL, DROP, BLOODBALL, ECHELLE, DASH }
 
 
 
@@ -99,9 +99,16 @@ func _physics_process(delta: float) -> void:
 	# un double saut ne peut donc jamais effacer une chute accumulée
 	if is_on_floor():
 		_double_jump_used = false
+		_air_dash_used = false
 		FALL_POINT = global_position.y
 	else:
 		FALL_POINT = minf(FALL_POINT, global_position.y)
+	# accroche d'échelle en MAINTENU : le verrou posé en quittant une échelle
+	# ne saute qu'une fois haut/bas relâchés, sinon on s'y raccrocherait
+	# instantanément après un saut/esquive/hissage
+	if _echelle_regrab_lock and not Input.is_action_pressed("up_move") \
+		and not Input.is_action_pressed("down_move"):
+		_echelle_regrab_lock = false
 	# Knockback absolu — même principe que les monstres (BASE_IA) : tant qu'il
 	# est actif, il remplace le déplacement horizontal, via velocity pour que
 	# move_and_slide glisse le long du sol
@@ -183,7 +190,7 @@ func _handle_landing() -> void:
 		goto_state(States.IDLE)
 
 func apply_damage(amount: int, source_x, source_tag := "?") -> void:
-	if current_state in [States.ROLL, States.DEAD]:
+	if current_state in [States.ROLL, States.DASH, States.DEAD]:
 		return
 	if current_state == States.HIT:
 		# DEBUG dégâts : coup ignoré pendant le stun
@@ -215,15 +222,15 @@ func goto_state(s: States) -> void:
 		return
 	call_deferred("change_state", s)
 
-## Détection de mur pour le wall jump : TOUT mur solide compte
-## (StaticBody2D et TileMap), sans groupe requis. Les CharacterBody2D
-## (monstres) sont volontairement exclus.
+## Détection de mur pour le wall jump : uniquement les StaticBody2D
+## explicitement marqués (groupe "wall_jump") — l'opt-in permet au level
+## design de décider quels murs sont grimpables
 func _raycast_hits_wall(rc: RayCast2D) -> bool:
 	rc.force_raycast_update()
 	if not rc.is_colliding():
 		return false
 	var col := rc.get_collider()
-	return col is StaticBody2D or col is TileMap or col is TileMapLayer
+	return col is StaticBody2D and col.is_in_group("wall_jump")
 
 
 func _raycast_hits_group(rc: RayCast2D, group_name: String, body_only := false) -> bool:
@@ -345,8 +352,22 @@ func change_state(new_state: States) -> void:
 	state_functions[current_state]["exit"].call()
 	previous_state = current_state
 	current_state  = new_state
+	_state_enter_frame = Engine.get_process_frames()
 	state_functions[current_state]["enter"].call()
 	_changing_now = false
+
+
+# Frame d'entrée dans l'état courant : sert à ignorer les pressions "fantômes"
+# quand deux actions partagent un bouton (ex. jump et griffe sur le bouton 0 :
+# la pression qui fait ENTRER dans wall_griffe ne doit pas aussi déclencher
+# le saut de sortie dans la même frame)
+var _state_enter_frame := 0
+
+## Comme is_action_just_pressed, mais ignore la pression qui a déclenché
+## l'entrée dans l'état courant (même frame)
+func _fresh_press(action: String) -> bool:
+	return Input.is_action_just_pressed(action) \
+		and Engine.get_process_frames() != _state_enter_frame
 
 # =====================  IDLE  ===========================
 #region IDLE
@@ -376,6 +397,9 @@ func idle_input(event: InputEvent) -> void:
 		return
 	elif Input.is_action_just_pressed("spell"):
 		_try_cast_bloodball()
+		return
+	elif (Input.is_action_pressed("up_move") or Input.is_action_pressed("down_move")) \
+		and _try_echelle():
 		return
 	elif Input.is_action_just_pressed("down_move") and is_on_floor():
 		change_state(States.DROP)
@@ -438,6 +462,9 @@ func run_input(event: InputEvent) -> void:
 	elif Input.is_action_just_pressed("spell"):
 		_try_cast_bloodball()
 		return
+	elif (Input.is_action_pressed("up_move") or Input.is_action_pressed("down_move")) \
+		and _try_echelle():
+		return
 	elif Input.is_action_just_pressed("down_move") and is_on_floor():
 		change_state(States.DROP)
 		return
@@ -498,6 +525,11 @@ func jump_enter():
 		velocity.x = 0.0
 		_climb_auto_exit = false
 		_jump_timer = MAX_JUMP_HOLD  # ← désactive le hold, gravité normale immédiate
+	elif _echelle_top_exit:
+		_echelle_top_exit = false
+		velocity.y = ECHELLE_TOP_JUMP_VELOCITY
+		velocity.x = 0.0
+		_jump_timer = MAX_JUMP_HOLD  # hissage sec, sans hold
 	elif _dj_pending:
 		_dj_pending = false
 		velocity.y = DOUBLE_JUMP_VELOCITY
@@ -543,26 +575,30 @@ func jump_execute(delta):
 		change_state(States.CHUTE)
 
 func jump_input(event: InputEvent) -> void:
+	# PRIORITÉ griffe : jump et griffe partagent le bouton — près d'une
+	# surface accrochable, la pression accroche au lieu de double-sauter
+	if Input.is_action_just_pressed("griffe"):
+		var hit_r := _raycast_hits_group(climbcast_right, "CLIMB")
+		var hit_l := _raycast_hits_group(climbcast_left,  "CLIMB")
+		if hit_r and hit_l:
+			change_state(States.CLIMB)
+			return
+		if _raycast_hits_group(climbcast_right, "GRIFFE") and absf(velocity.x) > 0.0:
+			change_state(States.WALL_GRIFFE)
+			return
 	if Input.is_action_just_pressed("jump"):
 		if _try_double_jump():
 			return
+	if _fresh_press("esquive") and _try_air_dash():
+		return
+	if (Input.is_action_pressed("up_move") or Input.is_action_pressed("down_move")) \
+		and _try_echelle():
+		return
 	if Input.is_action_just_pressed("spell"):
 		_try_cast_bloodball()
 		return
 	if Input.is_action_just_pressed("light_attack"):
 		change_state(States.ATTACK_AIR)
-		return
-	# CLIMB
-	var hit_r := _raycast_hits_group(climbcast_right, "CLIMB")
-	var hit_l := _raycast_hits_group(climbcast_left,  "CLIMB")
-	if hit_r and hit_l and Input.is_action_just_pressed("griffe"):
-		change_state(States.CLIMB)
-		return
-	# GRIFFE
-	if _raycast_hits_group(climbcast_right, "GRIFFE") \
-		and abs(velocity.x) > 0 \
-		and Input.is_action_just_pressed("griffe"):
-		change_state(States.WALL_GRIFFE)
 		return
 
 func jump_exit():
@@ -617,6 +653,21 @@ func chute_execute(delta: float) -> void:
 
 
 func chute_input(event: InputEvent) -> void:
+	# PRIORITÉ griffe : jump et griffe partagent le bouton — près d'une
+	# surface accrochable, la pression accroche au lieu de (double-)sauter
+	if Input.is_action_just_pressed("griffe"):
+		if _raycast_hits_group(climbcast_up, "CHUTE"):
+			change_state(States.CHUTE_GRIFFE)
+			return
+		var hit_r := _raycast_hits_group(climbcast_right, "CLIMB")
+		var hit_l := _raycast_hits_group(climbcast_left,  "CLIMB")
+		if hit_r and hit_l:
+			change_state(States.CLIMB)
+			return
+		if _raycast_hits_group(climbcast_right, "GRIFFE") and absf(velocity.x) > 0.0:
+			change_state(States.WALL_GRIFFE)
+			return
+
 	if Input.is_action_just_pressed("jump"):
 		if _coyote_timer > 0.0:
 			_coyote_timer = 0.0
@@ -626,30 +677,20 @@ func chute_input(event: InputEvent) -> void:
 			return
 		else:
 			_jump_buffer_timer = JUMP_BUFFER_TIME
-		
+
+	if _fresh_press("esquive") and _try_air_dash():
+		return
+
+	if (Input.is_action_pressed("up_move") or Input.is_action_pressed("down_move")) \
+		and _try_echelle():
+		return
+
 	if Input.is_action_just_pressed("spell"):
 		_try_cast_bloodball()
 		return
 
 	if Input.is_action_just_pressed("light_attack"):
 		change_state(States.ATTACK_AIR)
-		return
-
-	if _raycast_hits_group(climbcast_up, "CHUTE") \
-		and Input.is_action_just_pressed("griffe"):
-		change_state(States.CHUTE_GRIFFE)
-		return
-
-	var hit_r := _raycast_hits_group(climbcast_right, "CLIMB")
-	var hit_l := _raycast_hits_group(climbcast_left,  "CLIMB")
-	if hit_r and hit_l and Input.is_action_just_pressed("griffe"):
-		change_state(States.CLIMB)
-		return
-
-	if _raycast_hits_group(climbcast_right, "GRIFFE") \
-		and abs(velocity.x) > 0 \
-		and Input.is_action_just_pressed("griffe"):
-		change_state(States.WALL_GRIFFE)
 		return
 
 
@@ -660,9 +701,17 @@ func chute_exit() -> void:
 
 
 #region WALL_GRIFFE
+## S'accrocher à quelque chose (mur, griffe, échelle, point de grab…)
+## recharge le double saut et le dash aérien
+func _recharge_air_moves() -> void:
+	_double_jump_used = false
+	_air_dash_used = false
+
+
 func wall_griffe_enter():
 	animator.play("wall_griffe")
 	velocity.y = 0
+	_recharge_air_moves()
 
 	# On détermine la direction selon la vélocité d'arrivée
 	if velocity.x > 0:
@@ -683,7 +732,9 @@ func wall_griffe_execute(_delta: float) -> void:
 	change_state(States.CHUTE)
 
 func wall_griffe_input(event: InputEvent):
-	if Input.is_action_just_pressed("jump"):
+	# _fresh_press : jump partage le bouton de griffe — la pression qui a
+	# accroché le mur ne doit pas faire sauter dans la foulée
+	if _fresh_press("jump"):
 		change_state(States.JUMP)
 
 func wall_griffe_animation_finished():
@@ -708,7 +759,7 @@ func wall_jump_enter():
 	_flip_facing_on_wall()
 	velocity = Vector2.ZERO
 	_wj_phase = WallJumpPhase.SLIDING
-	_double_jump_used = false  # s'accrocher à un mur recharge le double saut
+	_recharge_air_moves()
 	animator.play("wall_jump")
 
 func wall_jump_execute(delta: float) -> void:
@@ -762,6 +813,7 @@ func wall_jump_exit():
 
 func climb_enter() -> void:
 	velocity = Vector2.ZERO
+	_recharge_air_moves()
 	animator.play("climbidle")
 
 func climb_execute(delta: float) -> void:
@@ -819,12 +871,242 @@ func climb_input(event: InputEvent) -> void:
 	if Input.is_action_just_pressed("esquive"):
 		change_state(States.CHUTE)
 		return
-	elif Input.is_action_just_pressed("jump"):
+	elif _fresh_press("jump"):  # même bouton que griffe → filtre la pression d'entrée
 		change_state(States.JUMP)
 		return
 
 func climb_exit() -> void:
 	pass
+
+
+# =====================  ECHELLE  ===========================
+#region ECHELLE
+## État parallèle à CLIMB, dédié aux échelles (zones Area2D du groupe
+## "ECHELLE") : on ne peut QUE monter et descendre. Seule échappatoire : sauter.
+
+@export var ECHELLE_SPEED: float = 250.0
+## Impulsion du saut automatique de hissage en sortie haute d'échelle
+@export var ECHELLE_TOP_JUMP_VELOCITY: float = -1200.0
+## Butée haute de grimpe : distance (px) entre le sommet de la ZONE de
+## l'échelle et l'origine du perso au maximum de la montée. Plus grand =
+## le perso s'arrête plus bas. À régler à l'œil dans l'inspecteur.
+@export var ECHELLE_TOP_OFFSET: float = 150.0
+## Portée de raccord entre échelles empilées : distance (px) au-dessus de la
+## sonde torse où l'on cherche l'échelle suivante une fois la butée atteinte
+@export var ECHELLE_CHAIN_REACH: float = 300.0
+## Distance (px) sondée sous les pieds pour le raccord descendant entre
+## deux échelles empilées
+@export var ECHELLE_BELOW_REACH: float = 120.0
+var _current_echelle: Area2D = null
+var _echelle_top_exit := false  # signal pour jump_enter : hissage de sommet
+var _echelle_regrab_lock := false  # posé en quittant l'échelle, levé au relâché haut/bas
+
+
+## Bord haut (y global) de la zone d'une échelle, lu depuis son CollisionShape2D
+func _echelle_zone_top(ladder: Area2D) -> float:
+	for child in ladder.get_children():
+		if child is CollisionShape2D and child.shape is RectangleShape2D:
+			return child.global_position.y - child.shape.size.y * 0.5 * absf(child.global_scale.y)
+	return ladder.global_position.y
+
+
+## Bord bas (y global) de la zone d'une échelle
+func _echelle_zone_bottom(ladder: Area2D) -> float:
+	for child in ladder.get_children():
+		if child is CollisionShape2D and child.shape is RectangleShape2D:
+			return child.global_position.y + child.shape.size.y * 0.5 * absf(child.global_scale.y)
+	return ladder.global_position.y
+
+
+## Cherche une zone du groupe "ECHELLE" en un point donné.
+## En cas de chevauchement, privilégie l'échelle qui monte le plus haut.
+func _find_echelle_at(point: Vector2) -> Area2D:
+	var params := PhysicsPointQueryParameters2D.new()
+	params.position = point
+	params.collide_with_areas = true
+	params.collide_with_bodies = false
+	var best: Area2D = null
+	for hit in get_world_2d().direct_space_state.intersect_point(params, 8):
+		var col = hit.get("collider")
+		if col is Area2D and col.is_in_group("ECHELLE"):
+			if best == null or _echelle_zone_top(col) < _echelle_zone_top(best):
+				best = col
+	return best
+
+
+## Cherche une zone du groupe "ECHELLE" au niveau du torse du perso
+func _find_echelle() -> Area2D:
+	return _find_echelle_at(global_position + Vector2(0.0, -60.0))
+
+
+## Tente d'accrocher une échelle (haut/bas maintenu dans les états qui le permettent)
+func _try_echelle() -> bool:
+	if _echelle_regrab_lock:
+		return false
+	var ladder := _find_echelle()
+	if ladder == null:
+		return false
+	_current_echelle = ladder
+	change_state(States.ECHELLE)
+	return true
+
+
+func echelle_enter() -> void:
+	velocity = Vector2.ZERO
+	_recharge_air_moves()
+	# sur l'échelle, les plateformes traversables (one-way) ne bloquent plus :
+	# indispensable pour descendre depuis un rebord ou croiser une plateforme
+	set_collision_mask_value(ONEWAY_LAYER, false)
+	# aimante le perso sur l'axe central de l'échelle
+	if _current_echelle != null:
+		global_position.x = _current_echelle.global_position.x
+		var top := _echelle_zone_top(_current_echelle)
+		print("[ECH] enter  perso_y=", snappedf(global_position.y, 0.1),
+			" haut_zone=", snappedf(top, 0.1),
+			" ecart(perso-haut)=", snappedf(global_position.y - top, 0.1),
+			" au_sol=", is_on_floor())
+		# accroché au-dessus de la butée (depuis un rebord) : on tombe en anim
+		# de chute jusqu'à l'échelle, sinon pose de grimpe directe
+		if global_position.y < top + ECHELLE_TOP_OFFSET - 4.0:
+			animator.play("chute")
+			return
+	animator.play("climbidle")
+
+
+func echelle_execute(_delta: float) -> void:
+	# ancre légitime : pas de chute accumulée tant qu'on est sur l'échelle
+	FALL_POINT = global_position.y
+
+	# uniquement monter / descendre — aucun déplacement horizontal
+	var dir := Input.get_axis("up_move", "down_move")
+	var vy_prec := velocity.y  # conservé pour la vraie gravité pendant la glisse
+	velocity.x = 0.0
+	velocity.y = dir * ECHELLE_SPEED
+
+	# échelles empilées : la sonde passe d'une échelle à l'autre en grimpant.
+	# On ne monte jamais en grade vers le bas ici (sinon ping-pong avec le
+	# raccord) : la descente vers une échelle plus basse passe uniquement
+	# par le raccord descendant explicite plus bas.
+	var ladder := _find_echelle()
+	if ladder != null and (_current_echelle == null
+		or _echelle_zone_top(ladder) <= _echelle_zone_top(_current_echelle)):
+		_current_echelle = ladder
+
+	# BUTÉE HAUTE géométrique : quoi que dise la sonde, l'origine du perso ne
+	# reste jamais au-dessus du sommet de la zone + ECHELLE_TOP_OFFSET.
+	# `au_dessus_butee` = accroché depuis un rebord ou re-grab trop haut :
+	# au lieu de téléporter, on GLISSE vers la butée à vitesse d'échelle.
+	var au_dessus_butee := false
+	if _current_echelle != null:
+		var limite := _echelle_zone_top(_current_echelle) + ECHELLE_TOP_OFFSET
+		au_dessus_butee = global_position.y < limite - 4.0
+		if global_position.y <= limite:
+			if dir < 0.0:
+				# une échelle continue-t-elle au-dessus ? raccord sans saut
+				var next := _find_echelle_at(global_position
+					+ Vector2(0.0, -60.0 - ECHELLE_CHAIN_REACH))
+				if next != null and _echelle_zone_top(next) < _echelle_zone_top(_current_echelle):
+					print("[ECH] raccord vers l'échelle du dessus")
+					_current_echelle = next
+					global_position.x = next.global_position.x  # ré-aimante en x
+				else:
+					# butée atteinte en montant, rien au-dessus : hissage
+					print("[ECH] sortie HAUT (butée)  perso_y=", snappedf(global_position.y, 0.1))
+					_echelle_top_exit = true
+					goto_state(States.JUMP)
+					return
+			elif ladder != null:
+				# (si ladder == null on est en transit de raccord descendant :
+				#  on garde la vitesse d'échelle, ni glisse ni téléport)
+				if au_dessus_butee:
+					# chute libre (vraie gravité) jusqu'à la butée
+					velocity.y = maxf(vy_prec, 0.0) + gravity * _delta
+				else:
+					global_position.y = limite
+					velocity.y = maxf(velocity.y, 0.0)
+
+	# animations : "chute" seulement en glisse d'accroche haute, jamais
+	# pendant un transit de raccord (ladder == null)
+	if au_dessus_butee and ladder != null:
+		if animator.animation != "chute":
+			animator.play("chute")
+	elif dir < 0.0:
+		if animator.animation != "climb_move_up":
+			animator.play("climb_move_up")
+	elif dir > 0.0:
+		if animator.animation != "climb_move_down":
+			animator.play("climb_move_down")
+	else:
+		if animator.animation != "climbidle":
+			animator.play("climbidle")
+
+	# plus d'échelle sous la main (au torse) → sortie selon la situation
+	if ladder == null:
+		# en glisse depuis un rebord vers la butée : on ne sort pas encore
+		if au_dessus_butee:
+			return
+		# transit entre deux échelles raccordées : la sonde est encore sous la
+		# zone de l'échelle adoptée au-dessus → on continue de grimper
+		if dir < 0.0 and _current_echelle != null \
+			and global_position.y - 60.0 > _echelle_zone_bottom(_current_echelle):
+			return
+		# raccord DESCENDANT échelle→échelle : une échelle continue en
+		# dessous → on descend vers elle sans lâcher prise
+		if dir > 0.0:
+			var next_bas := _find_echelle_at(global_position + Vector2(0.0, ECHELLE_BELOW_REACH))
+			if next_bas != null:
+				if next_bas != _current_echelle:
+					print("[ECH] raccord vers l'échelle du dessous")
+					_current_echelle = next_bas
+					global_position.x = next_bas.global_position.x  # ré-aimante en x
+				return
+		if dir < 0.0:
+			# raccord MONTANT : même si la sonde a décroché, une échelle
+			# continue peut-être au-dessus → on l'adopte au lieu de sauter
+			var next_haut := _find_echelle_at(global_position
+				+ Vector2(0.0, -60.0 - ECHELLE_CHAIN_REACH))
+			if next_haut != null and (_current_echelle == null
+				or _echelle_zone_top(next_haut) < _echelle_zone_top(_current_echelle)):
+				print("[ECH] raccord vers l'échelle du dessus (sonde)")
+				_current_echelle = next_haut
+				global_position.x = next_haut.global_position.x  # ré-aimante en x
+				return
+			# sortie par le HAUT en montant : saut automatique pour se hisser
+			print("[ECH] sortie HAUT (sonde)  perso_y=", snappedf(global_position.y, 0.1))
+			_echelle_top_exit = true
+			goto_state(States.JUMP)
+		elif is_on_floor():
+			print("[ECH] sortie SOL  perso_y=", snappedf(global_position.y, 0.1))
+			goto_state(States.IDLE)
+		else:
+			print("[ECH] sortie CHUTE  perso_y=", snappedf(global_position.y, 0.1))
+			goto_state(States.CHUTE)
+		return
+
+	# pieds au sol en descendant → arrivé en bas
+	# (pas pendant la glisse depuis un rebord : is_on_floor y est encore
+	# "vrai" au premier frame et éjectait l'état aussitôt)
+	if is_on_floor() and dir > 0.0 and not au_dessus_butee:
+		goto_state(States.IDLE)
+
+
+func echelle_input(_event: InputEvent) -> void:
+	# sauter depuis n'importe quel point de l'échelle
+	if Input.is_action_just_pressed("jump"):
+		change_state(States.JUMP)
+		return
+	# esquive (rond) : lâcher prise et se laisser tomber
+	if Input.is_action_just_pressed("esquive"):
+		change_state(States.CHUTE)
+
+
+func echelle_exit() -> void:
+	_current_echelle = null
+	velocity = Vector2.ZERO
+	set_collision_mask_value(ONEWAY_LAYER, true)
+	# pas de re-accroche tant que haut/bas n'est pas relâché (accroche maintenue)
+	_echelle_regrab_lock = true
+#endregion
 
 
 
@@ -876,6 +1158,61 @@ func roll_exit() -> void:
 	collision_normale.set_deferred("disabled", false)
 	collision_roulade.set_deferred("disabled", true)
 
+# =====================  DASH AÉRIEN  ===========================
+#region DASH
+## Version aérienne de l'esquive (même touche) : mêmes vitesse et distance
+## que la roulade (700 px/s pendant 0.727 s ≈ 509 px), horizontal pur.
+## Un seul dash par phase aérienne, rechargé au sol / mur / grab.
+
+## Capacité metroidvania : désactivable tant qu'elle n'est pas débloquée
+@export var air_dash_enabled := true
+## Vitesse du dash (2× la roulade — la distance reste identique grâce à
+## la durée divisée par deux : ~509 px au total)
+@export var DASH_SPEED: float = 1400.0
+@export var DASH_DURATION: float = 0.3636
+var _air_dash_used := false
+var _dash_timer := 0.0
+
+
+## Tente le dash aérien (touche esquive en l'air, depuis JUMP ou CHUTE)
+func _try_air_dash() -> bool:
+	if not air_dash_enabled or _air_dash_used or is_on_floor():
+		return false
+	_air_dash_used = true
+	change_state(States.DASH)
+	return true
+
+
+func dash_enter() -> void:
+	# direction : l'input s'il est tenu, sinon le regard
+	var dir := Input.get_axis("left_move", "right_move")
+	if dir != 0.0:
+		last_direction = sign(dir)
+		point.scale.x = last_direction
+	_dash_timer = 0.0
+	velocity = Vector2(last_direction * DASH_SPEED, 0.0)
+	# TODO : jouer l'anim de dash dédiée quand elle existera
+	# (volontairement aucune anim pour l'instant — l'anim en cours continue)
+
+
+func dash_execute(delta: float) -> void:
+	_dash_timer += delta
+	# trajectoire figée : horizontal pur, la gravité est suspendue
+	velocity.x = last_direction * DASH_SPEED
+	velocity.y = 0.0
+
+	if is_on_floor():
+		_handle_landing()
+		return
+	if _dash_timer >= DASH_DURATION:
+		goto_state(States.CHUTE)
+
+
+func dash_exit() -> void:
+	velocity.x = 0.0
+#endregion
+
+
 func roll_animation_finished() -> void:
 	# Pas la place de se relever (fin de roulade sous un passage bas) :
 	# on repart pour une roulade, en laissant le joueur choisir la direction
@@ -903,7 +1240,7 @@ func roll_animation_finished() -> void:
 
 
 func chute_griffe_enter() -> void:
-
+	_recharge_air_moves()
 	animator.play("chute_griffe")
 	velocity.y = 250.0
 
@@ -943,7 +1280,7 @@ var _grab_locked := false          # true quand le perso a atteint le point
 func grab_enter() -> void:
 	velocity = Vector2.ZERO
 	_grab_locked = false
-	_double_jump_used = false  # s'accrocher à un point recharge le double saut
+	_recharge_air_moves()
 	animator.play("chute")  # on garde l'anim de chute pendant l'approche
 
 func grab_execute(delta: float) -> void:

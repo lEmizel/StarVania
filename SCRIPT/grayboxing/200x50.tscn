@@ -1,6 +1,7 @@
 [gd_scene format=3 uid="uid://c1t2vi32cjp0d"]
 
 [ext_resource type="Texture2D" uid="uid://dj3l8wq1ailve" path="res://MEDIA/greyboxing/200x50.png" id="1_c5u4d"]
+[ext_resource type="PackedScene" uid="uid://byskgrt4gnfm7" path="res://SCRIPT/INTERACTIBLE/grab.tscn" id="2_17f62"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_35hhg"]
 size = Vector2(200, 50)
@@ -14,3 +15,9 @@ collision_mask = 3
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="StaticBody2D" unique_id=1422399730]
 shape = SubResource("RectangleShape2D_35hhg")
+
+[node name="GRAB" parent="." unique_id=499494625 instance=ExtResource("2_17f62")]
+position = Vector2(97, -15)
+
+[node name="GRAB2" parent="." unique_id=116002597 instance=ExtResource("2_17f62")]
+position = Vector2(-97, -15)

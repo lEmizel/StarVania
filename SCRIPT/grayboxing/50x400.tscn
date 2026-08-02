@@ -8,7 +8,7 @@ size = Vector2(50, 400)
 [node name="50x400" type="Sprite2D" unique_id=436297158]
 texture = ExtResource("1_01kjl")
 
-[node name="StaticBody2D" type="StaticBody2D" parent="." unique_id=1966514217]
+[node name="StaticBody2D" type="StaticBody2D" parent="." unique_id=1966514217 groups=["wall_jump"]]
 collision_layer = 3
 collision_mask = 3
 
