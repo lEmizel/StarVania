@@ -202,6 +202,13 @@ func _apply_sang_bar_max(new_max: float, tween: bool = true) -> void:
 @export var FX_COEUR_HAUTEUR: float = 0.25
 
 func heart_pickup_fx() -> void:
+	# le nouveau cœur (déjà ajouté aux stats et à la rangée) reste invisible
+	# jusqu'à l'impact de la comète — c'est elle qui le "dépose"
+	if not _hearts.is_empty():
+		var nouveau: Dictionary = _hearts.back()
+		for k in ["full", "broken", "empty"]:
+			nouveau[k].modulate.a = 0.0
+
 	var big := Vector2(220.0, 220.0)
 	var fx := TextureRect.new()
 	fx.texture = _heart_template_full.texture
@@ -265,7 +272,11 @@ func heart_pickup_fx() -> void:
 func _heart_land_pulse() -> void:
 	if _hearts.is_empty():
 		return
-	var h: TextureRect = _hearts.back()["full"]
+	# impact de la comète : le nouveau cœur se révèle et pulse
+	var trio: Dictionary = _hearts.back()
+	for k in ["full", "broken", "empty"]:
+		trio[k].modulate.a = 1.0
+	var h: TextureRect = trio["full"]
 	var base: Vector2 = h.scale
 	var pt := create_tween()
 	pt.tween_property(h, "scale", base * 1.35, 0.08)

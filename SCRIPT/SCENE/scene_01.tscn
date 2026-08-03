@@ -402,7 +402,6 @@ bg_color = Color(0.101960786, 0.101960786, 0.101960786, 0)
 margin = 50
 
 [node name="decord" type="Node2D" parent="." unique_id=1522053362]
-visible = false
 
 [node name="LevelExport" type="Sprite2D" parent="decord" unique_id=2035351058]
 visible = false

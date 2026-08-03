@@ -11,6 +11,7 @@
 [ext_resource type="PackedScene" uid="uid://cxb1r4knfgy12" path="res://SCRIPT/grayboxing/400x200 slide.tscn" id="7_gj2uf"]
 [ext_resource type="PackedScene" uid="uid://dx851ijsrvbgf" path="res://SCRIPT/grayboxing/400x200.tscn" id="8_5dkmq"]
 [ext_resource type="PackedScene" uid="uid://c1t2vi32cjp0d" path="res://SCRIPT/grayboxing/200x50.tscn" id="9_ns3h4"]
+[ext_resource type="Texture2D" uid="uid://t17cpogdibvu" path="res://MEDIA/UTILITAIRE/light.png" id="10_rpg47"]
 [ext_resource type="PackedScene" uid="uid://jlttuetl123w" path="res://SCRIPT/grayboxing/200x100 slide.tscn" id="12_frudr"]
 [ext_resource type="PackedScene" uid="uid://cuk0nckn13kwe" path="res://SCRIPT/grayboxing/50x400.tscn" id="13_ud6jo"]
 [ext_resource type="PackedScene" uid="uid://dvrlg4qij3sjd" path="res://SCRIPT/grayboxing/50x200.tscn" id="14_8nh62"]
@@ -22,6 +23,8 @@
 [ext_resource type="PackedScene" uid="uid://lskntqxi822j" path="res://SCRIPT/MONSTER/Orbe.tscn" id="19_prnxj"]
 [ext_resource type="PackedScene" uid="uid://deajggaeh7111" path="res://SCRIPT/INTERACTIBLE/platforme.tscn" id="21_prnxj"]
 [ext_resource type="PackedScene" uid="uid://cl4e5goxx8nvt" path="res://SCRIPT/INTERACTIBLE/coeur.tscn" id="22_0lfge"]
+[ext_resource type="Script" uid="uid://cldc0dscj1uj1" path="res://SCRIPT/OUTILS/LEVEL_EXPORTER.gd" id="23_agrp3"]
+[ext_resource type="Texture2D" uid="uid://pp6ocntm5ose" path="res://MEDIA/Calque 2.png" id="24_5r1ha"]
 
 [node name="scene_06" type="Node2D" unique_id=1897845605]
 
@@ -114,7 +117,22 @@ position = Vector2(1008, -845)
 [node name="skeleton_boss" parent="interactible" unique_id=627255339 instance=ExtResource("18_d2b0k")]
 position = Vector2(-1477, -3303)
 
+[node name="coeur" parent="interactible" unique_id=1091802907 instance=ExtResource("22_0lfge")]
+position = Vector2(5389.0005, -932)
+rotation = -3.132866
+scale = Vector2(0.6736213, 0.67362136)
+
+[node name="PointLight2D" type="PointLight2D" parent="interactible" unique_id=459084268]
+position = Vector2(24, -309)
+texture = ExtResource("10_rpg47")
+
+[node name="PointLight2D2" type="PointLight2D" parent="interactible" unique_id=857609691]
+position = Vector2(298, -316)
+texture = ExtResource("10_rpg47")
+
 [node name="grayboxing" type="Node2D" parent="." unique_id=724057271]
+visible = false
+z_index = -10
 
 [node name="400x100" parent="grayboxing" unique_id=436297158 instance=ExtResource("3_tdfyb")]
 position = Vector2(408, 52)
@@ -646,6 +664,11 @@ scale = Vector2(1, -1)
 
 [node name="VISUAL" type="Node2D" parent="." unique_id=631736178]
 
+[node name="Calque2" type="Sprite2D" parent="VISUAL" unique_id=787433060]
+z_index = -1
+position = Vector2(3407, -2047)
+texture = ExtResource("24_5r1ha")
+
 [node name="enemi" type="Node2D" parent="." unique_id=1026566139]
 
 [node name="enemi5" parent="enemi" unique_id=1195436115 instance=ExtResource("17_8nh62")]
@@ -670,6 +693,7 @@ scale = Vector2(-1, 1)
 position = Vector2(2982, -2375)
 scale = Vector2(-1, 1)
 
-[node name="coeur" parent="." unique_id=1091802907 instance=ExtResource("22_0lfge")]
-position = Vector2(5389.0005, -932)
-scale = Vector2(0.6736213, 0.67362136)
+[node name="screenshot" type="Node" parent="." unique_id=1723122859]
+script = ExtResource("23_agrp3")
+bg_color = Color(0.101960786, 0.101960786, 0.101960786, 0)
+margin = 50
