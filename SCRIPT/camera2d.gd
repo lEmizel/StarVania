@@ -16,6 +16,10 @@ var _shake_decay := 5.0
 const TELEPORT_THRESHOLD := 60.0
 const CATCH_UP_SPEED := 6.0
 var _catching_up := false
+# premier cadrage après l'apparition : collage SEC sur le héros — la glisse
+# de rattrapage n'a de sens qu'en cours de jeu, pas au spawn (en build, la
+# caméra démarrait ailleurs et glissait visiblement vers le héros)
+var _snap_first_frame := true
 
 func _ready():
 	make_current()
@@ -56,6 +60,11 @@ func _process(delta):
 			shake_offset = Vector2(randf_range(-1, 1), randf_range(-1, 1)) * _shake_intensity
 		var pos = target.global_position + current_offset + shake_offset
 		var desired: Vector2 = _clamp_to_barriers(pos)
+		if _snap_first_frame:
+			_snap_first_frame = false
+			_catching_up = false
+			global_position = desired.floor()
+			return
 		if desired.distance_to(global_position) > TELEPORT_THRESHOLD:
 			_catching_up = true
 		if _catching_up:

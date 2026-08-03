@@ -519,6 +519,9 @@ const GRAVITY_FALL    := 1.35
 const AIR_CONTROL = 0.2
 const DECELERATION_RATE = 0.95
 var _jump_timer := 0.0
+# vrai quand la phase aérienne a commencé SANS saut (marche dans le vide,
+# lâcher d'accroche…) : le saut simple reste dû, sans limite de temps
+var _walkoff_jump := false
 var _climb_auto_exit := false
 const CLIMB_EXIT_VELOCITY := -1000.0  # plus fort que JUMP_VELOCITY (-700)
 
@@ -559,6 +562,7 @@ func _try_double_jump() -> bool:
 func jump_enter():
 	animator.play("jump")
 	_jump_timer = 0.0
+	_walkoff_jump = false  # tout saut solde le saut de chute libre
 	# (FALL_POINT est géré en continu dans _physics_process : suivi au sol,
 	# point le plus haut conservé en vol)
 
@@ -679,12 +683,16 @@ func chute_enter() -> void:
 	# tomber d'une griffe/échelle/mur faisait de la 1re pression un DOUBLE
 	# saut ("la griffe ne recharge pas" — si, mais le saut normal sautait).
 	# Les chutes SUBIES (griffe qui expire…) ont une fenêtre élargie :
-	# le joueur n'a pas choisi de tomber, sa pression arrive plus tard
+	# le joueur n'a pas choisi de tomber, sa pression arrive plus tard.
+	# ET dans tous ces cas : tomber sans avoir sauté ne coûte jamais le
+	# saut simple — il reste disponible toute la chute (_walkoff_jump)
 	if previous_state in [States.WALL_GRIFFE, States.CHUTE_GRIFFE,
 		States.CLIMB, States.GRAB, States.ECHELLE, States.WALL_JUMP]:
 		_coyote_timer = GRIP_COYOTE_TIME
+		_walkoff_jump = true
 	elif previous_state in [States.RUN, States.IDLE]:
 		_coyote_timer = COYOTE_TIME
+		_walkoff_jump = true
 	else:
 		_coyote_timer = 0.0
 	animator.play("chute")
@@ -740,6 +748,10 @@ func chute_input(event: InputEvent) -> void:
 	if Input.is_action_just_pressed("jump"):
 		if _coyote_timer > 0.0:
 			_coyote_timer = 0.0
+			change_state(States.JUMP)
+			return
+		elif _walkoff_jump:
+			# la chute a commencé sans saut : le saut simple est toujours dû
 			change_state(States.JUMP)
 			return
 		elif _try_double_jump():

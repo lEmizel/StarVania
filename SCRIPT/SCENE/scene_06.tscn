@@ -666,7 +666,7 @@ scale = Vector2(1, -1)
 
 [node name="Calque2" type="Sprite2D" parent="VISUAL" unique_id=787433060]
 z_index = -1
-position = Vector2(3407, -2047)
+position = Vector2(3408, -2048)
 texture = ExtResource("24_5r1ha")
 
 [node name="enemi" type="Node2D" parent="." unique_id=1026566139]
