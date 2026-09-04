@@ -18,6 +18,9 @@ enum States { IDLE, PATROL, APPROACH, ATTACK, RETURN, DEAD }
 ## Délai de grâce après un abandon avant de pouvoir re-détecter le joueur
 ## (sinon re-aggro instantané = yo-yo). Un coup reçu réveille toujours.
 @export var abandon_cooldown := 2.5
+## Distance d'OUBLI : au-delà, le squelette lâche sa cible (et son re-scan
+## de vision ne peut pas la reprendre). Réglable par instance.
+@export var tracking_distance := 900.0
 var _idle_wait := 0.0
 var _patrol_dir := 1
 var _blocked_time := 0.0
@@ -28,10 +31,22 @@ var _abandon_timer := 0.0
 func _setup_states() -> void:
 	_register_states(States)
 
+
+## Décrochage (hors-vue géré par BASE_IA) : on y ajoute le délai de grâce
+## anti re-scan, comme pour l'abandon de frustration
+func _oublier_cible() -> void:
+	_blocked_time = 0.0
+	_abandon_timer = abandon_cooldown
+	target = null
+
 func _start() -> void:
+	# en MONTÉE de pente, l'origine du rayon de vide se retrouve DANS la
+	# colline (le sol devant est plus haut) : sans hit_from_inside, le rayon
+	# ne voit rien → faux "trou devant" → demi-tour au milieu de la pente
+	detection_vide.hit_from_inside = true
 	max_hp = 180
 	hp = 180
-	max_tracking_distance = 1500.0
+	max_tracking_distance = tracking_distance
 	confort_zone_max = 150.0
 	confort_zone_min = 30.0
 	change_state(States.IDLE)
@@ -140,10 +155,12 @@ func idle_execute(delta: float) -> void:
 
 
 ## Re-scan de la zone de vision (les corps déjà présents n'émettent pas
-## de signal d'entrée)
+## de signal d'entrée) — borné par la distance d'oubli : un joueur trop
+## loin ne peut pas être re-verrouillé même s'il reste dans le cône
 func _rescan_vision() -> void:
 	for b in vision.get_overlapping_bodies():
-		if b.is_in_group("Player"):
+		if b.is_in_group("Player") \
+			and b.global_position.distance_to(global_position) <= max_tracking_distance:
 			target = b
 			return
 
@@ -166,10 +183,17 @@ func patrol_execute(delta: float) -> void:
 		velocity.x = 0.0
 		decide()
 		return
-	# trou devant ? piques devant ? mur devant ? → demi-tour
+	# trou devant ? piques devant ? mur devant ? → demi-tour.
+	# "Mur" = paroi quasi verticale qui NOUS FAIT FACE : une pente raide ou
+	# un contact transitoire en bas de pente classé "wall" par la physique
+	# faisait demi-tourner la ronde au milieu de la montée
+	var mur_devant := false
+	if is_on_wall():
+		var n := get_wall_normal()
+		mur_devant = absf(n.x) > 0.85 and signf(n.x) == -signf(float(_patrol_dir))
 	detection_vide.position.x = absf(detection_vide.position.x) * _patrol_dir
 	detection_vide.force_raycast_update()
-	if not detection_vide.is_colliding() or is_on_wall() \
+	if not detection_vide.is_colliding() or mur_devant \
 		or danger_devant(detection_vide):
 		_patrol_dir = -_patrol_dir
 	velocity.x = _patrol_dir * patrol_speed

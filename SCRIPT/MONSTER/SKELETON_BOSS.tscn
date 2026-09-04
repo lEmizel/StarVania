@@ -16,23 +16,8 @@
 [ext_resource type="Texture2D" uid="uid://b5jp2lcp6o7w8" path="res://MEDIA/MONSTER/SKELETON_BOSS/attaque_02/Boss-attack02-6.png" id="13_yr737"]
 [ext_resource type="Texture2D" uid="uid://w1dppm51igbc" path="res://MEDIA/MONSTER/SKELETON_BOSS/attaque_02/Boss-attack02-7.png" id="14_jxy1h"]
 [ext_resource type="Texture2D" uid="uid://bf1t6iksq6k4t" path="res://MEDIA/MONSTER/SKELETON_BOSS/attaque_02/Boss-attack02-8.png" id="15_nd0be"]
-[ext_resource type="Texture2D" uid="uid://bsjosxbhpdjft" path="res://MEDIA/MONSTER/SKELETON_BOSS/attaque_03/Boss-attack03-1.png" id="16_cygpq"]
 [ext_resource type="Texture2D" uid="uid://bq65gu13gw3fn" path="res://MEDIA/MONSTER/SKELETON_BOSS/attaque_02/Boss-attack02-9.png" id="17_eg6hj"]
-[ext_resource type="Texture2D" uid="uid://0dqk8eol3mww" path="res://MEDIA/MONSTER/SKELETON_BOSS/attaque_03/Boss-attack03-2.png" id="17_o4tmj"]
-[ext_resource type="Texture2D" uid="uid://1twlrvy0uf6o" path="res://MEDIA/MONSTER/SKELETON_BOSS/attaque_03/Boss-attack03-3.png" id="18_3a6l5"]
-[ext_resource type="Texture2D" uid="uid://btl12q34dyp6u" path="res://MEDIA/MONSTER/SKELETON_BOSS/attaque_03/Boss-attack03-4.png" id="19_6dvyo"]
-[ext_resource type="Texture2D" uid="uid://bc7y43gxduncj" path="res://MEDIA/MONSTER/SKELETON_BOSS/attaque_03/Boss-attack03-5.png" id="20_alx4t"]
-[ext_resource type="Texture2D" uid="uid://dsdxnh5blqx8u" path="res://MEDIA/MONSTER/SKELETON_BOSS/attaque_03/Boss-attack03-6.png" id="21_k0v7q"]
-[ext_resource type="Texture2D" uid="uid://yb7281cnn08v" path="res://MEDIA/MONSTER/SKELETON_BOSS/attaque_03/Boss-attack03-7.png" id="22_byrnu"]
-[ext_resource type="Texture2D" uid="uid://b47e5271oaqb0" path="res://MEDIA/MONSTER/SKELETON_BOSS/attaque_03/Boss-attack03-8.png" id="23_dplwh"]
-[ext_resource type="Texture2D" uid="uid://ckiexqejpuwu4" path="res://MEDIA/MONSTER/SKELETON_BOSS/attaque_03/Boss-attack03-9.png" id="24_oe2tl"]
-[ext_resource type="Texture2D" uid="uid://72acxsl1sl4p" path="res://MEDIA/MONSTER/SKELETON_BOSS/attaque_03/Boss-attack03-10.png" id="25_h6fwj"]
-[ext_resource type="Texture2D" uid="uid://vql1qphqtkl3" path="res://MEDIA/MONSTER/SKELETON_BOSS/attaque_03/Boss-attack03-11.png" id="26_wrlus"]
-[ext_resource type="Texture2D" uid="uid://vhrpanwihv1n" path="res://MEDIA/MONSTER/SKELETON_BOSS/attaque_03/Boss-attack03-12.png" id="27_ran72"]
-[ext_resource type="Texture2D" uid="uid://bseqqu83thvwt" path="res://MEDIA/MONSTER/SKELETON_BOSS/attaque_03/Boss-attack03-13.png" id="28_fidmn"]
-[ext_resource type="Texture2D" uid="uid://bf6mldmd2643i" path="res://MEDIA/MONSTER/SKELETON_BOSS/attaque_03/Boss-attack03-14.png" id="29_go6ou"]
 [ext_resource type="Script" uid="uid://cvetaerfouv2n" path="res://SCRIPT/MONSTER/animator.gd" id="30_e5ujl"]
-[ext_resource type="Texture2D" uid="uid://djwdliisxm27y" path="res://MEDIA/MONSTER/SKELETON_BOSS/attaque_03/Boss-attack03-15.png" id="30_t8fjw"]
 [ext_resource type="Texture2D" uid="uid://kgwth4bs0bra" path="res://MEDIA/MONSTER/SKELETON_BOSS/death/Boss-death-1.png" id="31_kq7r6"]
 [ext_resource type="Texture2D" uid="uid://twuihuettuki" path="res://MEDIA/MONSTER/SKELETON_BOSS/death/Boss-death-2.png" id="32_ls1k7"]
 [ext_resource type="Texture2D" uid="uid://ik7ohvjba6hn" path="res://MEDIA/MONSTER/SKELETON_BOSS/death/Boss-death-3.png" id="33_v57y5"]
@@ -51,12 +36,6 @@
 [ext_resource type="Texture2D" uid="uid://bdby7enpvx3x6" path="res://MEDIA/MONSTER/SKELETON_BOSS/walk/Boss-walk-4.png" id="46_7h86k"]
 [ext_resource type="Texture2D" uid="uid://b42insit1pqej" path="res://MEDIA/MONSTER/SKELETON_BOSS/walk/Boss-walk-5.png" id="47_mrk34"]
 [ext_resource type="Texture2D" uid="uid://d2gi3q0bra7jn" path="res://MEDIA/MONSTER/SKELETON_BOSS/walk/Boss-walk-6.png" id="48_go6py"]
-[ext_resource type="Texture2D" uid="uid://cman1va284j75" path="res://MEDIA/MONSTER/SKELETON_BOSS/walk_back/Boss-walkback-1.png" id="49_kuaux"]
-[ext_resource type="Texture2D" uid="uid://vun2xhdmjbtn" path="res://MEDIA/MONSTER/SKELETON_BOSS/walk_back/Boss-walkback-2.png" id="50_ltjmh"]
-[ext_resource type="Texture2D" uid="uid://c6b8ucvhw0dmm" path="res://MEDIA/MONSTER/SKELETON_BOSS/walk_back/Boss-walkback-3.png" id="51_6gjg5"]
-[ext_resource type="Texture2D" uid="uid://bm2yobnfsrxtr" path="res://MEDIA/MONSTER/SKELETON_BOSS/walk_back/Boss-walkback-4.png" id="52_1iy35"]
-[ext_resource type="Texture2D" uid="uid://uoxec3tvc2nu" path="res://MEDIA/MONSTER/SKELETON_BOSS/walk_back/Boss-walkback-5.png" id="53_1sa67"]
-[ext_resource type="Texture2D" uid="uid://cfigmoy587gxx" path="res://MEDIA/MONSTER/SKELETON_BOSS/walk_back/Boss-walkback-6.png" id="54_ih0j6"]
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_7joub"]
 radius = 59.0
@@ -121,49 +100,49 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("16_cygpq")
+"texture": null
 }, {
 "duration": 1.0,
-"texture": ExtResource("17_o4tmj")
+"texture": null
 }, {
 "duration": 1.0,
-"texture": ExtResource("18_3a6l5")
+"texture": null
 }, {
 "duration": 1.0,
-"texture": ExtResource("19_6dvyo")
+"texture": null
 }, {
 "duration": 1.0,
-"texture": ExtResource("20_alx4t")
+"texture": null
 }, {
 "duration": 1.0,
-"texture": ExtResource("21_k0v7q")
+"texture": null
 }, {
 "duration": 1.0,
-"texture": ExtResource("22_byrnu")
+"texture": null
 }, {
 "duration": 1.0,
-"texture": ExtResource("23_dplwh")
+"texture": null
 }, {
 "duration": 1.0,
-"texture": ExtResource("24_oe2tl")
+"texture": null
 }, {
 "duration": 1.0,
-"texture": ExtResource("25_h6fwj")
+"texture": null
 }, {
 "duration": 1.0,
-"texture": ExtResource("26_wrlus")
+"texture": null
 }, {
 "duration": 1.0,
-"texture": ExtResource("27_ran72")
+"texture": null
 }, {
 "duration": 1.0,
-"texture": ExtResource("28_fidmn")
+"texture": null
 }, {
 "duration": 1.0,
-"texture": ExtResource("29_go6ou")
+"texture": null
 }, {
 "duration": 1.0,
-"texture": ExtResource("30_t8fjw")
+"texture": null
 }],
 "loop": 0,
 "name": &"attack_03",
@@ -248,22 +227,22 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("49_kuaux")
+"texture": null
 }, {
 "duration": 1.0,
-"texture": ExtResource("50_ltjmh")
+"texture": null
 }, {
 "duration": 1.0,
-"texture": ExtResource("51_6gjg5")
+"texture": null
 }, {
 "duration": 1.0,
-"texture": ExtResource("52_1iy35")
+"texture": null
 }, {
 "duration": 1.0,
-"texture": ExtResource("53_1sa67")
+"texture": null
 }, {
 "duration": 1.0,
-"texture": ExtResource("54_ih0j6")
+"texture": null
 }],
 "loop": 1,
 "name": &"walk_back",
@@ -286,6 +265,7 @@ position = Vector2(-175.00002, -451)
 scale = Vector2(0.77, 0.77)
 
 [node name="Collision" type="CollisionShape2D" parent="." unique_id=287775973]
+visible = false
 position = Vector2(-1, -172)
 shape = SubResource("CapsuleShape2D_7joub")
 
@@ -299,7 +279,7 @@ scale = Vector2(1, -1)
 [node name="animator" type="AnimatedSprite2D" parent="POINT" unique_id=1830194176]
 light_mask = 0
 texture_filter = 1
-position = Vector2(2, -197)
+position = Vector2(2, -189)
 scale = Vector2(-1, 1)
 sprite_frames = SubResource("SpriteFrames_dnpf1")
 animation = &"attack"
@@ -315,6 +295,7 @@ position = Vector2(80, -2)
 polygon = PackedVector2Array(-49, -16, 203, -152, 205, 148, -47, 25)
 
 [node name="collision_attack" type="Area2D" parent="POINT" unique_id=371815366]
+visible = false
 
 [node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="POINT/collision_attack" unique_id=74740681]
 position = Vector2(159, -289)

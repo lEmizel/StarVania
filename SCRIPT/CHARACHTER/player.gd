@@ -72,6 +72,9 @@ func _enter_tree() -> void:
 		Player.hearts_initialized = true
 		Player.max_hearts = MAX_HEARTS
 		Player.MAX_HP = MAX_HEARTS
+		# début de partie : la jauge de sang offre exactement un soin,
+		# comme au respawn
+		Player.sang = HEAL_COST
 	Player.hp = mini(Player.hp, Player.MAX_HP)
 
 
@@ -1336,8 +1339,7 @@ func dash_enter() -> void:
 		point.scale.x = last_direction
 	_dash_timer = 0.0
 	velocity = Vector2(last_direction * DASH_SPEED, 0.0)
-	# TODO : jouer l'anim de dash dédiée quand elle existera
-	# (volontairement aucune anim pour l'instant — l'anim en cours continue)
+	animator.play("dash")
 
 
 func dash_execute(delta: float) -> void:
@@ -1495,7 +1497,7 @@ func _attack_is_moving() -> bool:
 
 
 func attack_light_1_enter() -> void:
-	slash_attack.position = Vector2(98, -88)
+	slash_attack.position = Vector2(-4, -70)
 	_flip_from_input()
 	combo_buffered = false
 	animator.play("attack")
@@ -1662,6 +1664,7 @@ func attack_lourde_exit() -> void:
 
 
 func attack_air_enter() -> void:
+	slash_attack.position = Vector2(-4, -73)
 	animator.play("attack_air")
 	if velocity.y < 0.0:
 		velocity.y = 0.0  # stoppe la montée, la gravité prend le relais
@@ -1758,12 +1761,13 @@ func _notify_insufficient(kind: String) -> void:
 func bloodball_enter() -> void:
 	print("[SPELL] cast ! spawn de la boule au marker ", spellcast.global_position)
 	Player.changement_de_sang(-BLOODBALL_COST)  # le sort boit son sang
-	# TODO : remplacer par une vraie animation de cast quand elle existera
-	animator.play("idle")
 	# Au sol : le perso se plante pour lancer. En l'air : comme l'attaque
 	# aérienne, le cast ne touche pas à l'élan du saut
 	if is_on_floor():
+		animator.play("cast")
 		velocity.x = 0.0
+	else:
+		animator.play("cast_air")
 	_cast_timer = 0.0
 
 	var ball := BLOODBALL_SCENE.instantiate()
@@ -1850,7 +1854,9 @@ func dead_input(event: InputEvent) -> void:
 	if Input.is_action_just_pressed("jump"):
 		print("okkkkkkkje suis mort")
 		Player.hp = Player.MAX_HP
-		Player.sang = Player.MAX_SANG
+		# au respawn, la jauge de sang offre EXACTEMENT un soin : le joker
+		# du joueur, à dépenser au bon moment
+		Player.sang = HEAL_COST
 		# respawn dans la scène du dernier checkpoint croisé (peut être une
 		# autre scène que celle où on est mort)
 		var scene_path: String = Loader._target_scene_path

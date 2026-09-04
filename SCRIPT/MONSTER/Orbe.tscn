@@ -161,6 +161,7 @@ position = Vector2(-88, -169)
 scale = Vector2(0.37, 0.37)
 
 [node name="Collision" type="CollisionShape2D" parent="." unique_id=273910692]
+visible = false
 light_mask = 0
 visibility_layer = 2
 position = Vector2(12, -50)

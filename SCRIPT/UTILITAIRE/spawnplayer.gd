@@ -18,10 +18,22 @@ func _ready() -> void:
 		return
 
 	player_body.global_position = spawn_pos
-	player_body.velocity = Vector2.ZERO
 	player_body.apply_floor_snap()
-	player_body.change_state(player_body.States.IDLE)
-	player_body.animator.play("idle")
+	if Player.has_transition_momentum:
+		# passage traversé en courant : l'élan continue de l'autre côté
+		Player.has_transition_momentum = false
+		player_body.velocity = Player.transition_velocity
+		player_body.last_direction = Player.transition_direction
+		player_body.point.scale.x = Player.transition_direction
+		if absf(Player.transition_velocity.x) > 10.0:
+			player_body.change_state(player_body.States.RUN)
+		else:
+			player_body.change_state(player_body.States.IDLE)
+			player_body.animator.play("idle")
+	else:
+		player_body.velocity = Vector2.ZERO
+		player_body.change_state(player_body.States.IDLE)
+		player_body.animator.play("idle")
 
 	# Cale la caméra immédiatement sur le joueur
 	var cam = get_tree().get_first_node_in_group("Camera")

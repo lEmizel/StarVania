@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://7dxrb7drnumh"
-path="res://.godot/imported/Monster_chute-1.png-f80251982cd5cf61bb79861aec3f6a2e.ctex"
+uid="uid://d38sho38em6nq"
+path="res://.godot/imported/Monster_Chute-1.png-231dcfa5860aa4d0c1c9606fc1324d02.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://MEDIA/CHARACHTER/ANIMATION/CHUTE/Monster_chute-1.png"
-dest_files=["res://.godot/imported/Monster_chute-1.png-f80251982cd5cf61bb79861aec3f6a2e.ctex"]
+source_file="res://MEDIA/CHARACHTER/ANIMATION/CHUTE/Monster_Chute-1.png"
+dest_files=["res://.godot/imported/Monster_Chute-1.png-231dcfa5860aa4d0c1c9606fc1324d02.ctex"]
 
 [params]
 

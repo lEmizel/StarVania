@@ -29,12 +29,15 @@ func _setup_states() -> void:
 	_register_states(States)
 
 func _start() -> void:
+	# même correctif que le squelette : en montée de pente, le rayon de vide
+	# naît dans la colline et rapportait un faux "trou devant"
+	detection_vide.hit_from_inside = true
 	max_hp = 600
 	hp = 600
 	max_tracking_distance = 2000.0
 	confort_zone_max = 200.0
 	confort_zone_min = 60.0
-	HIT_KNOCK_X = 0.0  # le boss est inébranlable : aucun recul quand il est touché
+	inebranlable = true  # inébranlable : aucun recul, le joueur subit le contrecoup
 	change_state(States.IDLE)
 
 # ============================================================

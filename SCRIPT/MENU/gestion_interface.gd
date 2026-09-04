@@ -47,6 +47,8 @@ func _ready() -> void:
 		bar.min_value = 0
 		bar.max_value = _max_sang
 		bar.value = float(Player.sang)
+	print("[UI] ready  Player.sang=", Player.sang, " MAX_SANG=", Player.MAX_SANG,
+		" bar.value=", sang_bar.value, " bar.max=", sang_bar.max_value)
 
 	_build_hearts()
 
@@ -151,6 +153,8 @@ func _on_sang_request(amount: float) -> void:
 	# cible = la vérité du singleton (déjà mis à jour), robuste même si un
 	# tween de gain précédent est encore en vol
 	var new_val: float = clampf(float(Player.sang), 0.0, _max_sang)
+	print("[UI] sang_request amount=", amount, " Player.sang=", Player.sang,
+		" bar avant=", sang_bar.value)
 	var old_val: float = sang_bar.value
 
 	if amount >= 0.0:
@@ -163,7 +167,12 @@ func _on_sang_request(amount: float) -> void:
 		_sang_gain_tween.tween_property(sang_bar, "value", new_val, SANG_GAIN_TWEEN_DURATION)
 		_sang_gain_tween.parallel().tween_property(sang_back_bar, "value", new_val, SANG_GAIN_TWEEN_DURATION)
 	else:
-		# DÉPENSE : front instant, back suit en tween (effet fantôme)
+		# DÉPENSE : front instant, back suit en tween (effet fantôme).
+		# On TUE d'abord un éventuel tween de gain en vol : sinon il
+		# réécrivait la barre vers le haut après la dépense (bug de la
+		# jauge affichée pleine après un soin post-récolte)
+		if _sang_gain_tween != null and _sang_gain_tween.is_valid():
+			_sang_gain_tween.kill()
 		sang_bar.value = new_val
 		sang_back_bar.value = old_val
 		sang_back_bar.create_tween() \

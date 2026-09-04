@@ -12,6 +12,8 @@ enum States { IDLE, APPROACH, RETREAT, ATTACK, RETURN, DEAD }
 ## joueur — doit être nettement supérieure à attack_range, sinon le repli
 ## s'arrête à peine commencé
 @export var retreat_distance := 450.0
+## Distance d'OUBLI : au-delà, l'orbe lâche sa cible
+@export var tracking_distance := 1500.0
 
 const WAVE_FREQ := 0.5
 const WAVE_AMP := 100.0
@@ -23,7 +25,7 @@ func _setup_states() -> void:
 func _start() -> void:
 	max_hp = 230
 	hp = 230
-	max_tracking_distance = 1500.0
+	max_tracking_distance = tracking_distance
 	confort_zone_max = attack_range
 	confort_zone_min = 20.0
 	change_state(States.IDLE)

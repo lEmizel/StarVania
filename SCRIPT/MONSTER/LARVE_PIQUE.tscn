@@ -1,0 +1,193 @@
+[gd_scene format=3 uid="uid://b1fje6n3t7rv5"]
+
+[ext_resource type="Script" uid="uid://besd6ypinci0x" path="res://SCRIPT/MONSTER/larve_pique.gd" id="1_0wkpf"]
+[ext_resource type="PackedScene" uid="uid://c8y35es6jse5x" path="res://SCRIPT/MENU/heatle_bare_monster.tscn" id="2_hrifg"]
+[ext_resource type="Texture2D" uid="uid://dl5visqo5ollf" path="res://MEDIA/MONSTER/Larve pique/Attack/Larve_attack-1.png" id="3_0wkpf"]
+[ext_resource type="Texture2D" uid="uid://8xe73sjvpun8" path="res://MEDIA/MONSTER/Larve pique/Attack/Larve_attack-2.png" id="4_hrifg"]
+[ext_resource type="Texture2D" uid="uid://7w4qkjrmyno8" path="res://MEDIA/MONSTER/Larve pique/Attack/Larve_attack-3.png" id="5_sxont"]
+[ext_resource type="Texture2D" uid="uid://fiik15naeol6" path="res://MEDIA/MONSTER/Larve pique/Attack/Larve_attack-4.png" id="6_mn5oi"]
+[ext_resource type="Texture2D" uid="uid://dxip2crpp8vl5" path="res://MEDIA/MONSTER/Larve pique/Attack/Larve_attack-5.png" id="7_tn1sc"]
+[ext_resource type="Texture2D" uid="uid://dpiqpot43n5uj" path="res://MEDIA/MONSTER/Larve pique/Attack/Larve_attack-9.png" id="8_gk6qp"]
+[ext_resource type="Texture2D" uid="uid://csj21xt5hwemb" path="res://MEDIA/MONSTER/Larve pique/Attack/Larve_attack-10.png" id="9_ejkyt"]
+[ext_resource type="Texture2D" uid="uid://bq6a0lbtmkh1x" path="res://MEDIA/MONSTER/Larve pique/Death/Larve_death-1.png" id="10_gk6qp"]
+[ext_resource type="Texture2D" uid="uid://bmtlwa5ocm784" path="res://MEDIA/MONSTER/Larve pique/Death/Larve_death-2.png" id="11_ejkyt"]
+[ext_resource type="Texture2D" uid="uid://c3c6cvqsmj07k" path="res://MEDIA/MONSTER/Larve pique/Death/Larve_death-3.png" id="12_a2wjr"]
+[ext_resource type="Texture2D" uid="uid://dnqfnxr2grlry" path="res://MEDIA/MONSTER/Larve pique/Death/Larve_death-4.png" id="13_0wkpf"]
+[ext_resource type="Texture2D" uid="uid://biyadcucohrc1" path="res://MEDIA/MONSTER/Larve pique/Death/Larve_death-5.png" id="14_hrifg"]
+[ext_resource type="Texture2D" uid="uid://874ry44ygnfk" path="res://MEDIA/MONSTER/Larve pique/Walk/Larve_walk-1.png" id="18_wasdf"]
+[ext_resource type="Texture2D" uid="uid://dpe1pqchdkjpb" path="res://MEDIA/MONSTER/Larve pique/Walk/Larve_walk-2.png" id="19_nqfa7"]
+[ext_resource type="Texture2D" uid="uid://bha6u0usgdddo" path="res://MEDIA/MONSTER/Larve pique/Walk/Larve_walk-3.png" id="20_5ue1x"]
+[ext_resource type="Texture2D" uid="uid://fjtatjccsp4h" path="res://MEDIA/MONSTER/Larve pique/Walk/Larve_walk-4.png" id="21_t12jx"]
+[ext_resource type="Script" uid="uid://bhp678lv2dpoi" path="res://SCRIPT/MONSTER/animator_larve.gd" id="22_lyi3o"]
+[ext_resource type="Texture2D" uid="uid://b033tmglxqah7" path="res://MEDIA/MONSTER/Larve pique/Walk/Larve_walk-5.png" id="22_wayra"]
+[ext_resource type="Texture2D" uid="uid://dsp1e2pu42mf3" path="res://MEDIA/MONSTER/Larve pique/Walk/Larve_walk-6.png" id="23_cgv75"]
+[ext_resource type="Texture2D" uid="uid://dec2l777mmw52" path="res://MEDIA/MONSTER/Larve pique/Walk/Larve_walk-7.png" id="24_conxp"]
+[ext_resource type="Texture2D" uid="uid://bewqvnjwjw2h3" path="res://MEDIA/MONSTER/Larve pique/Walk/Larve_walk-8.png" id="25_6g8ci"]
+[ext_resource type="Texture2D" uid="uid://5ttjh7frnolj" path="res://MEDIA/MONSTER/SKELETON/wallback/Skeleton_walkback-1.png" id="26_6nn5s"]
+[ext_resource type="Texture2D" uid="uid://bmjkyhe04g3xr" path="res://MEDIA/MONSTER/SKELETON/wallback/Skeleton_walkback-2.png" id="27_54xiy"]
+[ext_resource type="Texture2D" uid="uid://cdnjkfrelkr07" path="res://MEDIA/MONSTER/SKELETON/wallback/Skeleton_walkback-3.png" id="28_swutg"]
+[ext_resource type="Texture2D" uid="uid://b7me0rjqaho6v" path="res://MEDIA/MONSTER/SKELETON/wallback/Skeleton_walkback-4.png" id="29_k58av"]
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_le5k3"]
+radius = 24.998188
+height = 90.017555
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_dnpf1"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("3_0wkpf")
+}, {
+"duration": 1.0,
+"texture": ExtResource("4_hrifg")
+}, {
+"duration": 1.0,
+"texture": ExtResource("5_sxont")
+}, {
+"duration": 1.0,
+"texture": ExtResource("6_mn5oi")
+}, {
+"duration": 20.0,
+"texture": ExtResource("7_tn1sc")
+}],
+"loop": 0,
+"name": &"attack",
+"speed": 13.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("8_gk6qp")
+}, {
+"duration": 1.0,
+"texture": ExtResource("9_ejkyt")
+}],
+"loop": 0,
+"name": &"attack_retour",
+"speed": 10.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("10_gk6qp")
+}, {
+"duration": 1.0,
+"texture": ExtResource("11_ejkyt")
+}, {
+"duration": 1.0,
+"texture": ExtResource("12_a2wjr")
+}, {
+"duration": 1.0,
+"texture": ExtResource("13_0wkpf")
+}, {
+"duration": 1.0,
+"texture": ExtResource("14_hrifg")
+}],
+"loop": 0,
+"name": &"dead",
+"speed": 10.0
+}, {
+"frames": [],
+"loop": 0,
+"name": &"hit",
+"speed": 2.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("18_wasdf")
+}],
+"loop": 1,
+"name": &"idle",
+"speed": 8.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("18_wasdf")
+}, {
+"duration": 1.0,
+"texture": ExtResource("19_nqfa7")
+}, {
+"duration": 1.0,
+"texture": ExtResource("20_5ue1x")
+}, {
+"duration": 1.0,
+"texture": ExtResource("21_t12jx")
+}, {
+"duration": 1.0,
+"texture": ExtResource("22_wayra")
+}, {
+"duration": 1.0,
+"texture": ExtResource("23_cgv75")
+}, {
+"duration": 1.0,
+"texture": ExtResource("24_conxp")
+}, {
+"duration": 1.0,
+"texture": ExtResource("25_6g8ci")
+}],
+"loop": 1,
+"name": &"walk",
+"speed": 8.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("26_6nn5s")
+}, {
+"duration": 1.0,
+"texture": ExtResource("27_54xiy")
+}, {
+"duration": 1.0,
+"texture": ExtResource("28_swutg")
+}, {
+"duration": 1.0,
+"texture": ExtResource("29_k58av")
+}],
+"loop": 1,
+"name": &"walk_back",
+"speed": 6.0
+}]
+
+[node name="enemi" type="CharacterBody2D" unique_id=627255339]
+light_mask = 0
+collision_layer = 8
+collision_mask = 6
+script = ExtResource("1_0wkpf")
+
+[node name="detection_vide" type="RayCast2D" parent="." unique_id=1277015668]
+position = Vector2(45, -13)
+target_position = Vector2(1, 94)
+
+[node name="bare_de_vie" parent="." unique_id=1882929594 instance=ExtResource("2_hrifg")]
+light_mask = 0
+position = Vector2(-90, -232)
+scale = Vector2(0.37, 0.37)
+
+[node name="Collision" type="CollisionShape2D" parent="." unique_id=287775973]
+light_mask = 0
+position = Vector2(0, -28.538246)
+rotation = 1.5587568
+shape = SubResource("CapsuleShape2D_le5k3")
+
+[node name="POINT" type="Node2D" parent="." unique_id=1327697225]
+
+[node name="animator" type="AnimatedSprite2D" parent="POINT" unique_id=1830194176]
+texture_filter = 1
+position = Vector2(-2, -21)
+scale = Vector2(1.22, 1.22)
+sprite_frames = SubResource("SpriteFrames_dnpf1")
+animation = &"attack"
+script = ExtResource("22_lyi3o")
+
+[node name="vision" type="Area2D" parent="POINT" unique_id=1946126189]
+visible = false
+position = Vector2(-27, -93)
+
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="POINT/vision" unique_id=1685665169]
+position = Vector2(80, -2)
+polygon = PackedVector2Array(-49, -16, 229, -127, 230, 96, -47, 25)
+
+[node name="collision_attack" type="Area2D" parent="POINT" unique_id=371815366]
+visible = false
+
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="POINT/collision_attack" unique_id=74740681]
+position = Vector2(35, -59)
+polygon = PackedVector2Array(-156, 43, -141, -36, -99, -84, -46, -108, 11, -94, 62, -58, 91, -1, 70, 45, 0, 56, -63, 55, -109, 48)
+disabled = true

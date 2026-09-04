@@ -6,6 +6,11 @@ var last_checkpoint_pos := Vector2.ZERO
 var last_checkpoint_scene := ""
 var has_checkpoint := false
 var last_door_id: int = -1
+# Élan à conserver en traversant un passage en courant : capturé par
+# passage.gd, restitué par spawnplayer de l'autre côté (une seule fois)
+var transition_velocity := Vector2.ZERO
+var transition_direction: int = 1
+var has_transition_momentum := false
 
 var blood := 0
 # La vie est comptée en CŒURS : 1 dégât = 1 cœur perdu.
@@ -23,6 +28,22 @@ var hearts_initialized := false
 var coeurs_ramasses := {}
 var sang := 0  # la jauge de sang commence vide (se remplit via les récoltes)
 var MAX_SANG := 195
+
+## Réinitialise TOUT l'état de partie — appelé par PLAY au menu principal.
+## Nouvelle partie = page blanche : cœurs ramassés compris.
+func reset_partie() -> void:
+	hearts_initialized = false  # le prochain spawn relira l'export du player
+	coeurs_ramasses.clear()
+	hp = 999999  # clampé au max par le _enter_tree du player
+	blood = 0
+	sang = 0
+	MAX_SANG = 195
+	has_checkpoint = false
+	last_checkpoint_scene = ""
+	last_checkpoint_pos = Vector2.ZERO
+	last_door_id = -1
+	has_transition_momentum = false
+
 
 func changement_de_vie(amount: int) -> void:
 	var old := hp

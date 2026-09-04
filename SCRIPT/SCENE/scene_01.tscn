@@ -908,7 +908,7 @@ position = Vector2(14.75, -18.3125)
 
 [node name="checkpoint" parent="interactible" unique_id=524856083 groups=["Checkpoint"] instance=ExtResource("37_bsdtk")]
 z_index = -4
-position = Vector2(20814, -4890)
+position = Vector2(8061.002, 1572)
 
 [node name="Checkpoint" type="Sprite2D" parent="interactible" unique_id=1644752575]
 position = Vector2(21041, -4980)

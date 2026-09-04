@@ -18,6 +18,13 @@ func _ready() -> void:
 	SignalUtils.connect_signal(self, "animation_changed", self, "_on_animation_changed")
 
 	SignalUtils.connect_signal(collision, "body_entered", self, "_on_body_entered")
+	# le FX de slash ne vit que le temps de son animation : caché au repos
+	SignalUtils.connect_signal(slash_attack, "animation_finished", self, "_on_slash_finished")
+	slash_attack.visible = false
+
+
+func _on_slash_finished() -> void:
+	slash_attack.visible = false
 
 	
 func _process(delta):
@@ -28,9 +35,9 @@ func _on_body_entered(body):
 	# on passe en paramètre amount ET la position X du joueur
 	if body.has_method("apply_damage"):
 		body.apply_damage(damage, player.global_position.x)
-		# Ennemi inébranlable (aucun knockback) : le contrecoup annule
-		# l'élan du joueur au lieu de faire reculer l'ennemi
-		if body is BaseAI and body.HIT_KNOCK_X == 0.0:
+		# Ennemi inébranlable : le contrecoup annule l'élan du joueur
+		# au lieu de faire reculer l'ennemi
+		if body is BaseAI and body.inebranlable:
 			player.cancel_movement_recoil()
 
 # play() ne redémarre pas une anim déjà en cours de lecture —
@@ -49,6 +56,11 @@ func _disable_all_hitboxes() -> void:
 	
 func _on_animation_changed() -> void:
 	_disable_all_hitboxes()
+	# le perso change d'animation = le coup en cours est terminé ou
+	# interrompu : son FX de slash disparaît avec lui (un éventuel coup
+	# suivant relancera le sien via _play_slash)
+	slash_attack.stop()
+	slash_attack.visible = false
 	# frame_changed n'est pas émis quand on passe d'une anim en frame 0
 	# à une nouvelle anim en frame 0 (la valeur ne change pas) —
 	# on rattrape donc la frame 0 ici, au changement d'animation
@@ -73,15 +85,14 @@ func _process_frame_logic() -> void:
 					_disable_all_hitboxes()
 				1:
 					pass
-				3:
+				2:
 					_disable_all_hitboxes()
-					_play_slash("slash_1")
+					_play_slash("new_slash_1")
 					hitbox_1.set_deferred("disabled", false)
 		"attack_02":
 			match frame:
 				1:
-					_play_slash("slash_2")
-				2:
+					_play_slash("new_slash_1")
 					hitbox_2.set_deferred("disabled", false)
 				3:
 					_disable_all_hitboxes()
@@ -126,11 +137,8 @@ func _process_frame_logic() -> void:
 					pass
 		"attack_air":
 			match frame:
-				0:
-					pass
-				1:
-					pass
-				5:
+				3:
+					_play_slash("slash_air")
 					hitbox_4.set_deferred("disabled", false)
 				6:
 					_disable_all_hitboxes()

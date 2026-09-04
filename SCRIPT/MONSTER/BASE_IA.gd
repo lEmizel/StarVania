@@ -35,6 +35,14 @@ var confort_zone_min: float = 50.0
 @export var HIT_X_DAMP: float = 8.0
 var _knock := Vector2.ZERO
 
+## INÉBRANLABLE : aucun recul quand touché, et le joueur qui le frappe
+## subit un contrecoup ×1.56 (voir animator.gd du player). Permanent
+## (boss, via l'export) ou fenêtré par code (larve en boule de piques).
+@export var inebranlable := false
+## INVULNÉRABLE : les dégâts sont ignorés — aucun flash, aucune barre de
+## vie, aucun feedback : l'absence de réaction EST le message
+var invulnerable := false
+
 # Flash blanc quand le monstre est touché
 const HIT_FLASH_SHADER := preload("res://SCRIPT/MONSTER/hit_flash.gdshader")
 @export var FLASH_DURATION: float = 0.15
@@ -80,9 +88,17 @@ func _ready() -> void:
 	vie.init_vie()
 
 
+## Oubli HORS DE VUE (commun à tous les monstres) : une cible tenue mais
+## absente du cône de vision pendant ce temps est lâchée. 0 = n'oublie
+## jamais faute de vue (boss).
+@export var oubli_hors_vue := 4.0
+var _hors_vue_temps := 0.0
+
+
 func _physics_process(delta: float) -> void:
 	if current_state < 0:
 		return
+	_tick_oubli_hors_vue(delta)
 	state_functions[current_state]["execute"].call(delta)
 	# Knockback absolu : tant qu'il est actif, il REMPLACE le déplacement
 	# horizontal de l'état (l'ennemi ne peut pas compenser en marchant contre).
@@ -93,6 +109,25 @@ func _physics_process(delta: float) -> void:
 	move_and_slide()
 	_decay_knockback(delta)
 	_check_contact_damage()
+
+
+func _tick_oubli_hors_vue(delta: float) -> void:
+	if oubli_hors_vue <= 0.0 or target == null or _is_dead():
+		_hors_vue_temps = 0.0
+		return
+	if vision.overlaps_body(target):
+		_hors_vue_temps = 0.0
+		return
+	_hors_vue_temps += delta
+	if _hors_vue_temps >= oubli_hors_vue:
+		_hors_vue_temps = 0.0
+		_oublier_cible()
+
+
+## Décrochage de la cible — surchargable par les enfants (le squelette et
+## la larve y ajoutent leur délai de grâce anti re-scan)
+func _oublier_cible() -> void:
+	target = null
 
 
 # ============================================================
@@ -185,6 +220,8 @@ func _flash_white() -> void:
 func apply_damage(amount: int, source_x, _source_tag := "?") -> void:
 	if _is_dead():
 		return
+	if invulnerable:
+		return
 	hp -= amount
 	vie.emit_signal("health_request", -amount)
 	vie.apparition_temp()
@@ -216,7 +253,10 @@ func apply_damage(amount: int, source_x, _source_tag := "?") -> void:
 		flip_toward(target.global_position.x)
 	elif source_x != null:
 		flip_toward(source_x)
-	# Knockback appliqué par-dessus l'état courant, sans l'interrompre
+	# Knockback appliqué par-dessus l'état courant, sans l'interrompre —
+	# sauf inébranlable : aucun recul, c'est le joueur qui encaisse
+	if inebranlable:
+		return
 	var dir := 0
 	if source_x != null:
 		dir = 1 if (global_position.x - source_x) > 0 else -1

@@ -35,6 +35,10 @@ text = "PLAY"
 layout_mode = 2
 text = "LOAD"
 
+[node name="OPTIONS" type="Button" parent="CenterContainer/BoxContainer"]
+layout_mode = 2
+text = "OPTIONS"
+
 [node name="QUIT" type="Button" parent="CenterContainer/BoxContainer"]
 layout_mode = 2
 text = "QUIT

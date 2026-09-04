@@ -1,0 +1,168 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://SCRIPT/MENU/options.gd" id="1_opts"]
+
+[node name="OPTIONS" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_opts")
+
+[node name="Fond" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.6)
+
+[node name="Panel" type="Panel" parent="."]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -380.0
+offset_top = -280.0
+offset_right = 380.0
+offset_bottom = 280.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="Panel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 30.0
+offset_top = 24.0
+offset_right = -30.0
+offset_bottom = -24.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 18
+
+[node name="Titre" type="Label" parent="Panel/VBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 34
+text = "OPTIONS"
+horizontal_alignment = 1
+
+[node name="WindowModeRow" type="HBoxContainer" parent="Panel/VBoxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="Label" type="Label" parent="Panel/VBoxContainer/WindowModeRow"]
+custom_minimum_size = Vector2(240, 0)
+layout_mode = 2
+text = "Affichage"
+
+[node name="FlecheGauche" type="Button" parent="Panel/VBoxContainer/WindowModeRow"]
+custom_minimum_size = Vector2(48, 0)
+layout_mode = 2
+focus_mode = 0
+text = "❮"
+
+[node name="ModeValeur" type="Button" parent="Panel/VBoxContainer/WindowModeRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Plein écran"
+
+[node name="FlecheDroite" type="Button" parent="Panel/VBoxContainer/WindowModeRow"]
+custom_minimum_size = Vector2(48, 0)
+layout_mode = 2
+focus_mode = 0
+text = "❯"
+
+[node name="MasterVolumeRow" type="HBoxContainer" parent="Panel/VBoxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="Label" type="Label" parent="Panel/VBoxContainer/MasterVolumeRow"]
+custom_minimum_size = Vector2(240, 0)
+layout_mode = 2
+text = "Volume général"
+
+[node name="MasterVolumeSlider" type="HSlider" parent="Panel/VBoxContainer/MasterVolumeRow"]
+custom_minimum_size = Vector2(260, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 4
+max_value = 1.0
+step = 0.05
+value = 1.0
+
+[node name="MasterVolumeValue" type="Label" parent="Panel/VBoxContainer/MasterVolumeRow"]
+custom_minimum_size = Vector2(70, 0)
+layout_mode = 2
+text = "100%"
+horizontal_alignment = 2
+
+[node name="MusicVolumeRow" type="HBoxContainer" parent="Panel/VBoxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="Label" type="Label" parent="Panel/VBoxContainer/MusicVolumeRow"]
+custom_minimum_size = Vector2(240, 0)
+layout_mode = 2
+text = "Musique"
+
+[node name="MusicVolumeSlider" type="HSlider" parent="Panel/VBoxContainer/MusicVolumeRow"]
+custom_minimum_size = Vector2(260, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 4
+max_value = 1.0
+step = 0.05
+value = 1.0
+
+[node name="MusicVolumeValue" type="Label" parent="Panel/VBoxContainer/MusicVolumeRow"]
+custom_minimum_size = Vector2(70, 0)
+layout_mode = 2
+text = "100%"
+horizontal_alignment = 2
+
+[node name="SFXVolumeRow" type="HBoxContainer" parent="Panel/VBoxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="Label" type="Label" parent="Panel/VBoxContainer/SFXVolumeRow"]
+custom_minimum_size = Vector2(240, 0)
+layout_mode = 2
+text = "Effets sonores"
+
+[node name="SFXVolumeSlider" type="HSlider" parent="Panel/VBoxContainer/SFXVolumeRow"]
+custom_minimum_size = Vector2(260, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 4
+max_value = 1.0
+step = 0.05
+value = 1.0
+
+[node name="SFXVolumeValue" type="Label" parent="Panel/VBoxContainer/SFXVolumeRow"]
+custom_minimum_size = Vector2(70, 0)
+layout_mode = 2
+text = "100%"
+horizontal_alignment = 2
+
+[node name="ButtonsRow" type="HBoxContainer" parent="Panel/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 8
+theme_override_constants/separation = 24
+alignment = 1
+
+[node name="ApplyButton" type="Button" parent="Panel/VBoxContainer/ButtonsRow"]
+custom_minimum_size = Vector2(180, 48)
+layout_mode = 2
+text = "Appliquer"
+
+[node name="CloseButton" type="Button" parent="Panel/VBoxContainer/ButtonsRow"]
+custom_minimum_size = Vector2(180, 48)
+layout_mode = 2
+text = "Fermer"

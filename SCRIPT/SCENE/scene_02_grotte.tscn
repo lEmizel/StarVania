@@ -3,7 +3,6 @@
 [ext_resource type="Script" uid="uid://dftar4ptyhjxe" path="res://SCRIPT/UTILITAIRE/spawnplayer.gd" id="1_a4l3l"]
 [ext_resource type="PackedScene" uid="uid://ckxwmy0iav2h2" path="res://SCRIPT/INTERACTIBLE/Checkpoint.tscn" id="1_osf8h"]
 [ext_resource type="Texture2D" uid="uid://0ce03uawvs4t" path="res://MEDIA/scene1/planche.png" id="2_owu4f"]
-[ext_resource type="PackedScene" uid="uid://ck8vpjpshuot0" path="res://SCRIPT/INTERACTIBLE/wall_jump.tscn" id="2_wi8lr"]
 [ext_resource type="PackedScene" uid="uid://buwunuey57xf7" path="res://SCRIPT/INTERACTIBLE/porte.tscn" id="3_b2tcf"]
 [ext_resource type="PackedScene" uid="uid://1xlgeshmkw51" path="res://SCRIPT/INTERACTIBLE/climb.tscn" id="4_cdmp5"]
 [ext_resource type="PackedScene" uid="uid://lfopd74ueqri" path="res://SCRIPT/INTERACTIBLE/cadre_mur_griffe.tscn" id="6_cdmp5"]
@@ -53,7 +52,7 @@ shader_parameter/edge_focus = 0.0
 shader_parameter/edge_boost = 66.36
 shader_parameter/wrap_uv = false
 
-[sub_resource type="Shader" id="Shader_1af6x"]
+[sub_resource type="Shader" id="Shader_vmt6a"]
 code = "shader_type canvas_item;
 
 uniform sampler2D SCREEN_TEXTURE : hint_screen_texture, filter_linear_mipmap;
@@ -77,7 +76,7 @@ void fragment() {
 }"
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_vmt6a"]
-shader = SubResource("Shader_1af6x")
+shader = SubResource("Shader_vmt6a")
 shader_parameter/blur_amount = 2.96400014079
 shader_parameter/iterations = 5
 
@@ -300,21 +299,15 @@ position = Vector2(-6193, 1774)
 polygon = PackedVector2Array(4008, -1638, 4006, -2246, 4004, -2754, 4272, -2744, 4444, -2631, 4582, -2058, 4587, -1590, 4537, -1281, 4229, -1170, 4014, -1224)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="classicsol/wall_jump" unique_id=1178610160 groups=["wall_jump"]]
-position = Vector2(1047, -645)
+position = Vector2(1345, -645)
 shape = SubResource("RectangleShape2D_gqq6u")
 
 [node name="CollisionShape2D2" type="CollisionShape2D" parent="classicsol/wall_jump" unique_id=436258281 groups=["wall_jump"]]
-position = Vector2(1344.5, -517)
+position = Vector2(1083, -517)
 shape = SubResource("RectangleShape2D_06s65")
 
-[node name="wall_jump2" parent="classicsol" unique_id=2017835529 instance=ExtResource("2_wi8lr")]
+[node name="wall_jump2" parent="classicsol" unique_id=2017835529]
 position = Vector2(-1725, -1256)
-
-[node name="CollisionShape2D" parent="classicsol/wall_jump2" index="0" unique_id=1178610160]
-position = Vector2(1345, -645)
-
-[node name="CollisionShape2D2" parent="classicsol/wall_jump2" index="1" unique_id=436258281]
-position = Vector2(1083, -517)
 
 [node name="CollisionShape2D3" type="CollisionShape2D" parent="classicsol/wall_jump2" unique_id=1629069611 groups=["wall_jump"]]
 position = Vector2(2612, -1983)
@@ -490,26 +483,26 @@ scroll_scale = Vector2(0, 0)
 [node name="Fond" type="Sprite2D" parent="Node2D/Parallax2D4" unique_id=760323344]
 modulate = Color(0.44806695, 0.44806695, 0.44806695, 1)
 z_index = -4096
-position = Vector2(2373.4536, 858.99316)
+position = Vector2(434.5, 378)
 scale = Vector2(0.22, 0.22)
 texture = ExtResource("16_jsm2b")
 
 [node name="ColorRect" type="ColorRect" parent="Node2D/Parallax2D4" unique_id=348624102]
 z_index = -25
 material = SubResource("ShaderMaterial_vmt6a")
-offset_left = 913.4768
-offset_top = 49.051025
-offset_right = 3663.4768
-offset_bottom = 1694.051
+offset_left = -1880.5
+offset_top = -314.0
+offset_right = 869.5
+offset_bottom = 1331.0
 metadata/_edit_use_anchors_ = true
 
 [node name="ColorRect2" type="ColorRect" parent="Node2D/Parallax2D4" unique_id=758691875]
 z_index = -80
 material = SubResource("ShaderMaterial_jsm2b")
-offset_left = 501.0
-offset_top = -455.0
-offset_right = 3484.5
-offset_bottom = 1937.5
+offset_left = -2320.0
+offset_top = 238.0
+offset_right = 663.5
+offset_bottom = 2630.5
 metadata/_edit_use_anchors_ = true
 
 [node name="Parallax2D" type="Parallax2D" parent="Node2D" unique_id=1338030865]
@@ -805,5 +798,4 @@ lifetime = 1.46
 explosiveness = 0.2
 process_material = SubResource("ParticleProcessMaterial_fjm2u")
 
-[editable path="classicsol/wall_jump2"]
 [editable path="classicsol/CLIMB"]
