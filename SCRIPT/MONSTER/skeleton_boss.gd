@@ -1,13 +1,48 @@
 # skeleton_boss.gd
 extends BaseAI
 
-enum States { IDLE, APPROACH, ATTACK_1, ATTACK_2, ATTACK_3, RETURN, DEAD }
+enum States { IDLE, PATROL, APPROACH, ATTACK_1, ATTACK_2, ATTACK_3, RETURN, DEAD }
 
 @export var speed := 200.0
 ## Nombre de boucles d'idle imposées entre chaque action du boss
 ## (tiré aléatoirement entre min et max à chaque pause ; 0 = enchaîne sans pause)
 @export var idle_cycles_min := 0
 @export var idle_cycles_max := 2
+## Temps mort de l'ATTAQUE 2 : tant qu'il court, seule l'attaque 1 sort —
+## sans lui, l'attaque 2 (éligible dans toutes les branches de décision)
+## sortait beaucoup trop souvent
+@export var attack_2_cooldown := 3.0
+## Distance sous laquelle la marche peut S'INTERROMPRE pour lancer
+## l'attaque 2 (si elle est rechargée)
+@export var attack_2_range := 250.0
+## Abandon de frustration : cible visible mais inaccessible (autre
+## plateforme…) pendant ce temps cumulé d'idle → il lâche l'aggro.
+## Plus patient que les squelettes : ses pauses de combat normales
+## (cycles d'idle) ne doivent JAMAIS le déclencher.
+@export var abandon_time := 3.0
+## Délai de grâce après un abandon avant de pouvoir re-détecter
+@export var abandon_cooldown := 2.5
+## Ronde quand personne en vue : même allure que la poursuite (speed)
+@export var patrol_enabled := true
+## Rythme de la ronde : durée moyenne de marche / de pause (±40 %)
+@export var patrol_walk_time := 4.0
+@export var patrol_pause_time := 2.0
+var _blocked_time := 0.0
+var _abandon_timer := 0.0
+var _patrol_dir := 1
+var _patrol_phase_timer := 0.0
+var _patrol_pausing := false
+var _a2_cd := 0.0
+
+
+func _physics_process(delta: float) -> void:
+	super(delta)
+	_a2_cd = maxf(_a2_cd - delta, 0.0)
+
+
+## Poids de l'attaque 2 dans les tirages : 0 pendant son temps mort
+func _a2_poids(poids: int) -> int:
+	return 0 if _a2_cd > 0.0 else poids
 
 ## Dégâts par attaque (chaque enter charge sa valeur dans attack_power,
 ## que l'animator applique au moment du coup)
@@ -73,7 +108,7 @@ func decide() -> void:
 		# Très proche → attaques rapides
 		choice = pick_weighted([
 			[States.ATTACK_1, 100],
-			[States.ATTACK_2, 100],
+			[States.ATTACK_2, _a2_poids(100)],
 			[States.IDLE, 20],
 		])
 
@@ -81,7 +116,7 @@ func decide() -> void:
 		# Zone de confort → mix d'attaques
 		choice = pick_weighted([
 			[States.ATTACK_1, 180],
-			[States.ATTACK_2, 100],
+			[States.ATTACK_2, _a2_poids(100)],
 			#[States.ATTACK_3, 80],
 			[States.IDLE, 150],
 		])
@@ -91,13 +126,13 @@ func decide() -> void:
 		var in_dead_zone := target and absf(target.global_position.x - global_position.x) < HORIZONTAL_DEAD_ZONE
 		if in_dead_zone or not can_approach:
 			choice = pick_weighted([
-				[States.ATTACK_2, 150],
+				[States.ATTACK_2, _a2_poids(150)],
 				[States.IDLE, 100],
 			])
 		else:
 			choice = pick_weighted([
 				[States.APPROACH, 250],
-				[States.ATTACK_2, 150],
+				[States.ATTACK_2, _a2_poids(150)],
 				#[States.ATTACK_3, 40],
 				[States.IDLE, 100],
 			])
@@ -126,20 +161,108 @@ func idle_execute(delta: float) -> void:
 	apply_gravity(delta)
 	if target:
 		flip_toward(target.global_position.x)
+		# idle prolongé AVEC cible = frustration (cible inaccessible) :
+		# les vraies actions (approche, attaques) remettent le compteur à zéro
+		_blocked_time += delta
+		if _blocked_time >= abandon_time:
+			_blocked_time = 0.0
+			_abandon_timer = abandon_cooldown
+			target = null
+	else:
+		# re-détection : un joueur DÉJÀ dans le cône ne ré-émet jamais
+		# body_entered → re-scan, passé le délai de grâce
+		_abandon_timer = maxf(_abandon_timer - delta, 0.0)
+		if _abandon_timer <= 0.0:
+			_rescan_vision()
+
+
+## Re-scan de la zone de vision, borné par la distance d'oubli
+func _rescan_vision() -> void:
+	for b in vision.get_overlapping_bodies():
+		if b.is_in_group("Player") \
+			and b.global_position.distance_to(global_position) <= max_tracking_distance:
+			target = b
+			return
+
+
+## Décrochage (hors-vue de BASE_IA) : même délai de grâce que la frustration
+func _oublier_cible() -> void:
+	_blocked_time = 0.0
+	_abandon_timer = abandon_cooldown
+	target = null
 
 func idle_animation_looped() -> void:
 	_idle_loops += 1
 	if target and _idle_loops >= _idle_loops_needed:
 		decide()
+	elif target == null and patrol_enabled:
+		# personne en vue : après une boucle d'idle, il part en ronde
+		goto_state(States.PATROL)
+
+
+# --- PATROL (ronde pesante entre les obstacles) ---
+
+func patrol_enter() -> void:
+	animator.play("walk")
+	_patrol_dir = 1 if point.scale.x >= 0.0 else -1
+	_patrol_pausing = false
+	_patrol_phase_timer = randf_range(patrol_walk_time * 0.6, patrol_walk_time * 1.4)
+
+func patrol_execute(delta: float) -> void:
+	apply_gravity(delta)
+	# re-détection en ronde, passé le délai de grâce
+	_abandon_timer = maxf(_abandon_timer - delta, 0.0)
+	if target == null and _abandon_timer <= 0.0:
+		_rescan_vision()
+	# un joueur apparaît → retour au cerveau de combat
+	if target:
+		velocity.x = 0.0
+		decide()
+		return
+	# respiration de ronde : alternance marche ↔ pause en idle
+	_patrol_phase_timer -= delta
+	if _patrol_pausing:
+		velocity.x = 0.0
+		if _patrol_phase_timer <= 0.0:
+			_patrol_pausing = false
+			_patrol_phase_timer = randf_range(patrol_walk_time * 0.6, patrol_walk_time * 1.4)
+			animator.play("walk")
+		return
+	if _patrol_phase_timer <= 0.0:
+		_patrol_pausing = true
+		_patrol_phase_timer = randf_range(patrol_pause_time * 0.6, patrol_pause_time * 1.4)
+		animator.play("idle")
+		velocity.x = 0.0
+		return
+	# trou devant ? piques devant ? vrai mur de face ? → demi-tour
+	var mur_devant := false
+	if is_on_wall():
+		var n := get_wall_normal()
+		mur_devant = absf(n.x) > 0.85 and signf(n.x) == -signf(float(_patrol_dir))
+	detection_vide.position.x = absf(detection_vide.position.x) * _patrol_dir
+	detection_vide.force_raycast_update()
+	if not detection_vide.is_colliding() or mur_devant \
+		or danger_devant(detection_vide):
+		_patrol_dir = -_patrol_dir
+	velocity.x = _patrol_dir * speed  # même allure qu'en poursuite
+	last_direction = _patrol_dir
+	point.scale.x = _patrol_dir
 
 # --- APPROACH ---
 func approach_enter() -> void:
 	animator.play("walk")
+	_blocked_time = 0.0  # la cible redevient accessible : frustration oubliée
 
 func approach_execute(delta: float) -> void:
 	apply_gravity(delta)
 	if not target:
 		goto_state(States.IDLE)
+		return
+	# la marche peut S'INTERROMPRE à tout moment pour l'attaque 2 : dès que
+	# la cible passe sous attack_2_range et que le temps mort est écoulé
+	if _a2_cd <= 0.0 and distance_to_target() <= attack_2_range:
+		velocity.x = 0.0
+		goto_state(States.ATTACK_2)
 		return
 	if distance_to_target() <= confort_zone_max:
 		velocity.x = 0.0
@@ -147,7 +270,7 @@ func approach_execute(delta: float) -> void:
 		# peut kiter le boss (s'éloigner → le frapper pendant sa pause → répéter)
 		goto_state(pick_weighted([
 			[States.ATTACK_1, 180],
-			[States.ATTACK_2, 100],
+			[States.ATTACK_2, _a2_poids(100)],
 		]))
 		return
 	detection_vide.position.x = absf(detection_vide.position.x) * last_direction
@@ -162,6 +285,7 @@ func attack_1_enter() -> void:
 	attack_power = attack_1_damage
 	animator.play("attack")
 	velocity.x = 0.0
+	_blocked_time = 0.0  # on se bat : frustration oubliée
 	if target:
 		flip_toward(target.global_position.x)
 
@@ -173,6 +297,8 @@ func attack_1_animation_finished() -> void:
 
 # --- ATTACK_2 (moyen) ---
 func attack_2_enter() -> void:
+	_a2_cd = attack_2_cooldown  # arme le temps mort de l'attaque 2
+	_blocked_time = 0.0  # on se bat : frustration oubliée
 	attack_power = attack_2_damage
 	animator.play("attack_02")
 	velocity.x = 0.0
@@ -200,6 +326,7 @@ func attack_2_animation_finished() -> void:
 func attack_3_enter() -> void:
 	animator.play("attack_03")
 	velocity.x = 0.0
+	_blocked_time = 0.0  # on se bat : frustration oubliée
 	if target:
 		flip_toward(target.global_position.x)
 

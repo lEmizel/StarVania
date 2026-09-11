@@ -25,6 +25,15 @@
 [ext_resource type="Texture2D" uid="uid://bnx8i3kgl6iic" path="res://MEDIA/scene 6/background/colonne.png" id="21_le5k3"]
 [ext_resource type="PackedScene" uid="uid://lskntqxi822j" path="res://SCRIPT/MONSTER/Orbe.tscn" id="22_orfeg"]
 [ext_resource type="Script" uid="uid://cldc0dscj1uj1" path="res://SCRIPT/OUTILS/LEVEL_EXPORTER.gd" id="25_miuck"]
+[ext_resource type="PackedScene" uid="uid://d0a63sa43lpwp" path="res://SCRIPT/INTERACTIBLE/flamme.tscn" id="26_le5k3"]
+[ext_resource type="Texture2D" uid="uid://coep7l80nhse3" path="res://MEDIA/tuto/Attack.png" id="27_0qkwp"]
+[ext_resource type="Texture2D" uid="uid://c0rkripprv1wk" path="res://MEDIA/tuto/Cast.png" id="28_e85f5"]
+[ext_resource type="Texture2D" uid="uid://e8qsjxmqfpa3" path="res://MEDIA/tuto/Double_jump.png" id="29_ee1go"]
+[ext_resource type="Texture2D" uid="uid://bdxeqrenliqgk" path="res://MEDIA/tuto/Heel.png" id="30_hv0rj"]
+[ext_resource type="Texture2D" uid="uid://by1g5f1chmwhf" path="res://MEDIA/tuto/Jump.png" id="31_4ybxj"]
+[ext_resource type="Texture2D" uid="uid://v3lsa27hl6tt" path="res://MEDIA/tuto/Roll.png" id="32_povf7"]
+[ext_resource type="Texture2D" uid="uid://dnqfwrxt81yxt" path="res://MEDIA/tuto/Wall_jump.png" id="33_m35ik"]
+[ext_resource type="Texture2D" uid="uid://bennv6y5dc2kx" path="res://MEDIA/tuto/Wall_run.png" id="34_w0c1q"]
 
 [sub_resource type="Shader" id="Shader_1af6x"]
 code = "shader_type canvas_item;
@@ -732,3 +741,67 @@ script = ExtResource("25_miuck")
 export_path = "res://scene_7.png"
 bg_color = Color(0.101960786, 0.101960786, 0.101960786, 0)
 margin = 50
+
+[node name="Node2D2" parent="." unique_id=1766281021 instance=ExtResource("26_le5k3")]
+position = Vector2(1193, -365.00003)
+scale = Vector2(2.77, 2.77)
+
+[node name="Node2D3" parent="." unique_id=680211072 instance=ExtResource("26_le5k3")]
+position = Vector2(3433.0002, -1654.0001)
+scale = Vector2(2.77, 2.77)
+
+[node name="Node2D4" parent="." unique_id=1148624728 instance=ExtResource("26_le5k3")]
+position = Vector2(4338, -1653)
+scale = Vector2(2.77, 2.77)
+
+[node name="Node2D5" parent="." unique_id=1242236200 instance=ExtResource("26_le5k3")]
+position = Vector2(-176, -2337.0002)
+scale = Vector2(2.77, 2.77)
+
+[node name="Attack" type="Sprite2D" parent="." unique_id=830162738]
+z_index = -1
+position = Vector2(1980, -224)
+scale = Vector2(0.59, 0.59)
+texture = ExtResource("27_0qkwp")
+
+[node name="Cast" type="Sprite2D" parent="." unique_id=1414475554]
+z_index = -1
+position = Vector2(4396, -448)
+scale = Vector2(0.59, 0.59)
+texture = ExtResource("28_e85f5")
+
+[node name="DoubleJump" type="Sprite2D" parent="." unique_id=60122863]
+z_index = -1
+position = Vector2(1174, -1453.64)
+scale = Vector2(0.59, 0.59)
+texture = ExtResource("29_ee1go")
+
+[node name="Heel" type="Sprite2D" parent="." unique_id=1754670019]
+z_index = -1
+position = Vector2(3641.9998, -1367.9999)
+scale = Vector2(0.59, 0.59)
+texture = ExtResource("30_hv0rj")
+
+[node name="Jump" type="Sprite2D" parent="." unique_id=1237421388]
+z_index = -1
+position = Vector2(1478.47, -289)
+scale = Vector2(0.59, 0.59)
+texture = ExtResource("31_4ybxj")
+
+[node name="Roll" type="Sprite2D" parent="." unique_id=1689816019]
+z_index = -1
+position = Vector2(-149.76001, -2156)
+scale = Vector2(0.59, 0.59)
+texture = ExtResource("32_povf7")
+
+[node name="WallJump" type="Sprite2D" parent="." unique_id=705185749]
+z_index = -1
+position = Vector2(5310.32, -610.27)
+scale = Vector2(0.59, 0.59)
+texture = ExtResource("33_m35ik")
+
+[node name="WallRun" type="Sprite2D" parent="." unique_id=1302589704]
+z_index = -1
+position = Vector2(758.99994, -2324)
+scale = Vector2(0.59, 0.59)
+texture = ExtResource("34_w0c1q")

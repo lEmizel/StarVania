@@ -11,6 +11,13 @@ enum States { IDLE, PATROL, APPROACH, ATTACK, RETURN, DEAD }
 ## proche à gauche, demi-tour, jusqu'à celui de droite, etc.
 @export var patrol_enabled := true
 @export var patrol_speed := 140.0
+## Rythme de la ronde : durée moyenne de marche avant une pause, et durée
+## moyenne de la pause en idle (chaque phase varie de ±40 % autour de la
+## moyenne — deux gardes ne sont jamais synchrones)
+@export var patrol_walk_time := 3.5
+@export var patrol_pause_time := 1.4
+var _patrol_phase_timer := 0.0
+var _patrol_pausing := false
 ## Abandon temporaire : si la cible reste inaccessible (bloqué à un bord…)
 ## pendant ce temps cumulé d'idle frustré, le squelette lâche l'aggro et
 ## reprend sa ronde — sa vision le re-déclenchera plus tard
@@ -171,6 +178,8 @@ func patrol_enter() -> void:
 	animator.play("walk")
 	# repart dans la direction du regard actuel
 	_patrol_dir = 1 if point.scale.x >= 0.0 else -1
+	_patrol_pausing = false
+	_patrol_phase_timer = randf_range(patrol_walk_time * 0.6, patrol_walk_time * 1.4)
 
 func patrol_execute(delta: float) -> void:
 	velocity.y += gravity * delta
@@ -182,6 +191,21 @@ func patrol_execute(delta: float) -> void:
 	if target:
 		velocity.x = 0.0
 		decide()
+		return
+	# respiration de ronde : alternance marche ↔ pause en idle
+	_patrol_phase_timer -= delta
+	if _patrol_pausing:
+		velocity.x = 0.0
+		if _patrol_phase_timer <= 0.0:
+			_patrol_pausing = false
+			_patrol_phase_timer = randf_range(patrol_walk_time * 0.6, patrol_walk_time * 1.4)
+			animator.play("walk")
+		return
+	if _patrol_phase_timer <= 0.0:
+		_patrol_pausing = true
+		_patrol_phase_timer = randf_range(patrol_pause_time * 0.6, patrol_pause_time * 1.4)
+		animator.play("idle")
+		velocity.x = 0.0
 		return
 	# trou devant ? piques devant ? mur devant ? → demi-tour.
 	# "Mur" = paroi quasi verticale qui NOUS FAIT FACE : une pente raide ou

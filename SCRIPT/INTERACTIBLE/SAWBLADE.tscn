@@ -1,0 +1,52 @@
+[gd_scene format=3 uid="uid://cxca5jid2onov"]
+
+[ext_resource type="Texture2D" uid="uid://bfks245c3mf4" path="res://MEDIA/INTERACTIBLE/SawBlade/Sawblade-1.png" id="1_q2kik"]
+[ext_resource type="Script" uid="uid://4qutshx5b832" path="res://SCRIPT/INTERACTIBLE/sawblade.gd" id="1_saw"]
+[ext_resource type="Script" uid="uid://bspu2lkfojat0" path="res://SCRIPT/INTERACTIBLE/piques.gd" id="2_saw"]
+[ext_resource type="Texture2D" uid="uid://wi43kr5lve7v" path="res://MEDIA/INTERACTIBLE/SawBlade/Sawblade-2.png" id="2_xxqk1"]
+[ext_resource type="Texture2D" uid="uid://cr1fbcdtq77v5" path="res://MEDIA/INTERACTIBLE/SawBlade/Sawblade-3.png" id="3_rm4cv"]
+[ext_resource type="Texture2D" uid="uid://e8wk3avihmcw" path="res://MEDIA/INTERACTIBLE/SawBlade/Sawblade-4.png" id="4_f1huw"]
+[ext_resource type="Texture2D" uid="uid://btjnxpgiampmg" path="res://MEDIA/INTERACTIBLE/SawBlade/Sawblade-5.png" id="5_1r3eq"]
+[ext_resource type="Texture2D" uid="uid://igk82woqayqx" path="res://MEDIA/INTERACTIBLE/SawBlade/Sawblade-6.png" id="6_he55u"]
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_35hhg"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("1_q2kik")
+}, {
+"duration": 1.0,
+"texture": ExtResource("2_xxqk1")
+}, {
+"duration": 1.0,
+"texture": ExtResource("3_rm4cv")
+}, {
+"duration": 1.0,
+"texture": ExtResource("4_f1huw")
+}, {
+"duration": 1.0,
+"texture": ExtResource("5_1r3eq")
+}, {
+"duration": 1.0,
+"texture": ExtResource("6_he55u")
+}],
+"loop": 1,
+"name": &"idle",
+"speed": 35.0
+}]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_saw"]
+radius = 148.0304
+
+[node name="SAWBLADE" type="AnimatedSprite2D" unique_id=388117046]
+sprite_frames = SubResource("SpriteFrames_35hhg")
+animation = &"idle"
+frame_progress = 0.69803977
+script = ExtResource("1_saw")
+
+[node name="Area2D" type="Area2D" parent="." unique_id=388117047 groups=["DEGATS"]]
+script = ExtResource("2_saw")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D" unique_id=388117048]
+visible = false
+shape = SubResource("CircleShape2D_saw")

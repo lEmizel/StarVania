@@ -29,7 +29,7 @@ var current_state : States = States.IDLE
 var previous_state : States = States.IDLE
 var state_functions: Dictionary = {}
 
-const GROUND_SPEED = 550            # FIX: renommé pour clarté
+const GROUND_SPEED = 650            # FIX: renommé pour clarté
 const AIR_SPEED    = 400            # FIX: anciennement var SPEED locale shadowed
 @export var GROUND_SPEED_ATTACK: float = 450.0  # vitesse de course pendant les attaques
 ## Nombre de cœurs de vie max — synchronisé vers le singleton Player au spawn
@@ -1506,6 +1506,13 @@ func attack_light_1_execute(delta: float) -> void:
 	_attack_run_movement(delta)
 
 func attack_light_1_input(event: InputEvent) -> void:
+	# CANCEL DÉFENSIF : sauter ou rouler interrompt l'attaque à tout moment
+	if Input.is_action_just_pressed("esquive"):
+		change_state(States.ROLL)
+		return
+	if Input.is_action_just_pressed("jump"):
+		change_state(States.JUMP)
+		return
 	# Buffer pendant l'anim principale
 	if event.is_action("light_attack") \
 		and event.is_pressed() \
@@ -1559,6 +1566,13 @@ func attack_light_2_execute(delta: float) -> void:
 	_attack_run_movement(delta)
 
 func attack_light_2_input(event: InputEvent) -> void:
+	# CANCEL DÉFENSIF : sauter ou rouler interrompt l'attaque à tout moment
+	if Input.is_action_just_pressed("esquive"):
+		change_state(States.ROLL)
+		return
+	if Input.is_action_just_pressed("jump"):
+		change_state(States.JUMP)
+		return
 	if event.is_action("light_attack") \
 		and event.is_pressed() \
 		and not event.is_echo() \
@@ -1611,6 +1625,13 @@ func attack_light_3_execute(delta: float) -> void:
 		change_state(States.CHUTE)
 
 func attack_light_3_input(event: InputEvent) -> void:
+	# CANCEL DÉFENSIF : sauter ou rouler interrompt l'attaque à tout moment
+	if Input.is_action_just_pressed("esquive"):
+		change_state(States.ROLL)
+		return
+	if Input.is_action_just_pressed("jump"):
+		change_state(States.JUMP)
+		return
 	if animator.animation == "attack_03_r":
 		if Input.is_action_just_pressed("light_attack"):
 			change_state(States.ATTACK_LIGHT_1)
@@ -1648,7 +1669,12 @@ func attack_lourde_execute(delta: float) -> void:
 		change_state(States.CHUTE)
 
 func attack_lourde_input(event: InputEvent) -> void:
-	pass
+	# CANCEL DÉFENSIF : même la lourde s'interrompt pour esquiver
+	if Input.is_action_just_pressed("esquive"):
+		change_state(States.ROLL)
+		return
+	if Input.is_action_just_pressed("jump"):
+		change_state(States.JUMP)
 
 func attack_lourde_animation_finished() -> void:
 	match animator.animation:
@@ -1676,7 +1702,11 @@ func attack_air_execute(delta: float) -> void:
 		_handle_landing()
 
 func attack_air_input(event: InputEvent) -> void:
-	pass
+	# CANCEL DÉFENSIF aérien : dash ou double saut interrompent l'attaque
+	if _fresh_press("esquive") and _try_air_dash():
+		return
+	if _fresh_press("jump") and _try_double_jump():
+		return
 
 func attack_air_animation_finished() -> void:
 	match animator.animation:
@@ -1738,7 +1768,9 @@ const BLOODBALL_SCENE := preload("res://SCRIPT/SPELL/bloodball.tscn")
 ## Durée du lancer avant de rendre la main (en attendant une anim de cast dédiée)
 @export var BLOODBALL_CAST_TIME: float = 0.25
 ## Coût en sang d'une boule
-@export var BLOODBALL_COST: int = 25
+## Coût en sang d'une boule — 0 pour le moment : tir ILLIMITÉ (rééquilibrage
+## sept. 2026, remettre un coût ici le jour où le sort redevient payant)
+@export var BLOODBALL_COST: int = 0
 var _cast_timer := 0.0
 
 

@@ -217,7 +217,9 @@ func _flash_white() -> void:
 
 ## _source_tag : étiquette de provenance optionnelle (parité avec le player,
 ## utilisée par les logs de debug — sans effet sur la logique)
-func apply_damage(amount: int, source_x, _source_tag := "?") -> void:
+## `knockback` : false pour les dégâts qui piquent sans déplacer
+## (ex. bloodball) — la réaction d'aggro/volte-face reste, seul le recul saute
+func apply_damage(amount: int, source_x, _source_tag := "?", knockback := true) -> void:
 	if _is_dead():
 		return
 	if invulnerable:
@@ -254,8 +256,9 @@ func apply_damage(amount: int, source_x, _source_tag := "?") -> void:
 	elif source_x != null:
 		flip_toward(source_x)
 	# Knockback appliqué par-dessus l'état courant, sans l'interrompre —
-	# sauf inébranlable : aucun recul, c'est le joueur qui encaisse
-	if inebranlable:
+	# sauf inébranlable (aucun recul, c'est le joueur qui encaisse) ou
+	# source sans recul (bloodball…)
+	if inebranlable or not knockback:
 		return
 	var dir := 0
 	if source_x != null:

@@ -6,13 +6,15 @@ extends Area2D
 const EXPLOSION_SCENE := preload("res://SCRIPT/SPELL/bloodball_explosion.tscn")
 
 @export var speed := 800.0
-@export var damage := 71  # 95 − 25 %
-@export var max_lifetime := 2.0  # au bout de 2 s sans impact : explose d'elle-même
+@export var damage := 36  # rééquilibrage sept. 2026 : 71 ÷ 4, puis ×2
+## Portée maximale (px) avant auto-explosion : courte = outil de proximité,
+## pas un sniper (avant sept. 2026 : ~1600 px via une durée de vie de 2 s)
+@export var portee := 400.0
 
 ## Direction horizontale (+1 droite, -1 gauche) — posée par le player au spawn
 var dir := 1
 
-var _life := 0.0
+var _parcouru := 0.0
 
 
 func _ready() -> void:
@@ -21,9 +23,10 @@ func _ready() -> void:
 
 
 func _physics_process(delta: float) -> void:
-	position.x += dir * speed * delta
-	_life += delta
-	if _life >= max_lifetime:
+	var pas := speed * delta
+	position.x += dir * pas
+	_parcouru += pas
+	if _parcouru >= portee:
 		_explode()
 
 
@@ -33,7 +36,9 @@ func _on_body_entered(body: Node) -> void:
 		return
 	# ennemi : dégâts (source = position de la boule → knockback dans le bon sens)
 	if body.has_method("apply_damage"):
-		body.apply_damage(damage, global_position.x, "bloodball")
+		# knockback = false : la bloodball pique sans déplacer (l'ennemi
+		# se retourne et aggro quand même via la réaction de BASE_IA)
+		body.apply_damage(damage, global_position.x, "bloodball", false)
 	_explode()
 
 

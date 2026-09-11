@@ -9,6 +9,8 @@
 [ext_resource type="PackedScene" uid="uid://lfopd74ueqri" path="res://SCRIPT/INTERACTIBLE/cadre_mur_griffe.tscn" id="7_f14ug"]
 [ext_resource type="PackedScene" uid="uid://bqbrm320hgjkj" path="res://SCRIPT/INTERACTIBLE/echelle.tscn" id="8_8jbyt"]
 [ext_resource type="PackedScene" uid="uid://deajggaeh7111" path="res://SCRIPT/INTERACTIBLE/platforme.tscn" id="9_8jbyt"]
+[ext_resource type="PackedScene" uid="uid://cxca5jid2onov" path="res://SCRIPT/INTERACTIBLE/SAWBLADE.tscn" id="10_gugmh"]
+[ext_resource type="PackedScene" uid="uid://i3vr6r3pmxtp" path="res://SCRIPT/MONSTER/XENO.tscn" id="11_pxmro"]
 
 [node name="scene_05" type="Node2D" unique_id=1083121648]
 
@@ -27,6 +29,18 @@ script = ExtResource("1_kudm0")
 
 [node name="400x100" parent="." unique_id=436297158 instance=ExtResource("3_fikys")]
 position = Vector2(1, 51)
+
+[node name="400x104" parent="." unique_id=269005025 instance=ExtResource("3_fikys")]
+position = Vector2(-399, 51)
+
+[node name="400x105" parent="." unique_id=654764849 instance=ExtResource("3_fikys")]
+position = Vector2(-799, 51)
+
+[node name="400x106" parent="." unique_id=1459951099 instance=ExtResource("3_fikys")]
+position = Vector2(-1199, 51)
+
+[node name="400x107" parent="." unique_id=2088282976 instance=ExtResource("3_fikys")]
+position = Vector2(-1672, 59)
 
 [node name="400x101" parent="." unique_id=740398732 instance=ExtResource("3_fikys")]
 position = Vector2(401, 51)
@@ -79,3 +93,12 @@ position = Vector2(357, -1701)
 
 [node name="checkpoint" parent="." unique_id=1851853008 instance=ExtResource("2_o3jev")]
 position = Vector2(269.49805, -1398)
+
+[node name="SAWBLADE" parent="." unique_id=388117046 instance=ExtResource("10_gugmh")]
+position = Vector2(-280, -669)
+frame_progress = 0.6349291
+position_a = Vector2(-280, -669)
+position_b = Vector2(-280, -1240)
+
+[node name="enemi2" parent="." unique_id=627255339 instance=ExtResource("11_pxmro")]
+position = Vector2(-1386, 3)

@@ -1,0 +1,33 @@
+[gd_scene format=3 uid="uid://d0a63sa43lpwp"]
+
+[ext_resource type="Shader" uid="uid://b2jj2vbtrgfq6" path="res://SCRIPT/SHADER/flamme_cartoon.gdshader" id="1_vwnqj"]
+[ext_resource type="Texture2D" uid="uid://t17cpogdibvu" path="res://MEDIA/UTILITAIRE/light.png" id="2_mmocj"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_35hhg"]
+shader = ExtResource("1_vwnqj")
+shader_parameter/speed = 1.16800005548
+shader_parameter/distortion = 0.5530000262675
+shader_parameter/flame_width = 0.20800000662012
+shader_parameter/flame_height = 0.74500003212762
+shader_parameter/detail = 6.79200027512
+shader_parameter/style_cartoon = 0.6430000305425
+shader_parameter/nb_bandes = 4
+shader_parameter/arrondi_base = 0.3050000144875
+shader_parameter/saturation = 0.5810000275975
+shader_parameter/outer_color = Color(0.9, 0.05, 0.005, 1)
+shader_parameter/middle_color = Color(1, 0.32, 0.01, 1)
+shader_parameter/inner_color = Color(1, 0.85, 0.15, 1)
+shader_parameter/core_color = Color(1, 1, 0.75, 1)
+
+[node name="Node2D" type="Node2D" unique_id=1766281021]
+
+[node name="ColorRect" type="ColorRect" parent="." unique_id=1564988201]
+material = SubResource("ShaderMaterial_35hhg")
+offset_left = -20.0
+offset_top = -19.0
+offset_right = 20.0
+offset_bottom = 21.0
+
+[node name="PointLight2D" type="PointLight2D" parent="." unique_id=948758515]
+energy = 0.35
+texture = ExtResource("2_mmocj")

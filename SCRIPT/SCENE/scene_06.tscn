@@ -23,11 +23,15 @@
 [ext_resource type="PackedScene" uid="uid://deajggaeh7111" path="res://SCRIPT/INTERACTIBLE/platforme.tscn" id="21_prnxj"]
 [ext_resource type="PackedScene" uid="uid://cl4e5goxx8nvt" path="res://SCRIPT/INTERACTIBLE/coeur.tscn" id="22_0lfge"]
 [ext_resource type="Script" uid="uid://cldc0dscj1uj1" path="res://SCRIPT/OUTILS/LEVEL_EXPORTER.gd" id="23_agrp3"]
-[ext_resource type="Texture2D" uid="uid://dcxq08l4g0hxq" path="res://MEDIA/scene_06.png" id="23_sebwa"]
 [ext_resource type="Texture2D" uid="uid://x774gue4he8e" path="res://MEDIA/scene 6/background/background.png" id="25_0rphr"]
 [ext_resource type="Texture2D" uid="uid://bnx8i3kgl6iic" path="res://MEDIA/scene 6/background/colonne.png" id="26_xccp3"]
+[ext_resource type="Script" uid="uid://dkh7eagbeu1pu" path="res://SCRIPT/SCENE/findeniveau.gd" id="29_qw731"]
+[ext_resource type="PackedScene" uid="uid://d0a63sa43lpwp" path="res://SCRIPT/INTERACTIBLE/flamme.tscn" id="29_sebwa"]
 [ext_resource type="PackedScene" uid="uid://b1fje6n3t7rv5" path="res://SCRIPT/MONSTER/LARVE_PIQUE.tscn" id="34_xccp3"]
 [ext_resource type="PackedScene" uid="uid://bobswn5tah03s" path="res://SCRIPT/INTERACTIBLE/passage.tscn" id="35_kv4j8"]
+
+[sub_resource type="CompressedTexture2D" id="CompressedTexture2D_0htds"]
+load_path = "res://.godot/imported/scene_06.png-9c93df901d30ecfce8499aa5cd8e802b.ctex"
 
 [sub_resource type="Shader" id="Shader_sebwa"]
 code = "shader_type canvas_item;
@@ -57,6 +61,9 @@ shader = SubResource("Shader_sebwa")
 shader_parameter/blur_amount = 2.246000106685
 shader_parameter/iterations = 5
 
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_35hhg"]
+size = Vector2(222, 321)
+
 [node name="scene_06" type="Node2D" unique_id=1897845605]
 
 [node name="spawnplayer" type="Node" parent="." unique_id=1693636159]
@@ -79,7 +86,8 @@ position = Vector2(-1698, -3404)
 bord_bloque = 1
 
 [node name="checkpoint" parent="interactible" unique_id=524856083 groups=["Checkpoint"] instance=ExtResource("2_k6qtm")]
-position = Vector2(617, -4)
+position = Vector2(403, 0)
+metadata/_edit_group_ = true
 
 [node name="checkpoint2" parent="interactible" unique_id=692703547 groups=["Checkpoint"] instance=ExtResource("2_k6qtm")]
 position = Vector2(5221, -2197)
@@ -738,7 +746,7 @@ position = Vector2(4208, 352)
 [node name="Calque2" type="Sprite2D" parent="VISUAL" unique_id=787433060]
 z_index = -1
 position = Vector2(3408, -2048)
-texture = ExtResource("23_sebwa")
+texture = SubResource("CompressedTexture2D_0htds")
 
 [node name="Parallax2D" type="Parallax2D" parent="VISUAL" unique_id=234547209]
 scroll_scale = Vector2(0, 0)
@@ -806,3 +814,19 @@ margin = 50
 
 [node name="enemi2" parent="." unique_id=819348583 instance=ExtResource("34_xccp3")]
 position = Vector2(2494, -404)
+
+[node name="Node2D" parent="." unique_id=1766281021 instance=ExtResource("29_sebwa")]
+position = Vector2(1426.0001, -351)
+scale = Vector2(2.77, 2.77)
+
+[node name="Node2D2" parent="." unique_id=15702722 instance=ExtResource("29_sebwa")]
+position = Vector2(459, -2360)
+scale = Vector2(2.77, 2.77)
+
+[node name="findeniveau" type="Area2D" parent="." unique_id=272344894]
+position = Vector2(-1889, -3333)
+script = ExtResource("29_qw731")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="findeniveau" unique_id=554795902]
+position = Vector2(17, -67.5)
+shape = SubResource("RectangleShape2D_35hhg")
