@@ -1864,9 +1864,15 @@ func hit_exit() -> void:
 # -------------------------------------------------
 # DEAD — FIX: ajout de la gravité + blocage propre
 # -------------------------------------------------
+# ---- DÉMO : écran de mort (voile sombre + "Press X to revive") -----------
+# À SUPPRIMER après la démo : cette constante, la ligne marquée DÉMO dans
+# dead_enter, et le fichier SCRIPT/UTILITAIRE/ecran_mort_demo.gd.
+const ECRAN_MORT_DEMO := preload("res://SCRIPT/UTILITAIRE/ecran_mort_demo.gd")
+# --------------------------------------------------------------------------
 func dead_enter() -> void:
 	animator.play("death")
 	velocity.x = 0.0            # FIX: stoppe le mouvement horizontal
+	add_child(ECRAN_MORT_DEMO.new())   # DÉMO — écran de mort (se retire seul)
 
 
 

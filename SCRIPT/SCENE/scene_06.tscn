@@ -82,7 +82,7 @@ position = Vector2(-1176, -180)
 bord_bloque = 1
 
 [node name="LIMITE_CAMERA2" parent="interactible" unique_id=75770946 instance=ExtResource("17_d2b0k")]
-position = Vector2(-1698, -3404)
+position = Vector2(-3255, -3404)
 bord_bloque = 1
 
 [node name="checkpoint" parent="interactible" unique_id=524856083 groups=["Checkpoint"] instance=ExtResource("2_k6qtm")]
@@ -149,9 +149,9 @@ scale = Vector2(1, -1)
 
 [node name="ColorRect" type="ColorRect" parent="interactible" unique_id=433847209]
 z_index = -10
-offset_left = -1695.0
+offset_left = -3262.0
 offset_top = -3551.0
-offset_right = -1627.0
+offset_right = -3194.0
 offset_bottom = -3298.0
 color = Color(0, 0, 0, 1)
 
@@ -167,7 +167,7 @@ color = Color(0, 0, 0, 1)
 position = Vector2(1008, -845)
 
 [node name="skeleton_boss" parent="interactible" unique_id=627255339 instance=ExtResource("18_d2b0k")]
-position = Vector2(-1477, -3303)
+position = Vector2(-1825, -3299)
 
 [node name="coeur" parent="interactible" unique_id=1091802907 instance=ExtResource("22_0lfge")]
 position = Vector2(5389.0005, -932)
@@ -272,6 +272,12 @@ position = Vector2(58, -2798)
 
 [node name="800x421" parent="grayboxing" unique_id=1108481373 instance=ExtResource("6_ns3h4")]
 position = Vector2(-1592, -3098)
+
+[node name="800x437" parent="grayboxing" unique_id=132023809 instance=ExtResource("6_ns3h4")]
+position = Vector2(-2392, -3098)
+
+[node name="800x438" parent="grayboxing" unique_id=1008132784 instance=ExtResource("6_ns3h4")]
+position = Vector2(-3192, -3098)
 
 [node name="800x402" parent="grayboxing" unique_id=1116713558 instance=ExtResource("6_ns3h4")]
 position = Vector2(1608, 302)
@@ -443,7 +449,7 @@ position = Vector2(308, -1248)
 position = Vector2(108, -1248)
 
 [node name="200x110" parent="grayboxing" unique_id=1839561523 instance=ExtResource("5_5dkmq")]
-position = Vector2(-1492, -3891)
+position = Vector2(-3091, -3891)
 
 [node name="200x100 slide3" parent="grayboxing" unique_id=618975311 instance=ExtResource("12_frudr")]
 position = Vector2(108, -1348)
@@ -669,16 +675,16 @@ position = Vector2(-592, -3098)
 position = Vector2(-992, -3098)
 
 [node name="400x218" parent="grayboxing" unique_id=2011186394 instance=ExtResource("8_5dkmq")]
-position = Vector2(-1792, -3641)
+position = Vector2(-3391, -3641)
 
 [node name="400x219" parent="grayboxing" unique_id=1738690310 instance=ExtResource("8_5dkmq")]
-position = Vector2(-1792, -3841)
+position = Vector2(-3391, -3841)
 
 [node name="400x220" parent="grayboxing" unique_id=1545436102 instance=ExtResource("8_5dkmq")]
-position = Vector2(-1792, -4041)
+position = Vector2(-3391, -4041)
 
 [node name="400x221" parent="grayboxing" unique_id=1533720511 instance=ExtResource("8_5dkmq")]
-position = Vector2(-1392, -4041)
+position = Vector2(-2991, -4041)
 
 [node name="400x127" parent="grayboxing" unique_id=1154320872 instance=ExtResource("3_tdfyb")]
 position = Vector2(-592, -3248)
@@ -702,7 +708,7 @@ position = Vector2(258, -2498)
 scale = Vector2(1, -1)
 
 [node name="200x100 slide8" parent="grayboxing" unique_id=1286553788 instance=ExtResource("12_frudr")]
-position = Vector2(-1492, -3791)
+position = Vector2(-3091, -3791)
 scale = Vector2(1, -1)
 
 [node name="400x222" parent="grayboxing" unique_id=781273794 instance=ExtResource("8_5dkmq")]
@@ -720,7 +726,7 @@ rotation = 3.1415927
 position = Vector2(1008, -748)
 
 [node name="200x100 slide9" parent="grayboxing" unique_id=608304841 instance=ExtResource("12_frudr")]
-position = Vector2(-1292, -3891)
+position = Vector2(-2891, -3891)
 scale = Vector2(1, -1)
 
 [node name="200x111" parent="grayboxing" unique_id=940911058 instance=ExtResource("5_5dkmq")]
@@ -745,7 +751,7 @@ position = Vector2(4208, 352)
 
 [node name="Calque2" type="Sprite2D" parent="VISUAL" unique_id=787433060]
 z_index = -1
-position = Vector2(3408, -2048)
+position = Vector2(2618, -2049)
 texture = SubResource("CompressedTexture2D_0htds")
 
 [node name="Parallax2D" type="Parallax2D" parent="VISUAL" unique_id=234547209]
@@ -824,9 +830,9 @@ position = Vector2(459, -2360)
 scale = Vector2(2.77, 2.77)
 
 [node name="findeniveau" type="Area2D" parent="." unique_id=272344894]
-position = Vector2(-1889, -3333)
+position = Vector2(-3496, -3333)
 script = ExtResource("29_qw731")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="findeniveau" unique_id=554795902]
-position = Vector2(17, -67.5)
+position = Vector2(30, -67)
 shape = SubResource("RectangleShape2D_35hhg")

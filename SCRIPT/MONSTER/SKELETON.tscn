@@ -230,6 +230,7 @@ position = Vector2(80, -2)
 polygon = PackedVector2Array(-49, -16, 229, -127, 230, 96, -47, 25)
 
 [node name="collision_attack" type="Area2D" parent="POINT" unique_id=371815366]
+visible = false
 
 [node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="POINT/collision_attack" unique_id=74740681]
 position = Vector2(35, -59)

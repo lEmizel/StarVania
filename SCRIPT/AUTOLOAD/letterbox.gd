@@ -6,8 +6,6 @@ const AR_4_3        : float = 4.0 / 3.0          # 1.333…
 const AR_16_9       : float = 21.0 / 9.0         # 1.778…
 const VIRTUAL_WIDTH : int   = 1920               # largeur fixe logiquement
 
-var  use_normal_range := true                    # toggle « ui_accept »
-
 @onready var window  : Window   = get_window()   # fenêtre physique
 var       _last_phys : Vector2i = Vector2i.ZERO  # mémo taille physique
 var       _last_virt : Vector2i = Vector2i.ZERO  # mémo taille virtuelle
@@ -23,20 +21,15 @@ func _process(_delta: float) -> void:
 		_last_phys = phys
 		_apply_letterbox()
 
-func _input(event: InputEvent) -> void:
-	if event.is_action_pressed("ui_accept"):     # ↔ inverse la plage 4:3/16:9
-		use_normal_range = !use_normal_range
-		_apply_letterbox()
-
 # -------------------------------------------------------------
 func _apply_letterbox() -> void:
 	# 1) rapport physique actuel
 	var phys      : Vector2i = _last_phys
 	var ar_phys   : float = phys.x / float(phys.y)
 
-	# 2) bornes dynamiques
-	var low  : float = AR_4_3  if use_normal_range else AR_16_9
-	var high : float = AR_16_9 if use_normal_range else AR_4_3
+	# 2) bornes de la plage autorisée
+	var low  : float = AR_4_3
+	var high : float = AR_16_9
 
 	# 3) clamp + résolution virtuelle
 	var ar_clamped : float = clampf(ar_phys, low, high)

@@ -95,10 +95,10 @@ position = Vector2(357, -1701)
 position = Vector2(269.49805, -1398)
 
 [node name="SAWBLADE" parent="." unique_id=388117046 instance=ExtResource("10_gugmh")]
-position = Vector2(-280, -669)
-frame_progress = 0.6349291
-position_a = Vector2(-280, -669)
-position_b = Vector2(-280, -1240)
+position = Vector2(-280, -1177)
+frame_progress = 0.7398554
+position_a = Vector2(-280, -1177)
+position_b = Vector2(-280, -425)
 
 [node name="enemi2" parent="." unique_id=627255339 instance=ExtResource("11_pxmro")]
 position = Vector2(-1386, 3)
