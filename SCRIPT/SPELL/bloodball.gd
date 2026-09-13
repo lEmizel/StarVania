@@ -6,7 +6,7 @@ extends Area2D
 const EXPLOSION_SCENE := preload("res://SCRIPT/SPELL/bloodball_explosion.tscn")
 
 @export var speed := 800.0
-@export var damage := 36  # rééquilibrage sept. 2026 : 71 ÷ 4, puis ×2
+@export var damage := 60  # sept. 2026 : un peu sous le coup léger au corps à corps (animator.gd : damage = 70)
 ## Portée maximale (px) avant auto-explosion : courte = outil de proximité,
 ## pas un sniper (avant sept. 2026 : ~1600 px via une durée de vie de 2 s)
 @export var portee := 400.0
