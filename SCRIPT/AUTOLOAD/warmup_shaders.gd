@@ -141,6 +141,15 @@ func _chauffer(materiaux: Array[Material], particules: Array[Dictionary], etique
 		gp.position = POS_HORS_LUMIERE
 		zoo.add_child(gp)
 
+	# particules CPU (sang, traînée du cœur) : pipeline instancié du canvas
+	var cp := CPUParticles2D.new()
+	cp.texture = _tex_pixel
+	cp.amount = 4
+	cp.lifetime = 0.2
+	cp.emitting = true
+	cp.position = POS_HORS_LUMIERE
+	zoo.add_child(cp)
+
 	for i in FRAMES_DE_CHAUFFE:
 		await get_tree().process_frame
 	zoo.queue_free()

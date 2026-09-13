@@ -1,5 +1,9 @@
-extends GPUParticles2D
+extends CPUParticles2D
 ## Récolte de sang, en 4 phases :
+## (CPUParticles2D et NON GPUParticles2D : les particules GPU provoquent des
+##  freezes de 100 à 250 ms à chaque apparition sur Metal / Mac — mesuré le
+##  13 sept. 2026. Les réglages du ParticleProcessMaterial d'origine ont été
+##  reportés sur le nœud, l'emission_curve cuite dans le dégradé de couleur.)
 ##   1. WAIT   — s'attarde sur le cadavre
 ##   2. SEEK   — s'envole vers le joueur en arc naturel (pilotage par vélocité,
 ##               vitesse max croissante → impossible à semer, rattrapage garanti)
