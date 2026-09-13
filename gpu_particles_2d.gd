@@ -1,14 +1,15 @@
 extends CPUParticles2D
 ## Récolte de sang, en 4 phases :
-## (CPUParticles2D et NON GPUParticles2D : les particules GPU provoquent des
-##  freezes de 100 à 250 ms à chaque apparition sur Metal / Mac — mesuré le
-##  13 sept. 2026. Les réglages du ParticleProcessMaterial d'origine ont été
-##  reportés sur le nœud, l'emission_curve cuite dans le dégradé de couleur.)
 ##   1. WAIT   — s'attarde sur le cadavre
 ##   2. SEEK   — s'envole vers le joueur en arc naturel (pilotage par vélocité,
 ##               vitesse max croissante → impossible à semer, rattrapage garanti)
 ##   3. LINGER — reste collée sur le joueur (le suit s'il bouge)
-##   4. FADE   — fondu, crédite le blood, se nettoie
+##   4. FADE   — fondu, crédite le blood, RETOURNE AU POOL
+##
+## CPUParticles2D (et non GPU) et instances RECYCLÉES par l'autoload Pool :
+## créer un système de particules coûte 100 à 250 ms sur Metal / Mac (mesuré
+## le 13 sept. 2026). On ne crée donc jamais en jeu : `relancer()` réveille une
+## instance dormante, `dormir()` la range. (Fichier au nom historique.)
 
 @export var wait_time: float = 1.0        ## temps sur le cadavre avant le départ
 @export var linger_time: float = 0.0      ## temps sur le joueur avant le fondu (0 = fondu immédiat)
@@ -36,16 +37,39 @@ var _vel := Vector2.ZERO
 var _prev_dist := INF
 var _was_closing := false
 var _direct := false
+var _tween: Tween
 
 
 func _ready() -> void:
+	# une instance naît endormie dans le pool : rien ne tourne avant relancer()
+	set_process(false)
+
+
+## Réveil (Pool.sang) : tout à zéro, émission relancée, poursuite armée.
+func relancer() -> void:
+	player = get_tree().get_first_node_in_group("Player") as CharacterBody2D
+	_phase = Phase.WAIT
+	_t = 0.0
+	_seek_t = 0.0
+	_prev_dist = INF
+	_was_closing = false
+	_direct = false
+	if _tween != null and _tween.is_valid():
+		_tween.kill()
 	self_modulate = Color(1, 1, 1, 1)
-	for n in get_tree().get_nodes_in_group("Player"):
-		if n is CharacterBody2D:
-			player = n
-			break
 	# élan de départ aléatoire vers le haut → chaque envol dessine un arc différent
 	_vel = Vector2(randf_range(-1.0, 1.0), randf_range(-1.6, -0.6)).normalized() * start_speed
+	restart()
+	set_process(true)
+
+
+## Mise en sommeil (Pool) : plus d'émission, plus de logique.
+func dormir() -> void:
+	emitting = false
+	set_process(false)
+	if _tween != null and _tween.is_valid():
+		_tween.kill()
+	self_modulate = Color(1, 1, 1, 1)
 
 
 func _process(delta: float) -> void:
@@ -56,7 +80,7 @@ func _process(delta: float) -> void:
 				_phase = Phase.SEEK
 
 		Phase.SEEK:
-			if player == null:
+			if player == null or not is_instance_valid(player):
 				_start_fade()
 				return
 			_seek_t += delta
@@ -87,7 +111,7 @@ func _process(delta: float) -> void:
 
 		Phase.LINGER, Phase.FADE:
 			# collée au joueur, elle le suit dans ses déplacements
-			if player != null:
+			if player != null and is_instance_valid(player):
 				global_position = player.global_position + Vector2(0.0, target_y_offset)
 			if _phase == Phase.LINGER:
 				_t += delta
@@ -99,14 +123,10 @@ func _start_fade() -> void:
 	if _phase == Phase.FADE:
 		return
 	_phase = Phase.FADE
-	var tw := create_tween().set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
-	tw.tween_property(self, "self_modulate:a", 0.0, fade_duration)
-	tw.finished.connect(func () -> void:
+	_tween = create_tween().set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+	_tween.tween_property(self, "self_modulate:a", 0.0, fade_duration)
+	_tween.finished.connect(func () -> void:
 		Player.changement_de_blood(blood_reward)
 		Player.changement_de_sang(gauge_fill)  # remplit la jauge de sang
-		var p := get_parent()
-		if is_instance_valid(p):
-			p.queue_free()  # libère aussi cette particule
-		else:
-			queue_free()
+		Pool.rendre_sang(get_parent() as Node2D)  # retour au pool, jamais de queue_free
 	)

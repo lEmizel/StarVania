@@ -55,7 +55,7 @@ var _contact_area: Area2D
 
 # Récolte de sang lâchée à la mort (les particules volent vers le joueur
 # et créditent du blood à l'arrivée)
-const BLOOD_PARTICLE_SCENE := preload("res://SCRIPT/PARTICLE/BLOOD_PARTICLE.tscn")
+# (la scène de récolte de sang est fabriquée et recyclée par l'autoload Pool)
 
 
 # ============================================================
@@ -239,9 +239,7 @@ func apply_damage(amount: int, source_x, _source_tag := "?", knockback := true) 
 		# (DEBUG PERF, à retirer après la démo : F6 ou `-- --sans-sang` supprime
 		#  ces particules GPU pour isoler les freezes Mac)
 		if not DebugPerf.sans_sang:
-			var blood := BLOOD_PARTICLE_SCENE.instantiate()
-			get_tree().current_scene.add_child(blood)
-			blood.global_position = global_position
+			Pool.sang(global_position)   # instance recyclée : zéro création en jeu
 		_on_dead()
 		return
 	# Attaqué — même de dos, même hors vision, même par un projectile : le

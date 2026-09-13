@@ -210,6 +210,36 @@ func _apply_sang_bar_max(new_max: float, tween: bool = true) -> void:
 ## haut, 0.5 = centre). À ajuster au feeling.
 @export var FX_COEUR_HAUTEUR: float = 0.25
 
+# traînée de la cérémonie du cœur, fabriquée une seule fois (voir heart_pickup_fx)
+@onready var _trail_coeur: CPUParticles2D = _creer_trail_coeur()
+
+
+func _creer_trail_coeur() -> CPUParticles2D:
+	var trail := CPUParticles2D.new()
+	trail.emitting = false
+	trail.amount = 60
+	trail.lifetime = 0.55
+	trail.local_coords = false
+	trail.direction = Vector2(0.0, 1.0)
+	trail.spread = 35.0
+	trail.gravity = Vector2.ZERO
+	trail.initial_velocity_min = 40.0
+	trail.initial_velocity_max = 140.0
+	trail.scale_amount_min = 3.0
+	trail.scale_amount_max = 7.0
+	var grad := Gradient.new()
+	grad.set_color(0, Color(1.0, 0.25, 0.3, 1.0))
+	grad.set_color(1, Color(0.45, 0.0, 0.06, 0.0))
+	trail.color_ramp = grad
+	trail.position = Vector2(-4000.0, -4000.0)   # hors écran en attendant
+	add_child(trail)
+	# chauffe : une émission hors écran à l'arrivée dans le niveau, pour que
+	# ses tampons GPU existent avant le premier ramassage
+	trail.emitting = true
+	get_tree().create_timer(0.4).timeout.connect(func() -> void: trail.emitting = false)
+	return trail
+
+
 func heart_pickup_fx() -> void:
 	# le nouveau cœur (déjà ajouté aux stats et à la rangée) reste invisible
 	# jusqu'à l'impact de la comète — c'est elle qui le "dépose"
@@ -236,25 +266,11 @@ func heart_pickup_fx() -> void:
 	fx.scale = Vector2(0.6, 0.6)
 	add_child(fx)
 
-	# traînée de comète rouge sang
-	var trail := CPUParticles2D.new()
-	trail.emitting = false
-	trail.amount = 60
-	trail.lifetime = 0.55
-	trail.local_coords = false
-	trail.direction = Vector2(0.0, 1.0)
-	trail.spread = 35.0
-	trail.gravity = Vector2.ZERO
-	trail.initial_velocity_min = 40.0
-	trail.initial_velocity_max = 140.0
-	trail.scale_amount_min = 3.0
-	trail.scale_amount_max = 7.0
-	var grad := Gradient.new()
-	grad.set_color(0, Color(1.0, 0.25, 0.3, 1.0))
-	grad.set_color(1, Color(0.45, 0.0, 0.06, 0.0))
-	trail.color_ramp = grad
+	# traînée de comète rouge sang — instance UNIQUE créée au ready du HUD et
+	# réutilisée : créer un CPUParticles2D en jeu freeze 100 à 250 ms sur Mac
+	var trail := _trail_coeur
+	trail.reparent(fx)
 	trail.position = big * 0.5
-	fx.add_child(trail)
 
 	# cible : le centre du dernier cœur de la rangée (le tout nouveau)
 	var target_center: Vector2 = _hearts.back()["full"].get_global_rect().get_center()
@@ -275,7 +291,9 @@ func heart_pickup_fx() -> void:
 	t.tween_callback(func() -> void: trail.emitting = false)
 	t.tween_property(fx, "modulate:a", 0.0, 0.1)
 	t.tween_interval(0.6)  # laisse la traînée finir de mourir
-	t.tween_callback(fx.queue_free)
+	t.tween_callback(func() -> void:
+		trail.reparent(self)   # la traînée survit au gros cœur, pour la prochaine fois
+		fx.queue_free())
 
 
 func _heart_land_pulse() -> void:

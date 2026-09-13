@@ -4,8 +4,8 @@
 [ext_resource type="Script" uid="uid://cx41dkcdldxya" path="res://gpu_particles_2d.gd" id="2_x56yi"]
 
 [sub_resource type="Gradient" id="Gradient_l5t25"]
-offsets = PackedFloat32Array(0, 0.227528, 0.512195, 0.651685, 0.994382)
-colors = PackedColorArray(0.096, 0.096, 0.096, 0, 0.151, 0.151, 0.151, 1, 0.26, 0.26, 0.26, 1, 0.226, 0.226, 0.226, 1, 0.09, 0.09, 0.09, 0)
+offsets = PackedFloat32Array(0, 0.227528, 0.651685, 0.994382)
+colors = PackedColorArray(1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0)
 
 [node name="bloodparticule" type="Node2D" unique_id=1851122890]
 z_index = 3
