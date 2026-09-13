@@ -27,6 +27,7 @@ Loader="*res://SCRIPT/AUTOLOAD/loader.gd"
 Settings="*res://SCRIPT/AUTOLOAD/settings.gd"
 PauseMenu="*res://SCRIPT/AUTOLOAD/pause_menu.gd"
 Warmup="*res://SCRIPT/AUTOLOAD/warmup_shaders.gd"
+DebugPerf="*res://SCRIPT/AUTOLOAD/debug_perf.gd"
 
 [display]
 
