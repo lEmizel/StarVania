@@ -38,9 +38,14 @@ var _prev_dist := INF
 var _was_closing := false
 var _direct := false
 var _tween: Tween
+# position locale d'origine (sous la racine) : le vol vers le joueur déplace CE
+# nœud, il faut le remettre en place à chaque réutilisation, sinon la récolte
+# émet à "nouveau cadavre + trajet précédent"
+var _position_initiale := Vector2.ZERO
 
 
 func _ready() -> void:
+	_position_initiale = position
 	# une instance naît endormie dans le pool : rien ne tourne avant relancer()
 	set_process(false)
 
@@ -57,6 +62,7 @@ func relancer() -> void:
 	if _tween != null and _tween.is_valid():
 		_tween.kill()
 	self_modulate = Color(1, 1, 1, 1)
+	position = _position_initiale   # retour sur le cadavre (la racine y est déjà)
 	# élan de départ aléatoire vers le haut → chaque envol dessine un arc différent
 	_vel = Vector2(randf_range(-1.0, 1.0), randf_range(-1.6, -0.6)).normalized() * start_speed
 	restart()
