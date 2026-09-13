@@ -25,6 +25,11 @@ func _ready() -> void:
 
 
 func precharger_scenes() -> void:
+	# DEBUG PERF : `-- --sans-precharge` en ligne de commande → rien n'est gardé
+	# en mémoire (test de pression mémoire sur Mac)
+	if "--sans-precharge" in OS.get_cmdline_user_args():
+		print("[LOAD] préchargement désactivé (--sans-precharge)")
+		return
 	for chemin in SCENES_PRECHARGEES:
 		if _prechargees.has(chemin) or chemin in _prechargement_en_cours:
 			continue
@@ -50,6 +55,18 @@ func _process(_delta: float) -> void:
 			push_error("[LOAD] échec du préchargement : " + chemin)
 	if _prechargement_en_cours.is_empty():
 		set_process(false)
+
+
+## DEBUG PERF (F7) : lâche les scènes préchargées → leurs textures sont libérées
+## si plus rien ne les utilise ; les prochains chargements repassent par l'écran
+## de chargement
+func liberer_prechargement() -> void:
+	var avant := Performance.get_monitor(Performance.RENDER_TEXTURE_MEM_USED) / 1e6
+	_prechargees.clear()
+	await get_tree().process_frame
+	await get_tree().process_frame
+	print("[LOAD] préchargement libéré : textures %.0f Mo → %.0f Mo" % [
+		avant, Performance.get_monitor(Performance.RENDER_TEXTURE_MEM_USED) / 1e6])
 
 
 ## la PackedScene déjà en mémoire pour ce chemin (res:// ou uid://), sinon null

@@ -236,9 +236,12 @@ func apply_damage(amount: int, source_x, _source_tag := "?", knockback := true) 
 		if _contact_area != null:
 			_contact_area.set_deferred("monitoring", false)
 		# Récolte de sang à l'endroit de la mort
-		var blood := BLOOD_PARTICLE_SCENE.instantiate()
-		get_tree().current_scene.add_child(blood)
-		blood.global_position = global_position
+		# (DEBUG PERF, à retirer après la démo : F6 ou `-- --sans-sang` supprime
+		#  ces particules GPU pour isoler les freezes Mac)
+		if not DebugPerf.sans_sang:
+			var blood := BLOOD_PARTICLE_SCENE.instantiate()
+			get_tree().current_scene.add_child(blood)
+			blood.global_position = global_position
 		_on_dead()
 		return
 	# Attaqué — même de dos, même hors vision, même par un projectile : le

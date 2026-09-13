@@ -3,6 +3,9 @@ extends Node
 ## DEBUG PERF — overlay FPS / temps de frame + journal des pics en console.
 ##
 ## Toggle : F3 au clavier, bouton Share (bouton 4) à la manette. Caché au boot.
+## Interrupteurs de test (Mac) : F6 = particules de sang ON/OFF,
+## F7 = libère les scènes préchargées (test de pression mémoire).
+## Équivalents en ligne de commande : `-- --sans-sang`, `-- --sans-precharge`.
 ## Chaque frame plus longue que SEUIL_PIC_MS est journalisée avec :
 ##   nœuds      = _process de tous les nœuds (mesuré entre ce script, qui
 ##                tourne EN PREMIER, et un marqueur qui tourne EN DERNIER)
@@ -31,6 +34,9 @@ class FinDeFrame extends Node:
 	func _process(_delta: float) -> void:
 		cible._fin_des_noeuds()
 
+
+## particules de sang désactivées (F6 ou `-- --sans-sang`) — lu par BASE_IA
+var sans_sang := "--sans-sang" in OS.get_cmdline_user_args()
 
 var _layer: CanvasLayer
 var _label: Label
@@ -77,15 +83,22 @@ func _ready() -> void:
 
 	_dernier_usec = Time.get_ticks_usec()
 	_relever_compteurs()
-	print("[PERF] écran %s | physique %d Hz | vsync %s | max_fps %d | fenêtre %s | %s" % [
+	print("[PERF] écran %s | physique %d Hz | vsync %s | max_fps %d | fenêtre %s | %s | args %s" % [
 		_hz(), Engine.physics_ticks_per_second, _vsync(), Engine.max_fps, _mode_fenetre(),
-		RenderingServer.get_video_adapter_name()])
+		RenderingServer.get_video_adapter_name(), OS.get_cmdline_user_args()])
 
 
 func _input(event: InputEvent) -> void:
 	var toggle := false
-	if event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_F3:
-		toggle = true
+	if event is InputEventKey and event.pressed and not event.echo:
+		match event.keycode:
+			KEY_F3:
+				toggle = true
+			KEY_F6:
+				sans_sang = not sans_sang
+				print("[PERF] particules de sang : ", "OFF" if sans_sang else "ON")
+			KEY_F7:
+				Loader.liberer_prechargement()
 	elif event is InputEventJoypadButton and event.pressed and event.button_index == JOY_BUTTON_BACK:
 		toggle = true
 	if toggle:
@@ -112,10 +125,12 @@ func _process(_delta: float) -> void:
 		var d_tex := Performance.get_monitor(Performance.RENDER_TEXTURE_MEM_USED) / 1e6 - _tex_prec
 		var d_ram := OS.get_static_memory_usage() / 1e6 - _ram_prec
 		var d_obj := int(Performance.get_monitor(Performance.OBJECT_COUNT)) - _objets_prec
-		print("[PERF] pic %.0f ms → nœuds %.1f | physique %.1f | rendu CPU %.1f | GPU %.1f | attente %.0f | pipelines +%d (à la volée +%d) | tex %+.0f Mo | RAM %+.0f Mo | objets %+d  (%s)" % [
+		print("[PERF] pic %.0f ms → nœuds %.1f | physique %.1f | rendu CPU %.1f | GPU %.1f | attente %.0f | pipelines +%d (à la volée +%d) | tex %.0f Mo (%+.0f) | RAM %.0f Mo (%+.0f) | objets %+d  (%s)" % [
 			ms, _noeuds_ms, phys_ms, rendu_cpu, gpu,
 			maxf(ms - _noeuds_ms - phys_ms - rendu_cpu, 0.0),
-			pipelines, pipelines_vol, d_tex, d_ram, d_obj, _contexte()])
+			pipelines, pipelines_vol,
+			Performance.get_monitor(Performance.RENDER_TEXTURE_MEM_USED) / 1e6, d_tex,
+			OS.get_static_memory_usage() / 1e6, d_ram, d_obj, _contexte()])
 
 	_relever_compteurs()
 	_debut_noeuds_usec = Time.get_ticks_usec()
