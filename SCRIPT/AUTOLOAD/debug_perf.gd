@@ -3,15 +3,17 @@ extends Node
 ## DEBUG PERF — overlay FPS / temps de frame + journal des pics en console.
 ##
 ## Toggle : F3 au clavier, bouton Share (bouton 4) à la manette. Caché au boot.
-## Chaque frame plus longue que SEUIL_PIC_MS est journalisée avec sa
-## répartition :
-##   nœuds     = _process de tous les nœuds de la scène (scripts, tweens…)
-##   physique  = pas de physique (_physics_process + moteur)
-##   rendu CPU = préparation du rendu sur le CPU
-##   GPU       = temps GPU réel de la frame précédente (0 si non mesurable)
-##   attente   = le reste : attente du GPU / de l'écran / du pilote
-##               (compilation de shader = gros pic ICI)
-## plus la scène et l'état du joueur à cet instant. Le journal va aussi dans
+## Chaque frame plus longue que SEUIL_PIC_MS est journalisée avec :
+##   nœuds      = _process de tous les nœuds (mesuré entre ce script, qui
+##                tourne EN PREMIER, et un marqueur qui tourne EN DERNIER)
+##   physique   = pas de physique (_physics_process + moteur)
+##   rendu CPU  = préparation du rendu sur le CPU
+##   GPU        = temps GPU de la frame (0 si le pilote ne le mesure pas)
+##   attente    = le reste : attente du GPU / de l'écran / du pilote
+##   pipelines  = pipelines GPU compilés À LA VOLÉE pendant la frame
+##                (> 0 = compilation de shader = c'est ÇA le freeze)
+##   tex / RAM / objets = variations pendant la frame (chargements, instances)
+## plus la scène et l'état du joueur. Le journal va aussi dans
 ## user://logs/godot.log (Mac : ~/Library/Application Support/Godot/
 ## app_userdata/SMILE_STAR/logs/).
 ##
@@ -21,6 +23,14 @@ extends Node
 
 const SEUIL_PIC_MS := 25.0          # 60 Hz = 16,7 ms par frame ; au-delà de 25 ms ça se voit
 const INTERVALLE_AFFICHAGE := 0.5   # s entre deux rafraîchissements du texte
+
+
+## marqueur de fin : sa priorité le fait tourner APRÈS tous les autres _process
+class FinDeFrame extends Node:
+	var cible: Node
+	func _process(_delta: float) -> void:
+		cible._fin_des_noeuds()
+
 
 var _layer: CanvasLayer
 var _label: Label
@@ -32,13 +42,24 @@ var _cumul_ms := 0.0
 var _nb_frames := 0
 var _max_ms := 0.0
 var _pics := 0
+# compteurs de la frame précédente, pour les deltas
+var _pipelines_prec := 0
+var _pipelines_vol_prec := 0
+var _tex_prec := 0.0
+var _ram_prec := 0.0
+var _objets_prec := 0
 
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
+	process_priority = -1000000          # premier _process de la frame
+	var fin := FinDeFrame.new()
+	fin.cible = self
+	fin.process_priority = 1000000       # dernier _process de la frame
+	add_child(fin)
+
 	_vp = get_viewport().get_viewport_rid()
 	RenderingServer.viewport_set_measure_render_time(_vp, true)
-	get_tree().process_frame.connect(_fin_des_noeuds)
 
 	_layer = CanvasLayer.new()
 	_layer.layer = 150
@@ -55,6 +76,7 @@ func _ready() -> void:
 	_layer.add_child(_label)
 
 	_dernier_usec = Time.get_ticks_usec()
+	_relever_compteurs()
 	print("[PERF] écran %s | physique %d Hz | vsync %s | max_fps %d | fenêtre %s | %s" % [
 		_hz(), Engine.physics_ticks_per_second, _vsync(), Engine.max_fps, _mode_fenetre(),
 		RenderingServer.get_video_adapter_name()])
@@ -72,13 +94,10 @@ func _input(event: InputEvent) -> void:
 			_rafraichir()
 
 
-# DebugPerf est le dernier autoload : son _process tourne juste avant ceux de la
-# scène ; process_frame est émis quand tous les nœuds ont fini → durée "nœuds"
 func _process(_delta: float) -> void:
 	var maintenant := Time.get_ticks_usec()
 	var ms := (maintenant - _dernier_usec) / 1000.0
 	_dernier_usec = maintenant
-	_debut_noeuds_usec = maintenant
 	_cumul_ms += ms
 	_nb_frames += 1
 	_max_ms = maxf(_max_ms, ms)
@@ -88,9 +107,18 @@ func _process(_delta: float) -> void:
 		var phys_ms := Performance.get_monitor(Performance.TIME_PHYSICS_PROCESS) * 1000.0
 		var rendu_cpu := RenderingServer.viewport_get_measured_render_time_cpu(_vp)
 		var gpu := RenderingServer.viewport_get_measured_render_time_gpu(_vp)
-		print("[PERF] pic %.0f ms → nœuds %.1f | physique %.1f | rendu CPU %.1f | GPU %.1f | attente %.0f  (%s)" % [
+		var pipelines := _pipelines() - _pipelines_prec
+		var pipelines_vol := _pipelines_a_la_volee() - _pipelines_vol_prec
+		var d_tex := Performance.get_monitor(Performance.RENDER_TEXTURE_MEM_USED) / 1e6 - _tex_prec
+		var d_ram := OS.get_static_memory_usage() / 1e6 - _ram_prec
+		var d_obj := int(Performance.get_monitor(Performance.OBJECT_COUNT)) - _objets_prec
+		print("[PERF] pic %.0f ms → nœuds %.1f | physique %.1f | rendu CPU %.1f | GPU %.1f | attente %.0f | pipelines +%d (à la volée +%d) | tex %+.0f Mo | RAM %+.0f Mo | objets %+d  (%s)" % [
 			ms, _noeuds_ms, phys_ms, rendu_cpu, gpu,
-			maxf(ms - _noeuds_ms - phys_ms - rendu_cpu, 0.0), _contexte()])
+			maxf(ms - _noeuds_ms - phys_ms - rendu_cpu, 0.0),
+			pipelines, pipelines_vol, d_tex, d_ram, d_obj, _contexte()])
+
+	_relever_compteurs()
+	_debut_noeuds_usec = Time.get_ticks_usec()
 
 	if _cumul_ms >= INTERVALLE_AFFICHAGE * 1000.0:
 		if _layer.visible:
@@ -104,6 +132,22 @@ func _fin_des_noeuds() -> void:
 	_noeuds_ms = (Time.get_ticks_usec() - _debut_noeuds_usec) / 1000.0
 
 
+func _relever_compteurs() -> void:
+	_pipelines_prec = _pipelines()
+	_pipelines_vol_prec = _pipelines_a_la_volee()
+	_tex_prec = Performance.get_monitor(Performance.RENDER_TEXTURE_MEM_USED) / 1e6
+	_ram_prec = OS.get_static_memory_usage() / 1e6
+	_objets_prec = int(Performance.get_monitor(Performance.OBJECT_COUNT))
+
+
+func _pipelines() -> int:
+	return int(RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_PIPELINE_COMPILATIONS_CANVAS))
+
+
+func _pipelines_a_la_volee() -> int:
+	return int(RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_PIPELINE_COMPILATIONS_DRAW))
+
+
 func _rafraichir() -> void:
 	var fps := 0.0
 	if _cumul_ms > 0.0:
@@ -111,11 +155,12 @@ func _rafraichir() -> void:
 	var moyenne := _cumul_ms / maxi(_nb_frames, 1)
 	_label.text = "FPS %.0f  |  frame moy %.1f ms  max %.1f ms  |  pics > %d ms : %d\n" % [
 			fps, moyenne, _max_ms, int(SEUIL_PIC_MS), _pics] \
-		+ "nœuds %.1f ms  |  physique %.1f ms  |  rendu CPU %.1f ms  |  GPU %.1f ms\n" % [
+		+ "nœuds %.1f ms  |  physique %.1f ms  |  rendu CPU %.1f ms  |  GPU %.1f ms  |  pipelines compilés %d (à la volée %d)\n" % [
 			_noeuds_ms,
 			Performance.get_monitor(Performance.TIME_PHYSICS_PROCESS) * 1000.0,
 			RenderingServer.viewport_get_measured_render_time_cpu(_vp),
-			RenderingServer.viewport_get_measured_render_time_gpu(_vp)] \
+			RenderingServer.viewport_get_measured_render_time_gpu(_vp),
+			_pipelines(), _pipelines_a_la_volee()] \
 		+ "écran %s  |  physique %d Hz  |  vsync %s  |  fenêtre %s\n" % [
 			_hz(), Engine.physics_ticks_per_second, _vsync(), _mode_fenetre()] \
 		+ "VRAM %.0f Mo (textures %.0f Mo)  |  RAM statique %.0f Mo  |  draw calls %d  |  nœuds %d\n" % [
@@ -132,6 +177,8 @@ func _contexte() -> String:
 	var holder := get_tree().get_first_node_in_group("MAIN_SCENE")
 	if holder != null and holder.get_child_count() > 0:
 		scene = holder.get_child(holder.get_child_count() - 1).scene_file_path.get_file()
+	elif get_tree().current_scene != null:
+		scene = get_tree().current_scene.scene_file_path.get_file()
 	var etat := "-"
 	var joueur := get_tree().get_first_node_in_group("Player")
 	if joueur != null and "current_state" in joueur:

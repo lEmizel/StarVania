@@ -12,8 +12,9 @@ uniform sampler2D SCREEN_TEXTURE : hint_screen_texture, filter_linear_mipmap;
 uniform float blur_amount : hint_range(0.0, 10.0) = 3.0;
 
 void fragment() {
-	// niveau de mipmap lu : blur 1 → ~3 px, blur 2.25 → ~7 px, blur 3 → ~9 px
-	float lod = log2(max(blur_amount, 0.35)) + 1.6;
+	// niveau de mipmap lu : blur 1 → ~2 px, blur 2.25 → ~5 px, blur 3 → ~6 px
+	// (+1.1 : calé à l'œil par Kaoru, 30 % plus doux que le premier réglage)
+	float lod = log2(max(blur_amount, 0.35)) + 1.1;
 	// centre + 4 lectures décalées d'un demi-texel du niveau lu : gomme les
 	// marches d'escalier des mipmaps sans coûter plus
 	vec2 d = SCREEN_PIXEL_SIZE * exp2(lod) * 0.5;
