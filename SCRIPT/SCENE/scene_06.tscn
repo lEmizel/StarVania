@@ -29,37 +29,14 @@
 [ext_resource type="PackedScene" uid="uid://d0a63sa43lpwp" path="res://SCRIPT/INTERACTIBLE/flamme.tscn" id="29_sebwa"]
 [ext_resource type="PackedScene" uid="uid://b1fje6n3t7rv5" path="res://SCRIPT/MONSTER/LARVE_PIQUE.tscn" id="34_xccp3"]
 [ext_resource type="PackedScene" uid="uid://bobswn5tah03s" path="res://SCRIPT/INTERACTIBLE/passage.tscn" id="35_kv4j8"]
+[ext_resource type="Shader" path="res://SCRIPT/SHADER/flou_fond.gdshader" id="flou_fond_1"]
 
 [sub_resource type="CompressedTexture2D" id="CompressedTexture2D_0htds"]
 load_path = "res://.godot/imported/scene_06.png-9c93df901d30ecfce8499aa5cd8e802b.ctex"
 
-[sub_resource type="Shader" id="Shader_sebwa"]
-code = "shader_type canvas_item;
-
-uniform sampler2D SCREEN_TEXTURE : hint_screen_texture, filter_linear_mipmap;
-uniform float blur_amount : hint_range(0.0, 10.0) = 3.0;
-uniform int iterations : hint_range(1, 10) = 5;
-
-void fragment() {
-	vec2 pixel_size = SCREEN_PIXEL_SIZE;
-	vec4 color = vec4(0.0);
-	float total_weight = 0.0;
-	
-	for (int x = -iterations; x <= iterations; x++) {
-		for (int y = -iterations; y <= iterations; y++) {
-			float weight = exp(-float(x * x + y * y) / (2.0 * blur_amount * blur_amount));
-			color += textureLod(SCREEN_TEXTURE, SCREEN_UV + vec2(float(x), float(y)) * pixel_size * blur_amount, 0.0) * weight;
-			total_weight += weight;
-		}
-	}
-	
-	COLOR = color / total_weight;
-}"
-
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_7amkf"]
-shader = SubResource("Shader_sebwa")
+shader = ExtResource("flou_fond_1")
 shader_parameter/blur_amount = 2.246000106685
-shader_parameter/iterations = 5
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_35hhg"]
 size = Vector2(222, 321)

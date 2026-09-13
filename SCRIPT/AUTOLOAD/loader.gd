@@ -122,6 +122,7 @@ func _continue_preloading() -> void:
 			print("[LOAD] scène finale instanciée, remplacement…")
 			replace_scene_in_viewport(scene)
 			save_scene()
+			Warmup.chauffer_arbre(scene, "niveau")
 		else:
 			push_error("[LOAD] la ressource chargée n’est pas un PackedScene ! ")
 	else:
@@ -131,6 +132,7 @@ func _continue_preloading() -> void:
 func _basculer(scene: Node) -> void:
 	replace_scene_in_viewport(scene)
 	save_scene()
+	Warmup.chauffer_arbre(scene, "niveau")
 
 
 # ------------------------------------------------------------------

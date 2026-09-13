@@ -55,6 +55,8 @@ func _instantiate_player(spawn_pos) -> CharacterBody2D:
 	if spawn_pos != null:
 		player_body.global_position = spawn_pos
 	parent.add_child(player_body)
+	# pré-compile ses shaders internes (slash d'attaque…) avant le premier coup
+	Warmup.chauffer_arbre(player_body, "joueur")
 
 	var camera: Camera2D = CAMERA_SCENE.instantiate()
 	camera.add_to_group("Camera")

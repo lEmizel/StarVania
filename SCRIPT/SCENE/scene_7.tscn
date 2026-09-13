@@ -34,34 +34,11 @@
 [ext_resource type="Texture2D" uid="uid://v3lsa27hl6tt" path="res://MEDIA/tuto/Roll.png" id="32_povf7"]
 [ext_resource type="Texture2D" uid="uid://dnqfwrxt81yxt" path="res://MEDIA/tuto/Wall_jump.png" id="33_m35ik"]
 [ext_resource type="Texture2D" uid="uid://bennv6y5dc2kx" path="res://MEDIA/tuto/Wall_run.png" id="34_w0c1q"]
-
-[sub_resource type="Shader" id="Shader_1af6x"]
-code = "shader_type canvas_item;
-
-uniform sampler2D SCREEN_TEXTURE : hint_screen_texture, filter_linear_mipmap;
-uniform float blur_amount : hint_range(0.0, 10.0) = 3.0;
-uniform int iterations : hint_range(1, 10) = 5;
-
-void fragment() {
-	vec2 pixel_size = SCREEN_PIXEL_SIZE;
-	vec4 color = vec4(0.0);
-	float total_weight = 0.0;
-	
-	for (int x = -iterations; x <= iterations; x++) {
-		for (int y = -iterations; y <= iterations; y++) {
-			float weight = exp(-float(x * x + y * y) / (2.0 * blur_amount * blur_amount));
-			color += textureLod(SCREEN_TEXTURE, SCREEN_UV + vec2(float(x), float(y)) * pixel_size * blur_amount, 0.0) * weight;
-			total_weight += weight;
-		}
-	}
-	
-	COLOR = color / total_weight;
-}"
+[ext_resource type="Shader" path="res://SCRIPT/SHADER/flou_fond.gdshader" id="flou_fond_1"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_7r4m0"]
-shader = SubResource("Shader_1af6x")
+shader = ExtResource("flou_fond_1")
 shader_parameter/blur_amount = 2.246000106685
-shader_parameter/iterations = 5
 
 [node name="scene_7" type="Node2D" unique_id=1316744881]
 

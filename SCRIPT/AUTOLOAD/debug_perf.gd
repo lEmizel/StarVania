@@ -4,10 +4,16 @@ extends Node
 ##
 ## Toggle : F3 au clavier, bouton Share (bouton 4) à la manette. Caché au boot.
 ## Chaque frame plus longue que SEUIL_PIC_MS est journalisée avec sa
-## répartition — script (process), physique, reste (rendu GPU / attente de
-## l'écran) — plus la scène et l'état du joueur à cet instant : on sait QUOI
-## accuser au lieu de deviner. Le journal va aussi dans user://logs/godot.log
-## (Mac : ~/Library/Application Support/Godot/app_userdata/SMILE_STAR/logs/).
+## répartition :
+##   nœuds     = _process de tous les nœuds de la scène (scripts, tweens…)
+##   physique  = pas de physique (_physics_process + moteur)
+##   rendu CPU = préparation du rendu sur le CPU
+##   GPU       = temps GPU réel de la frame précédente (0 si non mesurable)
+##   attente   = le reste : attente du GPU / de l'écran / du pilote
+##               (compilation de shader = gros pic ICI)
+## plus la scène et l'état du joueur à cet instant. Le journal va aussi dans
+## user://logs/godot.log (Mac : ~/Library/Application Support/Godot/
+## app_userdata/SMILE_STAR/logs/).
 ##
 ## À RETIRER après la démo : supprimer ce fichier + la ligne DebugPerf dans
 ## les autoloads de project.godot.
@@ -18,7 +24,10 @@ const INTERVALLE_AFFICHAGE := 0.5   # s entre deux rafraîchissements du texte
 
 var _layer: CanvasLayer
 var _label: Label
+var _vp: RID
 var _dernier_usec := 0
+var _debut_noeuds_usec := 0
+var _noeuds_ms := 0.0
 var _cumul_ms := 0.0
 var _nb_frames := 0
 var _max_ms := 0.0
@@ -27,6 +36,9 @@ var _pics := 0
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
+	_vp = get_viewport().get_viewport_rid()
+	RenderingServer.viewport_set_measure_render_time(_vp, true)
+	get_tree().process_frame.connect(_fin_des_noeuds)
 
 	_layer = CanvasLayer.new()
 	_layer.layer = 150
@@ -43,8 +55,9 @@ func _ready() -> void:
 	_layer.add_child(_label)
 
 	_dernier_usec = Time.get_ticks_usec()
-	print("[PERF] écran %s | physique %d Hz | vsync %s | max_fps %d | fenêtre %s" % [
-		_hz(), Engine.physics_ticks_per_second, _vsync(), Engine.max_fps, _mode_fenetre()])
+	print("[PERF] écran %s | physique %d Hz | vsync %s | max_fps %d | fenêtre %s | %s" % [
+		_hz(), Engine.physics_ticks_per_second, _vsync(), Engine.max_fps, _mode_fenetre(),
+		RenderingServer.get_video_adapter_name()])
 
 
 func _input(event: InputEvent) -> void:
@@ -59,20 +72,25 @@ func _input(event: InputEvent) -> void:
 			_rafraichir()
 
 
+# DebugPerf est le dernier autoload : son _process tourne juste avant ceux de la
+# scène ; process_frame est émis quand tous les nœuds ont fini → durée "nœuds"
 func _process(_delta: float) -> void:
 	var maintenant := Time.get_ticks_usec()
 	var ms := (maintenant - _dernier_usec) / 1000.0
 	_dernier_usec = maintenant
+	_debut_noeuds_usec = maintenant
 	_cumul_ms += ms
 	_nb_frames += 1
 	_max_ms = maxf(_max_ms, ms)
 
 	if ms > SEUIL_PIC_MS:
 		_pics += 1
-		var script_ms := Performance.get_monitor(Performance.TIME_PROCESS) * 1000.0
 		var phys_ms := Performance.get_monitor(Performance.TIME_PHYSICS_PROCESS) * 1000.0
-		print("[PERF] pic %.0f ms → script %.1f | physique %.1f | rendu/écran %.0f  (%s)" % [
-			ms, script_ms, phys_ms, maxf(ms - script_ms - phys_ms, 0.0), _contexte()])
+		var rendu_cpu := RenderingServer.viewport_get_measured_render_time_cpu(_vp)
+		var gpu := RenderingServer.viewport_get_measured_render_time_gpu(_vp)
+		print("[PERF] pic %.0f ms → nœuds %.1f | physique %.1f | rendu CPU %.1f | GPU %.1f | attente %.0f  (%s)" % [
+			ms, _noeuds_ms, phys_ms, rendu_cpu, gpu,
+			maxf(ms - _noeuds_ms - phys_ms - rendu_cpu, 0.0), _contexte()])
 
 	if _cumul_ms >= INTERVALLE_AFFICHAGE * 1000.0:
 		if _layer.visible:
@@ -82,6 +100,10 @@ func _process(_delta: float) -> void:
 		_max_ms = 0.0
 
 
+func _fin_des_noeuds() -> void:
+	_noeuds_ms = (Time.get_ticks_usec() - _debut_noeuds_usec) / 1000.0
+
+
 func _rafraichir() -> void:
 	var fps := 0.0
 	if _cumul_ms > 0.0:
@@ -89,6 +111,11 @@ func _rafraichir() -> void:
 	var moyenne := _cumul_ms / maxi(_nb_frames, 1)
 	_label.text = "FPS %.0f  |  frame moy %.1f ms  max %.1f ms  |  pics > %d ms : %d\n" % [
 			fps, moyenne, _max_ms, int(SEUIL_PIC_MS), _pics] \
+		+ "nœuds %.1f ms  |  physique %.1f ms  |  rendu CPU %.1f ms  |  GPU %.1f ms\n" % [
+			_noeuds_ms,
+			Performance.get_monitor(Performance.TIME_PHYSICS_PROCESS) * 1000.0,
+			RenderingServer.viewport_get_measured_render_time_cpu(_vp),
+			RenderingServer.viewport_get_measured_render_time_gpu(_vp)] \
 		+ "écran %s  |  physique %d Hz  |  vsync %s  |  fenêtre %s\n" % [
 			_hz(), Engine.physics_ticks_per_second, _vsync(), _mode_fenetre()] \
 		+ "VRAM %.0f Mo (textures %.0f Mo)  |  RAM statique %.0f Mo  |  draw calls %d  |  nœuds %d\n" % [
@@ -101,9 +128,10 @@ func _rafraichir() -> void:
 
 
 func _contexte() -> String:
-	var scene := "menu"
-	if Loader._target_scene_path != "":
-		scene = Loader._target_scene_path.get_file()
+	var scene := "?"
+	var holder := get_tree().get_first_node_in_group("MAIN_SCENE")
+	if holder != null and holder.get_child_count() > 0:
+		scene = holder.get_child(holder.get_child_count() - 1).scene_file_path.get_file()
 	var etat := "-"
 	var joueur := get_tree().get_first_node_in_group("Player")
 	if joueur != null and "current_state" in joueur:
