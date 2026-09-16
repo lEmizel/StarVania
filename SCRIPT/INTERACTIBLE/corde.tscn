@@ -1,0 +1,36 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://SCRIPT/INTERACTIBLE/corde.gd" id="1_corde"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_boite"]
+size = Vector2(50, 50)
+
+[node name="Corde" type="Node2D"]
+script = ExtResource("1_corde")
+
+[node name="Ancre" type="StaticBody2D" parent="."]
+collision_layer = 3
+collision_mask = 3
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Ancre"]
+shape = SubResource("RectangleShape2D_boite")
+
+[node name="Boite" type="Polygon2D" parent="Ancre"]
+color = Color(0.55, 0.55, 0.58, 1)
+polygon = PackedVector2Array(-25, -25, 25, -25, 25, 25, -25, 25)
+
+[node name="Attache" type="Marker2D" parent="Ancre"]
+position = Vector2(0, 25)
+
+[node name="Ligne" type="Line2D" parent="."]
+z_index = 1
+width = 6.0
+default_color = Color(0.47, 0.3, 0.16, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="Zone" type="Area2D" parent="."]
+collision_layer = 0
+collision_mask = 11
+monitorable = false

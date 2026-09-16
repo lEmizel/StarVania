@@ -1108,8 +1108,43 @@ shader_parameter/hue_tolerance_c = 0.06
 z_index = 1
 collision_mask = 3
 script = ExtResource("1_gvikp")
+GROUND_SPEED_ATTACK = null
 MAX_HEARTS = 3
+GRIP_COYOTE_TIME = null
+ENV_KNOCK_Y = null
+FALL_DAMAGE_ENABLED = null
 JUMP_VELOCITY = -750.0
+double_jump_enabled = null
+DOUBLE_JUMP_VELOCITY = null
+WALL_JUMP_PUSH_X = null
+WALL_JUMP_LOCK_TIME = null
+WALL_JUMP_DJ_GRACE = null
+ECHELLE_SPEED = null
+ECHELLE_TOP_OFFSET = null
+ECHELLE_CHAIN_REACH = null
+ECHELLE_BELOW_REACH = null
+ECHELLE_GRAB_SINK = null
+air_dash_enabled = null
+DASH_SPEED = null
+DASH_DURATION = null
+HEAL_COST = null
+HEAL_AMOUNT = null
+BLOODBALL_CAST_TIME = null
+BLOODBALL_COST = null
+HIT_STUN_TIME = null
+HIT_KNOCK_X = null
+HIT_KNOCK_Y = null
+HIT_X_DAMP = null
+CORDE_SAUT_IMPULSION = null
+GRAPPIN_ACCEL = null
+GRAPPIN_VITESSE_MAX = null
+GRAPPIN_DUREE_MIN = null
+GRAPPIN_AMORT_DERIVE = null
+GRAPPIN_CABLE_DUREE = null
+GRAPPIN_ELAN_Y = null
+GRAPPIN_ELAN_X = null
+GRAPPIN_PORTEE = null
+GRAPPIN_ANGLE_MAX = null
 
 [node name="POINT" type="Node2D" parent="." unique_id=984331396]
 
@@ -1191,6 +1226,9 @@ collide_with_areas = true
 [node name="ANCRE_SOL_BACK" type="Node2D" parent="POINT" unique_id=444125161]
 visible = false
 position = Vector2(-37, -29)
+
+[node name="ANCRE_GRAPPIN" type="Marker2D" parent="POINT" unique_id=171803666]
+position = Vector2(38, -113)
 
 [node name="ANCRE_SOL" type="Node2D" parent="POINT" unique_id=1280331426]
 visible = false

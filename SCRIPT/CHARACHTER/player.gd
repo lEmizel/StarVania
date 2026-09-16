@@ -1,7 +1,7 @@
 extends CharacterBody2D
 
 
-enum States { IDLE, RUN, CHUTE, JUMP, WALL_GRIFFE, WALL_JUMP, CLIMB, ROLL, CHUTE_GRIFFE, GRAB, ATTACK_LIGHT_1, ATTACK_LIGHT_2, ATTACK_LIGHT_3, ATTACK_AIR, ATTACK_LOURDE, DEAD, HIT, HEAL, DROP, BLOODBALL, ECHELLE, DASH }
+enum States { IDLE, RUN, CHUTE, JUMP, WALL_GRIFFE, WALL_JUMP, CLIMB, ROLL, CHUTE_GRIFFE, GRAB, ATTACK_LIGHT_1, ATTACK_LIGHT_2, ATTACK_LIGHT_3, ATTACK_AIR, ATTACK_LOURDE, DEAD, HIT, HEAL, DROP, BLOODBALL, ECHELLE, DASH, CORDE, GRAPPIN }
 
 
 
@@ -121,6 +121,9 @@ func _physics_process(delta: float) -> void:
 		velocity.x = _knock.x
 	move_and_slide()
 	_decay_knockback(delta)
+	_corde_cooldown = maxf(_corde_cooldown - delta, 0.0)
+	_grappin_cooldown = maxf(_grappin_cooldown - delta, 0.0)
+	_grappin_scanner()
 
 
 var _knock := Vector2.ZERO
@@ -156,6 +159,9 @@ func _input(event):
 	# DEBUG spell : l'événement arrive-t-il jusqu'au player, et dans quel état ?
 	if event.is_action_pressed("spell"):
 		print("[SPELL] événement reçu — état=", States.keys()[current_state])
+	# GRAPPIN : touche dédiée, valable dans les états listés (sol et air)
+	if event.is_action_pressed("grapin") and _try_grappin():
+		return
 	if state_functions[current_state].has("input"):
 		state_functions[current_state]["input"].call(event)
 
@@ -574,6 +580,16 @@ func jump_enter():
 		velocity.x = 0.0
 		_climb_auto_exit = false
 		_jump_timer = MAX_JUMP_HOLD  # ← désactive le hold, gravité normale immédiate
+	elif _grappin_pending:
+		# catapulte du grappin : vitesse imposée, gravité normale, pas de hold
+		_grappin_pending = false
+		velocity = _grappin_velocite
+		_jump_timer = MAX_JUMP_HOLD
+	elif _corde_pending:
+		# lâcher de corde : l'élan du balancier + une impulsion, gravité normale
+		_corde_pending = false
+		velocity = _corde_velocite_sortie
+		_jump_timer = MAX_JUMP_HOLD
 	elif _dj_pending:
 		_dj_pending = false
 		velocity.y = DOUBLE_JUMP_VELOCITY
@@ -690,7 +706,7 @@ func chute_enter() -> void:
 	# ET dans tous ces cas : tomber sans avoir sauté ne coûte jamais le
 	# saut simple — il reste disponible toute la chute (_walkoff_jump)
 	if previous_state in [States.WALL_GRIFFE, States.CHUTE_GRIFFE,
-		States.CLIMB, States.GRAB, States.ECHELLE, States.WALL_JUMP]:
+		States.CLIMB, States.GRAB, States.ECHELLE, States.WALL_JUMP, States.CORDE]:
 		_coyote_timer = GRIP_COYOTE_TIME
 		_walkoff_jump = true
 	elif previous_state in [States.RUN, States.IDLE]:
@@ -1965,4 +1981,287 @@ func drop_execute(delta: float) -> void:
 
 func drop_exit() -> void:
 	set_collision_mask_value(ONEWAY_LAYER, true)
+#endregion
+
+
+# =====================  CORDE (balancier)  ===========================
+#region CORDE
+## Corde suspendue (SCRIPT/INTERACTIBLE/corde.tscn). Quand le joueur la
+## touche en l'air, la corde appelle saisir_corde() ; c'est le joueur qui
+## accepte selon son état. Le balancier est un pendule rigide simulé par la
+## corde, le joueur y pend par ANCRE_GRAB. Stick = on pompe en rythme,
+## haut/bas = on grimpe/descend, saut = on se lâche avec l'élan (+ impulsion),
+## esquive = on se laisse tomber. Toute accroche recharge double saut et dash.
+
+const CORDE_COOLDOWN := 0.35             # s avant de pouvoir reprendre une corde
+## impulsion verticale ajoutée à l'élan quand on saute de la corde
+@export var CORDE_SAUT_IMPULSION: float = -450.0
+var _corde: Node2D = null
+var _corde_cooldown := 0.0
+var _corde_pending := false
+var _corde_velocite_sortie := Vector2.ZERO
+
+
+## Appelé par la corde qui touche le joueur. Retourne true s'il s'y accroche.
+func saisir_corde(corde: Node2D) -> bool:
+	if corde == null or _corde_cooldown > 0.0:
+		return false
+	if not (current_state in [States.JUMP, States.CHUTE, States.DASH, States.ATTACK_AIR]):
+		return false
+	_corde = corde
+	change_state(States.CORDE)
+	return true
+
+
+func corde_enter() -> void:
+	_recharge_air_moves()
+	_corde.saisir(self, ancre_grab.global_position, velocity)
+	velocity = Vector2.ZERO
+	animator.play("suspendu")
+
+
+func corde_execute(delta: float) -> void:
+	if _corde == null or not is_instance_valid(_corde):
+		change_state(States.CHUTE)
+		return
+	FALL_POINT = global_position.y   # appui légitime : suspendu
+	var axe := Input.get_axis("left_move", "right_move")
+	var grimpe := Input.get_axis("down_move", "up_move")
+	var main: Vector2 = _corde.simuler_balancier(delta, axe, grimpe)
+	# le perso pend par la main : le corps se place pour que ANCRE_GRAB soit sur la corde
+	global_position = main - (ancre_grab.global_position - global_position)
+	velocity = Vector2.ZERO
+	# pas de retournement au gré du balancier (trop étrange) : le perso garde
+	# le regard qu'il avait en attrapant la corde
+
+
+func corde_input(_event: InputEvent) -> void:
+	if _fresh_press("jump"):
+		_corde_velocite_sortie = _corde.vitesse_main()
+		_corde_velocite_sortie.y = minf(_corde_velocite_sortie.y, 0.0) + CORDE_SAUT_IMPULSION
+		_corde_pending = true
+		change_state(States.JUMP)
+		return
+	if Input.is_action_just_pressed("esquive"):
+		velocity = _corde.vitesse_main()   # on se laisse tomber avec l'élan
+		change_state(States.CHUTE)
+
+
+func corde_exit() -> void:
+	if _corde != null and is_instance_valid(_corde):
+		_corde.lacher()
+	_corde = null
+	_corde_cooldown = CORDE_COOLDOWN
+#endregion
+
+
+# =====================  GRAPPIN  ===========================
+#region GRAPPIN
+## Grappin (touche "grapin") vers une accroche (SCRIPT/INTERACTIBLE/
+## accroche_grappin.tscn, groupe GRAPPIN). Pas de zone : comme Batman, Sekiro
+## ou Ori, le joueur scanne chaque pas de physique les accroches à portée
+## (GRAPPIN_PORTEE), au-dessus de lui (GRAPPIN_ANGLE_MAX depuis la verticale)
+## et sans mur entre sa main et le point (rayon sur la couche 1) ; la plus
+## proche prenable s'allume, R1 y envoie le grappin :
+##   1) LANCER : le câble file de la main au point, le joueur est figé ;
+##   2) TIRER  : le joueur est hissé d'un trait jusqu'au point (main dessus) ;
+##   3) arrivé : catapulte au-dessus du point, grappin détaché, double saut
+##      et dash rechargés. Aucune suspension. Un coup reçu interrompt tout
+##      (le câble est caché par grappin_exit).
+
+@export var GRAPPIN_ACCEL: float = 5000.0        ## force de traction MAX du câble (px/s²), la gravité tire contre
+@export var GRAPPIN_VITESSE_MAX: float = 1600.0  ## vitesse plafond de la traction (px/s)
+## durée minimale d'une traction (s) : une accroche toute proche est hissée
+## aussi lentement qu'une lointaine — l'accélération est calculée pour ça
+@export var GRAPPIN_DUREE_MIN: float = 0.4
+## amortissement par seconde de l'élan perpendiculaire au câble (anti-orbite)
+@export var GRAPPIN_AMORT_DERIVE: float = 10.0
+var _grappin_accel := 0.0   # accélération effective de la traction en cours
+@export var GRAPPIN_CABLE_DUREE: float = 0.08    ## temps de vol du câble (s)
+@export var GRAPPIN_ELAN_Y: float = -1500.0      ## catapulte verticale à l'arrivée (saut normal = -700)
+@export var GRAPPIN_ELAN_X: float = 250.0        ## élan horizontal, dans le sens de l'approche
+@export var GRAPPIN_PORTEE: float = 520.0        ## distance max main → accroche (px) — +15 % le 16 sept.
+@export var GRAPPIN_ANGLE_MAX: float = 75.0      ## écart max à la verticale, en degrés (l'accroche doit être au-dessus)
+const GRAPPIN_COOLDOWN := 0.3
+## animations (SpriteFrames du joueur) : si elles existent, elles sont
+## jouées — le vol du câble dure alors exactement l'anim de lancer ;
+## sinon repli sur "jump" et GRAPPIN_CABLE_DUREE
+const ANIM_GRAPPIN_LANCER := "grappin_lancer"       # non bouclée : le bras part, le câble file
+const ANIM_GRAPPIN_ACCROCHE := "grappin_accroche"   # bouclée : hissé le long du câble
+var _grappin_candidat: Node2D = null   # accroche prenable ce pas-ci (allumée)
+var _grappin_duree_cable := 0.08       # durée effective du vol du câble (anim ou export)
+## d'où part le câble : un Marker2D "ANCRE_GRAPPIN" sous POINT, à placer sur la
+## main de l'anim de lancer (déplaçable dans l'éditeur) ; à défaut, l'ancre de grab
+@onready var ancre_grappin: Node2D = get_node_or_null("POINT/ANCRE_GRAPPIN")
+
+
+func _main_grappin() -> Vector2:
+	if ancre_grappin != null:
+		return ancre_grappin.global_position
+	return ancre_grab.global_position
+const ETATS_GRAPPIN_OK := [States.IDLE, States.RUN, States.JUMP, States.CHUTE, States.DASH, States.ATTACK_AIR]
+var _grappin_cible: Node2D = null
+var _grappin_cooldown := 0.0
+var _grappin_t := 0.0
+var _grappin_tire := false
+var _grappin_dir := 1
+var _grappin_pending := false
+var _grappin_velocite := Vector2.ZERO
+
+
+## Chaque pas de physique : quelle accroche est prenable ? À portée, au-dessus,
+## et rien entre la main et le point. La plus proche s'allume, les autres
+## s'éteignent. Quelques rayons par frame au plus : les accroches d'un niveau
+## se comptent sur les doigts d'une main.
+func _grappin_scanner() -> void:
+	var meilleure: Node2D = null
+	if current_state in ETATS_GRAPPIN_OK and _grappin_cooldown <= 0.0:
+		var main := _main_grappin()
+		var d_min := INF
+		var espace := get_world_2d().direct_space_state
+		var lim := deg_to_rad(GRAPPIN_ANGLE_MAX)
+		for a in get_tree().get_nodes_in_group("GRAPPIN"):
+			if not (a is Node2D and a.has_method("point")):
+				continue
+			var cible: Vector2 = a.point()
+			var v := cible - main
+			var d := v.length()
+			if d > GRAPPIN_PORTEE or d < 20.0 or v.y > -10.0:
+				continue                       # trop loin, trop près, ou pas au-dessus
+			if absf(atan2(v.x, -v.y)) > lim:
+				continue                       # trop sur le côté
+			if d >= d_min:
+				continue
+			# rien entre la main et le point ? (murs solides seulement)
+			var q := PhysicsRayQueryParameters2D.create(main, cible, 1)
+			q.exclude = [get_rid()]
+			if espace.intersect_ray(q).is_empty():
+				d_min = d
+				meilleure = a
+	if meilleure != _grappin_candidat:
+		if _grappin_candidat != null and is_instance_valid(_grappin_candidat):
+			_grappin_candidat.surligner(false)
+		_grappin_candidat = meilleure
+		if _grappin_candidat != null:
+			_grappin_candidat.surligner(true)
+
+
+## Touche "grapin" : part vers l'accroche allumée. Retourne true si le grappin part.
+func _try_grappin() -> bool:
+	if _grappin_candidat == null or not is_instance_valid(_grappin_candidat):
+		return false
+	_grappin_cible = _grappin_candidat
+	_grappin_candidat.surligner(false)
+	_grappin_candidat = null
+	change_state(States.GRAPPIN)
+	return true
+
+
+func grappin_enter() -> void:
+	velocity.x = 0.0                 # on garde (un peu de) la chute en cours : le poids
+	velocity.y = clampf(velocity.y, 0.0, 300.0)
+	_recharge_air_moves()
+	_grappin_t = 0.0
+	_grappin_tire = false
+	# on regarde vers le point ; l'élan final partira de ce côté
+	var dx: float = _grappin_cible.point().x - global_position.x
+	if absf(dx) > 8.0:
+		_grappin_dir = 1 if dx > 0.0 else -1
+	else:
+		_grappin_dir = last_direction
+	last_direction = _grappin_dir
+	point.scale.x = _grappin_dir
+	_grappin_duree_cable = maxf(GRAPPIN_CABLE_DUREE, 0.001)
+	if _anim_existe(ANIM_GRAPPIN_LANCER):
+		animator.play(ANIM_GRAPPIN_LANCER)
+		_grappin_duree_cable = maxf(_anim_duree(ANIM_GRAPPIN_LANCER), 0.001)
+	else:
+		animator.play("jump")
+
+
+## l'animation existe-t-elle dans les SpriteFrames du joueur ?
+func _anim_existe(nom: String) -> bool:
+	return animator.sprite_frames != null and animator.sprite_frames.has_animation(nom)
+
+
+## durée totale d'une animation (s), frames à durées variables comprises
+func _anim_duree(nom: String) -> float:
+	var sf = animator.sprite_frames
+	if sf == null or not sf.has_animation(nom):
+		return 0.0
+	var fps := maxf(sf.get_animation_speed(nom), 0.001)
+	var total := 0.0
+	for i in sf.get_frame_count(nom):
+		total += sf.get_frame_duration(nom, i) / fps
+	return total
+
+
+func grappin_execute(delta: float) -> void:
+	if _grappin_cible == null or not is_instance_valid(_grappin_cible):
+		change_state(States.CHUTE)
+		return
+	FALL_POINT = global_position.y
+	var cible: Vector2 = _grappin_cible.point()
+	var main := _main_grappin()
+	if not _grappin_tire:
+		# 1) le câble file vers le point ; le joueur, lui, continue de tomber :
+		#    c'est son poids qu'on sent pendant ce court instant
+		velocity.x = 0.0
+		velocity.y += gravity * delta
+		_grappin_t += delta
+		var t := clampf(_grappin_t / _grappin_duree_cable, 0.0, 1.0)
+		_grappin_cible.cable_montrer(main, main.lerp(cible, t))
+		if t >= 1.0:
+			_grappin_tire = true
+			if _anim_existe(ANIM_GRAPPIN_ACCROCHE):
+				animator.play(ANIM_GRAPPIN_ACCROCHE)
+			# accélération taillée sur la distance : une traction courte doit
+			# durer GRAPPIN_DUREE_MIN elle aussi (d = ½·a·t² → a = 2d/t²),
+			# la gravité étant compensée, et jamais plus que GRAPPIN_ACCEL
+			var d0 := (cible - main).length()
+			var t_min := maxf(GRAPPIN_DUREE_MIN, 0.05)
+			# + de quoi annuler la chute en cours dans le même temps
+			var chute := maxf(velocity.y, 0.0)
+			_grappin_accel = clampf(2.0 * d0 / (t_min * t_min) + gravity + chute / t_min,
+				gravity * 1.5, GRAPPIN_ACCEL)
+		return
+	# 2) traction PHYSIQUE : le câble accélère la main vers le point pendant
+	#    que la gravité tire vers le bas → léger affaissement au départ, puis
+	#    montée qui prend de la vitesse (treuil qui hisse un corps). Le
+	#    déplacement passe par move_and_slide : un mur arrête net.
+	var dest := cible - (main - global_position)
+	var vers := dest - global_position
+	var dist := vers.length()
+	if dist > 0.001:
+		var u := vers / dist
+		# l'élan HORS de l'axe du câble est amorti : sans ça, un élan latéral
+		# fait rater le point de peu et on tourne autour comme un satellite
+		var v_axe := velocity.dot(u)
+		var v_perp := velocity - u * v_axe
+		v_perp *= maxf(0.0, 1.0 - GRAPPIN_AMORT_DERIVE * delta)
+		velocity = u * v_axe + v_perp
+		velocity += u * _grappin_accel * delta
+	velocity.y += gravity * delta
+	velocity = velocity.limit_length(GRAPPIN_VITESSE_MAX)
+	_grappin_cible.cable_montrer(main, cible)
+	# arrivée : à portée d'un pas, main au niveau du point ou au-dessus (point
+	# dépassé, on ne tourne JAMAIS autour), ou point dépassé de peu à l'approche
+	# — jamais au départ : en l'air on tombe encore quelques frames
+	var pas := velocity.length() * delta
+	var a_portee := dist <= maxf(20.0, pas * 1.1)
+	var depasse := main.y <= cible.y + 6.0 or (dist < pas * 2.0 and vers.dot(velocity) < 0.0)
+	if a_portee or depasse:
+		if a_portee:
+			global_position = dest
+		# 3) catapulte au-dessus du point ; jump_enter applique la vitesse
+		_grappin_velocite = Vector2(_grappin_dir * GRAPPIN_ELAN_X, GRAPPIN_ELAN_Y)
+		_grappin_pending = true
+		change_state(States.JUMP)
+
+
+func grappin_exit() -> void:
+	if _grappin_cible != null and is_instance_valid(_grappin_cible):
+		_grappin_cible.cable_cacher()
+	_grappin_cible = null
+	_grappin_cooldown = GRAPPIN_COOLDOWN
 #endregion
