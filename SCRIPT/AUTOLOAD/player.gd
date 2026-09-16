@@ -26,8 +26,18 @@ var hearts_initialized := false
 # chaque respawn (cœurs infinis). Vit le temps de la session ; à brancher
 # sur la vraie sauvegarde disque quand elle existera.
 var coeurs_ramasses := {}
-var sang := 0  # la jauge de sang commence vide (se remplit via les récoltes)
-var MAX_SANG := 195
+# --- Réserve de soin BLOODHEAL : N barres côte à côte, chacune = un soin ---
+## capacité d'UNE barre = le coût d'un soin (HEAL_COST côté player : les deux doivent rester égaux)
+const BARRE_BLOODHEAL := 100
+## plafond de barres possibles (règle-le ici)
+const MAX_BARRES_BLOODHEAL := 4
+## barres possédées au départ d'une partie (1..MAX_BARRES_BLOODHEAL)
+const BARRES_BLOODHEAL_DEPART :=4
+var nb_barres_bloodheal := BARRES_BLOODHEAL_DEPART
+var bloodheal := 0  # réserve courante, remplie COUP PAR COUP, de gauche à droite
+## bloodheal rendu par coup au corps à corps qui porte : 15 % d'une barre
+const BLOODHEAL_PAR_COUP := 15
+var MAX_BLOODHEAL := BARRES_BLOODHEAL_DEPART * BARRE_BLOODHEAL  # dérivé : nb_barres × BARRE, ne pas régler à la main
 
 ## Réinitialise TOUT l'état de partie — appelé par PLAY au menu principal.
 ## Nouvelle partie = page blanche : cœurs ramassés compris.
@@ -36,8 +46,9 @@ func reset_partie() -> void:
 	coeurs_ramasses.clear()
 	hp = 999999  # clampé au max par le _enter_tree du player
 	blood = 0
-	sang = 0
-	MAX_SANG = 195
+	bloodheal = 0
+	nb_barres_bloodheal = BARRES_BLOODHEAL_DEPART
+	MAX_BLOODHEAL = nb_barres_bloodheal * BARRE_BLOODHEAL
 	has_checkpoint = false
 	last_checkpoint_scene = ""
 	last_checkpoint_pos = Vector2.ZERO
@@ -53,13 +64,13 @@ func changement_de_vie(amount: int) -> void:
 	if !bars.is_empty():
 		bars[0].emit_signal("health_request", float(delta))
 
-func changement_de_sang(amount: int) -> void:
-	var old := sang
-	sang = clamp(sang + amount, 0, MAX_SANG)
-	var delta := sang - old
-	var bars := get_tree().get_nodes_in_group("UI_Sang")
+func changement_de_bloodheal(amount: int) -> void:
+	var old := bloodheal
+	bloodheal = clamp(bloodheal + amount, 0, MAX_BLOODHEAL)
+	var delta := bloodheal - old
+	var bars := get_tree().get_nodes_in_group("UI_Bloodheal")
 	if !bars.is_empty():
-		bars[0].emit_signal("sang_request", float(delta))
+		bars[0].emit_signal("bloodheal_request", float(delta))
 
 func changement_de_blood(amount: int) -> void:
 	if amount == 0:
@@ -93,21 +104,32 @@ func set_max_hp(new_max: int) -> void:
 func add_max_hp(delta: int) -> void:
 	set_max_hp(MAX_HP + delta)  # <-- aucune mise à l’échelle
 
-# --- MAX SANG ---
-func set_max_sang(new_max: int) -> void:
-	new_max = max(1, new_max)
-	if new_max == MAX_SANG:
+# --- BARRES DE BLOODHEAL (capacité max = nombre de barres × un soin) ---
+## Fixe le nombre de barres (1..MAX_BARRES_BLOODHEAL) ; la capacité suit et
+## le HUD reconstruit la rangée. La réserve courante est conservée (clampée).
+func set_nb_barres_bloodheal(n: int) -> void:
+	n = clampi(n, 1, MAX_BARRES_BLOODHEAL)
+	var new_max := n * BARRE_BLOODHEAL
+	if n == nb_barres_bloodheal and new_max == MAX_BLOODHEAL:
 		return
-	var old_sang := sang
-	MAX_SANG = new_max
-	sang = min(old_sang, MAX_SANG)
+	nb_barres_bloodheal = n
+	MAX_BLOODHEAL = new_max
+	bloodheal = min(bloodheal, MAX_BLOODHEAL)
 
-	var ui := get_tree().get_nodes_in_group("UI_Sang")
+	var ui := get_tree().get_nodes_in_group("UI_Bloodheal")
 	if not ui.is_empty():
-		ui[0].emit_signal("bar_max_request", "sang", float(MAX_SANG))
+		ui[0].emit_signal("bar_max_request", "bloodheal", float(MAX_BLOODHEAL))
 
-func add_max_sang(delta: int) -> void:
-	set_max_sang(MAX_SANG + delta)
+## +1 barre (pickup, récompense…)
+func add_barre_bloodheal(delta: int = 1) -> void:
+	set_nb_barres_bloodheal(nb_barres_bloodheal + delta)
+
+## compatibilité : une capacité brute est arrondie au nombre de barres entier
+func set_max_bloodheal(new_max: int) -> void:
+	set_nb_barres_bloodheal(int(round(float(new_max) / float(BARRE_BLOODHEAL))))
+
+func add_max_bloodheal(delta: int) -> void:
+	set_max_bloodheal(MAX_BLOODHEAL + delta)
 
 
 #Player.add_max_sang(50)        # +50 de capacité de jauge de sang (la barre s'allonge)

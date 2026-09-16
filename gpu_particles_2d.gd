@@ -22,7 +22,7 @@ extends CPUParticles2D
 @export var max_speed_growth: float = 900.0   ## la vitesse max grandit avec le temps de poursuite
 @export var catch_distance: float = 24.0
 
-@export var gauge_fill: int = 25   ## points ajoutés à la jauge de sang à l'arrivée
+@export var gauge_fill: int = 0    ## bloodheal à l'arrivée — 0 depuis sept. 2026 : c'est le COUP qui recharge, plus le kill
 @export var blood_reward: int = 100  ## blood (monnaie) crédité à l'arrivée
 
 enum Phase { WAIT, SEEK, LINGER, FADE }
@@ -133,6 +133,7 @@ func _start_fade() -> void:
 	_tween.tween_property(self, "self_modulate:a", 0.0, fade_duration)
 	_tween.finished.connect(func () -> void:
 		Player.changement_de_blood(blood_reward)
-		Player.changement_de_sang(gauge_fill)  # remplit la jauge de sang
+		if gauge_fill > 0:
+			Player.changement_de_bloodheal(gauge_fill)
 		Pool.rendre_sang(get_parent() as Node2D)  # retour au pool, jamais de queue_free
 	)

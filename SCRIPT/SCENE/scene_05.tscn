@@ -98,7 +98,7 @@ position = Vector2(269.49805, -1398)
 
 [node name="SAWBLADE" parent="." unique_id=388117046 instance=ExtResource("10_gugmh")]
 position = Vector2(-280, -1177)
-frame_progress = 0.55961996
+frame_progress = 0.93026215
 position_a = Vector2(-280, -1177)
 position_b = Vector2(-280, -425)
 
@@ -110,6 +110,8 @@ position = Vector2(947, -621)
 
 [node name="AccrocheGrappin" parent="." unique_id=185721196 instance=ExtResource("13_786sa")]
 position = Vector2(-1111, -469)
+portee_indicative = 450.0
 
 [node name="AccrocheGrappin3" parent="." unique_id=1586620410 instance=ExtResource("13_786sa")]
 position = Vector2(-922, -1226)
+portee_indicative = 450.0

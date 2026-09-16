@@ -3,21 +3,32 @@ extends CanvasLayer
 ##
 ## Circuit : l'autoload Player modifie les valeurs (hp / sang) puis notifie
 ## ce HUD via les groupes UI_Health / UI_Sang et les signaux ci-dessous.
-## Personne ne modifie Player.hp ou Player.sang sans passer par l'autoload.
+## Personne ne modifie Player.hp ou Player.bloodheal sans passer par l'autoload.
 
 signal health_request(amount: float)
-signal sang_request(amount: float)
+signal bloodheal_request(amount: float)
 signal bar_max_request(kind: String, new_max: float)
 
 ## Largeur de la jauge de sang : pixels par point de capacité
-@export var SANG_PX_PER_POINT: float = 4.0
+@export var BLOODHEAL_PX_PER_POINT: float = 2.2   # 16 sept. : une barre de 100 ≈ 100 px à l'écran (−35 %)
 ## Durée du tween de la barre fantôme (dépense de sang)
 @export var BACK_TWEEN_DURATION: float = 1.0
 ## Durée de la montée de jauge lors d'un gain de sang (courte = nerveuse)
-@export var SANG_GAIN_TWEEN_DURATION: float = 0.3
+@export var BLOODHEAL_GAIN_TWEEN_DURATION: float = 0.3
 
-@onready var sang_bar: TextureProgressBar = $barre_de_sang
-@onready var sang_back_bar: TextureProgressBar = $Under_sang
+## Espace horizontal (px écran) entre deux barres de bloodheal
+@export var BLOODHEAL_ESPACEMENT: float = 2.0
+## Pixels TRANSPARENTS gauche + droite dans la texture du cadre (mesurés :
+## 21 + 23 sur barre de vie_1.png) : compensés pour que BLOODHEAL_ESPACEMENT
+## soit l'écart réellement visible entre deux barres
+@export var BLOODHEAL_MARGE_TEXTURE: float = 44.0
+
+# gabarits (barre n°1) : les suivantes sont des copies décalées vers la droite,
+# comme les cœurs. Chaque barre vaut exactement un soin (Player.BARRE_BLOODHEAL).
+@onready var bloodheal_bar: TextureProgressBar = $barre_de_bloodheal
+@onready var bloodheal_back_bar: TextureProgressBar = $Under_bloodheal
+var _bh_bars: Array[TextureProgressBar] = []        # fronts, de gauche à droite
+var _bh_back_bars: Array[TextureProgressBar] = []   # fantômes, même ordre
 @onready var _blood_icon: Control = $TextureRect
 @onready var _blood_label: Control = $Label
 
@@ -35,27 +46,23 @@ signal bar_max_request(kind: String, new_max: float)
 # chaque entrée : { "full", "broken", "empty" : TextureRect, "tw" : Tween }
 var _hearts: Array = []
 
-var _max_sang: float
+var _max_bloodheal: float
 
 
 func _ready() -> void:
 	add_to_group("UI_Health")
-	add_to_group("UI_Sang")
+	add_to_group("UI_Bloodheal")
 
-	_max_sang = Player.MAX_SANG
-	for bar in [sang_bar, sang_back_bar]:
-		bar.min_value = 0
-		bar.max_value = _max_sang
-		bar.value = float(Player.sang)
-	print("[UI] ready  Player.sang=", Player.sang, " MAX_SANG=", Player.MAX_SANG,
-		" bar.value=", sang_bar.value, " bar.max=", sang_bar.max_value)
+	_max_bloodheal = Player.MAX_BLOODHEAL
+	_build_bloodheal_bars()
+	print("[UI] ready  Player.bloodheal=", Player.bloodheal, " MAX_BLOODHEAL=", Player.MAX_BLOODHEAL,
+		" barres=", _bh_bars.size())
 
 	_build_hearts()
 
 	connect("health_request", Callable(self, "_on_health_request"))
-	connect("sang_request", Callable(self, "_on_sang_request"))
+	connect("bloodheal_request", Callable(self, "_on_bloodheal_request"))
 	connect("bar_max_request", Callable(self, "_on_bar_max_request"))
-	_apply_sang_bar_max(_max_sang, false)
 
 
 # ==================================================
@@ -147,58 +154,99 @@ func _on_health_request(amount: float) -> void:
 #   via les récoltes de sang des ennemis tués)
 # ==================================================
 
-var _sang_gain_tween: Tween = null
+var _bloodheal_gain_tween: Tween = null
 
-func _on_sang_request(amount: float) -> void:
+## valeur affichée par la barre n°i pour une réserve totale `total`
+## (les barres se remplissent de gauche à droite, chacune jusqu'à un soin)
+func _bh_valeur_barre(i: int, total: float) -> float:
+	var barre := float(Player.BARRE_BLOODHEAL)
+	return clampf(total - barre * float(i), 0.0, barre)
+
+
+func _on_bloodheal_request(amount: float) -> void:
 	# cible = la vérité du singleton (déjà mis à jour), robuste même si un
 	# tween de gain précédent est encore en vol
-	var new_val: float = clampf(float(Player.sang), 0.0, _max_sang)
-	print("[UI] sang_request amount=", amount, " Player.sang=", Player.sang,
-		" bar avant=", sang_bar.value)
-	var old_val: float = sang_bar.value
+	var total: float = clampf(float(Player.bloodheal), 0.0, _max_bloodheal)
+	print("[UI] bloodheal_request amount=", amount, " Player.bloodheal=", Player.bloodheal,
+		" barres=", _bh_bars.size())
+	# On TUE d'abord un éventuel tween de gain en vol : sinon il réécrivait
+	# les barres vers le haut après une dépense (bug de la jauge affichée
+	# pleine après un soin post-récolte)
+	if _bloodheal_gain_tween != null and _bloodheal_gain_tween.is_valid():
+		_bloodheal_gain_tween.kill()
 
 	if amount >= 0.0:
-		# GAIN : montée progressive et rapide, pas de "pop" instantané
-		if _sang_gain_tween != null and _sang_gain_tween.is_valid():
-			_sang_gain_tween.kill()
-		_sang_gain_tween = create_tween() \
-			.set_trans(Tween.TRANS_QUAD) \
-			.set_ease(Tween.EASE_OUT)
-		_sang_gain_tween.tween_property(sang_bar, "value", new_val, SANG_GAIN_TWEEN_DURATION)
-		_sang_gain_tween.parallel().tween_property(sang_back_bar, "value", new_val, SANG_GAIN_TWEEN_DURATION)
-	else:
-		# DÉPENSE : front instant, back suit en tween (effet fantôme).
-		# On TUE d'abord un éventuel tween de gain en vol : sinon il
-		# réécrivait la barre vers le haut après la dépense (bug de la
-		# jauge affichée pleine après un soin post-récolte)
-		if _sang_gain_tween != null and _sang_gain_tween.is_valid():
-			_sang_gain_tween.kill()
-		sang_bar.value = new_val
-		sang_back_bar.value = old_val
-		sang_back_bar.create_tween() \
+		# GAIN : montée progressive et rapide, barre après barre
+		_bloodheal_gain_tween = create_tween() \
 			.set_trans(Tween.TRANS_QUAD) \
 			.set_ease(Tween.EASE_OUT) \
-			.tween_property(sang_back_bar, "value", new_val, BACK_TWEEN_DURATION)
+			.set_parallel(true)
+		for i in _bh_bars.size():
+			var cible := _bh_valeur_barre(i, total)
+			if is_equal_approx(_bh_bars[i].value, cible):
+				continue
+			_bloodheal_gain_tween.tween_property(_bh_bars[i], "value", cible, BLOODHEAL_GAIN_TWEEN_DURATION)
+			_bloodheal_gain_tween.tween_property(_bh_back_bars[i], "value", cible, BLOODHEAL_GAIN_TWEEN_DURATION)
+	else:
+		# DÉPENSE : front instant, fantôme qui suit en tween, barre par barre
+		for i in _bh_bars.size():
+			var cible := _bh_valeur_barre(i, total)
+			var avant: float = _bh_bars[i].value
+			if is_equal_approx(avant, cible):
+				continue
+			_bh_bars[i].value = cible
+			_bh_back_bars[i].value = avant
+			_bh_back_bars[i].create_tween() \
+				.set_trans(Tween.TRANS_QUAD) \
+				.set_ease(Tween.EASE_OUT) \
+				.tween_property(_bh_back_bars[i], "value", cible, BACK_TWEEN_DURATION)
 
 
-## Redimensionne la jauge quand la capacité max change
-## (largeur = marges fixes + SANG_PX_PER_POINT × capacité)
-func _apply_sang_bar_max(new_max: float, tween: bool = true) -> void:
-	_max_sang = new_max
-	for b in [sang_bar, sang_back_bar]:
-		b.max_value = new_max
+## La capacité max a changé (barre gagnée…) : on reconstruit la rangée
+func _apply_bloodheal_bar_max(new_max: float, _tween: bool = true) -> void:
+	_max_bloodheal = new_max
+	_build_bloodheal_bars()
 
-	var cap_sum := float(sang_bar.stretch_margin_left + sang_bar.stretch_margin_right)
-	var w: float = cap_sum + SANG_PX_PER_POINT * new_max
-	for b in [sang_bar, sang_back_bar]:
-		if tween:
-			var t := create_tween()
-			t.tween_property(b, "size", Vector2(w, b.size.y), 0.30)
-		else:
+
+## Construit la rangée de barres : le gabarit + autant de copies que
+## Player.nb_barres_bloodheal − 1, décalées vers la droite. Chaque barre a la
+## largeur d'un soin (marges fixes + BLOODHEAL_PX_PER_POINT × BARRE_BLOODHEAL).
+func _build_bloodheal_bars() -> void:
+	if _bloodheal_gain_tween != null and _bloodheal_gain_tween.is_valid():
+		_bloodheal_gain_tween.kill()
+	# purge les copies d'une construction précédente (on garde les gabarits)
+	for b in _bh_bars:
+		if b != bloodheal_bar:
+			b.queue_free()
+	for b in _bh_back_bars:
+		if b != bloodheal_back_bar:
+			b.queue_free()
+	_bh_bars.clear()
+	_bh_back_bars.clear()
+
+	var barre := float(Player.BARRE_BLOODHEAL)
+	var nb: int = clampi(int(round(_max_bloodheal / barre)), 1, Player.MAX_BARRES_BLOODHEAL)
+	var cap_sum := float(bloodheal_bar.stretch_margin_left + bloodheal_bar.stretch_margin_right)
+	var w: float = cap_sum + BLOODHEAL_PX_PER_POINT * barre          # largeur non mise à l'échelle
+	# décalage écran entre deux barres : largeur VISIBLE (marges transparentes
+	# de la texture déduites) + espacement voulu
+	var pas: float = (w - BLOODHEAL_MARGE_TEXTURE) * bloodheal_bar.scale.x + BLOODHEAL_ESPACEMENT
+
+	for i in nb:
+		var front: TextureProgressBar = bloodheal_bar if i == 0 else bloodheal_bar.duplicate()
+		var back: TextureProgressBar = bloodheal_back_bar if i == 0 else bloodheal_back_bar.duplicate()
+		if i > 0:
+			add_child(back)   # le fantôme d'abord : il reste dessous (z_index -1 copié)
+			add_child(front)
+			front.position.x = bloodheal_bar.position.x + pas * float(i)
+			back.position.x = bloodheal_back_bar.position.x + pas * float(i)
+		for b in [front, back]:
+			b.min_value = 0
+			b.max_value = barre
 			b.size.x = w
-
-	sang_bar.value = float(Player.sang)
-	sang_back_bar.value = float(Player.sang)
+			b.value = _bh_valeur_barre(i, float(Player.bloodheal))
+		_bh_bars.append(front)
+		_bh_back_bars.append(back)
 
 
 # ==================================================
@@ -311,8 +359,8 @@ func _heart_land_pulse() -> void:
 
 
 func _on_bar_max_request(kind: String, new_max: float) -> void:
-	if kind == "sang":
-		_apply_sang_bar_max(new_max, true)
+	if kind == "bloodheal":
+		_apply_bloodheal_bar_max(new_max, true)
 	elif kind == "hp":
 		# le nombre de cœurs max a changé (cœur ramassé…) : on reconstruit
 		# la rangée — _build_hearts lit Player.max_hearts et repeint selon hp
@@ -333,8 +381,11 @@ var _fb_base_x: Dictionary = {}     # node -> position x d'origine
 
 func insufficient_feedback(kind: String) -> void:
 	match kind:
-		"sang":
-			_play_insufficient_feedback([sang_bar, sang_back_bar])
+		"bloodheal":
+			var noeuds: Array = []
+			noeuds.append_array(_bh_bars)
+			noeuds.append_array(_bh_back_bars)
+			_play_insufficient_feedback(noeuds)
 		"blood":
 			_play_insufficient_feedback([_blood_icon, _blood_label])
 

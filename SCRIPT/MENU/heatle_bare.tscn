@@ -59,7 +59,7 @@ offset_transform_scale = Vector2(0.275, 0.275)
 offset_transform_rotation = 3.1415927
 texture = ExtResource("3_l21g5")
 
-[node name="barre_de_sang" type="TextureProgressBar" parent="." unique_id=1384708096]
+[node name="barre_de_bloodheal" type="TextureProgressBar" parent="." unique_id=1384708096]
 offset_left = 69.0
 offset_top = 92.0
 offset_right = 1363.0
@@ -74,7 +74,7 @@ stretch_margin_right = 60
 texture_over = ExtResource("2_thk5q")
 texture_progress = ExtResource("5_meh65")
 
-[node name="Under_sang" type="TextureProgressBar" parent="." unique_id=1671706044]
+[node name="Under_bloodheal" type="TextureProgressBar" parent="." unique_id=1671706044]
 z_index = -1
 offset_left = 69.0
 offset_top = 92.0

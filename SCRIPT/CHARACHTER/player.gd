@@ -74,7 +74,7 @@ func _enter_tree() -> void:
 		Player.MAX_HP = MAX_HEARTS
 		# début de partie : la jauge de sang offre exactement un soin,
 		# comme au respawn
-		Player.sang = HEAL_COST
+		Player.bloodheal = HEAL_COST
 	Player.hp = mini(Player.hp, Player.MAX_HP)
 
 
@@ -1744,8 +1744,8 @@ func attack_air_exit() -> void:
 func _try_heal() -> void:
 	if Player.hp >= Player.MAX_HP:
 		return
-	if Player.sang < HEAL_COST:
-		_notify_insufficient("sang")
+	if Player.bloodheal < HEAL_COST:
+		_notify_insufficient("bloodheal")
 		return
 	change_state(States.HEAL)
 
@@ -1766,7 +1766,7 @@ func heal_input(event: InputEvent) -> void:
 func heal_animation_finished() -> void:
 	match animator.animation:
 		"heal":
-			Player.changement_de_sang(-HEAL_COST)
+			Player.changement_de_bloodheal(-HEAL_COST)
 			Player.changement_de_vie(HEAL_AMOUNT)
 			if Input.is_action_pressed("right_move") or Input.is_action_pressed("left_move"):
 				change_state(States.RUN)
@@ -1793,8 +1793,8 @@ var _cast_timer := 0.0
 ## Tente de lancer le sort : vérifie la jauge de sang ; si insuffisante,
 ## déclenche le feedback UI (jauge qui tremble + clignote rouge) sans caster
 func _try_cast_bloodball() -> void:
-	if Player.sang < BLOODBALL_COST:
-		_notify_insufficient("sang")
+	if Player.bloodheal < BLOODBALL_COST:
+		_notify_insufficient("bloodheal")
 		return
 	change_state(States.BLOODBALL)
 
@@ -1802,13 +1802,13 @@ func _try_cast_bloodball() -> void:
 ## Feedback universel de coût refusé : fait trembler/clignoter l'UI de la
 ## ressource concernée ("sang" = jauge, "blood" = compteur)
 func _notify_insufficient(kind: String) -> void:
-	var huds := get_tree().get_nodes_in_group("UI_Sang")
+	var huds := get_tree().get_nodes_in_group("UI_Bloodheal")
 	if not huds.is_empty() and huds[0].has_method("insufficient_feedback"):
 		huds[0].insufficient_feedback(kind)
 
 func bloodball_enter() -> void:
 	print("[SPELL] cast ! spawn de la boule au marker ", spellcast.global_position)
-	Player.changement_de_sang(-BLOODBALL_COST)  # le sort boit son sang
+	Player.changement_de_bloodheal(-BLOODBALL_COST)  # le sort boit son sang
 	# Au sol : le perso se plante pour lancer. En l'air : comme l'attaque
 	# aérienne, le cast ne touche pas à l'élan du saut
 	if is_on_floor():
@@ -1910,7 +1910,7 @@ func dead_input(event: InputEvent) -> void:
 		Player.hp = Player.MAX_HP
 		# au respawn, la jauge de sang offre EXACTEMENT un soin : le joker
 		# du joueur, à dépenser au bon moment
-		Player.sang = HEAL_COST
+		Player.bloodheal = HEAL_COST
 		# respawn dans la scène du dernier checkpoint croisé (peut être une
 		# autre scène que celle où on est mort)
 		var scene_path: String = Loader._target_scene_path

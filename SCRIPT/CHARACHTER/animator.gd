@@ -34,7 +34,12 @@ func _process(delta):
 func _on_body_entered(body):
 	# on passe en paramètre amount ET la position X du joueur
 	if body.has_method("apply_damage"):
-		body.apply_damage(damage, player.global_position.x)
+		var porte = body.apply_damage(damage, player.global_position.x)
+		# coup au corps à corps qui PORTE (pas sur un mort ni un blindé) :
+		# la jauge bloodheal se recharge de 20 % d'une barre (sept. 2026 :
+		# c'est le coup qui recharge, plus le kill)
+		if porte != false:
+			Player.changement_de_bloodheal(Player.BLOODHEAL_PAR_COUP)
 		# Ennemi inébranlable : le contrecoup annule l'élan du joueur
 		# au lieu de faire reculer l'ennemi
 		if body is BaseAI and body.inebranlable:

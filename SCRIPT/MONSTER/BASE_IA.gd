@@ -219,11 +219,13 @@ func _flash_white() -> void:
 ## utilisée par les logs de debug — sans effet sur la logique)
 ## `knockback` : false pour les dégâts qui piquent sans déplacer
 ## (ex. bloodball) — la réaction d'aggro/volte-face reste, seul le recul saute
-func apply_damage(amount: int, source_x, _source_tag := "?", knockback := true) -> void:
+## Retourne true si le coup a PORTÉ (false : déjà mort, ou invulnérable) — le
+## joueur s'en sert pour recharger sa jauge bloodheal à chaque coup réel.
+func apply_damage(amount: int, source_x, _source_tag := "?", knockback := true) -> bool:
 	if _is_dead():
-		return
+		return false
 	if invulnerable:
-		return
+		return false
 	hp -= amount
 	vie.emit_signal("health_request", -amount)
 	vie.apparition_temp()
@@ -241,7 +243,7 @@ func apply_damage(amount: int, source_x, _source_tag := "?", knockback := true) 
 		if not DebugPerf.sans_sang:
 			Pool.sang(global_position)   # instance recyclée : zéro création en jeu
 		_on_dead()
-		return
+		return true
 	# Attaqué — même de dos, même hors vision, même par un projectile : le
 	# monstre prend le joueur pour cible, se retourne vers LUI (pas vers le
 	# projectile, qui est déjà au contact) et réagit immédiatement sans
@@ -260,11 +262,12 @@ func apply_damage(amount: int, source_x, _source_tag := "?", knockback := true) 
 	# sauf inébranlable (aucun recul, c'est le joueur qui encaisse) ou
 	# source sans recul (bloodball…)
 	if inebranlable or not knockback:
-		return
+		return true
 	var dir := 0
 	if source_x != null:
 		dir = 1 if (global_position.x - source_x) > 0 else -1
 	_knock = Vector2(dir * HIT_KNOCK_X, HIT_KNOCK_Y)
+	return true
 
 func _is_dead() -> bool:
 	return false
