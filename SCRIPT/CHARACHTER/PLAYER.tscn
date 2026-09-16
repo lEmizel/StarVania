@@ -585,7 +585,7 @@ animations = [{
 }],
 "loop": 0,
 "name": &"roll",
-"speed": 11.0
+"speed": 15.0
 }, {
 "frames": [{
 "duration": 1.0,
@@ -1108,43 +1108,7 @@ shader_parameter/hue_tolerance_c = 0.06
 z_index = 1
 collision_mask = 3
 script = ExtResource("1_gvikp")
-GROUND_SPEED_ATTACK = null
 MAX_HEARTS = 3
-GRIP_COYOTE_TIME = null
-ENV_KNOCK_Y = null
-FALL_DAMAGE_ENABLED = null
-JUMP_VELOCITY = -750.0
-double_jump_enabled = null
-DOUBLE_JUMP_VELOCITY = null
-WALL_JUMP_PUSH_X = null
-WALL_JUMP_LOCK_TIME = null
-WALL_JUMP_DJ_GRACE = null
-ECHELLE_SPEED = null
-ECHELLE_TOP_OFFSET = null
-ECHELLE_CHAIN_REACH = null
-ECHELLE_BELOW_REACH = null
-ECHELLE_GRAB_SINK = null
-air_dash_enabled = null
-DASH_SPEED = null
-DASH_DURATION = null
-HEAL_COST = null
-HEAL_AMOUNT = null
-BLOODBALL_CAST_TIME = null
-BLOODBALL_COST = null
-HIT_STUN_TIME = null
-HIT_KNOCK_X = null
-HIT_KNOCK_Y = null
-HIT_X_DAMP = null
-CORDE_SAUT_IMPULSION = null
-GRAPPIN_ACCEL = null
-GRAPPIN_VITESSE_MAX = null
-GRAPPIN_DUREE_MIN = null
-GRAPPIN_AMORT_DERIVE = null
-GRAPPIN_CABLE_DUREE = null
-GRAPPIN_ELAN_Y = null
-GRAPPIN_ELAN_X = null
-GRAPPIN_PORTEE = null
-GRAPPIN_ANGLE_MAX = null
 
 [node name="POINT" type="Node2D" parent="." unique_id=984331396]
 
@@ -1157,7 +1121,7 @@ z_index = 1
 texture_filter = 1
 position = Vector2(-1.5019855, -75.50198)
 sprite_frames = SubResource("SpriteFrames_gfeug")
-animation = &"attack_02"
+animation = &"roll"
 script = ExtResource("63_v21cv")
 
 [node name="slash_attack" type="AnimatedSprite2D" parent="POINT" unique_id=1321397222]

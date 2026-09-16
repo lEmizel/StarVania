@@ -29,15 +29,18 @@ var current_state : States = States.IDLE
 var previous_state : States = States.IDLE
 var state_functions: Dictionary = {}
 
-const GROUND_SPEED = 650            # FIX: renommé pour clarté
-const AIR_SPEED    = 400            # FIX: anciennement var SPEED locale shadowed
-@export var GROUND_SPEED_ATTACK: float = 450.0  # vitesse de course pendant les attaques
+const GROUND_SPEED = 700            # FIX: renommé pour clarté
+## Vitesse horizontale en l'air (sept. 2026 : 400 → 480, garde la portée du
+## saut ≈ 440 px malgré le vol raccourci — et rend l'air moins pataud)
+@export var AIR_SPEED: float = 610.0
+@export var GROUND_SPEED_ATTACK: float = 550.0  # vitesse de course pendant les attaques
 ## Nombre de cœurs de vie max — synchronisé vers le singleton Player au spawn
 @export var MAX_HEARTS: int = 5
 var last_direction := 1  # 1 = droite, -1 = gauche
 
-const CLIMB_SPEED := 200.0
-const ROLL_SPEED := 700.0
+## vitesse de déplacement en escalade (surfaces CLIMB)
+@export var CLIMB_SPEED: float = 200.0
+const ROLL_SPEED := 760.0
 
 const COYOTE_TIME := 0.08
 ## Coyote élargi pour les chutes SUBIES depuis une accroche (griffe qui
@@ -518,12 +521,24 @@ func run_exit() -> void:
 
 ## Impulsion de saut (négatif = vers le haut). Plus la valeur est grande
 ## en absolu, plus le saut monte haut.
-@export var JUMP_VELOCITY: float = -700.0
+## Réglage "nerveux" (sept. 2026, retour playtest "sauts et chutes mollassons",
+## validé par Kaoru contre un réglage intermédiaire) : montée 0,35 s et chute
+## 0,38 s au lieu de 0,47 / 0,63, HAUTEURS INCHANGÉES (saut ≈ 232 px, petit
+## saut ≈ 80 px, comme l'ancien −750 forcé par la scène) et portée conservée
+## (≈ 445 px).
+@export var JUMP_VELOCITY: float = -1062.0   # −15 % (16 sept.) avec la gravité −15 % : mêmes durées, hauteur ≈ 257 px
 const MIN_JUMP_TIME   := 0.01
 const MAX_JUMP_HOLD   := 0.25
-const GRAVITY_RISE    := 0.45    # hold long → monte bien haut
-const GRAVITY_CUTOFF  := 3.50    # lâche tôt → coupe net
-const GRAVITY_FALL    := 1.35
+## multiplicateurs de la gravité projet (2500 depuis le 16 sept. 2026 : gravité
+## UNIFIÉE, la chute du joueur = la gravité de tout le monde)
+@export var GRAVITY_RISE: float = 0.6       # bouton maintenu → monte haut (gravité projet 2500 : 1 = chute normale)
+@export var GRAVITY_CUTOFF: float = 2.5     # relâché tôt → coupe net
+@export var GRAVITY_FALL: float = 1.0       # chute, attaque aérienne, drop = la gravité du projet telle quelle
+@export var MAX_FALL_SPEED: float = 1360.0  # vitesse de chute plafond (px/s) (1600 × 0,85)
+## Gravité de montée des LANCERS (grappin, corde, sortie d'escalade) : c'est
+## l'ancienne coupure, gardée pour ne pas changer les hauteurs déjà réglées
+@export var GRAVITY_LANCEMENT: float = 1.37  # = l'ancien 3,5 × 980 ramené à 2500 : hauteurs de lancer inchangées
+var _saut_lance := false   # saut issu d'un lancer → GRAVITY_LANCEMENT à la montée
 
 const AIR_CONTROL = 0.2
 const DECELERATION_RATE = 0.95
@@ -538,7 +553,7 @@ const CLIMB_EXIT_VELOCITY := -1000.0  # plus fort que JUMP_VELOCITY (-700)
 ## Capacité metroidvania : désactivable tant qu'elle n'est pas débloquée
 @export var double_jump_enabled := true
 ## Impulsion du second saut (souvent un peu plus faible que le premier)
-@export var DOUBLE_JUMP_VELOCITY: float = -650.0
+@export var DOUBLE_JUMP_VELOCITY: float = -944.0   # −15 % aussi (≈ 214 px)
 var _double_jump_used := false
 var _dj_pending := false  # signal pour jump_enter : c'est un double saut
 
@@ -571,6 +586,7 @@ func _try_double_jump() -> bool:
 func jump_enter():
 	animator.play("jump")
 	_jump_timer = 0.0
+	_saut_lance = false
 	_walkoff_jump = false  # tout saut solde le saut de chute libre
 	# (FALL_POINT est géré en continu dans _physics_process : suivi au sol,
 	# point le plus haut conservé en vol)
@@ -579,17 +595,20 @@ func jump_enter():
 		velocity.y = CLIMB_EXIT_VELOCITY
 		velocity.x = 0.0
 		_climb_auto_exit = false
-		_jump_timer = MAX_JUMP_HOLD  # ← désactive le hold, gravité normale immédiate
+		_jump_timer = MAX_JUMP_HOLD  # ← désactive le hold
+		_saut_lance = true
 	elif _grappin_pending:
 		# catapulte du grappin : vitesse imposée, gravité normale, pas de hold
 		_grappin_pending = false
 		velocity = _grappin_velocite
 		_jump_timer = MAX_JUMP_HOLD
+		_saut_lance = true
 	elif _corde_pending:
 		# lâcher de corde : l'élan du balancier + une impulsion, gravité normale
 		_corde_pending = false
 		velocity = _corde_velocite_sortie
 		_jump_timer = MAX_JUMP_HOLD
+		_saut_lance = true
 	elif _dj_pending:
 		_dj_pending = false
 		velocity.y = DOUBLE_JUMP_VELOCITY
@@ -636,14 +655,16 @@ func jump_execute(delta):
 		var force_min := _jump_timer < MIN_JUMP_TIME
 		var within_hold := _jump_timer < MAX_JUMP_HOLD
 
-		if force_min or (holding and within_hold):
+		if _saut_lance:
+			g_mul = GRAVITY_LANCEMENT   # lancer : montée comme avant le réglage nerveux
+		elif force_min or (holding and within_hold):
 			g_mul = GRAVITY_RISE
 		else:
 			g_mul = GRAVITY_CUTOFF
 	else:
 		g_mul = GRAVITY_FALL
 
-	velocity.y += gravity * g_mul * delta
+	velocity.y = minf(velocity.y + gravity * g_mul * delta, MAX_FALL_SPEED)
 
 	if _grab_cooldown_timer <= 0.0 and _raycast_hits_group(grab, "GRAB"):
 		current_grab_area = grab.get_collider()
@@ -728,7 +749,7 @@ func chute_execute(delta: float) -> void:
 			last_direction = sign(direction)
 			point.scale.x = last_direction
 
-	velocity.y += gravity * delta
+	velocity.y = minf(velocity.y + gravity * GRAVITY_FALL * delta, MAX_FALL_SPEED)
 
 	if direction != 0:
 		velocity.x = lerp(velocity.x, direction * AIR_SPEED, AIR_CONTROL)
@@ -825,7 +846,7 @@ func wall_griffe_enter():
 
 	# On pousse le perso DANS le mur pour maintenir le contact raycast
 	# Le mur bloque le déplacement réel, mais la vélocité garde le contact
-	velocity.x = 500.0 * last_direction
+	velocity.x = 700.0 * last_direction   # 500 → 700 (Kaoru, sept. 2026) : c'est la "vitesse du wall run"
 
 func wall_griffe_execute(_delta: float) -> void:
 	FALL_POINT = global_position.y  # appui légitime : accroché au mur
@@ -851,7 +872,8 @@ func wall_griffe_exit():
 
 
 #region WALL_JUMP
-const WALL_GLIDE_SPEED := 300.0
+## vitesse de glisse le long du mur en état WALL_JUMP
+@export var WALL_GLIDE_SPEED: float = 300.0
 
 # --- Saut mural façon Hollow Knight : LÉGÈRE impulsion diagonale imposée,
 # purement cosmétique (éviter de "baver" le long du mur en remontant) —
@@ -1712,7 +1734,7 @@ func attack_air_enter() -> void:
 		velocity.y = 0.0  # stoppe la montée, la gravité prend le relais
 
 func attack_air_execute(delta: float) -> void:
-	velocity.y += gravity * delta
+	velocity.y = minf(velocity.y + gravity * GRAVITY_FALL * delta, MAX_FALL_SPEED)
 
 	if is_on_floor():
 		_handle_landing()
@@ -1849,7 +1871,7 @@ func bloodball_exit() -> void:
 
 @export var HIT_STUN_TIME: float = 0.25
 @export var HIT_KNOCK_X:  float = 1300.0
-@export var HIT_KNOCK_Y:  float = -180.0
+@export var HIT_KNOCK_Y:  float = -287.0   # × 1,6 avec la gravité projet à 2500 : même soulèvement qu'à −180 sous 980
 @export var HIT_X_DAMP:   float = 8.0
 
 var _hit_elapsed := 0.0
@@ -1958,7 +1980,7 @@ func drop_enter() -> void:
 
 func drop_execute(delta: float) -> void:
 	_drop_timer -= delta
-	velocity.y += gravity * delta
+	velocity.y = minf(velocity.y + gravity * GRAVITY_FALL * delta, MAX_FALL_SPEED)
 
 	var direction := Input.get_axis("left_move", "right_move")
 	if direction != 0:
@@ -2069,7 +2091,7 @@ func corde_exit() -> void:
 ##      et dash rechargés. Aucune suspension. Un coup reçu interrompt tout
 ##      (le câble est caché par grappin_exit).
 
-@export var GRAPPIN_ACCEL: float = 5000.0        ## force de traction MAX du câble (px/s²), la gravité tire contre
+@export var GRAPPIN_ACCEL: float = 6520.0        ## force de traction MAX du câble (px/s²), la gravité (2500) tire contre — même traction nette qu'à 5000 sous 980
 @export var GRAPPIN_VITESSE_MAX: float = 1600.0  ## vitesse plafond de la traction (px/s)
 ## durée minimale d'une traction (s) : une accroche toute proche est hissée
 ## aussi lentement qu'une lointaine — l'accélération est calculée pour ça

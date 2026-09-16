@@ -5,3 +5,12 @@
 [node name="MAIN_SCENE" type="Node2D" unique_id=2051191417 groups=["MAIN_SCENE"]]
 
 [node name="MENU" parent="." unique_id=338350873 instance=ExtResource("1_q11fr")]
+
+[node name="Label" type="Label" parent="MENU" unique_id=1448735541]
+layout_mode = 0
+offset_left = 1281.9999
+offset_top = 619.0
+offset_right = 1407.9598
+offset_bottom = 642.0
+scale = Vector2(6.07, 6.07)
+text = "WISP OF BLOOD"
