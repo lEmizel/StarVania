@@ -16,7 +16,9 @@ const SCENES_PRECHARGEES: Array[String] = [
 	"res://SCRIPT/SCENE/scene_7.tscn",
 ]
 var _prechargees: Dictionary = {}               # chemin res:// → PackedScene (la référence garde la scène en cache)
-var _prechargement_en_cours: Array[String] = []
+var _prechargement_en_cours: Array[String] = []  # au plus UN élément : les charges threadées sont sérialisées
+var _file_prechargement: Array[String] = []      # scènes restant à précharger, dans l'ordre
+var _chargement_niveau_en_cours := false         # un load_scene_with_loading est en vol
 
 
 func _ready() -> void:
@@ -30,15 +32,31 @@ func precharger_scenes() -> void:
 	if "--sans-precharge" in OS.get_cmdline_user_args():
 		print("[LOAD] préchargement désactivé (--sans-precharge)")
 		return
+	# UNE charge threadée à la fois : deux threads qui chargent des scènes
+	# partageant des ressources (fond, colonne, shader du flou) font échouer le
+	# parsing par intermittence → les scènes sont préchargées l'une après l'autre
 	for chemin in SCENES_PRECHARGEES:
-		if _prechargees.has(chemin) or chemin in _prechargement_en_cours:
-			continue
-		if ResourceLoader.load_threaded_request(chemin) == OK:
-			_prechargement_en_cours.append(chemin)
-			print("[LOAD] préchargement en arrière-plan : ", chemin)
-		else:
-			push_error("[LOAD] préchargement impossible : " + chemin)
-	set_process(not _prechargement_en_cours.is_empty())
+		if not _prechargees.has(chemin) and not (chemin in _prechargement_en_cours) \
+				and not (chemin in _file_prechargement):
+			_file_prechargement.append(chemin)
+	_lancer_prochain_prechargement()
+
+
+## démarre le préchargement suivant de la file, si rien d'autre ne charge
+func _lancer_prochain_prechargement() -> void:
+	if _chargement_niveau_en_cours or not _prechargement_en_cours.is_empty() or _file_prechargement.is_empty():
+		return
+	var chemin: String = _file_prechargement.pop_front()
+	if _prechargees.has(chemin):
+		_lancer_prochain_prechargement()
+		return
+	if ResourceLoader.load_threaded_request(chemin) == OK:
+		_prechargement_en_cours.append(chemin)
+		set_process(true)
+		print("[LOAD] préchargement en arrière-plan : ", chemin)
+	else:
+		push_error("[LOAD] préchargement impossible : " + chemin)
+		_lancer_prochain_prechargement()
 
 
 func _process(_delta: float) -> void:
@@ -55,6 +73,7 @@ func _process(_delta: float) -> void:
 			push_error("[LOAD] échec du préchargement : " + chemin)
 	if _prechargement_en_cours.is_empty():
 		set_process(false)
+		_lancer_prochain_prechargement()   # au suivant
 
 
 ## DEBUG PERF (F7) : lâche les scènes préchargées → leurs textures sont libérées
@@ -63,6 +82,7 @@ func _process(_delta: float) -> void:
 func liberer_prechargement() -> void:
 	var avant := Performance.get_monitor(Performance.RENDER_TEXTURE_MEM_USED) / 1e6
 	_prechargees.clear()
+	_file_prechargement.clear()
 	await get_tree().process_frame
 	await get_tree().process_frame
 	print("[LOAD] préchargement libéré : textures %.0f Mo → %.0f Mo" % [
@@ -113,10 +133,23 @@ func load_scene_with_loading(final_scene_path: String) -> void:
 # Appelé une frame plus tard pour éviter de bloquer le rendu
 # ------------------------------------------------------------------
 func _do_async_load() -> void:
+	# une seule charge threadée à la fois (voir precharger_scenes) : on attend
+	# la fin d'un préchargement en cours, et la file est suspendue pendant nous
+	_chargement_niveau_en_cours = true
+	while not _prechargement_en_cours.is_empty():
+		await get_tree().create_timer(0.01).timeout
+	var prete := scene_prechargee(_target_scene_path)
+	if prete != null:
+		# c'était justement la scène qui finissait de se précharger
+		_chargement_niveau_en_cours = false
+		_basculer(prete.instantiate())
+		_lancer_prochain_prechargement()
+		return
 	# 3) Lance la requête de pré-chargement asynchrone
 	var err = ResourceLoader.load_threaded_request(_target_scene_path)
 	if err != OK:
 		push_error("[LOAD] load_threaded_request a échoué pour " + str(_target_scene_path))
+		_fin_chargement_niveau()
 		return
 	print("[LOAD] preload async lancé…")
 	_continue_preloading()
@@ -140,10 +173,18 @@ func _continue_preloading() -> void:
 			replace_scene_in_viewport(scene)
 			save_scene()
 			Warmup.chauffer_arbre(scene, "niveau")
+			_fin_chargement_niveau()
 		else:
 			push_error("[LOAD] la ressource chargée n’est pas un PackedScene ! ")
+			_fin_chargement_niveau()
 	else:
 		push_error("[LOAD] chargement asynchrone échoué, status=" + str(status))
+		_fin_chargement_niveau()
+
+
+func _fin_chargement_niveau() -> void:
+	_chargement_niveau_en_cours = false
+	_lancer_prochain_prechargement()
 
 
 func _basculer(scene: Node) -> void:
