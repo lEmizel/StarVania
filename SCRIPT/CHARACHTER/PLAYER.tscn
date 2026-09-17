@@ -74,9 +74,12 @@
 [ext_resource type="Texture2D" uid="uid://mk762qgcnk4v" path="res://MEDIA/CHARACHTER/ANIMATION/HEAL/Monster_HEAL-9.png" id="60_kqgep"]
 [ext_resource type="Texture2D" uid="uid://b02ki75goravk" path="res://MEDIA/CHARACHTER/ANIMATION/HEAL/Monster_HEAL-10.png" id="61_lwpav"]
 [ext_resource type="Texture2D" uid="uid://bmbwjvn70tf3l" path="res://MEDIA/CHARACHTER/ANIMATION/HEAL/Monster_HEAL-11.png" id="62_sny4y"]
+[ext_resource type="Texture2D" uid="uid://dr0tuaoeytq2d" path="res://MEDIA/CHARACHTER/ANIMATION/GRAPPIN/grappin_air.png" id="63_147dk"]
 [ext_resource type="Script" uid="uid://c2740bn5xjykn" path="res://SCRIPT/CHARACHTER/animator.gd" id="63_v21cv"]
+[ext_resource type="Texture2D" uid="uid://b87sfqpin1fby" path="res://MEDIA/CHARACHTER/ANIMATION/GRAPPIN/grappin_grab.png" id="64_dkgwm"]
 [ext_resource type="Texture2D" uid="uid://84d5m4f5x1ip" path="res://MEDIA/CHARACHTER/effect/slash_attack/1/Light_attack-14-2.png" id="64_elvui"]
 [ext_resource type="Texture2D" uid="uid://dmekuvjnmr4y3" path="res://MEDIA/CHARACHTER/effect/slash_attack/1/Light_attack-14-3.png" id="65_765c3"]
+[ext_resource type="Texture2D" uid="uid://2aopi02g0qhj" path="res://MEDIA/CHARACHTER/ANIMATION/GRAPPIN/grappin_sol.png" id="65_fmbg8"]
 [ext_resource type="Texture2D" uid="uid://biei54fc2smdd" path="res://MEDIA/CHARACHTER/effect/slash_attack/1/Light_attack-14-4.png" id="66_jw47m"]
 [ext_resource type="Texture2D" uid="uid://dblhalv54fefi" path="res://MEDIA/CHARACHTER/effect/slash_attack/1/Light_attack-14-5.png" id="67_15ud5"]
 [ext_resource type="Texture2D" uid="uid://dliyfiu1mk010" path="res://MEDIA/CHARACHTER/effect/slash_attack/1/Light_attack-14-6.png" id="68_ll8uo"]
@@ -469,6 +472,30 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
+"texture": ExtResource("63_147dk")
+}],
+"loop": 1,
+"name": &"grappin_air",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("64_dkgwm")
+}],
+"loop": 1,
+"name": &"grappin_grab",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("65_fmbg8")
+}],
+"loop": 1,
+"name": &"grappin_sol",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
 "texture": ExtResource("52_cdn23")
 }, {
 "duration": 1.0,
@@ -552,11 +579,6 @@ animations = [{
 "loop": 0,
 "name": &"jump",
 "speed": 16.0
-}, {
-"frames": [],
-"loop": 1,
-"name": &"new_animation_1",
-"speed": 5.0
 }, {
 "frames": [{
 "duration": 1.0,
@@ -1121,7 +1143,7 @@ z_index = 1
 texture_filter = 1
 position = Vector2(-1.5019855, -75.50198)
 sprite_frames = SubResource("SpriteFrames_gfeug")
-animation = &"roll"
+animation = &"grappin_sol"
 script = ExtResource("63_v21cv")
 
 [node name="slash_attack" type="AnimatedSprite2D" parent="POINT" unique_id=1321397222]
@@ -1192,7 +1214,7 @@ visible = false
 position = Vector2(-37, -29)
 
 [node name="ANCRE_GRAPPIN" type="Marker2D" parent="POINT" unique_id=171803666]
-position = Vector2(38, -113)
+position = Vector2(51, -134)
 
 [node name="ANCRE_SOL" type="Node2D" parent="POINT" unique_id=1280331426]
 visible = false

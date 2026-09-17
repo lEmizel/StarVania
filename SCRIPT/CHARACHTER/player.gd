@@ -123,6 +123,10 @@ func _physics_process(delta: float) -> void:
 	if _knock != Vector2.ZERO:
 		velocity.x = _knock.x
 	move_and_slide()
+	# le câble du grappin se trace APRÈS le déplacement (sinon il part de la
+	# main du pas précédent et dépasse du bras, voir _grappin_tracer_cable)
+	if current_state == States.GRAPPIN:
+		_grappin_tracer_cable()
 	_decay_knockback(delta)
 	_corde_cooldown = maxf(_corde_cooldown - delta, 0.0)
 	_grappin_cooldown = maxf(_grappin_cooldown - delta, 0.0)
@@ -2105,11 +2109,15 @@ var _grappin_accel := 0.0   # accélération effective de la traction en cours
 @export var GRAPPIN_PORTEE: float = 520.0        ## distance max main → accroche (px) — +15 % le 16 sept.
 @export var GRAPPIN_ANGLE_MAX: float = 75.0      ## écart max à la verticale, en degrés (l'accroche doit être au-dessus)
 const GRAPPIN_COOLDOWN := 0.3
-## animations (SpriteFrames du joueur) : si elles existent, elles sont
-## jouées — le vol du câble dure alors exactement l'anim de lancer ;
-## sinon repli sur "jump" et GRAPPIN_CABLE_DUREE
-const ANIM_GRAPPIN_LANCER := "grappin_lancer"       # non bouclée : le bras part, le câble file
-const ANIM_GRAPPIN_ACCROCHE := "grappin_accroche"   # bouclée : hissé le long du câble
+## animations (SpriteFrames du joueur), jouées si elles existent :
+##   lancer   : "grappin_sol" les pieds au sol, "grappin_air" sinon
+##   traction : "grappin_grab", la même au sol et en l'air
+## Une anim de lancer de PLUSIEURS frames donne sa durée au vol du câble ;
+## une pose d'une seule frame n'a pas de durée propre → GRAPPIN_CABLE_DUREE.
+## Repli si l'anim manque : "jump".
+const ANIM_GRAPPIN_SOL := "grappin_sol"
+const ANIM_GRAPPIN_AIR := "grappin_air"
+const ANIM_GRAPPIN_GRAB := "grappin_grab"
 var _grappin_candidat: Node2D = null   # accroche prenable ce pas-ci (allumée)
 var _grappin_duree_cable := 0.08       # durée effective du vol du câble (anim ou export)
 ## d'où part le câble : un Marker2D "ANCRE_GRAPPIN" sous POINT, à placer sur la
@@ -2194,9 +2202,14 @@ func grappin_enter() -> void:
 	last_direction = _grappin_dir
 	point.scale.x = _grappin_dir
 	_grappin_duree_cable = maxf(GRAPPIN_CABLE_DUREE, 0.001)
-	if _anim_existe(ANIM_GRAPPIN_LANCER):
-		animator.play(ANIM_GRAPPIN_LANCER)
-		_grappin_duree_cable = maxf(_anim_duree(ANIM_GRAPPIN_LANCER), 0.001)
+	# lancer : l'anim "sol" les pieds par terre, l'anim "air" sinon
+	var anim_lancer := ANIM_GRAPPIN_SOL if is_on_floor() else ANIM_GRAPPIN_AIR
+	if _anim_existe(anim_lancer):
+		animator.play(anim_lancer)
+		# une vraie animation (plusieurs frames) donne sa durée au vol du câble ;
+		# une pose d'une frame n'a pas de durée propre → l'export fait foi
+		if animator.sprite_frames.get_frame_count(anim_lancer) > 1:
+			_grappin_duree_cable = maxf(_anim_duree(anim_lancer), 0.001)
 	else:
 		animator.play("jump")
 
@@ -2232,11 +2245,10 @@ func grappin_execute(delta: float) -> void:
 		velocity.y += gravity * delta
 		_grappin_t += delta
 		var t := clampf(_grappin_t / _grappin_duree_cable, 0.0, 1.0)
-		_grappin_cible.cable_montrer(main, main.lerp(cible, t))
 		if t >= 1.0:
 			_grappin_tire = true
-			if _anim_existe(ANIM_GRAPPIN_ACCROCHE):
-				animator.play(ANIM_GRAPPIN_ACCROCHE)
+			if _anim_existe(ANIM_GRAPPIN_GRAB):
+				animator.play(ANIM_GRAPPIN_GRAB)
 			# accélération taillée sur la distance : une traction courte doit
 			# durer GRAPPIN_DUREE_MIN elle aussi (d = ½·a·t² → a = 2d/t²),
 			# la gravité étant compensée, et jamais plus que GRAPPIN_ACCEL
@@ -2265,7 +2277,6 @@ func grappin_execute(delta: float) -> void:
 		velocity += u * _grappin_accel * delta
 	velocity.y += gravity * delta
 	velocity = velocity.limit_length(GRAPPIN_VITESSE_MAX)
-	_grappin_cible.cable_montrer(main, cible)
 	# arrivée : à portée d'un pas, main au niveau du point ou au-dessus (point
 	# dépassé, on ne tourne JAMAIS autour), ou point dépassé de peu à l'approche
 	# — jamais au départ : en l'air on tombe encore quelques frames
@@ -2279,6 +2290,23 @@ func grappin_execute(delta: float) -> void:
 		_grappin_velocite = Vector2(_grappin_dir * GRAPPIN_ELAN_X, GRAPPIN_ELAN_Y)
 		_grappin_pending = true
 		change_state(States.JUMP)
+
+
+## Trace le câble ; appelé par _physics_process APRÈS move_and_slide. Tracé dans
+## grappin_execute, donc AVANT le déplacement du pas, il partait de la main du
+## pas précédent : écart = vitesse / 60, mesuré 21 px à 1283 px/s → le bout du
+## câble sortait du bras, de plus en plus à mesure que la traction accélère.
+func _grappin_tracer_cable() -> void:
+	if _grappin_cible == null or not is_instance_valid(_grappin_cible):
+		return
+	var main := _main_grappin()
+	var cible: Vector2 = _grappin_cible.point()
+	if _grappin_tire:
+		_grappin_cible.cable_montrer(main, cible)
+	else:
+		# le câble file : sa pointe avance de la main vers le point
+		var t := clampf(_grappin_t / _grappin_duree_cable, 0.0, 1.0)
+		_grappin_cible.cable_montrer(main, main.lerp(cible, t))
 
 
 func grappin_exit() -> void:

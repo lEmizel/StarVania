@@ -3,10 +3,12 @@ extends Node
 ## DEBUG PERF — overlay FPS / temps de frame + journal des pics en console.
 ##
 ## Toggle : F3 au clavier, bouton Share (bouton 4) à la manette. Caché au boot.
+## Console SILENCIEUSE tant que l'overlay est caché (sept. 2026) : l'en-tête et
+## les pics ne partent en console que pendant qu'il est affiché.
 ## Interrupteurs de test (Mac) : F6 = particules de sang ON/OFF,
 ## F7 = libère les scènes préchargées (test de pression mémoire).
 ## Équivalents en ligne de commande : `-- --sans-sang`, `-- --sans-precharge`.
-## Chaque frame plus longue que SEUIL_PIC_MS est journalisée avec :
+## Overlay affiché : chaque frame plus longue que SEUIL_PIC_MS est journalisée avec :
 ##   nœuds      = _process de tous les nœuds (mesuré entre ce script, qui
 ##                tourne EN PREMIER, et un marqueur qui tourne EN DERNIER)
 ##   physique   = pas de physique (_physics_process + moteur)
@@ -83,9 +85,6 @@ func _ready() -> void:
 
 	_dernier_usec = Time.get_ticks_usec()
 	_relever_compteurs()
-	print("[PERF] écran %s | physique %d Hz | vsync %s | max_fps %d | fenêtre %s | %s | args %s" % [
-		_hz(), Engine.physics_ticks_per_second, _vsync(), Engine.max_fps, _mode_fenetre(),
-		RenderingServer.get_video_adapter_name(), OS.get_cmdline_user_args()])
 
 
 func _input(event: InputEvent) -> void:
@@ -104,6 +103,7 @@ func _input(event: InputEvent) -> void:
 	if toggle:
 		_layer.visible = not _layer.visible
 		if _layer.visible:
+			_imprimer_entete()
 			_rafraichir()
 
 
@@ -117,20 +117,21 @@ func _process(_delta: float) -> void:
 
 	if ms > SEUIL_PIC_MS:
 		_pics += 1
-		var phys_ms := Performance.get_monitor(Performance.TIME_PHYSICS_PROCESS) * 1000.0
-		var rendu_cpu := RenderingServer.viewport_get_measured_render_time_cpu(_vp)
-		var gpu := RenderingServer.viewport_get_measured_render_time_gpu(_vp)
-		var pipelines := _pipelines() - _pipelines_prec
-		var pipelines_vol := _pipelines_a_la_volee() - _pipelines_vol_prec
-		var d_tex := Performance.get_monitor(Performance.RENDER_TEXTURE_MEM_USED) / 1e6 - _tex_prec
-		var d_ram := OS.get_static_memory_usage() / 1e6 - _ram_prec
-		var d_obj := int(Performance.get_monitor(Performance.OBJECT_COUNT)) - _objets_prec
-		print("[PERF] pic %.0f ms → nœuds %.1f | physique %.1f | rendu CPU %.1f | GPU %.1f | attente %.0f | pipelines +%d (à la volée +%d) | tex %.0f Mo (%+.0f) | RAM %.0f Mo (%+.0f) | objets %+d  (%s)" % [
-			ms, _noeuds_ms, phys_ms, rendu_cpu, gpu,
-			maxf(ms - _noeuds_ms - phys_ms - rendu_cpu, 0.0),
-			pipelines, pipelines_vol,
-			Performance.get_monitor(Performance.RENDER_TEXTURE_MEM_USED) / 1e6, d_tex,
-			OS.get_static_memory_usage() / 1e6, d_ram, d_obj, _contexte()])
+		if _layer.visible:
+			var phys_ms := Performance.get_monitor(Performance.TIME_PHYSICS_PROCESS) * 1000.0
+			var rendu_cpu := RenderingServer.viewport_get_measured_render_time_cpu(_vp)
+			var gpu := RenderingServer.viewport_get_measured_render_time_gpu(_vp)
+			var pipelines := _pipelines() - _pipelines_prec
+			var pipelines_vol := _pipelines_a_la_volee() - _pipelines_vol_prec
+			var d_tex := Performance.get_monitor(Performance.RENDER_TEXTURE_MEM_USED) / 1e6 - _tex_prec
+			var d_ram := OS.get_static_memory_usage() / 1e6 - _ram_prec
+			var d_obj := int(Performance.get_monitor(Performance.OBJECT_COUNT)) - _objets_prec
+			print("[PERF] pic %.0f ms → nœuds %.1f | physique %.1f | rendu CPU %.1f | GPU %.1f | attente %.0f | pipelines +%d (à la volée +%d) | tex %.0f Mo (%+.0f) | RAM %.0f Mo (%+.0f) | objets %+d  (%s)" % [
+				ms, _noeuds_ms, phys_ms, rendu_cpu, gpu,
+				maxf(ms - _noeuds_ms - phys_ms - rendu_cpu, 0.0),
+				pipelines, pipelines_vol,
+				Performance.get_monitor(Performance.RENDER_TEXTURE_MEM_USED) / 1e6, d_tex,
+				OS.get_static_memory_usage() / 1e6, d_ram, d_obj, _contexte()])
 
 	_relever_compteurs()
 	_debut_noeuds_usec = Time.get_ticks_usec()
@@ -141,6 +142,18 @@ func _process(_delta: float) -> void:
 		_cumul_ms = 0.0
 		_nb_frames = 0
 		_max_ms = 0.0
+
+
+var _entete_imprimee := false
+
+## contexte machine (écran, vsync, carte, args), une seule fois, quand l'overlay s'ouvre
+func _imprimer_entete() -> void:
+	if _entete_imprimee:
+		return
+	_entete_imprimee = true
+	print("[PERF] écran %s | physique %d Hz | vsync %s | max_fps %d | fenêtre %s | %s | args %s" % [
+		_hz(), Engine.physics_ticks_per_second, _vsync(), Engine.max_fps, _mode_fenetre(),
+		RenderingServer.get_video_adapter_name(), OS.get_cmdline_user_args()])
 
 
 func _fin_des_noeuds() -> void:
