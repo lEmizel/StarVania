@@ -255,9 +255,11 @@ func centre_corps() -> Vector2:
 ## centre de la scie vers nous), et recharge du double saut + dash pour pouvoir
 ## se rattraper. Roulade et dash rendent invulnérable, comme contre les
 ## ennemis. Sans direction : vers le haut, comme avant.
-func apply_environment_damage(amount: int, direction: Vector2 = Vector2.UP) -> void:
+## Retourne true si le coup a PORTÉ (false : mort, déjà sonné, en roulade ou en dash)
+## — les pièges qui ne doivent toucher qu'une fois par sortie s'en servent.
+func apply_environment_damage(amount: int, direction: Vector2 = Vector2.UP) -> bool:
 	if current_state in [States.DEAD, States.HIT, States.ROLL, States.DASH]:
-		return
+		return false
 	print("[DMG] f=", Engine.get_physics_frames(),
 		" src=environnement amount=", amount,
 		" état=", States.keys()[current_state],
@@ -266,7 +268,7 @@ func apply_environment_damage(amount: int, direction: Vector2 = Vector2.UP) -> v
 	if Player.hp <= 0:
 		_knock = Vector2.ZERO
 		change_state(States.DEAD)
-		return
+		return true
 	var d := direction.normalized() if direction.length_squared() > 0.0001 else Vector2.UP
 	# latéral : poussée absolue amortie, le même mécanisme que les coups de monstres
 	_knock = Vector2(d.x * ENV_KNOCK_X, 0.0)
@@ -282,6 +284,7 @@ func apply_environment_damage(amount: int, direction: Vector2 = Vector2.UP) -> v
 	var soulevement := ENV_KNOCK_SOULEVEMENT * absf(d.x) * (1.0 - maxf(d.y, 0.0))
 	velocity.y = bas - maxf(haut, soulevement)
 	_recharge_air_moves()
+	return true
 
 
 func goto_state(s: States) -> void:
@@ -2055,6 +2058,7 @@ var _corde: Node2D = null
 var _corde_cooldown := 0.0
 var _corde_pending := false
 var _corde_velocite_sortie := Vector2.ZERO
+var _corde_est_pendule := false   # la « corde » est une accroche pendulaire (câble de grappin)
 
 
 ## Appelé par la corde qui touche le joueur. Retourne true s'il s'y accroche.
@@ -2068,11 +2072,23 @@ func saisir_corde(corde: Node2D) -> bool:
 	return true
 
 
+## la main qui tient : ANCRE_GRAB sur une corde, l'ancre du grappin sur une
+## accroche pendulaire (c'est de là que part le câble)
+func _corde_ancre_main() -> Node2D:
+	if _corde_est_pendule and ancre_grappin != null:
+		return ancre_grappin
+	return ancre_grab
+
+
 func corde_enter() -> void:
 	_recharge_air_moves()
-	_corde.saisir(self, ancre_grab.global_position, velocity)
+	_corde_est_pendule = _corde.has_method("signaler_blocage")
+	_corde.saisir(self, _corde_ancre_main().global_position, velocity)
 	velocity = Vector2.ZERO
-	animator.play("suspendu")
+	if _corde_est_pendule and _anim_existe(ANIM_GRAPPIN_GRAB):
+		animator.play(ANIM_GRAPPIN_GRAB)   # on tient le câble du grappin, pas une corde
+	else:
+		animator.play("suspendu")
 
 
 func corde_execute(delta: float) -> void:
@@ -2084,7 +2100,18 @@ func corde_execute(delta: float) -> void:
 	var grimpe := Input.get_axis("down_move", "up_move")
 	var main: Vector2 = _corde.simuler_balancier(delta, axe, grimpe)
 	# le perso pend par la main : le corps se place pour que ANCRE_GRAB soit sur la corde
-	global_position = main - (ancre_grab.global_position - global_position)
+	var ancre := _corde_ancre_main()
+	var cible := main - (ancre.global_position - global_position)
+	if _corde_est_pendule:
+		# une accroche pendulaire se prend aussi depuis le sol ou près d'un mur :
+		# déplacement AVEC collisions ; bloqué, le pendule repart de la position réelle
+		var col := move_and_collide(cible - global_position)
+		if col != null:
+			_corde.signaler_blocage(ancre.global_position, col.get_normal(), delta)
+		# câble tracé APRÈS le déplacement (sinon il part de la main du pas précédent)
+		_corde.cable_montrer(ancre.global_position, _corde.point())
+	else:
+		global_position = cible   # corde classique : inchangé
 	velocity = Vector2.ZERO
 	# pas de retournement au gré du balancier (trop étrange) : le perso garde
 	# le regard qu'il avait en attrapant la corde
@@ -2105,6 +2132,9 @@ func corde_input(_event: InputEvent) -> void:
 func corde_exit() -> void:
 	if _corde != null and is_instance_valid(_corde):
 		_corde.lacher()
+	if _corde_est_pendule:
+		_grappin_cooldown = maxf(_grappin_cooldown, CORDE_COOLDOWN)
+	_corde_est_pendule = false
 	_corde = null
 	_corde_cooldown = CORDE_COOLDOWN
 #endregion
@@ -2275,6 +2305,13 @@ func grappin_execute(delta: float) -> void:
 		_grappin_t += delta
 		var t := clampf(_grappin_t / _grappin_duree_cable, 0.0, 1.0)
 		if t >= 1.0:
+			if _grappin_cible.has_method("saisir"):
+				# ACCROCHE PENDULAIRE (accroche_pendule.tscn, la bleue) : pas de traction,
+				# on reste suspendu au câble et on joue comme à la corde — l'accroche
+				# fournit l'API d'une corde, l'état CORDE fait le reste
+				_corde = _grappin_cible
+				change_state(States.CORDE)
+				return
 			_grappin_tire = true
 			if _anim_existe(ANIM_GRAPPIN_GRAB):
 				animator.play(ANIM_GRAPPIN_GRAB)

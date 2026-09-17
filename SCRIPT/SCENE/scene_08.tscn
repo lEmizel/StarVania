@@ -3,6 +3,7 @@
 [ext_resource type="Script" uid="uid://dftar4ptyhjxe" path="res://SCRIPT/UTILITAIRE/spawnplayer.gd" id="1_danr8"]
 [ext_resource type="PackedScene" uid="uid://ckxwmy0iav2h2" path="res://SCRIPT/INTERACTIBLE/Checkpoint.tscn" id="2_a2il2"]
 [ext_resource type="PackedScene" uid="uid://dx851ijsrvbgf" path="res://SCRIPT/grayboxing/400x200.tscn" id="3_danr8"]
+[ext_resource type="PackedScene" uid="uid://cbbnunbqbc3sa" path="res://SCRIPT/INTERACTIBLE/pique_retractable.tscn" id="4_a2il2"]
 
 [node name="scene_08" type="Node2D" unique_id=1958345523]
 
@@ -18,6 +19,44 @@ script = ExtResource("1_danr8")
 [node name="400x200" parent="grayboxing" unique_id=436297158 instance=ExtResource("3_danr8")]
 position = Vector2(-4, 102)
 
+[node name="400x201" parent="grayboxing" unique_id=1366873565 instance=ExtResource("3_danr8")]
+position = Vector2(1394.75, 102)
+
 [node name="VISUAL" type="Node2D" parent="." unique_id=1984328939]
 
 [node name="enemi" type="Node2D" parent="." unique_id=573886309]
+
+[node name="pique_retractable" parent="." unique_id=329253064 instance=ExtResource("4_a2il2")]
+position = Vector2(295, -47)
+
+[node name="pique_retractable2" parent="." unique_id=1831988861 instance=ExtResource("4_a2il2")]
+position = Vector2(494.75, -47)
+
+[node name="pique_retractable3" parent="." unique_id=424707508 instance=ExtResource("4_a2il2")]
+position = Vector2(694.5, -47)
+
+[node name="pique_retractable4" parent="." unique_id=752196093 instance=ExtResource("4_a2il2")]
+position = Vector2(894.25, -47)
+
+[node name="pique_retractable5" parent="." unique_id=660945545 instance=ExtResource("4_a2il2")]
+position = Vector2(1094, -47)
+
+[node name="pique_retractable6" parent="." unique_id=21986762 instance=ExtResource("4_a2il2")]
+position = Vector2(1778, -219)
+rotation = -1.5707964
+
+[node name="pique_retractable7" parent="." unique_id=1814083410 instance=ExtResource("4_a2il2")]
+position = Vector2(1778, -418.75)
+rotation = -1.5707964
+
+[node name="pique_retractable8" parent="." unique_id=1661895379 instance=ExtResource("4_a2il2")]
+position = Vector2(1778, -618.5)
+rotation = -1.5707964
+
+[node name="pique_retractable9" parent="." unique_id=1543390094 instance=ExtResource("4_a2il2")]
+position = Vector2(1665, -418.25)
+rotation = 1.5707964
+
+[node name="pique_retractable10" parent="." unique_id=2045841552 instance=ExtResource("4_a2il2")]
+position = Vector2(1665, -618)
+rotation = 1.5707964

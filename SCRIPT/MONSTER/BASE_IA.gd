@@ -352,24 +352,46 @@ const HORIZONTAL_DEAD_ZONE := 25.0
 ## sur le trajet de ce raycast de détection de vide ? Les terrestres le
 ## traitent comme un trou : demi-tour au lieu d'y marcher.
 ## (le groupe peut être sur l'Area2D ou sur son CollisionShape2D enfant)
+## Exception : un danger où l'on a DÉJÀ les pieds ne compte pas (poussé dessus
+## par un coup, piège rétractable qui s'arme sous nous…). Il est « devant » des
+## deux côtés : faire demi-tour ferait trembler le monstre sur place jusqu'à
+## sa mort. La sortie est droit devant.
 func danger_devant(rc: RayCast2D) -> bool:
+	var devant := _dangers_sur_segment(rc.global_position, rc.to_global(rc.target_position))
+	if devant.is_empty():
+		return false
+	var sous_pieds := _dangers_sur_segment(global_position + Vector2(0.0, -20.0),
+		global_position + Vector2(0.0, 30.0))
+	for aire in devant:
+		if not sous_pieds.has(aire):
+			return true
+	return false
+
+
+## les Area2D du groupe DEGATS traversées par le segment a→b (positions globales)
+func _dangers_sur_segment(a: Vector2, b: Vector2) -> Array:
 	var params := PhysicsShapeQueryParameters2D.new()
 	var seg := SegmentShape2D.new()
-	seg.a = rc.global_position
-	seg.b = rc.to_global(rc.target_position)
+	seg.a = a
+	seg.b = b
 	params.shape = seg
 	params.transform = Transform2D.IDENTITY
 	params.collide_with_areas = true
 	params.collide_with_bodies = false
+	var trouves := []
 	for hit in get_world_2d().direct_space_state.intersect_shape(params, 8):
 		var col = hit.get("collider")
-		if col is Area2D:
-			if col.is_in_group("DEGATS"):
-				return true
+		if not (col is Area2D) or trouves.has(col):
+			continue
+		var danger: bool = col.is_in_group("DEGATS")
+		if not danger:
 			for child in col.get_children():
 				if child.is_in_group("DEGATS"):
-					return true
-	return false
+					danger = true
+					break
+		if danger:
+			trouves.append(col)
+	return trouves
 
 
 func flip_toward(target_x: float) -> void:

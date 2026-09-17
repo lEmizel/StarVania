@@ -1,0 +1,66 @@
+[gd_scene format=3 uid="uid://cbbnunbqbc3sa"]
+
+[ext_resource type="Texture2D" uid="uid://b4blfnnte4tyt" path="res://MEDIA/INTERACTIBLE/Pics/Pics-1.png" id="1_u8f7a"]
+[ext_resource type="Texture2D" uid="uid://c8h1531k5hecn" path="res://MEDIA/INTERACTIBLE/Pics/Pics-2.png" id="2_h3op3"]
+[ext_resource type="Texture2D" uid="uid://23hsja5gd2jj" path="res://MEDIA/INTERACTIBLE/Pics/Pics-3.png" id="3_igo5p"]
+[ext_resource type="Script" path="res://SCRIPT/INTERACTIBLE/pique_retractable.gd" id="4_piege"]
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_35hhg"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("1_u8f7a")
+}, {
+"duration": 1.0,
+"texture": ExtResource("2_h3op3")
+}, {
+"duration": 1.0,
+"texture": ExtResource("3_igo5p")
+}],
+"loop": 0,
+"name": &"attack",
+"speed": 20.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("1_u8f7a")
+}],
+"loop": 1,
+"name": &"idle",
+"speed": 5.0
+}]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_35hhg"]
+size = Vector2(199.5, 50)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_0j44r"]
+size = Vector2(198, 51)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_bpnca"]
+size = Vector2(197, 148)
+
+[node name="pique_retractable" type="AnimatedSprite2D" unique_id=329253064]
+position = Vector2(0, -74)
+sprite_frames = SubResource("SpriteFrames_35hhg")
+animation = &"idle"
+script = ExtResource("4_piege")
+
+[node name="StaticBody2D" type="StaticBody2D" parent="." unique_id=821323361]
+visible = false
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="StaticBody2D" unique_id=35153756]
+position = Vector2(1, 74)
+shape = SubResource("RectangleShape2D_35hhg")
+
+[node name="Area2D" type="Area2D" parent="." unique_id=89419449]
+visible = false
+
+[node name="detection" type="CollisionShape2D" parent="Area2D" unique_id=673895432]
+visible = false
+position = Vector2(0, 40.5)
+shape = SubResource("RectangleShape2D_0j44r")
+
+[node name="zone_Degat" type="CollisionShape2D" parent="Area2D" unique_id=308274008]
+visible = false
+position = Vector2(1, -24)
+shape = SubResource("RectangleShape2D_bpnca")

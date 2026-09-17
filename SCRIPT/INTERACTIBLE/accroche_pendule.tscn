@@ -1,0 +1,16 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://SCRIPT/INTERACTIBLE/accroche_pendule.gd" id="1_pendule"]
+
+[node name="AccrochePendule" type="Node2D" groups=["GRAPPIN"]]
+script = ExtResource("1_pendule")
+couleur_anneau = Color(0.35, 0.65, 1, 1)
+couleur_active = Color(0.3, 1, 1, 1)
+
+[node name="Cable" type="Line2D" parent="."]
+visible = false
+z_index = 2
+width = 4.0
+default_color = Color(0.62, 0.04, 0.08, 1)
+begin_cap_mode = 2
+end_cap_mode = 2
