@@ -15,6 +15,10 @@ signal bar_max_request(kind: String, new_max: float)
 @export var BACK_TWEEN_DURATION: float = 1.0
 ## Durée de la montée de jauge lors d'un gain de sang (courte = nerveuse)
 @export var BLOODHEAL_GAIN_TWEEN_DURATION: float = 0.3
+## Soin : durée pendant laquelle la pastille pleine consommée se vide (son fantôme)
+@export var BLOODHEAL_CONSO_DUREE: float = 0.35
+## Soin : durée du report, le reste entamé glisse dans la pastille libérée
+@export var BLOODHEAL_REPORT_DUREE: float = 0.25
 
 ## Espace horizontal (px écran) entre deux barres de bloodheal
 @export var BLOODHEAL_ESPACEMENT: float = 2.0
@@ -155,6 +159,8 @@ func _on_health_request(amount: float) -> void:
 # ==================================================
 
 var _bloodheal_gain_tween: Tween = null
+var _bloodheal_depense_tween: Tween = null      # dépense « par pastilles » en vol
+var _bh_tweens_fantomes: Array[Tween] = []      # fantômes du vidage continu en vol
 
 ## valeur affichée par la barre n°i pour une réserve totale `total`
 ## (les barres se remplissent de gauche à droite, chacune jusqu'à un soin)
@@ -172,8 +178,10 @@ func _on_bloodheal_request(amount: float) -> void:
 	# On TUE d'abord un éventuel tween de gain en vol : sinon il réécrivait
 	# les barres vers le haut après une dépense (bug de la jauge affichée
 	# pleine après un soin post-récolte)
-	if _bloodheal_gain_tween != null and _bloodheal_gain_tween.is_valid():
-		_bloodheal_gain_tween.kill()
+	if _bh_couper_animations():
+		# une DÉPENSE animée a été coupée (coup porté juste après un soin) : on
+		# repart de l'état VRAI d'avant cette requête, tassé à gauche
+		_bh_caler(clampf(total - amount, 0.0, _max_bloodheal))
 
 	if amount >= 0.0:
 		# GAIN : montée progressive et rapide, barre après barre
@@ -187,8 +195,11 @@ func _on_bloodheal_request(amount: float) -> void:
 				continue
 			_bloodheal_gain_tween.tween_property(_bh_bars[i], "value", cible, BLOODHEAL_GAIN_TWEEN_DURATION)
 			_bloodheal_gain_tween.tween_property(_bh_back_bars[i], "value", cible, BLOODHEAL_GAIN_TWEEN_DURATION)
+	elif _bh_depense_par_pastilles(clampf(total - amount, 0.0, _max_bloodheal), total):
+		pass  # un soin : pastille pleine consommée, puis report du reste (voir la fonction)
 	else:
-		# DÉPENSE : front instant, fantôme qui suit en tween, barre par barre
+		# DÉPENSE partielle (pas un nombre entier de pastilles) : vidage continu,
+		# front instant, fantôme qui suit en tween, barre par barre
 		for i in _bh_bars.size():
 			var cible := _bh_valeur_barre(i, total)
 			var avant: float = _bh_bars[i].value
@@ -196,10 +207,75 @@ func _on_bloodheal_request(amount: float) -> void:
 				continue
 			_bh_bars[i].value = cible
 			_bh_back_bars[i].value = avant
-			_bh_back_bars[i].create_tween() \
+			var tf := _bh_back_bars[i].create_tween() \
 				.set_trans(Tween.TRANS_QUAD) \
-				.set_ease(Tween.EASE_OUT) \
-				.tween_property(_bh_back_bars[i], "value", cible, BACK_TWEEN_DURATION)
+				.set_ease(Tween.EASE_OUT)
+			tf.tween_property(_bh_back_bars[i], "value", cible, BACK_TWEEN_DURATION)
+			_bh_tweens_fantomes.append(tf)
+
+
+## cale fronts ET fantômes sur l'état « tassé à gauche » d'une réserve `total`
+func _bh_caler(total: float) -> void:
+	for i in _bh_bars.size():
+		var v := _bh_valeur_barre(i, total)
+		_bh_bars[i].value = v
+		_bh_back_bars[i].value = v
+
+
+## coupe les animations de jauge en vol ; true si une DÉPENSE animée a été coupée
+func _bh_couper_animations() -> bool:
+	if _bloodheal_gain_tween != null and _bloodheal_gain_tween.is_valid():
+		_bloodheal_gain_tween.kill()
+	var depense_coupee := false
+	if _bloodheal_depense_tween != null and _bloodheal_depense_tween.is_valid():
+		_bloodheal_depense_tween.kill()
+		depense_coupee = true
+	_bloodheal_depense_tween = null
+	for t in _bh_tweens_fantomes:
+		if t != null and t.is_valid():
+			t.kill()
+			depense_coupee = true
+	_bh_tweens_fantomes.clear()
+	return depense_coupee
+
+
+## Dépense d'un nombre ENTIER de pastilles (un soin = une pastille). La jauge ne
+## se vide PAS comme une barre continue : la pastille PLEINE la plus à droite est
+## consommée d'un bloc (son fantôme se vide vite, on la voit partir), puis le
+## reste entamé glisse à gauche dans la place libérée. L'état final est le même
+## que tassé à gauche. Retourne false si la dépense n'est pas un nombre entier
+## de pastilles : l'appelant fait alors le vidage continu classique.
+func _bh_depense_par_pastilles(avant: float, apres: float) -> bool:
+	var barre := float(Player.BARRE_BLOODHEAL)
+	var nb_conso := int(round((avant - apres) / barre))
+	if nb_conso < 1 or not is_equal_approx(avant - apres, barre * float(nb_conso)):
+		return false
+	var pleines := int(floor(avant / barre + 0.0001))   # pastilles pleines avant la dépense
+	if pleines < nb_conso or pleines > _bh_bars.size():
+		return false
+	_bh_caler(avant)                       # base vraie : l'état d'avant, tassé à gauche
+	var premiere := pleines - nb_conso     # première pastille consommée
+	var tw := create_tween().set_parallel(true)
+	_bloodheal_depense_tween = tw
+	# 1) consommation : le front tombe à zéro tout de suite, le fantôme se vide vite
+	for i in range(premiere, pleines):
+		_bh_bars[i].value = 0.0
+		tw.tween_property(_bh_back_bars[i], "value", 0.0, BLOODHEAL_CONSO_DUREE) \
+			.set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	# 2) report : tout se retasse à gauche, fronts et fantômes ensemble (c'est un
+	#    déplacement, pas une perte : aucun fantôme à la traîne)
+	var premier := true
+	for i in range(premiere, _bh_bars.size()):
+		var cible := _bh_valeur_barre(i, apres)
+		var depart := 0.0 if i < pleines else _bh_valeur_barre(i, avant)
+		if is_equal_approx(depart, cible):
+			continue
+		for b in [_bh_bars[i], _bh_back_bars[i]]:
+			var t := tw.chain() if premier else tw
+			premier = false
+			t.tween_property(b, "value", cible, BLOODHEAL_REPORT_DUREE) \
+				.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+	return true
 
 
 ## La capacité max a changé (barre gagnée…) : on reconstruit la rangée
@@ -212,8 +288,7 @@ func _apply_bloodheal_bar_max(new_max: float, _tween: bool = true) -> void:
 ## Player.nb_barres_bloodheal − 1, décalées vers la droite. Chaque barre a la
 ## largeur d'un soin (marges fixes + BLOODHEAL_PX_PER_POINT × BARRE_BLOODHEAL).
 func _build_bloodheal_bars() -> void:
-	if _bloodheal_gain_tween != null and _bloodheal_gain_tween.is_valid():
-		_bloodheal_gain_tween.kill()
+	_bh_couper_animations()
 	# purge les copies d'une construction précédente (on garde les gabarits)
 	for b in _bh_bars:
 		if b != bloodheal_bar:

@@ -714,7 +714,12 @@ func jump_input(event: InputEvent) -> void:
 		if _raycast_hits_group(climbcast_right, "GRIFFE") and absf(velocity.x) > 0.0:
 			change_state(States.WALL_GRIFFE)
 			return
-	if Input.is_action_just_pressed("jump"):
+	# _fresh_press et pas is_action_just_pressed : la pression qui vient de nous
+	# faire ENTRER dans JUMP reste « juste pressée » toute la frame. Un 2e événement
+	# dans cette frame (le stick tenu sur une échelle en envoie sans arrêt) repassait
+	# ici et consommait le double saut aussitôt. Invisible depuis le sol (le double
+	# saut y est refusé), mais pas depuis une échelle, une corde ou un saut de grâce.
+	if _fresh_press("jump"):
 		if _try_double_jump():
 			return
 	if _fresh_press("esquive") and _try_air_dash():
