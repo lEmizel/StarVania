@@ -2,6 +2,7 @@
 
 [ext_resource type="Script" uid="uid://dftar4ptyhjxe" path="res://SCRIPT/UTILITAIRE/spawnplayer.gd" id="1_kudm0"]
 [ext_resource type="PackedScene" uid="uid://ckxwmy0iav2h2" path="res://SCRIPT/INTERACTIBLE/Checkpoint.tscn" id="2_o3jev"]
+[ext_resource type="PackedScene" uid="uid://mluwyom1v02y" path="res://SCRIPT/INTERACTIBLE/piques 400x100.tscn" id="3_36kjk"]
 [ext_resource type="PackedScene" uid="uid://jxp4cxeqdyhv" path="res://SCRIPT/grayboxing/400x100.tscn" id="3_fikys"]
 [ext_resource type="PackedScene" uid="uid://cxb1r4knfgy12" path="res://SCRIPT/grayboxing/400x200 slide.tscn" id="4_uqm6n"]
 [ext_resource type="PackedScene" uid="uid://c1t2vi32cjp0d" path="res://SCRIPT/grayboxing/200x50.tscn" id="5_f14ug"]
@@ -22,6 +23,15 @@ script = ExtResource("1_kudm0")
 [node name="interactible" type="Node2D" parent="." unique_id=580635241]
 
 [node name="checkpoint" parent="interactible" unique_id=524856083 groups=["Checkpoint"] instance=ExtResource("2_o3jev")]
+
+[node name="piques 400x100" parent="interactible" unique_id=1466333129 instance=ExtResource("3_36kjk")]
+position = Vector2(1727, -496)
+scale = Vector2(1, -1)
+
+[node name="piques 400x101" parent="interactible" unique_id=314187308 instance=ExtResource("3_36kjk")]
+position = Vector2(2164, -564)
+rotation = -1.5707964
+scale = Vector2(-1, 1)
 
 [node name="grayboxing" type="Node2D" parent="." unique_id=1122596716]
 
@@ -98,7 +108,7 @@ position = Vector2(269.49805, -1398)
 
 [node name="SAWBLADE" parent="." unique_id=388117046 instance=ExtResource("10_gugmh")]
 position = Vector2(-280, -1177)
-frame_progress = 0.1251319
+frame_progress = 0.92357874
 position_a = Vector2(-280, -1177)
 position_b = Vector2(-280, -425)
 

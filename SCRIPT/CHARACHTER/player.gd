@@ -235,14 +235,27 @@ func apply_damage(amount: int, source_x, source_tag := "?") -> void:
 	velocity.y = HIT_KNOCK_Y
 
 
-## Renvoi vertical des dégâts d'environnement (piques…)
-@export var ENV_KNOCK_Y: float = -1100.0
+## Renvoi des dégâts d'environnement (piques, scie). Le danger fournit une
+## DIRECTION de repoussée et chaque axe a sa force (sept. 2026 : avant, le renvoi
+## était toujours vers le haut : une pique de plafond nous renvoyait DANS elle).
+@export var ENV_KNOCK_Y: float = -1100.0           ## vers le HAUT (piques au sol), inchangé
+@export var ENV_KNOCK_BAS: float = 500.0           ## vers le BAS (piques de plafond) : on décroche, la gravité fait le reste
+@export var ENV_KNOCK_X: float = 1300.0            ## sur le CÔTÉ (piques murales, flanc d'une scie), comme un coup de monstre
+@export var ENV_KNOCK_SOULEVEMENT: float = 450.0   ## petit saut ajouté à une poussée latérale, pour décoller du sol
 
-## Dégâts d'environnement (piques & co) : perte de cœur(s), renvoi VERTICAL
-## fort — pas de poussée horizontale — et recharge du double saut + dash
-## pour pouvoir se rattraper. Roulade et dash rendent invulnérable,
-## comme contre les ennemis.
-func apply_environment_damage(amount: int) -> void:
+
+## centre du corps (milieu de la hitbox debout), pour les dangers à repoussée
+## radiale (scie) : les pieds sont trop bas pour donner une bonne direction
+func centre_corps() -> Vector2:
+	return collision_normale.global_position
+
+
+## Dégâts d'environnement (piques & co) : perte de cœur(s), renvoi fort dans la
+## `direction` fournie par le danger (le sens où pointent les piques, ou du
+## centre de la scie vers nous), et recharge du double saut + dash pour pouvoir
+## se rattraper. Roulade et dash rendent invulnérable, comme contre les
+## ennemis. Sans direction : vers le haut, comme avant.
+func apply_environment_damage(amount: int, direction: Vector2 = Vector2.UP) -> void:
 	if current_state in [States.DEAD, States.HIT, States.ROLL, States.DASH]:
 		return
 	print("[DMG] f=", Engine.get_physics_frames(),
@@ -254,9 +267,20 @@ func apply_environment_damage(amount: int) -> void:
 		_knock = Vector2.ZERO
 		change_state(States.DEAD)
 		return
-	_knock = Vector2.ZERO
+	var d := direction.normalized() if direction.length_squared() > 0.0001 else Vector2.UP
+	# latéral : poussée absolue amortie, le même mécanisme que les coups de monstres
+	_knock = Vector2(d.x * ENV_KNOCK_X, 0.0)
 	change_state(States.HIT)
-	velocity.y = ENV_KNOCK_Y   # après hit_enter (qui remet velocity à zéro)
+	# vertical : impulsion one-shot, APRÈS hit_enter (qui remet velocity à zéro)
+	# haut, bas et soulèvement se raccordent SANS seuil : une pique murale donne
+	# d.y = ±0,00000004 (flottants) et un joueur qui tombe est vite quelques
+	# pixels sous le centre d'une scie ; un test « d.y <= 0 » sautait dans ces cas
+	var haut := maxf(-d.y, 0.0) * absf(ENV_KNOCK_Y)
+	var bas := maxf(d.y, 0.0) * ENV_KNOCK_BAS
+	# poussée latérale : petit soulèvement pour décoller du sol, qui s'efface à
+	# mesure que le danger pousse vers le bas
+	var soulevement := ENV_KNOCK_SOULEVEMENT * absf(d.x) * (1.0 - maxf(d.y, 0.0))
+	velocity.y = bas - maxf(haut, soulevement)
 	_recharge_air_moves()
 
 
