@@ -1,0 +1,46 @@
+[gd_scene format=3 uid="uid://duvx7j61qskv3"]
+
+[ext_resource type="Texture2D" uid="uid://dj3l8wq1ailve" path="res://MEDIA/greyboxing/200x50.png" id="1_ic38t"]
+[ext_resource type="PackedScene" path="res://SCRIPT/SHADER/jet_flamme.tscn" id="2_7ldul"]
+[ext_resource type="Script" path="res://SCRIPT/INTERACTIBLE/piege_de_flamme.gd" id="3_piege"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_gu8qg"]
+size = Vector2(200, 50)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_35hhg"]
+size = Vector2(189.5, 158.5)
+
+[node name="piege_de_flamme" type="Node2D" unique_id=1517354040]
+script = ExtResource("3_piege")
+
+[node name="StaticBody2D" type="StaticBody2D" parent="." unique_id=1378735891]
+visible = false
+position = Vector2(0.25, -102.75)
+collision_layer = 3
+collision_mask = 3
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="StaticBody2D" unique_id=2116749039]
+position = Vector2(-0.25, 102.75)
+shape = SubResource("RectangleShape2D_gu8qg")
+
+[node name="Area2D" type="Area2D" parent="." unique_id=95584925]
+visible = false
+
+[node name="zonededegat" type="CollisionShape2D" parent="Area2D" unique_id=550507838]
+position = Vector2(0.25, -102.75)
+shape = SubResource("RectangleShape2D_35hhg")
+
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=251869698]
+texture = ExtResource("1_ic38t")
+
+[node name="JetFlamme" parent="." unique_id=1003743659 instance=ExtResource("2_7ldul")]
+position = Vector2(73, -26)
+scale = Vector2(0.37, 0.37)
+
+[node name="JetFlamme2" parent="." unique_id=761981168 instance=ExtResource("2_7ldul")]
+position = Vector2(0, -26)
+scale = Vector2(0.37, 0.37)
+
+[node name="JetFlamme3" parent="." unique_id=234198554 instance=ExtResource("2_7ldul")]
+position = Vector2(-75, -26)
+scale = Vector2(0.37, 0.37)

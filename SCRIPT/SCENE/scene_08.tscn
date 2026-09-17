@@ -4,6 +4,8 @@
 [ext_resource type="PackedScene" uid="uid://ckxwmy0iav2h2" path="res://SCRIPT/INTERACTIBLE/Checkpoint.tscn" id="2_a2il2"]
 [ext_resource type="PackedScene" uid="uid://dx851ijsrvbgf" path="res://SCRIPT/grayboxing/400x200.tscn" id="3_danr8"]
 [ext_resource type="PackedScene" uid="uid://cbbnunbqbc3sa" path="res://SCRIPT/INTERACTIBLE/pique_retractable.tscn" id="4_a2il2"]
+[ext_resource type="PackedScene" uid="uid://duvx7j61qskv3" path="res://SCRIPT/INTERACTIBLE/piege_de_flamme.tscn" id="5_lmwkn"]
+[ext_resource type="PackedScene" uid="uid://bs1685hwv6d0w" path="res://SCRIPT/MONSTER/SKELETON.tscn" id="6_8gtq1"]
 
 [node name="scene_08" type="Node2D" unique_id=1958345523]
 
@@ -41,22 +43,19 @@ position = Vector2(894.25, -47)
 [node name="pique_retractable5" parent="." unique_id=660945545 instance=ExtResource("4_a2il2")]
 position = Vector2(1094, -47)
 
-[node name="pique_retractable6" parent="." unique_id=21986762 instance=ExtResource("4_a2il2")]
-position = Vector2(1778, -219)
-rotation = -1.5707964
+[node name="piege_de_flamme" parent="." unique_id=1517354040 instance=ExtResource("5_lmwkn")]
+position = Vector2(1694.75, 26)
 
-[node name="pique_retractable7" parent="." unique_id=1814083410 instance=ExtResource("4_a2il2")]
-position = Vector2(1778, -418.75)
-rotation = -1.5707964
+[node name="piege_de_flamme2" parent="." unique_id=40215102 instance=ExtResource("5_lmwkn")]
+position = Vector2(1894.75, 26)
+decale = true
 
-[node name="pique_retractable8" parent="." unique_id=1661895379 instance=ExtResource("4_a2il2")]
-position = Vector2(1778, -618.5)
-rotation = -1.5707964
+[node name="piege_de_flamme3" parent="." unique_id=1073525089 instance=ExtResource("5_lmwkn")]
+position = Vector2(2094.75, 26)
 
-[node name="pique_retractable9" parent="." unique_id=1543390094 instance=ExtResource("4_a2il2")]
-position = Vector2(1665, -418.25)
-rotation = 1.5707964
+[node name="piege_de_flamme4" parent="." unique_id=1868906985 instance=ExtResource("5_lmwkn")]
+position = Vector2(2294.75, 26)
+decale = true
 
-[node name="pique_retractable10" parent="." unique_id=2045841552 instance=ExtResource("4_a2il2")]
-position = Vector2(1665, -618)
-rotation = 1.5707964
+[node name="enemi2" parent="." unique_id=627255339 instance=ExtResource("6_8gtq1")]
+position = Vector2(1351, -4)

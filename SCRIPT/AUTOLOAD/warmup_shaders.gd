@@ -29,6 +29,7 @@ extends Node
 ## pipeline dépend du code du shader, pas des valeurs.
 const SHADERS: Array[String] = [
 	"res://SCRIPT/SHADER/flamme_cartoon.gdshader",     # flamme.tscn
+	"res://SCRIPT/SHADER/jet_flamme.gdshader",         # jet_flamme.tscn (prototype, sept. 2026)
 	"res://SCRIPT/SHADER/flou_fond.gdshader",          # flou de fond (scene_06, scene_7)
 	"res://SCRIPT/SCENE/ss.gdshader",                  # cadre mur griffe, grotte
 	"res://SCRIPT/SCENE/scene_3.gdshader",             # décor de scene_3
