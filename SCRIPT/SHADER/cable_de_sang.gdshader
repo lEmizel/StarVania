@@ -14,10 +14,19 @@ render_mode unshaded;
 // qui change à chaque frame pendant le lancer, et les gouttes tomberaient de
 // travers dès que le câble n'est pas vertical.
 //
-// PRINCIPE : le câble n'est pas un trait, c'est un vaisseau. Son axe serpente
-// (mais revient exactement sur ses deux ancrages), son épaisseur bat au rythme
-// de caillots qui remontent vers la main, et du sang perle sur son flanc bas
-// avant de se détacher.
+// PRINCIPE : le câble n'a AUCUNE silhouette. Ce n'est pas un tuyau dont le bord
+// s'effiloche, c'est une traînée de BRUME : une décroissance douce depuis l'axe,
+// multipliée par une matière bruitée qui dérive. Ce qui est dense se voit, le
+// reste s'évapore — et comme la matière bouge, tout se dissout en permanence,
+// y compris au milieu. Un bord franc ne peut pas réapparaître : il n'existe pas.
+//
+// Son axe serpente quand même (mais revient exactement sur ses deux ancrages)
+// et des caillots plus denses remontent vers la main : c'est ce qui empêche la
+// brume de n'être qu'un flou et lui donne un sens de circulation.
+//
+// Le trait d'encre et les gouttes existent toujours dans le code, mais sont
+// ÉTEINTS par défaut (`contour` et `gouttes` à 0) : ils racontent un liquide
+// solide, l'inverse d'une brume.
 
 // --- renseignés par accroche_grappin.gd ---
 uniform float longueur = 300.0;    // longueur du câble, en pixels
@@ -26,7 +35,7 @@ uniform vec2 bas_local = vec2(0.0, 1.0);   // "vers le bas" du monde, dans le re
 
 // --- réglages ---
 // épaisseur du câble au repos, en pixels
-uniform float epaisseur : hint_range(1.0, 40.0) = 10.0;
+uniform float epaisseur : hint_range(1.0, 40.0) = 13.0;
 // grumeaux : 0 = tuyau régulier, 1 = boyau noueux
 uniform float renflement : hint_range(0.0, 1.0) = 0.45;
 // ondulation de l'axe, en pixels (0 = câble tendu au cordeau)
@@ -35,10 +44,30 @@ uniform float serpentement : hint_range(0.0, 10.0) = 2.5;
 uniform float vitesse_pulse : hint_range(-6.0, 6.0) = 2.2;
 // distance entre deux caillots, en pixels
 uniform float pas_pulse : hint_range(20.0, 400.0) = 90.0;
-// suintement : 0 = câble sec, 1 = il dégouline
-uniform float gouttes : hint_range(0.0, 1.0) = 1.0;
+// suintement : 0 = aucune goutte (défaut : une goutte, c'est du liquide qui
+// tient, ça contredit la brume). Laissé pour une variante future
+uniform float gouttes : hint_range(0.0, 1.0) = 0.0;
 // halo autour du câble
 uniform float lueur : hint_range(0.0, 1.0) = 0.5;
+
+// --- BRUME ---
+// part de la matière laissée au bruit. 0 = traînée pleine et régulière,
+// 1 = le bruit décide de tout, y compris au centre
+uniform float dissolution : hint_range(0.0, 1.0) = 0.80;
+// étalement de la brume autour de l'axe (1 = la largeur d'`epaisseur`)
+uniform float etalement : hint_range(0.5, 3.0) = 1.35;
+// douceur du fondu : petit = volutes encore marquées, grand = vapeur
+uniform float douceur : hint_range(0.05, 1.2) = 0.45;
+// opacité d'ensemble
+uniform float densite : hint_range(0.2, 2.0) = 1.0;
+// seuil d'existence : ce qui est en dessous n'est PAS dessiné. C'est lui qui
+// creuse les trous et détache les volutes. Trop bas, la brume redevient un
+// tuyau plein ; trop haut, le câble se coupe en morceaux
+uniform float seuil : hint_range(0.0, 0.7) = 0.30;
+// taille des volutes (petit = grosses masses, grand = fine poussière)
+uniform float brume_grain : hint_range(0.01, 0.40) = 0.09;
+// vitesse à laquelle la brume file le long du câble
+uniform float brume_vitesse : hint_range(0.0, 10.0) = 2.5;
 // grosse tête à la pointe : le crochet qui mord l'accroche
 uniform float pointe : hint_range(0.0, 1.5) = 0.7;
 // décale le bruit : une valeur par accroche, sinon deux câbles sont identiques
@@ -49,12 +78,12 @@ uniform int nb_bandes : hint_range(2, 8) = 4;
 
 // épaisseur du trait d'encre au bord, en PIXELS (0 = pas de contour). Le jeu
 // est dessiné au trait : sans lui le câble ne ressemble à rien de la scène
-uniform float contour : hint_range(0.0, 5.0) = 2.2;
+uniform float contour : hint_range(0.0, 5.0) = 0.0;
 uniform vec4 contour_color : source_color = vec4(0.07, 0.0, 0.02, 1.0);
 uniform vec4 outer_color : source_color = vec4(0.33, 0.0, 0.05, 1.0);
 uniform vec4 middle_color : source_color = vec4(0.62, 0.04, 0.08, 1.0);
 uniform vec4 inner_color : source_color = vec4(0.86, 0.08, 0.09, 1.0);
-uniform vec4 core_color : source_color = vec4(1.00, 0.80, 0.60, 1.0);
+uniform vec4 core_color : source_color = vec4(1.00, 0.66, 0.56, 1.0);
 
 
 // BRUIT À GRADIENTS, hash SANS sin (le hash sin perd sa précision GPU quand le
@@ -172,9 +201,28 @@ void fragment() {
 	demi *= 1.0 + pointe * smoothstep(0.84, 1.0, UV.x);
 	demi = max(demi, 0.6);
 
+	// ===================== LA BRUME =====================
+	// distance à l'axe, en "épaisseurs" : aucune frontière, juste un éloignement
+	float r = abs(travers - axe) / (max(demi, 0.6) * etalement);
+	// noyau : décroissance douce, jamais de bord
+	float noyau = exp(-r * r * 0.9);
+
+	// LA MATIÈRE EST LE BRUIT, et elle dérive le long du câble. Deux échelles :
+	// les grosses volutes portent la forme, les fines la déchirent.
+	float m1 = fbm(vec2(le_long * brume_grain - t * brume_vitesse,
+		travers * brume_grain * 1.4 + t * 0.8 + graine * 3.0));
+	float m2 = fbm(vec2(le_long * brume_grain * 2.6 - t * brume_vitesse * 1.7,
+		travers * brume_grain * 3.0 + t * 1.4 + graine));
+	float matiere = m1 * 0.65 + m2 * 0.35;
+
+	// Densité : le noyau donne l'allure générale, la matière la ronge PARTOUT.
+	// Le bruit doit faire passer la masse AU-DESSUS ET EN DESSOUS du seuil,
+	// sinon l'alpha sature et on retrouve un tuyau plein à bord franc.
+	float force = noyau * (1.0 - dissolution * 0.5 + dissolution * (matiere - 0.5) * 2.2);
+	float masse = force - seuil;
+
+	// les gouttes et l'encre ne servent qu'à la variante "liquide" (éteintes)
 	float d = abs(travers - axe) - demi;
-	// échelle locale : l'épaisseur du câble, ou le rayon de la goutte si c'est
-	// elle qu'on est en train de peindre
 	float echelle = demi;
 	if (gouttes > 0.001) {
 		vec2 dg = champ_gouttes(p, axe, demi, t);
@@ -182,17 +230,16 @@ void fragment() {
 			d = dg.x;
 			echelle = dg.y;
 		}
+		masse = max(masse, (-dg.x / max(dg.y, 1.0)) * 0.9);
 	}
 	echelle = max(echelle, 1.0);
 
-	// CHALEUR : 1 au cœur du câble, 0 sur son bord. Les caillots l'éclaircissent
-	// au passage — c'est ce qui fait lire un liquide qui circule.
-	// Le cœur clair ne doit PAS être un filet continu au milieu : ça donne un
-	// néon. Il n'atteint la couleur de cœur que là où un caillot passe, donc
-	// l'éclat REMONTE le câble au lieu de rester posé dessus.
-	float chaleur = clamp(-d / echelle, 0.0, 1.0);
-	float eclat = 0.60 + 0.52 * pulse * (0.55 + 0.45 * grain);
-	chaleur = pow(chaleur, 1.25) * eclat;
+	float alpha = clamp(masse / douceur, 0.0, 1.0) * densite;
+	alpha = clamp(alpha, 0.0, 1.0);
+
+	// CHALEUR : c'est la densité qui décide de la couleur, plus aucune distance.
+	// Les caillots l'éclaircissent au passage : l'éclat REMONTE le câble.
+	float chaleur = clamp(masse * 1.9, 0.0, 1.0) * (0.66 + 0.50 * pulse * (0.55 + 0.45 * grain));
 	chaleur = clamp(chaleur, 0.0, 1.0);
 	if (style_cartoon > 0.5) {
 		float n = float(nb_bandes);
@@ -202,20 +249,19 @@ void fragment() {
 
 	vec3 col = mix(outer_color.rgb, middle_color.rgb, smoothstep(0.0, 0.45, chaleur));
 	col = mix(col, inner_color.rgb, smoothstep(0.42, 0.75, chaleur));
-	col = mix(col, core_color.rgb, smoothstep(0.80, 1.0, chaleur));
+	// le cœur clair reste RARE : dans une brume, un gros aplat crème fait de la
+	// chair, pas de la vapeur
+	col = mix(col, core_color.rgb, smoothstep(0.93, 1.0, chaleur));
 
-	// corps net (antialiasé sur un pixel) + halo qui déborde
-	// trait d'encre : une largeur FIXE en pixels, pas une fraction de
-	// l'épaisseur, sinon il maigrit avec le câble et le style se perd
-	// le trait suit la taille de ce qu'il entoure : à largeur fixe il noircissait
-	// les gouttes en entier
-	float trait = min(contour, echelle * 0.5);
-	col = mix(col, contour_color.rgb, smoothstep(-trait, -trait * 0.25, d));
+	// trait d'encre : éteint par défaut, il raconte un corps solide
+	if (contour > 0.01) {
+		float trait = min(contour, echelle * 0.5);
+		col = mix(col, contour_color.rgb, smoothstep(-trait, -trait * 0.25, d)
+			* (1.0 - smoothstep(0.0, 4.0, d)));
+	}
 
-	float corps = 1.0 - smoothstep(0.0, 1.2, d);
-	float halo = lueur * 0.40 * exp(-max(d, 0.0) / 5.0) * (1.0 - corps);
-	float alpha = clamp(corps + halo, 0.0, 1.0);
-	col = mix(outer_color.rgb, col, corps);
+	// halo : un reste de lueur sous la brume
+	alpha = clamp(alpha + lueur * 0.30 * noyau * noyau, 0.0, 1.0);
 
 	COLOR = vec4(col, alpha);
 }

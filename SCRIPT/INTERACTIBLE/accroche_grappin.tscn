@@ -1,7 +1,7 @@
-[gd_scene format=3]
+[gd_scene format=3 uid="uid://jkojvyshl67j"]
 
-[ext_resource type="Script" path="res://SCRIPT/INTERACTIBLE/accroche_grappin.gd" id="1_accroche"]
-[ext_resource type="Shader" path="res://SCRIPT/SHADER/cable_de_sang.gdshader" id="2_cable"]
+[ext_resource type="Script" uid="uid://fo71spqw5bw4" path="res://SCRIPT/INTERACTIBLE/accroche_grappin.gd" id="1_accroche"]
+[ext_resource type="Shader" uid="uid://crl7ac8te3hoy" path="res://SCRIPT/SHADER/cable_de_sang.gdshader" id="2_cable"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_cable"]
 resource_local_to_scene = true
@@ -9,33 +9,49 @@ shader = ExtResource("2_cable")
 shader_parameter/longueur = 300.0
 shader_parameter/largeur = 50.0
 shader_parameter/bas_local = Vector2(0, 1)
-shader_parameter/epaisseur = 10.0
-shader_parameter/renflement = 0.45
-shader_parameter/serpentement = 2.5
-shader_parameter/vitesse_pulse = 2.2
-shader_parameter/pas_pulse = 90.0
-shader_parameter/gouttes = 1.0
-shader_parameter/lueur = 0.35
-shader_parameter/pointe = 0.55
-shader_parameter/graine = 0.0
+shader_parameter/epaisseur = 6.9310002817225005
+shader_parameter/renflement = 0.5010000237975
+shader_parameter/serpentement = 3.5010001662975
+shader_parameter/vitesse_pulse = 2.849999996001884e-07
+shader_parameter/pas_pulse = 357.4070160268325
+shader_parameter/gouttes = 0.0
+shader_parameter/lueur = 0.414000019665
+shader_parameter/dissolution = 0.76800003648
+shader_parameter/etalement = 1.558000050255
+shader_parameter/douceur = 0.43900001922256
+shader_parameter/densite = 1.10800004611023
+shader_parameter/seuil = 0.2
+shader_parameter/brume_grain = 0.055
+shader_parameter/brume_vitesse = 2.5
+shader_parameter/pointe = 0.7
+shader_parameter/graine = 60.91497271186515
 shader_parameter/style_cartoon = 1.0
 shader_parameter/nb_bandes = 4
-shader_parameter/contour = 2.2
+shader_parameter/contour = 0.0
 shader_parameter/contour_color = Color(0.07, 0, 0.02, 1)
 shader_parameter/outer_color = Color(0.33, 0, 0.05, 1)
 shader_parameter/middle_color = Color(0.62, 0.04, 0.08, 1)
 shader_parameter/inner_color = Color(0.86, 0.08, 0.09, 1)
-shader_parameter/core_color = Color(1, 0.8, 0.6, 1)
+shader_parameter/core_color = Color(0.9999874, 0.36387488, 0.16725919, 1)
 
-[node name="AccrocheGrappin" type="Node2D" groups=["GRAPPIN"]]
+[sub_resource type="Image" id="Image_w2hjv"]
+data = {
+"data": PackedByteArray(255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255),
+"format": "RGBA8",
+"height": 4,
+"mipmaps": false,
+"width": 4
+}
+
+[sub_resource type="ImageTexture" id="ImageTexture_2n23d"]
+image = SubResource("Image_w2hjv")
+
+[node name="AccrocheGrappin" type="Node2D" unique_id=1635525328 groups=["GRAPPIN"]]
 script = ExtResource("1_accroche")
 
-[node name="Cable" type="Line2D" parent="."]
-material = SubResource("ShaderMaterial_cable")
-visible = false
+[node name="Cable" type="Line2D" parent="." unique_id=1939149805]
 z_index = 2
+material = SubResource("ShaderMaterial_cable")
 width = 50.0
-default_color = Color(1, 1, 1, 1)
+texture = SubResource("ImageTexture_2n23d")
 texture_mode = 2
-begin_cap_mode = 0
-end_cap_mode = 0
