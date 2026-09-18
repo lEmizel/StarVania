@@ -143,6 +143,9 @@ func idle_enter() -> void:
 
 func idle_execute(delta: float) -> void:
 	velocity.y += gravity * delta
+	if _en_cast():
+		velocity.x = 0.0      # il est planté le temps de son geste (voir _en_cast)
+		return
 	if target:
 		flip_toward(target.global_position.x)
 		# idle AVEC cible = frustration (cible hors de portée) : au bout
@@ -384,19 +387,29 @@ func _physics_process(delta: float) -> void:
 
 
 func _tick_boule_de_feu(delta: float) -> void:
-	# une boule en charge : la main est levée, elle part au bout du délai
-	if _charge >= 0.0:
-		if current_state == States.DEAD or current_state == States.ATTACK:
-			_charge = -1.0                    # geste interrompu : rien ne part
-		else:
-			_charge -= delta
-			if _charge <= 0.0:
-				_charge = -1.0
-				_tirer_boule_de_feu()
+	# LE GESTE EN COURS : main levée, puis tir au bout du délai.
 	if _pose_cast > 0.0:
-		_pose_cast -= delta
-		if _pose_cast <= 0.0:
-			_fin_pose_cast()
+		if current_state == States.DEAD or current_state == States.ATTACK:
+			# il meurt ou il frappe au corps à corps : le geste n'aboutit pas et on
+			# rend la main tout de suite à l'animation de son état
+			_charge = -1.0
+			_pose_cast = 0.0
+		else:
+			# la pose doit TENIR jusqu'au bout. Tout changement d'état rejoue
+			# l'animation de SON état (walk, idle…) par-dessus : sans ce rappel, le
+			# squelette repassait en "walk" au milieu de son sort et, le déplacement
+			# étant gelé, il marchait sur place en lançant sa boule (vu par Kaoru
+			# le 18 sept. 2026).
+			if String(animator.animation) != "cast":
+				animator.play("cast")
+			if _charge >= 0.0:
+				_charge -= delta
+				if _charge <= 0.0:
+					_charge = -1.0
+					_tirer_boule_de_feu()
+			_pose_cast -= delta
+			if _pose_cast <= 0.0:
+				_fin_pose_cast()
 	_cast_timer = maxf(_cast_timer - delta, 0.0)
 
 	var a_cible: bool = target != null and is_instance_valid(target)
