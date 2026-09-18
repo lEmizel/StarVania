@@ -32,6 +32,7 @@ const SHADERS: Array[String] = [
 	"res://SCRIPT/SHADER/jet_flamme.gdshader",         # jet_flamme.tscn (prototype, sept. 2026)
 	"res://SCRIPT/SHADER/boule_de_feu.gdshader",       # boule_de_feu.tscn (projectile, sept. 2026)
 	"res://SCRIPT/SHADER/explosion_violette.gdshader", # explosion du kamikaze (sept. 2026)
+	"res://SCRIPT/SHADER/cable_de_sang.gdshader",    # câble du grappin (sept. 2026)
 	"res://SCRIPT/SHADER/flou_fond.gdshader",          # flou de fond (scene_06, scene_7)
 	"res://SCRIPT/SCENE/ss.gdshader",                  # cadre mur griffe, grotte
 	"res://SCRIPT/SCENE/scene_3.gdshader",             # décor de scene_3

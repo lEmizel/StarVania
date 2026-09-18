@@ -14,8 +14,10 @@ extends Node2D
 
 @export var couleur_anneau := Color(1.0, 0.9, 0.3)
 @export var couleur_active := Color(0.4, 1.0, 0.5)
+## robe du câble : pilote la couleur de corps du shader cable_de_sang
 @export var couleur_cable := Color(0.62, 0.04, 0.08)   # rouge sang
-@export var epaisseur_cable := 4.0
+## épaisseur VISIBLE du câble, en pixels (le shader fait le reste)
+@export var epaisseur_cable := 10.0
 ## rayon indicatif dessiné dans l'éditeur (la vraie portée est celle du joueur,
 ## GRAPPIN_PORTEE dans player.gd) : à garder égal pour placer juste
 @export var portee_indicative := 520.0:
@@ -23,14 +25,47 @@ extends Node2D
 		portee_indicative = v
 		queue_redraw()
 
+## Marge laissée AUTOUR du câble dans le ruban : c'est la place des gouttes,
+## des grumeaux et de la lueur. Le ruban de la Line2D est donc volontairement
+## bien plus large que le câble qu'on y voit.
+const CABLE_MARGE := 40.0
+
+const CABLE_SHADER := preload("res://SCRIPT/SHADER/cable_de_sang.gdshader")
+
 @onready var _cable: Line2D = $Cable
 var _actif := false
 
 
 func _ready() -> void:
 	add_to_group("GRAPPIN")
-	_cable.width = epaisseur_cable
-	_cable.default_color = couleur_cable
+	# Le ruban est fabriqué ICI et pas dans la scène : l'accroche pendulaire
+	# hérite de ce script sans avoir le matériau, elle aurait affiché une bande
+	# blanche de 50 px. Les valeurs posées dans une scène restent prioritaires.
+	if _cable.material == null:
+		var m := ShaderMaterial.new()
+		m.shader = CABLE_SHADER
+		_cable.material = m
+	# bouts CARRÉS : arrondis, un ruban de 50 px déborderait de 25 px au-delà
+	# de la main et de l'anneau
+	_cable.begin_cap_mode = Line2D.LINE_CAP_NONE
+	_cable.end_cap_mode = Line2D.LINE_CAP_NONE
+	_cable.texture_mode = Line2D.LINE_TEXTURE_STRETCH
+	_cable.width = epaisseur_cable + CABLE_MARGE
+	_cable.default_color = Color.WHITE       # la couleur vient du shader
+	# Une Line2D ne fabrique ses UV que si elle porte une texture : sans elle le
+	# shader n'aurait aucune coordonnée le long du câble. Quatre pixels blancs
+	# suffisent, c'est le shader qui peint.
+	if _cable.texture == null:
+		var img := Image.create_empty(4, 4, false, Image.FORMAT_RGBA8)
+		img.fill(Color.WHITE)
+		_cable.texture = ImageTexture.create_from_image(img)
+	var mat := _cable.material as ShaderMaterial
+	if mat != null:
+		mat.set_shader_parameter("epaisseur", epaisseur_cable)
+		mat.set_shader_parameter("largeur", _cable.width)
+		mat.set_shader_parameter("middle_color", couleur_cable)
+		# une graine par accroche : deux câbles ne grumellent pas pareil
+		mat.set_shader_parameter("graine", randf_range(1.0, 100.0))
 	_cable.visible = false
 	queue_redraw()
 
@@ -56,6 +91,23 @@ func surligner(actif: bool) -> void:
 func cable_montrer(depuis: Vector2, jusqua: Vector2) -> void:
 	_cable.visible = true
 	_cable.points = PackedVector2Array([to_local(depuis), to_local(jusqua)])
+	var mat := _cable.material as ShaderMaterial
+	if mat == null:
+		return
+	var v := jusqua - depuis
+	var l := v.length()
+	# la longueur change à CHAQUE image pendant le lancer : sans elle, grumeaux
+	# et gouttes s'étireraient avec le câble au lieu de garder leur taille
+	mat.set_shader_parameter("longueur", l)
+	if l < 0.001:
+		return
+	# "vers le bas" du monde, exprimé dans le repère du ruban (le long, en
+	# travers) : sinon les gouttes tomberaient perpendiculairement au câble,
+	# donc de côté dès qu'il est en diagonale
+	var tangente := v / l
+	var normale := Vector2(-tangente.y, tangente.x)
+	mat.set_shader_parameter("bas_local",
+		Vector2(Vector2.DOWN.dot(tangente), Vector2.DOWN.dot(normale)))
 
 
 func cable_cacher() -> void:

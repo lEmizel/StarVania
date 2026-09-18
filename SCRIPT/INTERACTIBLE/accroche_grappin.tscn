@@ -1,14 +1,41 @@
 [gd_scene format=3]
 
 [ext_resource type="Script" path="res://SCRIPT/INTERACTIBLE/accroche_grappin.gd" id="1_accroche"]
+[ext_resource type="Shader" path="res://SCRIPT/SHADER/cable_de_sang.gdshader" id="2_cable"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_cable"]
+resource_local_to_scene = true
+shader = ExtResource("2_cable")
+shader_parameter/longueur = 300.0
+shader_parameter/largeur = 50.0
+shader_parameter/bas_local = Vector2(0, 1)
+shader_parameter/epaisseur = 10.0
+shader_parameter/renflement = 0.45
+shader_parameter/serpentement = 2.5
+shader_parameter/vitesse_pulse = 2.2
+shader_parameter/pas_pulse = 90.0
+shader_parameter/gouttes = 1.0
+shader_parameter/lueur = 0.35
+shader_parameter/pointe = 0.55
+shader_parameter/graine = 0.0
+shader_parameter/style_cartoon = 1.0
+shader_parameter/nb_bandes = 4
+shader_parameter/contour = 2.2
+shader_parameter/contour_color = Color(0.07, 0, 0.02, 1)
+shader_parameter/outer_color = Color(0.33, 0, 0.05, 1)
+shader_parameter/middle_color = Color(0.62, 0.04, 0.08, 1)
+shader_parameter/inner_color = Color(0.86, 0.08, 0.09, 1)
+shader_parameter/core_color = Color(1, 0.8, 0.6, 1)
 
 [node name="AccrocheGrappin" type="Node2D" groups=["GRAPPIN"]]
 script = ExtResource("1_accroche")
 
 [node name="Cable" type="Line2D" parent="."]
+material = SubResource("ShaderMaterial_cable")
 visible = false
 z_index = 2
-width = 4.0
-default_color = Color(0.62, 0.04, 0.08, 1)
-begin_cap_mode = 2
-end_cap_mode = 2
+width = 50.0
+default_color = Color(1, 1, 1, 1)
+texture_mode = 2
+begin_cap_mode = 0
+end_cap_mode = 0
