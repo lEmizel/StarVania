@@ -58,6 +58,17 @@ func regler(cible: float, duree := 0.15) -> void:
 	_tween.tween_property(self, "puissance", clampf(cible, 0.0, 1.0), duree)
 
 
+## Raccourcit (ou rallonge) la traînée. Une boule qui CHARGE dans une main ne
+## vole pas : sa traînée partirait dans le corps du lanceur. À appeler APRÈS
+## `add_child`, le matériau est local à l'instance.
+func regler_trainee(longueur: float) -> void:
+	if _boule == null:
+		return
+	var mat := _boule.material as ShaderMaterial
+	if mat != null:
+		mat.set_shader_parameter("longueur_trainee", maxf(longueur, 0.0))
+
+
 func _process(delta: float) -> void:
 	if Engine.is_editor_hint() or not demo_vol:
 		return

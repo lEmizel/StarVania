@@ -349,6 +349,8 @@ func dead_execute(delta: float) -> void:
 # ---------------------------------------------------------------------------
 
 const BOULE_DE_FEU := preload("res://SCRIPT/SPELL/projectile_feu.tscn")
+## le VISUEL seul (aucun dégât) : celui qui grossit dans sa main pendant le geste
+const VISUEL_CHARGE := preload("res://SCRIPT/SHADER/boule_de_feu.tscn")
 
 @export_group("Boule de feu")
 @export var boule_de_feu_activee := true
@@ -363,6 +365,13 @@ const BOULE_DE_FEU := preload("res://SCRIPT/SPELL/projectile_feu.tscn")
 @export var delai_avant_tir := 0.65   # réglé à la manette le 18 sept. 2026 (essais : 0,5 puis 0,25 puis 0,40)
 ## temps pendant lequel la pose "cast" est encore tenue APRÈS le départ de la boule
 @export var duree_pose_cast := 0.35
+## taille FINALE de la boule qui charge dans sa main, exprimée comme celle du
+## projectile (0.77 = exactement la boule qui va partir). L'échelle du marqueur
+## est compensée, ce réglage veut donc dire la même chose où qu'on pose la main
+@export var taille_charge := 0.77
+## traînée de la boule pendant la charge : elle ne vole pas encore, une longue
+## traînée partirait dans le corps du squelette
+@export var trainee_charge := 0.15
 ## Le geste est-il en cours ? Tant qu'il l'est, il est PLANTÉ : il peut
 ## déclencher son sort en marchant, mais pas continuer à avancer pendant la
 ## pose (18 sept. 2026, demande de Kaoru). Couvre le lever de main, le délai
@@ -375,6 +384,7 @@ func _en_cast() -> bool:
 var _cast_timer := 0.0
 var _pose_cast := 0.0
 var _charge := -1.0      # >= 0 : main levée, compte à rebours avant le tir
+var _visuel_charge: Node2D = null
 var _avait_cible := false
 
 
@@ -394,6 +404,7 @@ func _tick_boule_de_feu(delta: float) -> void:
 			# rend la main tout de suite à l'animation de son état
 			_charge = -1.0
 			_pose_cast = 0.0
+			_eteindre_charge()
 		else:
 			# la pose doit TENIR jusqu'au bout. Tout changement d'état rejoue
 			# l'animation de SON état (walk, idle…) par-dessus : sans ce rappel, le
@@ -404,6 +415,7 @@ func _tick_boule_de_feu(delta: float) -> void:
 				animator.play("cast")
 			if _charge >= 0.0:
 				_charge -= delta
+				_grossir_charge()
 				if _charge <= 0.0:
 					_charge = -1.0
 					_tirer_boule_de_feu()
@@ -432,12 +444,14 @@ func _commencer_cast() -> void:
 	animator.play("cast")
 	_charge = delai_avant_tir
 	_pose_cast = delai_avant_tir + duree_pose_cast
+	_allumer_charge()
 
 
 ## Second temps : la boule part enfin, dans le sens où il regarde MAINTENANT
 ## (s'il s'est retourné pendant le geste, le tir suit son regard : jamais de
 ## boule qui part dans son dos).
 func _tirer_boule_de_feu() -> void:
+	_eteindre_charge()          # elle quitte la main : le projectile prend le relais
 	var origine: Vector2 = global_position
 	if _ancre_boule != null:
 		origine = _ancre_boule.global_position
@@ -449,6 +463,51 @@ func _tirer_boule_de_feu() -> void:
 	# même convention que bloodball.gd : la scène courante, pas le niveau
 	get_tree().current_scene.add_child(boule)
 	boule.global_position = origine
+
+
+# --- LA BOULE QUI GROSSIT DANS SA MAIN ---------------------------------------
+# L'animation "cast" ne fait qu'UNE image (main levée) : sans elle, rien ne dit
+# à l'écran ce qu'il fabrique pendant les 0,65 s d'anticipation. La boule qui
+# enfle, c'est le compte à rebours rendu visible — le joueur lit le temps qu'il
+# lui reste à la taille de la boule.
+
+func _allumer_charge() -> void:
+	_eteindre_charge()
+	if _ancre_boule == null:
+		return
+	_visuel_charge = VISUEL_CHARGE.instantiate()
+	_visuel_charge.demo_vol = false     # elle charge sur place, elle ne vole pas
+	_visuel_charge.puissance = 0.25
+	# Le marqueur de la main est placé AVANT l'animator dans la scène : sans
+	# z_index, la boule serait dessinée derrière le squelette.
+	_visuel_charge.z_index = 1
+	_ancre_boule.add_child(_visuel_charge)
+	_visuel_charge.position = Vector2.ZERO
+	_visuel_charge.scale = Vector2.ONE * _taille_charge_locale(0.12)
+	_visuel_charge.regler_trainee(trainee_charge)
+
+
+func _grossir_charge() -> void:
+	if _visuel_charge == null or not is_instance_valid(_visuel_charge):
+		return
+	var t := 1.0 - clampf(_charge / maxf(delai_avant_tir, 0.001), 0.0, 1.0)
+	_visuel_charge.scale = Vector2.ONE * _taille_charge_locale(0.12 + 0.88 * t)
+	_visuel_charge.puissance = 0.25 + 0.75 * t
+
+
+func _eteindre_charge() -> void:
+	if _visuel_charge != null and is_instance_valid(_visuel_charge):
+		_visuel_charge.queue_free()
+	_visuel_charge = null
+
+
+## Compense l'échelle du marqueur de la main (1,22 dans la scène) : `taille_charge`
+## garde le même sens que la taille du projectile, où que la main soit réglée.
+func _taille_charge_locale(part: float) -> float:
+	var compense := 1.0
+	if _ancre_boule != null:
+		compense = 1.0 / maxf(absf(_ancre_boule.scale.x), 0.01)
+	return taille_charge * part * compense
 
 
 ## remet l'animation de l'état courant après la pose de cast
