@@ -106,7 +106,7 @@ collision_mask = 2
 script = ExtResource("1_kmkz")
 
 [node name="bare_de_vie" parent="." unique_id=1546643075 instance=ExtResource("2_kteqm")]
-position = Vector2(-88, -169)
+position = Vector2(-88, -135.00002)
 scale = Vector2(0.37, 0.37)
 
 [node name="Collision" type="CollisionShape2D" parent="." unique_id=273910692]

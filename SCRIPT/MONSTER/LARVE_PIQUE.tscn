@@ -157,7 +157,7 @@ target_position = Vector2(1, 94)
 
 [node name="bare_de_vie" parent="." unique_id=1882929594 instance=ExtResource("2_hrifg")]
 light_mask = 0
-position = Vector2(-90, -232)
+position = Vector2(-90, -120)
 scale = Vector2(0.37, 0.37)
 
 [node name="Collision" type="CollisionShape2D" parent="." unique_id=287775973]

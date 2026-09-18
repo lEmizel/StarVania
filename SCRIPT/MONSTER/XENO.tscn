@@ -104,16 +104,16 @@ animations = [{
 "speed": 13.0
 }, {
 "frames": [{
-"duration": 2.0,
+"duration": 2.5,
 "texture": ExtResource("13_bcneu")
 }, {
-"duration": 2.0,
+"duration": 2.5,
 "texture": ExtResource("14_hqvfc")
 }, {
-"duration": 2.0,
+"duration": 2.5,
 "texture": ExtResource("15_yj7n8")
 }, {
-"duration": 2.0,
+"duration": 2.5,
 "texture": ExtResource("16_yjaxa")
 }, {
 "duration": 1.0,
@@ -148,7 +148,7 @@ animations = [{
 }],
 "loop": 0,
 "name": &"attack_langue",
-"speed": 20.0
+"speed": 16.0
 }, {
 "frames": [{
 "duration": 1.0,
@@ -291,7 +291,9 @@ texture_filter = 1
 position = Vector2(-3, -120)
 scale = Vector2(1.22, 1.22)
 sprite_frames = SubResource("SpriteFrames_dnpf1")
-animation = &"attack_2"
+animation = &"attack_langue"
+frame = 13
+frame_progress = 1.0
 script = ExtResource("1_xanim")
 
 [node name="vision" type="Area2D" parent="POINT" unique_id=1946126189]
