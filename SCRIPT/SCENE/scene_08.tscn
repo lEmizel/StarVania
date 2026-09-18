@@ -47,17 +47,30 @@ position = Vector2(295, -47)
 [node name="pique_retractable2" parent="." unique_id=1831988861 instance=ExtResource("4_a2il2")]
 position = Vector2(494.75, -47)
 
+[node name="pique_retractable6" parent="." unique_id=245551963 instance=ExtResource("4_a2il2")]
+position = Vector2(-304.75, -47)
+
 [node name="pique_retractable3" parent="." unique_id=424707508 instance=ExtResource("4_a2il2")]
 position = Vector2(694.5, -47)
+
+[node name="enemi3" parent="." unique_id=1347999994 instance=ExtResource("7_exa1j")]
+position = Vector2(-1750, -4)
 
 [node name="pique_retractable4" parent="." unique_id=752196093 instance=ExtResource("4_a2il2")]
 position = Vector2(894.25, -47)
 
+[node name="enemi2" parent="." unique_id=627255339 instance=ExtResource("6_8gtq1")]
+position = Vector2(1351, -4)
+
 [node name="pique_retractable5" parent="." unique_id=660945545 instance=ExtResource("4_a2il2")]
 position = Vector2(1094, -47)
 
-[node name="pique_retractable6" parent="." unique_id=245551963 instance=ExtResource("4_a2il2")]
-position = Vector2(-304.75, -47)
+[node name="piege_de_flamme4" parent="." unique_id=1868906985 instance=ExtResource("5_lmwkn")]
+position = Vector2(2294.75, 26)
+decale = true
+
+[node name="piege_de_flamme3" parent="." unique_id=1073525089 instance=ExtResource("5_lmwkn")]
+position = Vector2(2094.75, 26)
 
 [node name="piege_de_flamme" parent="." unique_id=1517354040 instance=ExtResource("5_lmwkn")]
 position = Vector2(1694.75, 26)
@@ -65,16 +78,3 @@ position = Vector2(1694.75, 26)
 [node name="piege_de_flamme2" parent="." unique_id=40215102 instance=ExtResource("5_lmwkn")]
 position = Vector2(1894.75, 26)
 decale = true
-
-[node name="piege_de_flamme3" parent="." unique_id=1073525089 instance=ExtResource("5_lmwkn")]
-position = Vector2(2094.75, 26)
-
-[node name="piege_de_flamme4" parent="." unique_id=1868906985 instance=ExtResource("5_lmwkn")]
-position = Vector2(2294.75, 26)
-decale = true
-
-[node name="enemi2" parent="." unique_id=627255339 instance=ExtResource("6_8gtq1")]
-position = Vector2(1351, -4)
-
-[node name="enemi3" parent="." unique_id=1347999994 instance=ExtResource("7_exa1j")]
-position = Vector2(-1750, -4)

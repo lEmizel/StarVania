@@ -1,0 +1,19 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://SCRIPT/SPELL/projectile_feu.gd" id="1_tir"]
+[ext_resource type="PackedScene" path="res://SCRIPT/SHADER/boule_de_feu.tscn" id="2_tir"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_tir"]
+radius = 22.4
+
+[node name="ProjectileFeu" type="Area2D"]
+collision_layer = 0
+collision_mask = 1
+script = ExtResource("1_tir")
+
+[node name="Visuel" parent="." instance=ExtResource("2_tir")]
+scale = Vector2(0.77, 0.77)
+demo_vol = false
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("CircleShape2D_tir")

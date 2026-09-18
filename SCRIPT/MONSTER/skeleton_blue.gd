@@ -3,8 +3,8 @@
 ## de Kaoru, sept. 2026 : un monstre = ses propres scripts, même si le
 ## comportement est pour l'instant celui du squelette). Copie de skeleton.gd au
 ## 18 sept. 2026 ; ce qui change :
-##   • poursuite bien plus rapide : speed 455 (squelette : 280 ; +30 % puis encore
-##     +25 % à la demande de Kaoru) — la ronde reste à 140
+##   • poursuite plus rapide : speed 341 (squelette : 280 ; +30 %, encore +25 %,
+##     puis −25 % après essai à la manette) — la ronde reste à 140
 ##   • deux fois plus de vie : 360 PV (squelette : 180)
 ##   • 2 cœurs de dégâts par coup : `attack_power = 2`, réglé sur la racine de
 ##     SKELETON_blue.tscn (c'est un export de BaseAI, visible dans l'inspecteur)
@@ -13,7 +13,7 @@ extends BaseAI
 
 enum States { IDLE, PATROL, APPROACH, ATTACK, RETURN, DEAD }
 
-@export var speed := 455.0   # squelette 280 → +30 % (364) → encore +25 % le 18 sept. 2026 = 455
+@export var speed := 341.0   # squelette 280 → 364 → 455 → −25 % le 18 sept. 2026 (trop rapide à la manette) = 341
 ## Temps de réflexion en idle avant la prochaine décision (indépendant
 ## de la durée de l'animation d'idle, qui fait 0.75s par boucle)
 @export var reaction_time := 0.3
@@ -193,6 +193,9 @@ func patrol_enter() -> void:
 
 func patrol_execute(delta: float) -> void:
 	velocity.y += gravity * delta
+	if _en_cast():
+		velocity.x = 0.0      # il est planté le temps de son geste (voir _en_cast)
+		return
 	# re-détection en ronde (voir _rescan_vision), passé le délai de grâce
 	_abandon_timer = maxf(_abandon_timer - delta, 0.0)
 	if target == null and _abandon_timer <= 0.0:
@@ -243,6 +246,9 @@ func approach_enter() -> void:
 
 func approach_execute(delta: float) -> void:
 	apply_gravity(delta)
+	if _en_cast():
+		velocity.x = 0.0      # il est planté le temps de son geste (voir _en_cast)
+		return
 	if not target:
 		goto_state(States.IDLE)
 		return
@@ -285,6 +291,9 @@ func return_enter() -> void:
 
 func return_execute(delta: float) -> void:
 	velocity.y += gravity * delta
+	if _en_cast():
+		velocity.x = 0.0      # il est planté le temps de son geste (voir _en_cast)
+		return
 	var dir := 1 if initial_position.x > global_position.x else -1
 	# Même garde-fou que APPROACH : pas de sol devant → on s'arrête
 	detection_vide.position.x = absf(detection_vide.position.x) * dir
@@ -311,3 +320,133 @@ func dead_execute(delta: float) -> void:
 		velocity.y += gravity * delta
 	else:
 		velocity.y = 0.0
+
+#region BOULE DE FEU
+# ---------------------------------------------------------------------------
+# TIR À DISTANCE (18 sept. 2026, demande de Kaoru) : dès que le joueur est
+# REPÉRÉ, le squelette bleu lui envoie une boule de feu, à n'importe quelle
+# distance et SANS S'ARRÊTER — il tire aussi bien en marchant sur lui qu'à
+# l'arrêt. Seule son attaque au corps à corps l'en empêche : la pose de cast
+# couperait son animation d'attaque, donc sa hitbox.
+#
+# La boule part du Marker2D `POINT/bouledefeu` (sa main). Comme le marqueur est
+# sous POINT, il suit le retournement du perso : le tir part du bon côté. Le
+# squelette se tourne vers le joueur puis tire À PLAT, droit devant : la boule
+# ne vise ni ne suit personne.
+#
+# ANTICIPATION (18 sept. 2026) : le geste se fait en DEUX temps. Il lève la main
+# (pose "cast") en S'ARRÊTANT NET, et la boule ne part que `delai_avant_tir`
+# plus tard : le joueur voit le coup venir et a le temps de sauter ou de
+# s'écarter. Il repart quand la pose se termine. Le geste est
+# interrompu s'il meurt ou s'il passe au corps à corps entre-temps.
+#
+# L'animation "cast" ne fait qu'UNE image et elle boucle : elle ne se termine
+# jamais toute seule. La pose est donc tenue au chrono puis l'animation de
+# l'état courant est remise.
+# ---------------------------------------------------------------------------
+
+const BOULE_DE_FEU := preload("res://SCRIPT/SPELL/projectile_feu.tscn")
+
+@export_group("Boule de feu")
+@export var boule_de_feu_activee := true
+## cœurs enlevés au joueur
+@export var degats_boule_de_feu: int = 1
+## temps entre deux tirs
+@export var cast_cooldown := 2.5
+## délai avant le PREMIER tir après avoir repéré le joueur : laisse réagir
+@export var cast_delai_aggro := 0.8
+## temps entre le LEVER DE MAIN et le départ de la boule : c'est ce délai qui
+## laisse au joueur le temps d'anticiper
+@export var delai_avant_tir := 0.65   # réglé à la manette le 18 sept. 2026 (essais : 0,5 puis 0,25 puis 0,40)
+## temps pendant lequel la pose "cast" est encore tenue APRÈS le départ de la boule
+@export var duree_pose_cast := 0.35
+## Le geste est-il en cours ? Tant qu'il l'est, il est PLANTÉ : il peut
+## déclencher son sort en marchant, mais pas continuer à avancer pendant la
+## pose (18 sept. 2026, demande de Kaoru). Couvre le lever de main, le délai
+## d'anticipation et le petit temps de pose après le tir.
+func _en_cast() -> bool:
+	return _pose_cast > 0.0
+
+
+@onready var _ancre_boule: Node2D = get_node_or_null("POINT/bouledefeu")
+var _cast_timer := 0.0
+var _pose_cast := 0.0
+var _charge := -1.0      # >= 0 : main levée, compte à rebours avant le tir
+var _avait_cible := false
+
+
+func _physics_process(delta: float) -> void:
+	# AVANT super() : c'est super() qui exécute l'état courant puis déplace. Si le
+	# cast démarrait après, l'état aurait déjà donné sa vitesse de marche pour la
+	# frame et le squelette avancerait d'un pas au moment du lever de main.
+	_tick_boule_de_feu(delta)
+	super(delta)
+
+
+func _tick_boule_de_feu(delta: float) -> void:
+	# une boule en charge : la main est levée, elle part au bout du délai
+	if _charge >= 0.0:
+		if current_state == States.DEAD or current_state == States.ATTACK:
+			_charge = -1.0                    # geste interrompu : rien ne part
+		else:
+			_charge -= delta
+			if _charge <= 0.0:
+				_charge = -1.0
+				_tirer_boule_de_feu()
+	if _pose_cast > 0.0:
+		_pose_cast -= delta
+		if _pose_cast <= 0.0:
+			_fin_pose_cast()
+	_cast_timer = maxf(_cast_timer - delta, 0.0)
+
+	var a_cible: bool = target != null and is_instance_valid(target)
+	if a_cible and not _avait_cible:
+		# il vient de le repérer : petit temps de réaction avant le premier tir
+		_cast_timer = maxf(_cast_timer, cast_delai_aggro)
+	_avait_cible = a_cible
+
+	if not boule_de_feu_activee or not a_cible or _cast_timer > 0.0 or _charge >= 0.0:
+		return
+	if current_state == States.DEAD or current_state == States.ATTACK:
+		return
+	_commencer_cast()
+
+
+## Premier temps : il se tourne vers sa cible et LÈVE LA MAIN. Rien ne part encore.
+func _commencer_cast() -> void:
+	_cast_timer = cast_cooldown
+	flip_toward(target.global_position.x)
+	animator.play("cast")
+	_charge = delai_avant_tir
+	_pose_cast = delai_avant_tir + duree_pose_cast
+
+
+## Second temps : la boule part enfin, dans le sens où il regarde MAINTENANT
+## (s'il s'est retourné pendant le geste, le tir suit son regard : jamais de
+## boule qui part dans son dos).
+func _tirer_boule_de_feu() -> void:
+	var origine: Vector2 = global_position
+	if _ancre_boule != null:
+		origine = _ancre_boule.global_position
+	# TIR HORIZONTAL, droit devant lui (essayé visé sur le joueur le 18 sept. 2026,
+	# REFUSÉ par Kaoru : la boule ne suit ni ne vise personne, elle part à plat)
+	var boule := BOULE_DE_FEU.instantiate()
+	boule.direction = Vector2(float(last_direction), 0.0)
+	boule.damage = degats_boule_de_feu
+	# même convention que bloodball.gd : la scène courante, pas le niveau
+	get_tree().current_scene.add_child(boule)
+	boule.global_position = origine
+
+
+## remet l'animation de l'état courant après la pose de cast
+func _fin_pose_cast() -> void:
+	if current_state == States.DEAD or current_state == States.ATTACK:
+		return
+	match current_state:
+		States.PATROL:
+			animator.play("idle" if _patrol_pausing else "walk")
+		States.APPROACH, States.RETURN:
+			animator.play("walk")
+		_:
+			animator.play("idle")
+#endregion

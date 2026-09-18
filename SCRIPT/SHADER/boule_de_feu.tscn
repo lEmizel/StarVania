@@ -1,0 +1,43 @@
+[gd_scene format=3 uid="uid://bxxs4y7do06wq"]
+
+[ext_resource type="Shader" uid="uid://bujk853iebyfm" path="res://SCRIPT/SHADER/boule_de_feu.gdshader" id="1_boule"]
+[ext_resource type="Script" uid="uid://cb8bcn48hw3ha" path="res://SCRIPT/SHADER/boule_de_feu.gd" id="2_boule"]
+[ext_resource type="Texture2D" uid="uid://t17cpogdibvu" path="res://MEDIA/UTILITAIRE/light.png" id="3_boule"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_boule"]
+resource_local_to_scene = true
+shader = ExtResource("1_boule")
+shader_parameter/puissance = 1.0
+shader_parameter/rayon = 0.38
+shader_parameter/longueur_trainee = 1.3270000630325
+shader_parameter/vitesse = 3.0
+shader_parameter/col = 0.56600002362512
+shader_parameter/evasement = 0.24800001178
+shader_parameter/turbulence = 0.306000014535
+shader_parameter/dispersion = 1.79600008531
+shader_parameter/detail = 4.1250001484375005
+shader_parameter/ratio = 3.0
+shader_parameter/tete_x = 0.79
+shader_parameter/graine = 84.34557632759429
+shader_parameter/style_cartoon = 1.0
+shader_parameter/nb_bandes = 4
+shader_parameter/saturation = 1.0
+shader_parameter/outer_color = Color(0.9, 0.05, 0.005, 1)
+shader_parameter/middle_color = Color(1, 0.32, 0.01, 1)
+shader_parameter/inner_color = Color(1, 0.85, 0.15, 1)
+shader_parameter/core_color = Color(1, 1, 0.75, 1)
+
+[node name="BouleDeFeu" type="Node2D" unique_id=902953988]
+script = ExtResource("2_boule")
+
+[node name="Boule" type="ColorRect" parent="." unique_id=574114862]
+material = SubResource("ShaderMaterial_boule")
+offset_left = -190.0
+offset_top = -40.0
+offset_right = 50.0
+offset_bottom = 40.0
+mouse_filter = 2
+
+[node name="Lumiere" type="PointLight2D" parent="." unique_id=1128065377]
+energy = 0.8
+texture = ExtResource("3_boule")

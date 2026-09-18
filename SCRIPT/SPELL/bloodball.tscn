@@ -1,4 +1,4 @@
-[gd_scene load_steps=5 format=3 uid="uid://cvimiabqboknx"]
+[gd_scene format=3 uid="uid://cvimiabqboknx"]
 
 [ext_resource type="Script" uid="uid://evbmsfirfr4t" path="res://SCRIPT/SPELL/bloodball.gd" id="1_script"]
 [ext_resource type="Shader" uid="uid://dklwwhc6exnvc" path="res://SCRIPT/SPELL/bloodball.gdshader" id="2_shader"]
@@ -28,4 +28,5 @@ offset_bottom = 32.0
 mouse_filter = 2
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=112438287]
+visible = false
 shape = SubResource("CircleShape2D_hit")

@@ -14,6 +14,7 @@
 [ext_resource type="Texture2D" uid="uid://dwxqtgn3md4vc" path="res://MEDIA/MONSTER/BLUE_SKELETON/Attack/Skeleton_attack01-4.png" id="12_tkgip"]
 [ext_resource type="Texture2D" uid="uid://bkxdxnsrfxwf7" path="res://MEDIA/MONSTER/BLUE_SKELETON/Attack/Skeleton_attack01-5.png" id="13_op620"]
 [ext_resource type="Texture2D" uid="uid://bon8mntxw72xi" path="res://MEDIA/MONSTER/BLUE_SKELETON/Attack/Skeleton_attack01-6.png" id="14_021n7"]
+[ext_resource type="Texture2D" uid="uid://n5i3qtalbpl2" path="res://MEDIA/MONSTER/BLUE_SKELETON/Cast/Skeleton_cast.png" id="15_j0dl5"]
 [ext_resource type="Texture2D" uid="uid://bfnesu6rdc1p" path="res://MEDIA/MONSTER/BLUE_SKELETON/Death/Skeleton_death-1.png" id="15_pqcym"]
 [ext_resource type="Texture2D" uid="uid://dtjgf6epsexi8" path="res://MEDIA/MONSTER/BLUE_SKELETON/Death/Skeleton_death-2.png" id="16_isk41"]
 [ext_resource type="Texture2D" uid="uid://bqphm2v25e1g5" path="res://MEDIA/MONSTER/BLUE_SKELETON/Death/Skeleton_death-3.png" id="17_qljov"]
@@ -89,6 +90,14 @@ animations = [{
 "loop": 0,
 "name": &"attack",
 "speed": 14.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("15_j0dl5")
+}],
+"loop": 1,
+"name": &"cast",
+"speed": 5.0
 }, {
 "frames": [{
 "duration": 1.1,
@@ -178,7 +187,7 @@ light_mask = 0
 collision_layer = 8
 collision_mask = 6
 script = ExtResource("1_ne721")
-attack_power = 2
+attack_power = 1
 
 [node name="detection_vide" type="RayCast2D" parent="." unique_id=1277015668]
 position = Vector2(45, -13)
@@ -204,15 +213,20 @@ sprite_frames = SubResource("SpriteFrames_35hhg")
 animation = &"slash"
 frame = 3
 
+[node name="bouledefeu" type="Marker2D" parent="POINT" unique_id=1741276189]
+position = Vector2(91, -142)
+scale = Vector2(1.22, 1.22)
+
 [node name="animator" type="AnimatedSprite2D" parent="POINT" unique_id=1830194176]
 texture_filter = 1
 position = Vector2(-1, -97)
 scale = Vector2(1.22, 1.22)
 sprite_frames = SubResource("SpriteFrames_dnpf1")
-animation = &"attack"
+animation = &"cast"
 script = ExtResource("36_ightx")
 
 [node name="vision" type="Area2D" parent="POINT" unique_id=1946126189]
+visible = false
 position = Vector2(-27, -93)
 
 [node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="POINT/vision" unique_id=1685665169]
