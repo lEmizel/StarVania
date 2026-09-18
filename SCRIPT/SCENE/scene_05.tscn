@@ -11,9 +11,9 @@
 [ext_resource type="PackedScene" uid="uid://bqbrm320hgjkj" path="res://SCRIPT/INTERACTIBLE/echelle.tscn" id="8_8jbyt"]
 [ext_resource type="PackedScene" uid="uid://deajggaeh7111" path="res://SCRIPT/INTERACTIBLE/platforme.tscn" id="9_8jbyt"]
 [ext_resource type="PackedScene" uid="uid://cxca5jid2onov" path="res://SCRIPT/INTERACTIBLE/SAWBLADE.tscn" id="10_gugmh"]
-[ext_resource type="PackedScene" uid="uid://i3vr6r3pmxtp" path="res://SCRIPT/MONSTER/XENO.tscn" id="11_pxmro"]
 [ext_resource type="PackedScene" path="res://SCRIPT/INTERACTIBLE/corde.tscn" id="12_g5h7o"]
 [ext_resource type="PackedScene" path="res://SCRIPT/INTERACTIBLE/accroche_grappin.tscn" id="13_786sa"]
+[ext_resource type="PackedScene" uid="uid://bovko7646dmrg" path="res://SCRIPT/MONSTER/Kamikaze.tscn" id="14_36kjk"]
 
 [node name="scene_05" type="Node2D" unique_id=1083121648]
 
@@ -108,12 +108,9 @@ position = Vector2(269.49805, -1398)
 
 [node name="SAWBLADE" parent="." unique_id=388117046 instance=ExtResource("10_gugmh")]
 position = Vector2(-280, -1177)
-frame_progress = 0.052444626
+frame_progress = 0.987385
 position_a = Vector2(-280, -1177)
 position_b = Vector2(-280, -425)
-
-[node name="enemi2" parent="." unique_id=627255339 instance=ExtResource("11_pxmro")]
-position = Vector2(-1386, 3)
 
 [node name="Corde" parent="." unique_id=1876946880 instance=ExtResource("12_g5h7o")]
 position = Vector2(947, -621)
@@ -123,3 +120,15 @@ position = Vector2(-1111, -469)
 
 [node name="AccrocheGrappin3" parent="." unique_id=1586620410 instance=ExtResource("13_786sa")]
 position = Vector2(-922, -1226)
+
+[node name="CharacterBody2D" parent="." unique_id=485432489 instance=ExtResource("14_36kjk")]
+position = Vector2(-1317, -115)
+
+[node name="CharacterBody2D2" parent="." unique_id=645843795 instance=ExtResource("14_36kjk")]
+position = Vector2(-1191, -303.133)
+
+[node name="CharacterBody2D3" parent="." unique_id=249518098 instance=ExtResource("14_36kjk")]
+position = Vector2(-904, -411.133)
+
+[node name="CharacterBody2D4" parent="." unique_id=192717445 instance=ExtResource("14_36kjk")]
+position = Vector2(-666.133, -411.133)

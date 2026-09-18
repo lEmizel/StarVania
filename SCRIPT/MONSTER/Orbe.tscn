@@ -149,7 +149,7 @@ animations = [{
 }]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_3lqle"]
-radius = 455.133
+radius = 409.0
 
 [node name="CharacterBody2D" type="CharacterBody2D" unique_id=485432489]
 collision_layer = 8
@@ -179,10 +179,8 @@ frame_progress = 1.0
 script = ExtResource("30_ys8th")
 
 [node name="vision" type="Area2D" parent="POINT" unique_id=1199829117]
-visible = false
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="POINT/vision" unique_id=879174060]
-visible = false
 position = Vector2(12, 21)
 shape = SubResource("CircleShape2D_3lqle")
 

@@ -207,10 +207,16 @@ func _handle_landing() -> void:
 	else:
 		goto_state(States.IDLE)
 
-func apply_damage(amount: int, source_x, source_tag := "?") -> void:
+## `perce_stun` : réservé aux sources qui ne frappent QU'UNE FOIS (le souffle
+## d'un kamikaze). Les sources continues — contact d'un monstre, piques, jet de
+## flammes — sont relues à chaque frame et ont besoin du stun pour ne pas vider
+## la barre en une seconde ; un souffle, lui, ne part qu'un coup par bombe, et
+## sans ça quatre kamikazes qui explosent ensemble ne coûtent qu'un seul cœur
+## (vécu le 18 sept. 2026). La roulade et le dash restent des parades absolues.
+func apply_damage(amount: int, source_x, source_tag := "?", perce_stun := false) -> void:
 	if current_state in [States.ROLL, States.DASH, States.DEAD]:
 		return
-	if current_state == States.HIT:
+	if current_state == States.HIT and not perce_stun:
 		# DEBUG dégâts : coup ignoré pendant le stun
 		print("[DMG bloqué/stun] f=", Engine.get_physics_frames(),
 			" src=", source_tag, " amount=", amount)

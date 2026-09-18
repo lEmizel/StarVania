@@ -1,0 +1,134 @@
+[gd_scene format=3 uid="uid://bovko7646dmrg"]
+
+[ext_resource type="Script" uid="uid://cy36ygw7iwmkq" path="res://SCRIPT/MONSTER/kamikaze.gd" id="1_kmkz"]
+[ext_resource type="Texture2D" uid="uid://yqmket1yogsx" path="res://MEDIA/MONSTER/KAMIKAZE/Kamikaze_explosion/Kamikaze_explosion-1.png" id="2_h3pu5"]
+[ext_resource type="PackedScene" uid="uid://c8y35es6jse5x" path="res://SCRIPT/MENU/heatle_bare_monster.tscn" id="2_kteqm"]
+[ext_resource type="Texture2D" uid="uid://dg8yavkvrkrc4" path="res://MEDIA/MONSTER/KAMIKAZE/Kamikaze_explosion/Kamikaze_explosion-2.png" id="3_1jmyd"]
+[ext_resource type="Texture2D" uid="uid://cx0u7cs1wlq21" path="res://MEDIA/MONSTER/KAMIKAZE/Kamikaze_explosion/Kamikaze_explosion-3.png" id="4_oiw76"]
+[ext_resource type="Texture2D" uid="uid://di26vqmmi35mt" path="res://MEDIA/MONSTER/KAMIKAZE/Kamikaze_explosion/Kamikaze_explosion-4.png" id="5_lu6il"]
+[ext_resource type="Texture2D" uid="uid://xkaubwdq4oh4" path="res://MEDIA/MONSTER/KAMIKAZE/Kamikaze_explosion/Kamikaze_explosion-5.png" id="6_k74xw"]
+[ext_resource type="Texture2D" uid="uid://c6jljf6shuuix" path="res://MEDIA/MONSTER/KAMIKAZE/Kamikaze_gonfle/Kamikaze_gonfle-1.png" id="7_iy7p3"]
+[ext_resource type="Texture2D" uid="uid://p4guc4jop26g" path="res://MEDIA/MONSTER/KAMIKAZE/Kamikaze_gonfle/Kamikaze_gonfle-2.png" id="8_xu200"]
+[ext_resource type="Texture2D" uid="uid://dm8bct2wbkmj2" path="res://MEDIA/MONSTER/KAMIKAZE/Kamikaze_gonfle/Kamikaze_gonfle-3.png" id="9_vyqh5"]
+[ext_resource type="Texture2D" uid="uid://kch6qqf6o68h" path="res://MEDIA/MONSTER/KAMIKAZE/Kamikaze_gonfle/Kamikaze_gonfle-4.png" id="10_2v17j"]
+[ext_resource type="Texture2D" uid="uid://bokmgqcqtrofl" path="res://MEDIA/MONSTER/KAMIKAZE/Kamikaze_gonfle/Kamikaze_gonfle-5.png" id="11_50vld"]
+[ext_resource type="Texture2D" uid="uid://d3qcxjudfuucc" path="res://MEDIA/MONSTER/KAMIKAZE/Kamikaze_idle/Kamikaze_idle-1.png" id="12_ghdm0"]
+[ext_resource type="Texture2D" uid="uid://dr4d36y2a0y7o" path="res://MEDIA/MONSTER/KAMIKAZE/Kamikaze_idle/Kamikaze_idle-2.png" id="13_5ssgf"]
+[ext_resource type="Texture2D" uid="uid://dnbkulimfgpns" path="res://MEDIA/MONSTER/KAMIKAZE/Kamikaze_idle/Kamikaze_idle-3.png" id="14_8nn3w"]
+[ext_resource type="Texture2D" uid="uid://boogii2py82h6" path="res://MEDIA/MONSTER/KAMIKAZE/Kamikaze_idle/Kamikaze_idle-4.png" id="15_kteqm"]
+[ext_resource type="Texture2D" uid="uid://cmgiubakp7t5" path="res://MEDIA/MONSTER/KAMIKAZE/Kamikaze_idle/Kamikaze_idle-5.png" id="16_v2ici"]
+[ext_resource type="Texture2D" uid="uid://byf0vjor424ko" path="res://MEDIA/MONSTER/KAMIKAZE/Kamikaze_idle/Kamikaze_idle-6.png" id="17_l4cdr"]
+[ext_resource type="Texture2D" uid="uid://dyyp6dlk35ry0" path="res://MEDIA/MONSTER/KAMIKAZE/Kamikaze_idle/Kamikaze_idle-7.png" id="18_vi1rb"]
+[ext_resource type="Texture2D" uid="uid://8sh4qdr6v68p" path="res://MEDIA/MONSTER/KAMIKAZE/Kamikaze_idle/Kamikaze_idle-8.png" id="19_5plb1"]
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_p2oq4"]
+radius = 30.0
+height = 60.0
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_mdjyn"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("2_h3pu5")
+}, {
+"duration": 1.0,
+"texture": ExtResource("3_1jmyd")
+}, {
+"duration": 1.0,
+"texture": ExtResource("4_oiw76")
+}, {
+"duration": 1.0,
+"texture": ExtResource("5_lu6il")
+}, {
+"duration": 1.0,
+"texture": ExtResource("6_k74xw")
+}],
+"loop": 0,
+"name": &"explosion",
+"speed": 18.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("7_iy7p3")
+}, {
+"duration": 1.0,
+"texture": ExtResource("8_xu200")
+}, {
+"duration": 1.0,
+"texture": ExtResource("9_vyqh5")
+}, {
+"duration": 1.0,
+"texture": ExtResource("10_2v17j")
+}, {
+"duration": 1.0,
+"texture": ExtResource("11_50vld")
+}],
+"loop": 0,
+"name": &"gonfle",
+"speed": 8.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("12_ghdm0")
+}, {
+"duration": 1.0,
+"texture": ExtResource("13_5ssgf")
+}, {
+"duration": 1.0,
+"texture": ExtResource("14_8nn3w")
+}, {
+"duration": 1.0,
+"texture": ExtResource("15_kteqm")
+}, {
+"duration": 1.0,
+"texture": ExtResource("16_v2ici")
+}, {
+"duration": 1.0,
+"texture": ExtResource("17_l4cdr")
+}, {
+"duration": 1.0,
+"texture": ExtResource("18_vi1rb")
+}, {
+"duration": 1.0,
+"texture": ExtResource("19_5plb1")
+}],
+"loop": 1,
+"name": &"idle",
+"speed": 10.0
+}]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_3lqle"]
+radius = 455.133
+
+[node name="CharacterBody2D" type="CharacterBody2D" unique_id=485432489]
+collision_layer = 8
+collision_mask = 2
+script = ExtResource("1_kmkz")
+
+[node name="bare_de_vie" parent="." unique_id=1546643075 instance=ExtResource("2_kteqm")]
+position = Vector2(-88, -169)
+scale = Vector2(0.37, 0.37)
+
+[node name="Collision" type="CollisionShape2D" parent="." unique_id=273910692]
+light_mask = 0
+visibility_layer = 2
+position = Vector2(12, -50)
+shape = SubResource("CapsuleShape2D_p2oq4")
+
+[node name="POINT" type="Node2D" parent="." unique_id=302250341]
+position = Vector2(0, -64)
+
+[node name="animator" type="AnimatedSprite2D" parent="POINT" unique_id=207791315]
+texture_filter = 1
+position = Vector2(-4.999996, -10)
+scale = Vector2(-1.382, 1.382)
+sprite_frames = SubResource("SpriteFrames_mdjyn")
+animation = &"gonfle"
+
+[node name="vision" type="Area2D" parent="POINT" unique_id=1199829117]
+visible = false
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="POINT/vision" unique_id=879174060]
+visible = false
+position = Vector2(12, 21)
+shape = SubResource("CircleShape2D_3lqle")

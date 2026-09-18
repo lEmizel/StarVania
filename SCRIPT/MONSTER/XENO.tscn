@@ -295,12 +295,11 @@ animation = &"attack_2"
 script = ExtResource("1_xanim")
 
 [node name="vision" type="Area2D" parent="POINT" unique_id=1946126189]
-visible = false
 position = Vector2(-27, -93)
 
 [node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="POINT/vision" unique_id=1685665169]
 position = Vector2(80, -2)
-polygon = PackedVector2Array(-49, -16, 229, -127, 230, 96, -47, 25)
+polygon = PackedVector2Array(-49, -16, 387, -145, 385, 101, -47, 25)
 
 [node name="collision_attack" type="Area2D" parent="POINT" unique_id=371815366]
 

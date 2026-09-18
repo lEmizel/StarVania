@@ -27,11 +27,17 @@ var _patrol_pausing := false
 @export var tracking_distance := 900.0
 ## Bande de l'ATTAQUE LANGUE : déclenchable quand la cible est entre ces
 ## deux distances (px). À caler sur la longueur réelle de ta hitbox.
-@export var langue_min := 400.0
-@export var langue_max := 700.0
+## Bande de tir de la langue. RÈGLES ALIGNÉES SUR LE SQUELETTE (18 sept. 2026) :
+## il s'en sert dès qu'il a une cible à portée, sans zone morte.
+##   • 160 = juste après `confort_zone_max` (150), donc plus de trou entre le
+##     corps à corps et la langue, où il se contentait d'avancer sans rien faire ;
+##   • 530 = la VRAIE portée de sa hitbox de langue (le polygone va jusqu'à
+##     558 px), au lieu de 700 où il tirait dans le vide.
+@export var langue_min := 160.0
+@export var langue_max := 530.0
 ## Temps mort entre deux attaques langue : il ne les enchaîne jamais —
 ## entre deux tirs il approche ou respire
-@export var langue_cooldown := 3.0
+@export var langue_cooldown := 2.5   # la cadence du sort du squelette
 var _langue_cd := 0.0
 var _idle_wait := 0.0
 var _patrol_dir := 1
@@ -50,8 +56,8 @@ func _physics_process(delta: float) -> void:
 
 func _start() -> void:
 	detection_vide.hit_from_inside = true
-	max_hp = 180
-	hp = 180
+	max_hp = 252   # 180 +40 % (320 essaye le 18 sept. 2026 : trop fort)
+	hp = 252
 	max_tracking_distance = tracking_distance
 	confort_zone_max = 150.0
 	confort_zone_min = 30.0
@@ -117,10 +123,12 @@ func decide() -> void:
 				[States.IDLE, 150],
 			])
 		else:
+			# rechargée : elle part presque à coup sûr, comme le squelette qui
+			# lance son sort dès que son temps mort est écoulé
 			choice = pick_weighted([
-				[States.ATTACK_LANGUE, 250],
+				[States.ATTACK_LANGUE, 700],
 				[States.APPROACH, 60 if can_approach else 0],
-				[States.IDLE, 120],
+				[States.IDLE, 40],
 			])
 
 	else:

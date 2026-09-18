@@ -1,0 +1,44 @@
+[gd_scene format=3 uid="uid://c6xcj4jfdlt5w"]
+
+[ext_resource type="Shader" uid="uid://cm0ygf3qq6qgm" path="res://SCRIPT/SHADER/explosion_violette.gdshader" id="1_exv"]
+[ext_resource type="Script" uid="uid://3ifr4rm7jaxw" path="res://SCRIPT/SHADER/explosion_violette.gd" id="2_exv"]
+[ext_resource type="Texture2D" uid="uid://t17cpogdibvu" path="res://MEDIA/UTILITAIRE/light.png" id="3_exv"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_exv"]
+resource_local_to_scene = true
+shader = ExtResource("1_exv")
+shader_parameter/progress = 0.0
+shader_parameter/rayon_max = 0.38400001661006
+shader_parameter/bosses = 1.0
+shader_parameter/lobes = 4.242000153995
+shader_parameter/nb_traits = 15
+shader_parameter/longueur_traits = 1.35
+shader_parameter/epaisseur_traits = 0.76300003461256
+shader_parameter/onde_force = 0.86800004123
+shader_parameter/onde_epaisseur = 0.045
+shader_parameter/detail = 3.0
+shader_parameter/graine = 1.0892475481686652
+shader_parameter/style_cartoon = 1.0
+shader_parameter/nb_bandes = 4
+shader_parameter/saturation = 1.0
+shader_parameter/outer_color = Color(0.2, 0.02, 0.34, 1)
+shader_parameter/middle_color = Color(0.52, 0.12, 0.85, 1)
+shader_parameter/inner_color = Color(0.82, 0.45, 1, 1)
+shader_parameter/core_color = Color(1, 0.94, 1, 1)
+
+[node name="ExplosionViolette" type="Node2D" unique_id=1785508077]
+script = ExtResource("2_exv")
+
+[node name="Feu" type="ColorRect" parent="." unique_id=591535685]
+material = SubResource("ShaderMaterial_exv")
+offset_left = -180.0
+offset_top = -179.0
+offset_right = 180.0
+offset_bottom = 181.0
+mouse_filter = 2
+
+[node name="Lumiere" type="PointLight2D" parent="." unique_id=1564750890]
+color = Color(0.82, 0.45, 1, 1)
+energy = 2.6
+texture = ExtResource("3_exv")
+texture_scale = 0.5

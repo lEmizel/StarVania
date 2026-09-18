@@ -33,7 +33,7 @@ enum Etat { REPOS, ARME, SORTIE, DEHORS, RENTREE, PAUSE }
 
 @export_group("Rythme")
 ## temps entre la détection et la sortie des piques : le temps de réagir
-@export var delai_avant_sortie := 1.0
+@export var delai_avant_sortie := 0.3
 ## temps passé piques dehors. Libre : une même sortie ne touche un même corps
 ## qu'UNE fois (voir _blesser), donc le joueur projeté en l'air qui retombe
 ## dans les piques encore sorties ne reprend pas un 2e cœur
