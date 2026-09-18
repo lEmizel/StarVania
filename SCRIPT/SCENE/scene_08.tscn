@@ -6,6 +6,7 @@
 [ext_resource type="PackedScene" uid="uid://cbbnunbqbc3sa" path="res://SCRIPT/INTERACTIBLE/pique_retractable.tscn" id="4_a2il2"]
 [ext_resource type="PackedScene" uid="uid://duvx7j61qskv3" path="res://SCRIPT/INTERACTIBLE/piege_de_flamme.tscn" id="5_lmwkn"]
 [ext_resource type="PackedScene" uid="uid://bs1685hwv6d0w" path="res://SCRIPT/MONSTER/SKELETON.tscn" id="6_8gtq1"]
+[ext_resource type="PackedScene" uid="uid://bpeorkg8vsrcb" path="res://SCRIPT/MONSTER/SKELETON_blue.tscn" id="7_exa1j"]
 
 [node name="scene_08" type="Node2D" unique_id=1958345523]
 
@@ -20,6 +21,18 @@ script = ExtResource("1_danr8")
 
 [node name="400x200" parent="grayboxing" unique_id=436297158 instance=ExtResource("3_danr8")]
 position = Vector2(-4, 102)
+
+[node name="400x202" parent="grayboxing" unique_id=1740457853 instance=ExtResource("3_danr8")]
+position = Vector2(-603.75, 102)
+
+[node name="400x203" parent="grayboxing" unique_id=257078550 instance=ExtResource("3_danr8")]
+position = Vector2(-1003.75, 102)
+
+[node name="400x204" parent="grayboxing" unique_id=1157966033 instance=ExtResource("3_danr8")]
+position = Vector2(-1403.75, 102)
+
+[node name="400x205" parent="grayboxing" unique_id=1898499993 instance=ExtResource("3_danr8")]
+position = Vector2(-1803.75, 102)
 
 [node name="400x201" parent="grayboxing" unique_id=1366873565 instance=ExtResource("3_danr8")]
 position = Vector2(1394.75, 102)
@@ -43,6 +56,9 @@ position = Vector2(894.25, -47)
 [node name="pique_retractable5" parent="." unique_id=660945545 instance=ExtResource("4_a2il2")]
 position = Vector2(1094, -47)
 
+[node name="pique_retractable6" parent="." unique_id=245551963 instance=ExtResource("4_a2il2")]
+position = Vector2(-304.75, -47)
+
 [node name="piege_de_flamme" parent="." unique_id=1517354040 instance=ExtResource("5_lmwkn")]
 position = Vector2(1694.75, 26)
 
@@ -59,3 +75,6 @@ decale = true
 
 [node name="enemi2" parent="." unique_id=627255339 instance=ExtResource("6_8gtq1")]
 position = Vector2(1351, -4)
+
+[node name="enemi3" parent="." unique_id=1347999994 instance=ExtResource("7_exa1j")]
+position = Vector2(-1750, -4)
