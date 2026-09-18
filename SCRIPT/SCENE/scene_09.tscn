@@ -25,6 +25,7 @@
 [ext_resource type="PackedScene" uid="uid://lskntqxi822j" path="res://SCRIPT/MONSTER/Orbe.tscn" id="20_sdkh0"]
 [ext_resource type="PackedScene" uid="uid://bs1685hwv6d0w" path="res://SCRIPT/MONSTER/SKELETON.tscn" id="21_xgre4"]
 [ext_resource type="PackedScene" uid="uid://b1fje6n3t7rv5" path="res://SCRIPT/MONSTER/LARVE_PIQUE.tscn" id="22_vlh48"]
+[ext_resource type="PackedScene" uid="uid://mluwyom1v02y" path="res://SCRIPT/INTERACTIBLE/piques 400x100.tscn" id="26_vlh48"]
 
 [node name="scene_09" type="Node2D" unique_id=1699024437]
 
@@ -158,30 +159,27 @@ position = Vector2(3516, -487)
 [node name="piques 400x202" parent="interactible" unique_id=299967351 instance=ExtResource("8_rlp1r")]
 position = Vector2(3917, -481)
 
-[node name="piques 400x206" parent="interactible" unique_id=132990946 instance=ExtResource("8_rlp1r")]
-position = Vector2(4917, -482)
-
 [node name="SAWBLADE" parent="interactible" unique_id=388117046 instance=ExtResource("9_jb0e2")]
 position = Vector2(-344, -3811)
-frame_progress = 0.26921245
+frame_progress = 0.94298786
 position_a = Vector2(-344, -3109)
 position_b = Vector2(-344, -3811)
 
 [node name="SAWBLADE2" parent="interactible" unique_id=246594848 instance=ExtResource("9_jb0e2")]
 position = Vector2(590, -3104)
-frame_progress = 0.6211489
+frame_progress = 0.29492426
 position_a = Vector2(590, -3100)
 position_b = Vector2(590, -3767)
 
 [node name="SAWBLADE3" parent="interactible" unique_id=105869148 instance=ExtResource("9_jb0e2")]
 position = Vector2(2074, -2095)
-frame_progress = 0.6211489
+frame_progress = 0.29492426
 position_a = Vector2(2074, -3057)
 position_b = Vector2(2074, -2095)
 
 [node name="SAWBLADE4" parent="interactible" unique_id=1759190604 instance=ExtResource("9_jb0e2")]
 position = Vector2(3027, -3036)
-frame_progress = 0.6211489
+frame_progress = 0.29492426
 position_a = Vector2(3027, -3036)
 position_b = Vector2(3027, -2095)
 
@@ -622,9 +620,6 @@ position = Vector2(4117, -484)
 [node name="200x103" parent="grayboxing" unique_id=1855930211 instance=ExtResource("16_ufj3b")]
 position = Vector2(4718, -485)
 
-[node name="200x111" parent="grayboxing" unique_id=717932750 instance=ExtResource("16_ufj3b")]
-position = Vector2(5118, -484)
-
 [node name="200x112" parent="grayboxing" unique_id=481929857 instance=ExtResource("16_ufj3b")]
 position = Vector2(5318, -484)
 
@@ -711,3 +706,6 @@ position = Vector2(4955, -4296)
 position = Vector2(6080.81, -664.99994)
 rotation = -3.132866
 scale = Vector2(0.6736213, 0.6736214)
+
+[node name="piques 400x100" parent="." unique_id=528419844 instance=ExtResource("26_vlh48")]
+position = Vector2(5018, -482)
