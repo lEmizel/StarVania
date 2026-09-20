@@ -32,7 +32,7 @@ const BARRE_BLOODHEAL := 100
 ## plafond de barres possibles (règle-le ici)
 const MAX_BARRES_BLOODHEAL := 4
 ## barres possédées au départ d'une partie (1..MAX_BARRES_BLOODHEAL)
-const BARRES_BLOODHEAL_DEPART := 5
+const BARRES_BLOODHEAL_DEPART := 2
 var nb_barres_bloodheal := BARRES_BLOODHEAL_DEPART
 var bloodheal := 0  # réserve courante, remplie COUP PAR COUP, de gauche à droite
 ## bloodheal rendu par coup au corps à corps qui porte : 15 % d'une barre

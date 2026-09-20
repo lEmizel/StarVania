@@ -121,7 +121,7 @@ position = Vector2(0, -64)
 [node name="animator" type="AnimatedSprite2D" parent="POINT" unique_id=207791315]
 texture_filter = 1
 position = Vector2(-4.999996, -10)
-scale = Vector2(-1.382, 1.382)
+scale = Vector2(1.382, 1.382)
 sprite_frames = SubResource("SpriteFrames_mdjyn")
 animation = &"gonfle"
 

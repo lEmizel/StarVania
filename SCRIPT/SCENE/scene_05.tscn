@@ -108,7 +108,7 @@ position = Vector2(269.49805, -1398)
 
 [node name="SAWBLADE" parent="." unique_id=388117046 instance=ExtResource("10_gugmh")]
 position = Vector2(-280, -1177)
-frame_progress = 0.96548074
+frame_progress = 0.44013584
 position_a = Vector2(-280, -1177)
 position_b = Vector2(-280, -425)
 

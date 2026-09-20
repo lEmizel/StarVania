@@ -5,7 +5,7 @@
 [ext_resource type="PackedScene" uid="uid://dx851ijsrvbgf" path="res://SCRIPT/grayboxing/400x200.tscn" id="3_danr8"]
 [ext_resource type="PackedScene" uid="uid://cl4e5goxx8nvt" path="res://SCRIPT/INTERACTIBLE/coeur.tscn" id="3_o0ir8"]
 [ext_resource type="PackedScene" uid="uid://cbbnunbqbc3sa" path="res://SCRIPT/INTERACTIBLE/pique_retractable.tscn" id="4_a2il2"]
-[ext_resource type="PackedScene" path="res://SCRIPT/INTERACTIBLE/accroche_grappin.tscn" id="4_dvjac"]
+[ext_resource type="PackedScene" uid="uid://jkojvyshl67j" path="res://SCRIPT/INTERACTIBLE/accroche_grappin.tscn" id="4_dvjac"]
 [ext_resource type="PackedScene" uid="uid://47qcpwpulk4y" path="res://SCRIPT/grayboxing/800x400.tscn" id="4_lmwkn"]
 [ext_resource type="PackedScene" uid="uid://caq8nkv6ng2f" path="res://SCRIPT/grayboxing/800x400 slide.tscn" id="5_8gtq1"]
 [ext_resource type="PackedScene" uid="uid://cxca5jid2onov" path="res://SCRIPT/INTERACTIBLE/SAWBLADE.tscn" id="6_jjk24"]
@@ -19,9 +19,16 @@
 [ext_resource type="PackedScene" uid="uid://do2lu22wxi4r4" path="res://SCRIPT/grayboxing/200x400.tscn" id="13_iwfiy"]
 [ext_resource type="PackedScene" uid="uid://b1fje6n3t7rv5" path="res://SCRIPT/MONSTER/LARVE_PIQUE.tscn" id="18_l2vjt"]
 [ext_resource type="PackedScene" uid="uid://bs1685hwv6d0w" path="res://SCRIPT/MONSTER/SKELETON.tscn" id="19_eeq7o"]
-[ext_resource type="PackedScene" uid="uid://i3vr6r3pmxtp" path="res://SCRIPT/MONSTER/XENO.tscn" id="20_mghad"]
 [ext_resource type="PackedScene" uid="uid://bobswn5tah03s" path="res://SCRIPT/INTERACTIBLE/passage.tscn" id="21_l2vjt"]
 [ext_resource type="PackedScene" uid="uid://bovko7646dmrg" path="res://SCRIPT/MONSTER/Kamikaze.tscn" id="22_eeq7o"]
+[ext_resource type="Texture2D" uid="uid://coep7l80nhse3" path="res://MEDIA/tuto/Attack.png" id="22_esa63"]
+[ext_resource type="Texture2D" uid="uid://c0rkripprv1wk" path="res://MEDIA/tuto/Cast.png" id="23_dpt2b"]
+[ext_resource type="Texture2D" uid="uid://e8qsjxmqfpa3" path="res://MEDIA/tuto/Double_jump.png" id="24_6m7aa"]
+[ext_resource type="Texture2D" uid="uid://bdxeqrenliqgk" path="res://MEDIA/tuto/Heel.png" id="25_4u2bj"]
+[ext_resource type="Texture2D" uid="uid://v3lsa27hl6tt" path="res://MEDIA/tuto/Roll.png" id="26_e0k0a"]
+[ext_resource type="Texture2D" uid="uid://dnqfwrxt81yxt" path="res://MEDIA/tuto/Wall_jump.png" id="27_e5fgg"]
+[ext_resource type="Texture2D" uid="uid://bennv6y5dc2kx" path="res://MEDIA/tuto/Wall_run.png" id="28_qboba"]
+[ext_resource type="Script" uid="uid://cldc0dscj1uj1" path="res://SCRIPT/OUTILS/LEVEL_EXPORTER.gd" id="29_dpt2b"]
 
 [node name="scene_08" type="Node2D" unique_id=1958345523]
 
@@ -81,10 +88,6 @@ position = Vector2(3595, -1305)
 [node name="pique_retractable11" parent="interactible" unique_id=799953556 instance=ExtResource("4_a2il2")]
 position = Vector2(3171, -1284)
 
-[node name="pique_retractable15" parent="interactible" unique_id=1552313507 instance=ExtResource("4_a2il2")]
-position = Vector2(415, -2148.25)
-rotation = -1.5707964
-
 [node name="pique_retractable18" parent="interactible" unique_id=448100696 instance=ExtResource("4_a2il2")]
 position = Vector2(1013, -1849.75)
 rotation = 1.5707964
@@ -105,14 +108,6 @@ rotation = 1.5707964
 position = Vector2(1013, -2648.75)
 rotation = 1.5707964
 
-[node name="pique_retractable16" parent="interactible" unique_id=2119046219 instance=ExtResource("4_a2il2")]
-position = Vector2(415, -2348)
-rotation = -1.5707964
-
-[node name="pique_retractable17" parent="interactible" unique_id=222245133 instance=ExtResource("4_a2il2")]
-position = Vector2(415, -2548)
-rotation = -1.5707964
-
 [node name="AccrocheGrappin" parent="interactible" unique_id=192803354 instance=ExtResource("4_dvjac")]
 position = Vector2(-1344, -1703)
 
@@ -121,13 +116,13 @@ position = Vector2(-528, -2959)
 
 [node name="SAWBLADE" parent="interactible" unique_id=388117046 instance=ExtResource("6_jjk24")]
 position = Vector2(1160, -2753)
-frame_progress = 0.8946554
+frame_progress = 0.6764427
 position_a = Vector2(1139, -2596.7803)
 position_b = Vector2(1139, -3572)
 
 [node name="SAWBLADE2" parent="interactible" unique_id=1554993943 instance=ExtResource("6_jjk24")]
 position = Vector2(1973, -3547)
-frame_progress = 0.23420069
+frame_progress = 0.0159865
 position_a = Vector2(1973, -2615)
 position_b = Vector2(1973, -3553)
 
@@ -163,6 +158,12 @@ position = Vector2(-604, 202)
 [node name="800x403" parent="grayboxing" unique_id=865549781 instance=ExtResource("4_lmwkn")]
 position = Vector2(-1404, 202)
 
+[node name="800x469" parent="grayboxing" unique_id=1173042988 instance=ExtResource("4_lmwkn")]
+position = Vector2(-2204, 202)
+
+[node name="800x470" parent="grayboxing" unique_id=1160629025 instance=ExtResource("4_lmwkn")]
+position = Vector2(-2204, -198)
+
 [node name="800x404" parent="grayboxing" unique_id=1340347522 instance=ExtResource("4_lmwkn")]
 position = Vector2(-1404, -198)
 
@@ -177,6 +178,9 @@ position = Vector2(-2204, -998)
 
 [node name="800x429" parent="grayboxing" unique_id=1418421000 instance=ExtResource("4_lmwkn")]
 position = Vector2(-2204, -598)
+
+[node name="800x471" parent="grayboxing" unique_id=1013189796 instance=ExtResource("4_lmwkn")]
+position = Vector2(-3004, -598)
 
 [node name="800x418" parent="grayboxing" unique_id=1311162563 instance=ExtResource("4_lmwkn")]
 position = Vector2(-2828, -1398)
@@ -193,6 +197,21 @@ position = Vector2(-3004, -2198)
 [node name="800x425" parent="grayboxing" unique_id=797006103 instance=ExtResource("4_lmwkn")]
 position = Vector2(-3004, -2198)
 
+[node name="800x475" parent="grayboxing" unique_id=591374150 instance=ExtResource("4_lmwkn")]
+position = Vector2(-3804, -2198)
+
+[node name="800x476" parent="grayboxing" unique_id=1102055792 instance=ExtResource("4_lmwkn")]
+position = Vector2(-4604, -2198)
+
+[node name="800x477" parent="grayboxing" unique_id=978499260 instance=ExtResource("4_lmwkn")]
+position = Vector2(-4604, -2598)
+
+[node name="800x478" parent="grayboxing" unique_id=1277794812 instance=ExtResource("4_lmwkn")]
+position = Vector2(-4604, -2998)
+
+[node name="800x479" parent="grayboxing" unique_id=407802192 instance=ExtResource("4_lmwkn")]
+position = Vector2(-4604, -3398)
+
 [node name="800x426" parent="grayboxing" unique_id=980127068 instance=ExtResource("4_lmwkn")]
 position = Vector2(-3628, -1798)
 
@@ -202,6 +221,15 @@ position = Vector2(-3628, -1398)
 [node name="800x428" parent="grayboxing" unique_id=1870386090 instance=ExtResource("4_lmwkn")]
 position = Vector2(-3004, -998)
 
+[node name="800x472" parent="grayboxing" unique_id=798508974 instance=ExtResource("4_lmwkn")]
+position = Vector2(-3804, -998)
+
+[node name="800x473" parent="grayboxing" unique_id=928151817 instance=ExtResource("4_lmwkn")]
+position = Vector2(-3804, -598)
+
+[node name="800x474" parent="grayboxing" unique_id=1504835312 instance=ExtResource("4_lmwkn")]
+position = Vector2(-3804, -598)
+
 [node name="800x423" parent="grayboxing" unique_id=1129817372 instance=ExtResource("4_lmwkn")]
 position = Vector2(-3804, -2598)
 
@@ -210,6 +238,12 @@ position = Vector2(-3804, -2998)
 
 [node name="800x432" parent="grayboxing" unique_id=74945422 instance=ExtResource("4_lmwkn")]
 position = Vector2(-3804, -3398)
+
+[node name="800x480" parent="grayboxing" unique_id=504554750 instance=ExtResource("4_lmwkn")]
+position = Vector2(-3804, -3798)
+
+[node name="800x481" parent="grayboxing" unique_id=1366726586 instance=ExtResource("4_lmwkn")]
+position = Vector2(-4604, -3798)
 
 [node name="800x433" parent="grayboxing" unique_id=135844922 instance=ExtResource("4_lmwkn")]
 position = Vector2(-3004, -3398)
@@ -265,6 +299,24 @@ position = Vector2(2196, -198)
 [node name="800x409" parent="grayboxing" unique_id=2105262244 instance=ExtResource("4_lmwkn")]
 position = Vector2(2196, 202)
 
+[node name="800x463" parent="grayboxing" unique_id=2140249067 instance=ExtResource("4_lmwkn")]
+position = Vector2(2196, 602)
+
+[node name="800x464" parent="grayboxing" unique_id=1315066123 instance=ExtResource("4_lmwkn")]
+position = Vector2(1396, 602)
+
+[node name="800x465" parent="grayboxing" unique_id=27641877 instance=ExtResource("4_lmwkn")]
+position = Vector2(596, 602)
+
+[node name="800x466" parent="grayboxing" unique_id=323267669 instance=ExtResource("4_lmwkn")]
+position = Vector2(-204, 602)
+
+[node name="800x467" parent="grayboxing" unique_id=1872058112 instance=ExtResource("4_lmwkn")]
+position = Vector2(-1004, 602)
+
+[node name="800x468" parent="grayboxing" unique_id=2121937096 instance=ExtResource("4_lmwkn")]
+position = Vector2(-1804, 602)
+
 [node name="800x410" parent="grayboxing" unique_id=1992376509 instance=ExtResource("4_lmwkn")]
 position = Vector2(2996, -149)
 
@@ -274,14 +326,32 @@ position = Vector2(3796, -149)
 [node name="800x412" parent="grayboxing" unique_id=2116141387 instance=ExtResource("4_lmwkn")]
 position = Vector2(2996, 251)
 
+[node name="800x462" parent="grayboxing" unique_id=1757496523 instance=ExtResource("4_lmwkn")]
+position = Vector2(2996, 651)
+
 [node name="800x413" parent="grayboxing" unique_id=814359553 instance=ExtResource("4_lmwkn")]
 position = Vector2(3796, 251)
+
+[node name="800x461" parent="grayboxing" unique_id=2091019137 instance=ExtResource("4_lmwkn")]
+position = Vector2(3796, 651)
 
 [node name="800x414" parent="grayboxing" unique_id=1316552430 instance=ExtResource("4_lmwkn")]
 position = Vector2(4594, -199)
 
 [node name="800x417" parent="grayboxing" unique_id=1645784946 instance=ExtResource("4_lmwkn")]
 position = Vector2(5394, -1063)
+
+[node name="800x456" parent="grayboxing" unique_id=602283483 instance=ExtResource("4_lmwkn")]
+position = Vector2(5394, -663)
+
+[node name="800x457" parent="grayboxing" unique_id=1448758293 instance=ExtResource("4_lmwkn")]
+position = Vector2(5394, -288)
+
+[node name="800x458" parent="grayboxing" unique_id=175937142 instance=ExtResource("4_lmwkn")]
+position = Vector2(5394, 112)
+
+[node name="800x459" parent="grayboxing" unique_id=1683969296 instance=ExtResource("4_lmwkn")]
+position = Vector2(5394, 512)
 
 [node name="800x422" parent="grayboxing" unique_id=1648749325 instance=ExtResource("4_lmwkn")]
 position = Vector2(5394, -1463)
@@ -300,6 +370,27 @@ position = Vector2(6185, -2864)
 
 [node name="800x446" parent="grayboxing" unique_id=1649713360 instance=ExtResource("4_lmwkn")]
 position = Vector2(6185, -2493)
+
+[node name="800x482" parent="grayboxing" unique_id=1744914538 instance=ExtResource("4_lmwkn")]
+position = Vector2(6185, -2093)
+
+[node name="800x483" parent="grayboxing" unique_id=2046530986 instance=ExtResource("4_lmwkn")]
+position = Vector2(6185, -1693)
+
+[node name="800x484" parent="grayboxing" unique_id=1032231892 instance=ExtResource("4_lmwkn")]
+position = Vector2(6194, -1293)
+
+[node name="800x485" parent="grayboxing" unique_id=797456833 instance=ExtResource("4_lmwkn")]
+position = Vector2(6194, -893)
+
+[node name="800x486" parent="grayboxing" unique_id=2103757438 instance=ExtResource("4_lmwkn")]
+position = Vector2(6194, -493)
+
+[node name="800x487" parent="grayboxing" unique_id=949238793 instance=ExtResource("4_lmwkn")]
+position = Vector2(6194, -93)
+
+[node name="800x488" parent="grayboxing" unique_id=1538452285 instance=ExtResource("4_lmwkn")]
+position = Vector2(6194, 307)
 
 [node name="800x447" parent="grayboxing" unique_id=522495577 instance=ExtResource("4_lmwkn")]
 position = Vector2(6160, -3519)
@@ -331,11 +422,17 @@ position = Vector2(6160, -3919)
 [node name="800x415" parent="grayboxing" unique_id=205041715 instance=ExtResource("4_lmwkn")]
 position = Vector2(4594, 201)
 
+[node name="800x460" parent="grayboxing" unique_id=1193189320 instance=ExtResource("4_lmwkn")]
+position = Vector2(4594, 576)
+
 [node name="50x400" parent="grayboxing" unique_id=367537328 instance=ExtResource("7_b6xqq")]
 position = Vector2(4969, -599)
 
 [node name="50x200" parent="grayboxing" unique_id=1139176651 instance=ExtResource("8_13odv")]
 position = Vector2(4704, -768)
+
+[node name="50x201" parent="grayboxing" unique_id=635712049 instance=ExtResource("8_13odv")]
+position = Vector2(2827, -2981)
 
 [node name="50x401" parent="grayboxing" unique_id=1573762652 instance=ExtResource("7_b6xqq")]
 position = Vector2(4969, -999)
@@ -353,6 +450,9 @@ position = Vector2(4969, -1863)
 position = Vector2(4969, -2264)
 
 [node name="50x402" parent="grayboxing" unique_id=1679868863 instance=ExtResource("7_b6xqq")]
+position = Vector2(4704, -1068)
+
+[node name="50x407" parent="grayboxing" unique_id=1719763117 instance=ExtResource("7_b6xqq")]
 position = Vector2(4704, -1068)
 
 [node name="400x203" parent="grayboxing" unique_id=616697213 instance=ExtResource("3_danr8")]
@@ -382,6 +482,10 @@ scale = Vector2(1, -1)
 
 [node name="400x200 slide6" parent="grayboxing" unique_id=1041851114 instance=ExtResource("9_13odv")]
 position = Vector2(-1604, -2098)
+scale = Vector2(1, -1)
+
+[node name="400x200 slide10" parent="grayboxing" unique_id=1392758180 instance=ExtResource("9_13odv")]
+position = Vector2(-2228, -1898)
 scale = Vector2(1, -1)
 
 [node name="400x200 slide5" parent="grayboxing" unique_id=1057880207 instance=ExtResource("9_13odv")]
@@ -540,20 +644,17 @@ position = Vector2(762, 1)
 [node name="enemi" parent="enemi" unique_id=525366232 instance=ExtResource("18_l2vjt")]
 position = Vector2(2163, -399)
 
-[node name="enemi3" parent="enemi" unique_id=215295611 instance=ExtResource("19_eeq7o")]
-position = Vector2(4584, -405)
-
-[node name="enemi4" parent="enemi" unique_id=617624255 instance=ExtResource("18_l2vjt")]
-position = Vector2(557, -1211)
-
-[node name="enemi5" parent="enemi" unique_id=1649056745 instance=ExtResource("20_mghad")]
-position = Vector2(-2000, -1204)
-
 [node name="enemi6" parent="enemi" unique_id=951659162 instance=ExtResource("18_l2vjt")]
 position = Vector2(-162, -1850)
 
 [node name="enemi7" parent="enemi" unique_id=2060130290 instance=ExtResource("18_l2vjt")]
 position = Vector2(-2936, -2799)
+
+[node name="enemi4" parent="enemi" unique_id=1174163870 instance=ExtResource("19_eeq7o")]
+position = Vector2(-1016, -1204)
+
+[node name="CharacterBody2D" parent="enemi" unique_id=485432489 instance=ExtResource("22_eeq7o")]
+position = Vector2(-1550.133, -1499.867)
 
 [node name="passage" parent="." unique_id=1292859230 instance=ExtResource("21_l2vjt")]
 position = Vector2(6493, -3065)
@@ -561,6 +662,54 @@ scale = Vector2(-1, 1)
 id = 1
 target_scene = "uid://dvcjfu0svv3o1"
 
-[node name="CharacterBody2D" parent="." unique_id=485432489 instance=ExtResource("22_eeq7o")]
+[node name="Attack" type="Sprite2D" parent="." unique_id=2047569886]
+z_index = -1
+position = Vector2(-4, -288)
+scale = Vector2(0.59, 0.59)
+texture = ExtResource("22_esa63")
+
+[node name="Cast" type="Sprite2D" parent="." unique_id=714376550]
+z_index = -1
+position = Vector2(4494, -1462.9999)
+scale = Vector2(0.59, 0.59)
+texture = ExtResource("23_dpt2b")
+
+[node name="DoubleJump" type="Sprite2D" parent="." unique_id=314943709]
+z_index = -1
+position = Vector2(-421, -141.95)
+scale = Vector2(0.59, 0.59)
+texture = ExtResource("24_6m7aa")
+
+[node name="Heel" type="Sprite2D" parent="." unique_id=1208344041]
+z_index = -1
+position = Vector2(577, -1418)
+scale = Vector2(0.59, 0.59)
+texture = ExtResource("25_4u2bj")
+
+[node name="Roll" type="Sprite2D" parent="." unique_id=24163464]
+z_index = -1
+position = Vector2(882, -118.999985)
+scale = Vector2(0.59, 0.59)
+texture = ExtResource("26_e0k0a")
+
+[node name="WallJump" type="Sprite2D" parent="." unique_id=1825968295]
+z_index = -1
+position = Vector2(4560, -687.99994)
+scale = Vector2(0.59, 0.59)
+texture = ExtResource("27_e5fgg")
+
+[node name="WallRun" type="Sprite2D" parent="." unique_id=1285699133]
+z_index = -1
+position = Vector2(1978, -1447)
+scale = Vector2(0.59, 0.59)
+texture = ExtResource("28_qboba")
+
+[node name="CharacterBody2D" parent="." unique_id=157466115 instance=ExtResource("22_eeq7o")]
 position = Vector2(727, -3307)
 scale = Vector2(-1, 1)
+
+[node name="screenshot" type="Node" parent="." unique_id=2046639030]
+script = ExtResource("29_dpt2b")
+export_path = "res://scene_7.png"
+bg_color = Color(0.101960786, 0.101960786, 0.101960786, 0)
+margin = 50

@@ -161,25 +161,25 @@ position = Vector2(3917, -481)
 
 [node name="SAWBLADE" parent="interactible" unique_id=388117046 instance=ExtResource("9_jb0e2")]
 position = Vector2(-344, -3811)
-frame_progress = 0.94298786
+frame_progress = 0.86287653
 position_a = Vector2(-344, -3109)
 position_b = Vector2(-344, -3811)
 
 [node name="SAWBLADE2" parent="interactible" unique_id=246594848 instance=ExtResource("9_jb0e2")]
 position = Vector2(590, -3104)
-frame_progress = 0.29492426
+frame_progress = 0.2148136
 position_a = Vector2(590, -3100)
 position_b = Vector2(590, -3767)
 
 [node name="SAWBLADE3" parent="interactible" unique_id=105869148 instance=ExtResource("9_jb0e2")]
 position = Vector2(2074, -2095)
-frame_progress = 0.29492426
+frame_progress = 0.2148136
 position_a = Vector2(2074, -3057)
 position_b = Vector2(2074, -2095)
 
 [node name="SAWBLADE4" parent="interactible" unique_id=1759190604 instance=ExtResource("9_jb0e2")]
 position = Vector2(3027, -3036)
-frame_progress = 0.29492426
+frame_progress = 0.2148136
 position_a = Vector2(3027, -3036)
 position_b = Vector2(3027, -2095)
 
@@ -236,6 +236,30 @@ position = Vector2(866, 407)
 [node name="800x400" parent="grayboxing" unique_id=553957001 instance=ExtResource("7_h8t3u")]
 position = Vector2(218, 407)
 
+[node name="800x446" parent="grayboxing" unique_id=644171934 instance=ExtResource("7_h8t3u")]
+position = Vector2(-582, 407)
+
+[node name="800x447" parent="grayboxing" unique_id=524139733 instance=ExtResource("7_h8t3u")]
+position = Vector2(-582, 807)
+
+[node name="800x448" parent="grayboxing" unique_id=205812925 instance=ExtResource("7_h8t3u")]
+position = Vector2(-582, 1207)
+
+[node name="800x449" parent="grayboxing" unique_id=1204737314 instance=ExtResource("7_h8t3u")]
+position = Vector2(-582, 1607)
+
+[node name="800x450" parent="grayboxing" unique_id=162436286 instance=ExtResource("7_h8t3u")]
+position = Vector2(218, 1607)
+
+[node name="800x451" parent="grayboxing" unique_id=1629010389 instance=ExtResource("7_h8t3u")]
+position = Vector2(1018, 1607)
+
+[node name="800x452" parent="grayboxing" unique_id=935925082 instance=ExtResource("7_h8t3u")]
+position = Vector2(1818, 1607)
+
+[node name="800x453" parent="grayboxing" unique_id=1235654360 instance=ExtResource("7_h8t3u")]
+position = Vector2(2618, 1607)
+
 [node name="800x401" parent="grayboxing" unique_id=1189365834 instance=ExtResource("7_h8t3u")]
 position = Vector2(218, 807)
 
@@ -281,6 +305,24 @@ position = Vector2(-707, -2294)
 [node name="800x424" parent="grayboxing" unique_id=1861103594 instance=ExtResource("7_h8t3u")]
 position = Vector2(-1705, -2694)
 
+[node name="800x479" parent="grayboxing" unique_id=1379074933 instance=ExtResource("7_h8t3u")]
+position = Vector2(-2307, -2294)
+
+[node name="800x480" parent="grayboxing" unique_id=820118413 instance=ExtResource("7_h8t3u")]
+position = Vector2(-2505, -2694)
+
+[node name="800x481" parent="grayboxing" unique_id=1997789003 instance=ExtResource("7_h8t3u")]
+position = Vector2(-2505, -3094)
+
+[node name="800x482" parent="grayboxing" unique_id=1102959628 instance=ExtResource("7_h8t3u")]
+position = Vector2(-2505, -3494)
+
+[node name="800x483" parent="grayboxing" unique_id=97951063 instance=ExtResource("7_h8t3u")]
+position = Vector2(-2505, -3894)
+
+[node name="800x484" parent="grayboxing" unique_id=1424014411 instance=ExtResource("7_h8t3u")]
+position = Vector2(-2505, -4294)
+
 [node name="800x426" parent="grayboxing" unique_id=338994041 instance=ExtResource("7_h8t3u")]
 position = Vector2(-1705, -3094)
 
@@ -308,14 +350,59 @@ position = Vector2(-350, -1894)
 [node name="800x445" parent="grayboxing" unique_id=2040531315 instance=ExtResource("7_h8t3u")]
 position = Vector2(-1150, -1894)
 
+[node name="800x485" parent="grayboxing" unique_id=1147552297 instance=ExtResource("7_h8t3u")]
+position = Vector2(-2307, -1894)
+
+[node name="800x486" parent="grayboxing" unique_id=636494948 instance=ExtResource("7_h8t3u")]
+position = Vector2(-2307, -1894)
+
 [node name="800x425" parent="grayboxing" unique_id=270666551 instance=ExtResource("7_h8t3u")]
 position = Vector2(-1507, -1294)
 
 [node name="800x409" parent="grayboxing" unique_id=1716165114 instance=ExtResource("7_h8t3u")]
 position = Vector2(3418, -234)
 
+[node name="800x454" parent="grayboxing" unique_id=1134136001 instance=ExtResource("7_h8t3u")]
+position = Vector2(3418, 166)
+
+[node name="800x455" parent="grayboxing" unique_id=1481133396 instance=ExtResource("7_h8t3u")]
+position = Vector2(3418, 566)
+
+[node name="800x456" parent="grayboxing" unique_id=343866176 instance=ExtResource("7_h8t3u")]
+position = Vector2(3418, 966)
+
+[node name="800x457" parent="grayboxing" unique_id=751700744 instance=ExtResource("7_h8t3u")]
+position = Vector2(3418, 1366)
+
 [node name="800x410" parent="grayboxing" unique_id=1547993266 instance=ExtResource("7_h8t3u")]
 position = Vector2(4218, -234)
+
+[node name="800x458" parent="grayboxing" unique_id=1147016886 instance=ExtResource("7_h8t3u")]
+position = Vector2(4218, 166)
+
+[node name="800x459" parent="grayboxing" unique_id=174144406 instance=ExtResource("7_h8t3u")]
+position = Vector2(5018, 166)
+
+[node name="800x460" parent="grayboxing" unique_id=420332298 instance=ExtResource("7_h8t3u")]
+position = Vector2(5818, 166)
+
+[node name="800x461" parent="grayboxing" unique_id=268619648 instance=ExtResource("7_h8t3u")]
+position = Vector2(6618, 166)
+
+[node name="800x462" parent="grayboxing" unique_id=815968502 instance=ExtResource("7_h8t3u")]
+position = Vector2(7418, 166)
+
+[node name="800x463" parent="grayboxing" unique_id=1757985192 instance=ExtResource("7_h8t3u")]
+position = Vector2(7418, -234)
+
+[node name="800x464" parent="grayboxing" unique_id=683505644 instance=ExtResource("7_h8t3u")]
+position = Vector2(7418, -634)
+
+[node name="800x465" parent="grayboxing" unique_id=702521076 instance=ExtResource("7_h8t3u")]
+position = Vector2(7418, -1034)
+
+[node name="800x466" parent="grayboxing" unique_id=273234051 instance=ExtResource("7_h8t3u")]
+position = Vector2(7418, -1434)
 
 [node name="800x411" parent="grayboxing" unique_id=899986992 instance=ExtResource("7_h8t3u")]
 position = Vector2(5018, -234)
@@ -347,8 +434,29 @@ position = Vector2(5018, -1835)
 [node name="800x428" parent="grayboxing" unique_id=1127213449 instance=ExtResource("7_h8t3u")]
 position = Vector2(5018, -1835)
 
+[node name="800x467" parent="grayboxing" unique_id=257630479 instance=ExtResource("7_h8t3u")]
+position = Vector2(5818, -1834)
+
+[node name="800x468" parent="grayboxing" unique_id=1904183823 instance=ExtResource("7_h8t3u")]
+position = Vector2(6618, -1834)
+
+[node name="800x469" parent="grayboxing" unique_id=382648824 instance=ExtResource("7_h8t3u")]
+position = Vector2(7418, -1834)
+
 [node name="800x429" parent="grayboxing" unique_id=1174375862 instance=ExtResource("7_h8t3u")]
 position = Vector2(4618, -2410)
+
+[node name="800x470" parent="grayboxing" unique_id=272042493 instance=ExtResource("7_h8t3u")]
+position = Vector2(5418, -2410)
+
+[node name="800x471" parent="grayboxing" unique_id=1080745772 instance=ExtResource("7_h8t3u")]
+position = Vector2(5418, -2810)
+
+[node name="800x472" parent="grayboxing" unique_id=1971019223 instance=ExtResource("7_h8t3u")]
+position = Vector2(5418, -3210)
+
+[node name="800x473" parent="grayboxing" unique_id=1703757154 instance=ExtResource("7_h8t3u")]
+position = Vector2(5418, -3610)
 
 [node name="800x430" parent="grayboxing" unique_id=2050581457 instance=ExtResource("7_h8t3u")]
 position = Vector2(4618, -2810)
@@ -361,6 +469,21 @@ position = Vector2(4618, -3610)
 
 [node name="800x436" parent="grayboxing" unique_id=95860332 instance=ExtResource("7_h8t3u")]
 position = Vector2(5565, -4668.2656)
+
+[node name="800x474" parent="grayboxing" unique_id=1294869916 instance=ExtResource("7_h8t3u")]
+position = Vector2(5565, -5068.2656)
+
+[node name="800x475" parent="grayboxing" unique_id=378446972 instance=ExtResource("7_h8t3u")]
+position = Vector2(4765, -5068.2656)
+
+[node name="800x476" parent="grayboxing" unique_id=598861467 instance=ExtResource("7_h8t3u")]
+position = Vector2(3965, -5068.2656)
+
+[node name="800x477" parent="grayboxing" unique_id=1628446535 instance=ExtResource("7_h8t3u")]
+position = Vector2(3165, -5068.2656)
+
+[node name="800x478" parent="grayboxing" unique_id=1292993573 instance=ExtResource("7_h8t3u")]
+position = Vector2(2365, -5068.2656)
 
 [node name="800x437" parent="grayboxing" unique_id=901968566 instance=ExtResource("7_h8t3u")]
 position = Vector2(4765, -4668.2656)
@@ -452,6 +575,12 @@ position = Vector2(4418, -3860)
 
 [node name="400x121" parent="grayboxing" unique_id=914613888 instance=ExtResource("11_jsc20")]
 position = Vector2(4818, -3860)
+
+[node name="400x130" parent="grayboxing" unique_id=1936518521 instance=ExtResource("11_jsc20")]
+position = Vector2(5218, -3860)
+
+[node name="400x131" parent="grayboxing" unique_id=706923605 instance=ExtResource("11_jsc20")]
+position = Vector2(5618, -3860)
 
 [node name="400x117" parent="grayboxing" unique_id=605364687 instance=ExtResource("11_jsc20")]
 position = Vector2(-107, -1194)
@@ -555,6 +684,15 @@ position = Vector2(4818, -2135)
 
 [node name="400x212" parent="grayboxing" unique_id=1428547122 instance=ExtResource("3_txbwx")]
 position = Vector2(5218, -2135)
+
+[node name="400x233" parent="grayboxing" unique_id=538294790 instance=ExtResource("3_txbwx")]
+position = Vector2(5618, -2135)
+
+[node name="400x234" parent="grayboxing" unique_id=1752924652 instance=ExtResource("3_txbwx")]
+position = Vector2(6018, -2135)
+
+[node name="400x235" parent="grayboxing" unique_id=209050331 instance=ExtResource("3_txbwx")]
+position = Vector2(6418, -2135)
 
 [node name="200x50" parent="grayboxing" unique_id=1255373747 instance=ExtResource("9_652gt")]
 position = Vector2(3045, -1089)
