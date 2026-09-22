@@ -11,9 +11,15 @@ var _target_scene_path: String
 # principal et GARDÉES EN MÉMOIRE toute la partie → bascule instantanée,
 # sans écran de chargement. Coût : leurs textures restent résidentes.
 # ------------------------------------------------------------------
+## COÛT MESURÉ (22 sept. 2026, textures résidentes en VRAM) :
+##   scene_06 : 795 Mo   scene_7 : 177 Mo   scene_08 : 275 Mo   scene_09 : 81 Mo
+##   → 1,35 Go à quatre. scene_06 pèse à elle seule 60 % du total : c'est elle
+##   qu'il faudra alléger le jour où la mémoire pose problème, pas les autres.
 const SCENES_PRECHARGEES: Array[String] = [
 	"res://SCRIPT/SCENE/scene_06.tscn",
 	"res://SCRIPT/SCENE/scene_7.tscn",
+	"res://SCRIPT/SCENE/scene_08.tscn",
+	"res://SCRIPT/SCENE/scene_09.tscn",
 ]
 var _prechargees: Dictionary = {}               # chemin res:// → PackedScene (la référence garde la scène en cache)
 var _prechargement_en_cours: Array[String] = []  # au plus UN élément : les charges threadées sont sérialisées
@@ -122,8 +128,13 @@ func load_scene_with_loading(final_scene_path: String) -> void:
 	if packed is PackedScene:
 		replace_scene_in_viewport(packed.instantiate())
 	else:
-		push_error("[LOAD] impossible de charger la loading scene → " + str(loading_scene_path))
-		return
+		# L'écran de chargement est DÉCORATIF. S'il manque, on continue SANS lui :
+		# ce `return` rendait le bouton « retour au menu » complètement mort dans
+		# le build (22 sept. 2026 — la scène référençait une capture d'écran
+		# supprimée du projet, absente du .pck mais encore dans le cache de
+		# l'éditeur). Une décoration ne doit jamais bloquer une navigation.
+		push_warning("[LOAD] écran de chargement introuvable (" + str(loading_scene_path)
+			+ ") — on bascule sans lui")
 
 	# 2) Décale d’une frame pour laisser la loading screen se rendre
 	call_deferred("_do_async_load")
