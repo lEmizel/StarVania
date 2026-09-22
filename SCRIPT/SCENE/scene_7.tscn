@@ -34,7 +34,7 @@
 [ext_resource type="Texture2D" uid="uid://v3lsa27hl6tt" path="res://MEDIA/tuto/Roll.png" id="32_povf7"]
 [ext_resource type="Texture2D" uid="uid://dnqfwrxt81yxt" path="res://MEDIA/tuto/Wall_jump.png" id="33_m35ik"]
 [ext_resource type="Texture2D" uid="uid://bennv6y5dc2kx" path="res://MEDIA/tuto/Wall_run.png" id="34_w0c1q"]
-[ext_resource type="Shader" path="res://SCRIPT/SHADER/flou_fond.gdshader" id="flou_fond_1"]
+[ext_resource type="Shader" uid="uid://jblop3f3vfan" path="res://SCRIPT/SHADER/flou_fond.gdshader" id="flou_fond_1"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_7r4m0"]
 shader = ExtResource("flou_fond_1")

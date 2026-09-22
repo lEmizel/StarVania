@@ -44,6 +44,8 @@ position = Vector2(0, -74)
 sprite_frames = SubResource("SpriteFrames_35hhg")
 animation = &"idle"
 script = ExtResource("4_piege")
+delai_avant_sortie = 0.45
+tremblement_px = 3.0
 
 [node name="StaticBody2D" type="StaticBody2D" parent="." unique_id=821323361]
 

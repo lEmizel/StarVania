@@ -17,8 +17,11 @@
 [ext_resource type="PackedScene" uid="uid://jxp4cxeqdyhv" path="res://SCRIPT/grayboxing/400x100.tscn" id="11_t6oq2"]
 [ext_resource type="PackedScene" uid="uid://d0g8jaoqx2mu6" path="res://SCRIPT/grayboxing/400x100 slide.tscn" id="12_t6oq2"]
 [ext_resource type="PackedScene" uid="uid://do2lu22wxi4r4" path="res://SCRIPT/grayboxing/200x400.tscn" id="13_iwfiy"]
+[ext_resource type="Texture2D" uid="uid://0k62m7sg7cyw" path="res://MEDIA/scene_8.png" id="18_6m7aa"]
 [ext_resource type="PackedScene" uid="uid://b1fje6n3t7rv5" path="res://SCRIPT/MONSTER/LARVE_PIQUE.tscn" id="18_l2vjt"]
+[ext_resource type="Shader" uid="uid://jblop3f3vfan" path="res://SCRIPT/SHADER/flou_fond.gdshader" id="19_e0k0a"]
 [ext_resource type="PackedScene" uid="uid://bs1685hwv6d0w" path="res://SCRIPT/MONSTER/SKELETON.tscn" id="19_eeq7o"]
+[ext_resource type="Texture2D" uid="uid://cisdy5yixbx7q" path="res://MEDIA/imagefondscene8.png" id="20_e0k0a"]
 [ext_resource type="PackedScene" uid="uid://bobswn5tah03s" path="res://SCRIPT/INTERACTIBLE/passage.tscn" id="21_l2vjt"]
 [ext_resource type="PackedScene" uid="uid://bovko7646dmrg" path="res://SCRIPT/MONSTER/Kamikaze.tscn" id="22_eeq7o"]
 [ext_resource type="Texture2D" uid="uid://coep7l80nhse3" path="res://MEDIA/tuto/Attack.png" id="22_esa63"]
@@ -29,6 +32,10 @@
 [ext_resource type="Texture2D" uid="uid://dnqfwrxt81yxt" path="res://MEDIA/tuto/Wall_jump.png" id="27_e5fgg"]
 [ext_resource type="Texture2D" uid="uid://bennv6y5dc2kx" path="res://MEDIA/tuto/Wall_run.png" id="28_qboba"]
 [ext_resource type="Script" uid="uid://cldc0dscj1uj1" path="res://SCRIPT/OUTILS/LEVEL_EXPORTER.gd" id="29_dpt2b"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_qboba"]
+shader = ExtResource("19_e0k0a")
+shader_parameter/blur_amount = 2.246000106685
 
 [node name="scene_08" type="Node2D" unique_id=1958345523]
 
@@ -116,13 +123,13 @@ position = Vector2(-528, -2959)
 
 [node name="SAWBLADE" parent="interactible" unique_id=388117046 instance=ExtResource("6_jjk24")]
 position = Vector2(1160, -2753)
-frame_progress = 0.6764427
+frame_progress = 0.81737316
 position_a = Vector2(1139, -2596.7803)
 position_b = Vector2(1139, -3572)
 
 [node name="SAWBLADE2" parent="interactible" unique_id=1554993943 instance=ExtResource("6_jjk24")]
 position = Vector2(1973, -3547)
-frame_progress = 0.0159865
+frame_progress = 0.1569167
 position_a = Vector2(1973, -2615)
 position_b = Vector2(1973, -3553)
 
@@ -635,6 +642,43 @@ scale = Vector2(-1, -1)
 position = Vector2(4385, -3114)
 
 [node name="VISUAL" type="Node2D" parent="." unique_id=1984328939]
+
+[node name="Sprite2D" type="Sprite2D" parent="VISUAL" unique_id=56999856]
+modulate = Color(0.918091, 0.91809106, 0.91809094, 1)
+position = Vector2(842, -1975)
+texture = ExtResource("18_6m7aa")
+
+[node name="Parallax2D" type="Parallax2D" parent="VISUAL" unique_id=647597156]
+scroll_scale = Vector2(0, 0)
+scroll_offset = Vector2(-4, -93)
+
+[node name="ColorRect" type="ColorRect" parent="VISUAL/Parallax2D" unique_id=686724147]
+z_index = -3
+material = SubResource("ShaderMaterial_qboba")
+offset_left = -668.43994
+offset_top = -305.07593
+offset_right = 2081.56
+offset_bottom = 1339.9241
+metadata/_edit_use_anchors_ = true
+
+[node name="ColorRect3" type="ColorRect" parent="VISUAL/Parallax2D" unique_id=683778532]
+z_index = -4096
+offset_left = -36.940918
+offset_top = -36.343384
+offset_right = 1997.0591
+offset_bottom = 1246.6566
+color = Color(0.30980393, 0.4117647, 0.53333336, 1)
+metadata/_edit_use_anchors_ = true
+
+[node name="Parallax2D2" type="Parallax2D" parent="VISUAL" unique_id=936825898]
+scroll_scale = Vector2(0.25, 0.25)
+
+[node name="Sprite2D3" type="Sprite2D" parent="VISUAL/Parallax2D2" unique_id=1590025044]
+modulate = Color(0.73300546, 0.7330054, 0.7330054, 1)
+z_index = -200
+position = Vector2(1061.7476, -156.50085)
+scale = Vector2(2.85704, 2.8395324)
+texture = ExtResource("20_e0k0a")
 
 [node name="enemi" type="Node2D" parent="." unique_id=573886309]
 
