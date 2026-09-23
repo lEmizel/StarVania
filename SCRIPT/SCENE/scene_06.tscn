@@ -30,9 +30,7 @@
 [ext_resource type="PackedScene" uid="uid://b1fje6n3t7rv5" path="res://SCRIPT/MONSTER/LARVE_PIQUE.tscn" id="34_xccp3"]
 [ext_resource type="PackedScene" uid="uid://bobswn5tah03s" path="res://SCRIPT/INTERACTIBLE/passage.tscn" id="35_kv4j8"]
 [ext_resource type="Shader" path="res://SCRIPT/SHADER/flou_fond.gdshader" id="flou_fond_1"]
-
-[sub_resource type="CompressedTexture2D" id="CompressedTexture2D_0htds"]
-load_path = "res://.godot/imported/scene_06.png-9c93df901d30ecfce8499aa5cd8e802b.ctex"
+[ext_resource type="Texture2D" uid="uid://dcxq08l4g0hxq" path="res://MEDIA/scene_06.png" id="1_s06png"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_7amkf"]
 shader = ExtResource("flou_fond_1")
@@ -729,7 +727,7 @@ position = Vector2(4208, 352)
 [node name="Calque2" type="Sprite2D" parent="VISUAL" unique_id=787433060]
 z_index = -1
 position = Vector2(2618, -2049)
-texture = SubResource("CompressedTexture2D_0htds")
+texture = ExtResource("1_s06png")
 
 [node name="Parallax2D" type="Parallax2D" parent="VISUAL" unique_id=234547209]
 scroll_scale = Vector2(0, 0)
