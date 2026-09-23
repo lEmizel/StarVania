@@ -20,6 +20,7 @@ shader_parameter/blur_amount = 2.246000106685
 
 [node name="Camera2D" type="Camera2D" parent="." unique_id=922863564]
 position = Vector2(34, -170)
+zoom = Vector2(0.585, 0.585)
 
 [node name="screenshot" type="Node" parent="." unique_id=1803822617]
 script = ExtResource("1_fruad")

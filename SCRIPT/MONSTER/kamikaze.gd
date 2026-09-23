@@ -131,10 +131,17 @@ func idle_enter() -> void:
 func idle_execute(delta: float) -> void:
 	_phase += repos_frequence * delta
 	var v := Vector2.ZERO
-	var vers_poste := initial_position - global_position
-	if vers_poste.length() > 30.0:
-		v = vers_poste.normalized() * speed_retour
-	v.y += _ondulation(repos_amplitude, repos_frequence)
+	if virevolte:
+		# vol libre (BASE_IA) : il virevolte autour du poste ; entre deux points
+		# il garde son flottement
+		v = virevolter(delta)
+		if v == Vector2.ZERO:
+			v.y = _ondulation(repos_amplitude, repos_frequence)
+	else:
+		var vers_poste := initial_position - global_position
+		if vers_poste.length() > 30.0:
+			v = vers_poste.normalized() * speed_retour
+		v.y += _ondulation(repos_amplitude, repos_frequence)
 	velocity = v
 	if target == null:
 		_rescan_vision()        # un ennemi déjà dans le champ (sa cible vient de mourir…)

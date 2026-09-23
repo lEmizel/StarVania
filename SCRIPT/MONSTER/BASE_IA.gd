@@ -40,6 +40,26 @@ var max_hp: int = 100
 ## une seconde
 @export var contact_temps_mort := 0.6
 @export_group("")
+
+# VOL LIBRE (23 sept. 2026, demande de Kaoru) : un monstre VOLANT qui n'a pas de
+# cible virevolte de point en point, au hasard, dans un rayon autour de son
+# poste. Éteint par défaut ; les volants (orbe, kamikaze) appellent
+# `virevolter()` dans leur idle quand la case est cochée. Les terrestres n'y
+# touchent pas.
+@export_group("Vol libre (volants)")
+## coché = il virevolte au repos au lieu de rester à son poste
+@export var virevolte := false
+## rayon autour du poste, en pixels (200 px ≈ 2 m à l'échelle du jeu)
+@export var virevolte_rayon := 200.0
+## vitesse de vol entre deux points
+@export var virevolte_vitesse := 140.0
+## pause entre deux points, tirée entre ces deux valeurs (secondes)
+@export var virevolte_pause_min := 0.2
+@export var virevolte_pause_max := 0.9
+@export_group("")
+var _virevolte_cible := Vector2.INF     # INF = pas de point choisi
+var _virevolte_attente := 0.0
+var _virevolte_chrono := 0.0
 var _contact_recents: Dictionary = {}   # corps → temps restant avant de pouvoir le retoucher
 
 # Distance & tracking
@@ -270,6 +290,38 @@ func _rescan_vision() -> void:
 			meilleur = b
 	if meilleur != null:
 		target = meilleur
+
+
+# ============================================================
+#  VOL LIBRE
+# ============================================================
+
+## Vitesse à appliquer cette frame pour virevolter (ZERO pendant les pauses
+## entre deux points). Tire un point au hasard dans le disque autour du poste,
+## y vole, marque une pause, recommence. Un point inaccessible (dans un mur, le
+## sol) est abandonné au bout du temps qu'il aurait fallu pour l'atteindre.
+func virevolter(delta: float) -> Vector2:
+	if _virevolte_attente > 0.0:
+		_virevolte_attente -= delta
+		return Vector2.ZERO
+	if _virevolte_cible == Vector2.INF:
+		_virevolte_nouveau_point()
+	var vers := _virevolte_cible - global_position
+	_virevolte_chrono += delta
+	var trop_long := virevolte_rayon * 2.0 / maxf(virevolte_vitesse, 1.0) + 1.0
+	if vers.length() < 12.0 or _virevolte_chrono > trop_long:
+		_virevolte_cible = Vector2.INF
+		_virevolte_attente = randf_range(virevolte_pause_min, virevolte_pause_max)
+		return Vector2.ZERO
+	flip_toward(_virevolte_cible.x)
+	return vers.normalized() * virevolte_vitesse
+
+
+## un point uniforme dans le disque (le sqrt évite d'entasser les points au centre)
+func _virevolte_nouveau_point() -> void:
+	_virevolte_cible = initial_position \
+		+ Vector2.from_angle(randf() * TAU) * virevolte_rayon * sqrt(randf())
+	_virevolte_chrono = 0.0
 
 
 # ============================================================

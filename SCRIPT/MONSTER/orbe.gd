@@ -94,10 +94,17 @@ func idle_enter() -> void:
 	animator.play("idle")
 	velocity.x = 0.0
 
-func idle_execute(_delta: float) -> void:
+func idle_execute(delta: float) -> void:
 	var t := Time.get_ticks_msec() * 0.001
-	velocity.y = sin(t * WAVE_FREQ * TAU) * WAVE_AMP
-	velocity.x = 0.0
+	if virevolte:
+		# vol libre (BASE_IA) : de point en point autour du poste ; entre deux
+		# points, il reprend son flottement pour ne jamais paraître figé
+		velocity = virevolter(delta)
+		if velocity == Vector2.ZERO:
+			velocity.y = sin(t * WAVE_FREQ * TAU) * WAVE_AMP
+	else:
+		velocity.y = sin(t * WAVE_FREQ * TAU) * WAVE_AMP
+		velocity.x = 0.0
 	if target:
 		flip_toward(target.global_position.x)
 
