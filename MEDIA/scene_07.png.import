@@ -3,20 +3,22 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://c6a8ixrmh42cn"
-path="res://.godot/imported/scene_07.png-fd9994d1a56ae83456002cb1acf06be8.ctex"
+path.bptc="res://.godot/imported/scene_07.png-fd9994d1a56ae83456002cb1acf06be8.bptc.ctex"
+path.astc="res://.godot/imported/scene_07.png-fd9994d1a56ae83456002cb1acf06be8.astc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 
 [deps]
 
 source_file="res://MEDIA/scene_07.png"
-dest_files=["res://.godot/imported/scene_07.png-fd9994d1a56ae83456002cb1acf06be8.ctex"]
+dest_files=["res://.godot/imported/scene_07.png-fd9994d1a56ae83456002cb1acf06be8.bptc.ctex", "res://.godot/imported/scene_07.png-fd9994d1a56ae83456002cb1acf06be8.astc.ctex"]
 
 [params]
 
-compress/mode=0
-compress/high_quality=false
+compress/mode=2
+compress/high_quality=true
 compress/lossy_quality=0.7
 compress/uastc_level=0
 compress/rdo_quality_loss=0.0

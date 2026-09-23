@@ -3,20 +3,22 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bnx8i3kgl6iic"
-path="res://.godot/imported/colonne.png-952a8c385fe7e43dad5cd9d2ebe9d56f.ctex"
+path.bptc="res://.godot/imported/colonne.png-952a8c385fe7e43dad5cd9d2ebe9d56f.bptc.ctex"
+path.astc="res://.godot/imported/colonne.png-952a8c385fe7e43dad5cd9d2ebe9d56f.astc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 
 [deps]
 
 source_file="res://MEDIA/scene 6/background/colonne.png"
-dest_files=["res://.godot/imported/colonne.png-952a8c385fe7e43dad5cd9d2ebe9d56f.ctex"]
+dest_files=["res://.godot/imported/colonne.png-952a8c385fe7e43dad5cd9d2ebe9d56f.bptc.ctex", "res://.godot/imported/colonne.png-952a8c385fe7e43dad5cd9d2ebe9d56f.astc.ctex"]
 
 [params]
 
-compress/mode=0
-compress/high_quality=false
+compress/mode=2
+compress/high_quality=true
 compress/lossy_quality=0.7
 compress/uastc_level=0
 compress/rdo_quality_loss=0.0
