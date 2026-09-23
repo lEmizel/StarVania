@@ -15,13 +15,17 @@ var _target_scene_path: String
 ##   scene_06 : 795 Mo   scene_7 : 177 Mo   scene_08 : 275 Mo   scene_09 : 81 Mo
 ##   → 1,35 Go à quatre. scene_06 pèse à elle seule 60 % du total : c'est elle
 ##   qu'il faudra alléger le jour où la mémoire pose problème, pas les autres.
+## Depuis le menu on ne précharge que les ENTRÉES des deux démos (23 sept. 2026,
+## demande de Kaoru) : scene_7 (DEMO 1) et scene_08 (DEMO 2). Leurs suites
+## (scene_06, scene_09) ne sont pas gardées en mémoire au menu.
 const SCENES_PRECHARGEES: Array[String] = [
-	"res://SCRIPT/SCENE/scene_06.tscn",
 	"res://SCRIPT/SCENE/scene_7.tscn",
 	"res://SCRIPT/SCENE/scene_08.tscn",
-	"res://SCRIPT/SCENE/scene_09.tscn",
 ]
+## Le menu principal : ses « voisins » sont les entrées des démos ci-dessus
+const MENU_SCENE := "uid://dm012xrdmag4v"        # SCRIPT/MENU/menu.tscn
 var _prechargees: Dictionary = {}               # chemin res:// → PackedScene (la référence garde la scène en cache)
+var _sans_precharge := false                    # `-- --sans-precharge` : rien n'est gardé
 var _prechargement_en_cours: Array[String] = []  # au plus UN élément : les charges threadées sont sérialisées
 var _file_prechargement: Array[String] = []      # scènes restant à précharger, dans l'ordre
 var _chargement_niveau_en_cours := false         # un load_scene_with_loading est en vol
@@ -36,6 +40,7 @@ func precharger_scenes() -> void:
 	# DEBUG PERF : `-- --sans-precharge` en ligne de commande → rien n'est gardé
 	# en mémoire (test de pression mémoire sur Mac)
 	if "--sans-precharge" in OS.get_cmdline_user_args():
+		_sans_precharge = true
 		print("[LOAD] préchargement désactivé (--sans-precharge)")
 		return
 	# UNE charge threadée à la fois : deux threads qui chargent des scènes
@@ -179,11 +184,15 @@ func _continue_preloading() -> void:
 		# 4) Récupère et instancie la scène finale
 		var res = ResourceLoader.load_threaded_get(_target_scene_path)
 		if res is PackedScene:
+			# on la GARDE : la mort du joueur recharge ce même niveau, il doit
+			# repartir sans écran de chargement
+			_prechargees[_chemin_res(_target_scene_path)] = res
 			var scene = res.instantiate()
 			print("[LOAD] scène finale instanciée, remplacement…")
 			replace_scene_in_viewport(scene)
 			save_scene()
 			Warmup.chauffer_arbre(scene, "niveau")
+			_niveau_pose(scene)
 			_fin_chargement_niveau()
 		else:
 			push_error("[LOAD] la ressource chargée n’est pas un PackedScene ! ")
@@ -202,6 +211,71 @@ func _basculer(scene: Node) -> void:
 	replace_scene_in_viewport(scene)
 	save_scene()
 	Warmup.chauffer_arbre(scene, "niveau")
+	_niveau_pose(scene)
+
+
+# ------------------------------------------------------------------
+# VOISINAGE (23 sept. 2026, idée de Kaoru) : à chaque niveau posé, on regarde
+# ses PASSAGES et on précharge leurs cibles en arrière-plan pendant que le
+# joueur joue — plus d'écran de chargement au passage suivant. Et on LÂCHE ce
+# qui n'est plus voisin : la mémoire suit le joueur au lieu de grossir jusqu'à
+# la fin de la partie. Reste résident : le niveau courant (sa mort le recharge
+# à l'instant) + les cibles de ses passages. Pour le menu, les voisins sont
+# les entrées des démos.
+# ------------------------------------------------------------------
+func _niveau_pose(scene: Node) -> void:
+	var courant := _chemin_res(_target_scene_path)
+	var voisins: Array[String] = []
+	if courant == _chemin_res(MENU_SCENE):
+		voisins = SCENES_PRECHARGEES.duplicate()
+	else:
+		voisins = _cibles_des_passages(scene, courant)
+
+	# 1) lâcher ce qui n'est ni courant ni voisin (les textures partent avec, si
+	#    plus rien ne les utilise ; celles partagées avec le niveau courant restent)
+	var laches: Array[String] = []
+	for chemin in _prechargees.keys():
+		if chemin != courant and not voisins.has(chemin):
+			laches.append(chemin)
+	for chemin in laches:
+		_prechargees.erase(chemin)
+
+	# 2) mettre les voisins manquants en file (une charge threadée à la fois)
+	_file_prechargement.clear()
+	if not _sans_precharge:
+		for chemin in voisins:
+			if not _prechargees.has(chemin) and not (chemin in _prechargement_en_cours):
+				_file_prechargement.append(chemin)
+
+	print("[LOAD] niveau posé : ", courant.get_file(),
+		" | voisins : ", _noms(voisins),
+		" | lâchés : ", _noms(laches))
+	_lancer_prochain_prechargement()
+
+
+## les scènes visées par les passages/portes de ce niveau (tout nœud portant
+## un `target_scene`), en chemins res://, sans doublon ni le niveau lui-même
+func _cibles_des_passages(racine: Node, courant: String) -> Array[String]:
+	var cibles: Array[String] = []
+	var pile: Array[Node] = [racine]
+	while not pile.is_empty():
+		var n: Node = pile.pop_back()
+		if "target_scene" in n:
+			var brut := str(n.target_scene)
+			if not brut.is_empty():
+				var chemin := _chemin_res(brut)
+				if chemin != courant and not cibles.has(chemin):
+					cibles.append(chemin)
+		for enfant in n.get_children():
+			pile.append(enfant)
+	return cibles
+
+
+static func _noms(chemins: Array) -> String:
+	var noms: PackedStringArray = []
+	for c in chemins:
+		noms.append(str(c).get_file().get_basename())
+	return "[" + ", ".join(noms) + "]"
 
 
 # ------------------------------------------------------------------

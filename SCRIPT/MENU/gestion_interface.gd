@@ -359,7 +359,13 @@ func _creer_trail_coeur() -> CPUParticles2D:
 	# chauffe : une émission hors écran à l'arrivée dans le niveau, pour que
 	# ses tampons GPU existent avant le premier ramassage
 	trail.emitting = true
-	get_tree().create_timer(0.4).timeout.connect(func() -> void: trail.emitting = false)
+	# Tween DU NŒUD, pas minuteur de l'arbre : un SceneTreeTimer survit au HUD,
+	# et si le niveau est quitté dans les 0,4 s (retour menu, mort) sa lambda
+	# touchait `trail` déjà libéré — « Lambda capture was freed », vu le
+	# 23 sept. 2026 en enchaînant les niveaux. Le tween, lui, meurt avec trail.
+	var chauffe := trail.create_tween()
+	chauffe.tween_interval(0.4)
+	chauffe.tween_callback(func() -> void: trail.emitting = false)
 	return trail
 
 
