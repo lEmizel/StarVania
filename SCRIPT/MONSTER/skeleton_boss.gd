@@ -176,13 +176,8 @@ func idle_execute(delta: float) -> void:
 			_rescan_vision()
 
 
-## Re-scan de la zone de vision, borné par la distance d'oubli
-func _rescan_vision() -> void:
-	for b in vision.get_overlapping_bodies():
-		if b.is_in_group("Player") \
-			and b.global_position.distance_to(global_position) <= max_tracking_distance:
-			target = b
-			return
+# _rescan_vision() : désormais celui de BASE_IA (tout ennemi de camp, le plus
+# proche). La copie locale ne cherchait que le joueur.
 
 
 ## Décrochage (hors-vue de BASE_IA) : même délai de grâce que la frustration
@@ -317,6 +312,10 @@ func attack_2_execute(delta: float) -> void:
 		var fx = FX_SHAKE_SCENE.instantiate()
 		fx.global_position = ancre_fx.global_position
 		fx.damage = attack_2_damage
+		# camps : l'onde porte le camp du boss (traverse ses alliés, PV aux ennemis)
+		fx.faction = faction
+		fx.degats_monstres = degats_monstres
+		fx.tireur = self
 		get_tree().current_scene.add_child(fx)
 
 func attack_2_animation_finished() -> void:

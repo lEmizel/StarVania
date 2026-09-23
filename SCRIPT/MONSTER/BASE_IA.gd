@@ -24,6 +24,24 @@ var max_hp: int = 100
 ## Dégâts des attaques, EN CŒURS (lu par l'animator au moment du coup)
 @export var attack_power: int = 1
 
+# CAMPS (23 sept. 2026, demande de Kaoru) : des groupes de monstres capables
+# de se taper dessus. Même valeur = alliés, valeurs différentes = ennemis à vue,
+# traités exactement comme le joueur. Le joueur a son propre camp (1 par
+# défaut, `faction` dans player.gd) : un monstre du camp 1 ne l'attaque pas.
+@export_group("Camp")
+## camp du monstre, 0 à 10. Tous à 0 par défaut : rien ne change tant qu'on
+## n'y touche pas
+@export_range(0, 10) var faction: int = 0
+## dégâts infligés aux AUTRES MONSTRES, en points de vie (70 = un coup d'épée
+## du joueur). À régler par monstre pour rester cohérent avec sa force
+@export var degats_monstres: int = 70
+## temps mort entre deux dégâts de CONTACT sur un même monstre : ils n'ont pas
+## le stun du joueur, sans ça deux ennemis qui se chevauchent se broient en
+## une seconde
+@export var contact_temps_mort := 0.6
+@export_group("")
+var _contact_recents: Dictionary = {}   # corps → temps restant avant de pouvoir le retoucher
+
 # Distance & tracking
 var max_tracking_distance: float = 1000.0
 var confort_zone_max: float = 200.0
@@ -78,6 +96,12 @@ func _ready() -> void:
 	_flash_material.shader = HIT_FLASH_SHADER
 	animator.material = _flash_material
 	_setup_contact_area()
+	# Les zones ne regardaient que la couche du joueur (masque 1). Les monstres
+	# sont sur la couche 8 : on l'ajoute par code, aucune scène à retoucher.
+	vision.collision_mask |= 8
+	var zone_attaque := get_node_or_null("POINT/collision_attack") as Area2D
+	if zone_attaque != null:
+		zone_attaque.collision_mask |= 8
 	animator.connect("animation_finished", Callable(self, "_on_animation_finished"))
 	animator.connect("animation_looped", Callable(self, "_on_animation_looped"))
 	vision.connect("body_entered", Callable(self, "_on_vision_body_entered"))
@@ -108,6 +132,7 @@ func _physics_process(delta: float) -> void:
 		velocity.x = _knock.x
 	move_and_slide()
 	_decay_knockback(delta)
+	_tick_contacts(delta)
 	_check_contact_damage()
 
 
@@ -139,7 +164,7 @@ func _oublier_cible() -> void:
 func _setup_contact_area() -> void:
 	_contact_area = Area2D.new()
 	_contact_area.collision_layer = 0
-	_contact_area.collision_mask = 1
+	_contact_area.collision_mask = 1 | 8      # joueur + monstres
 	var cs := CollisionShape2D.new()
 	cs.shape = collision.shape
 	cs.position = collision.position
@@ -150,12 +175,30 @@ func _setup_contact_area() -> void:
 
 
 func _check_contact_damage() -> void:
-	if _is_dead():
+	if _is_dead() or contact_damage <= 0:
 		return
 	for body in _contact_area.get_overlapping_bodies():
-		if body.is_in_group("Player") and body.has_method("apply_damage"):
+		if body == self or not est_ennemi(body):
+			continue
+		if body.is_in_group("Player"):
 			# L'invulnérabilité du joueur (état HIT / ROLL) limite la cadence
 			body.apply_damage(contact_damage, global_position.x, "contact:" + name)
+		elif not _contact_recents.has(body):
+			# un monstre n'a pas de stun : c'est NOUS qui tenons la cadence
+			_contact_recents[body] = contact_temps_mort
+			body.apply_damage(degats_monstres, global_position.x, "contact:" + name, true, self)
+
+
+func _tick_contacts(delta: float) -> void:
+	if _contact_recents.is_empty():
+		return
+	for body in _contact_recents.keys():
+		if not is_instance_valid(body):
+			_contact_recents.erase(body)
+			continue
+		_contact_recents[body] -= delta
+		if _contact_recents[body] <= 0.0:
+			_contact_recents.erase(body)
 
 
 ## Décroissance du knockback ; à la fin, on purge la vitesse résiduelle
@@ -187,19 +230,77 @@ func _on_animation_looped() -> void:
 # ============================================================
 
 func _on_vision_body_entered(body: Node2D) -> void:
-	if body.is_in_group("Player"):
+	# premier ennemi vu, premier servi : on ne lâche pas une cible pour une
+	# autre, on en reprend une quand la nôtre meurt ou s'éloigne
+	if target == null and est_ennemi(body):
 		target = body
 
 func _on_vision_body_exited(body: Node2D) -> void:
 	pass
 
 func check_tracking() -> bool:
+	# une cible monstre peut MOURIR (ce que le joueur ne fait pas en plein
+	# combat : sa mort recharge la scène) : on la lâche, sinon on frapperait
+	# un cadavre jusqu'à la fin des temps
+	if target != null and (not is_instance_valid(target) or (target is BaseAI and target._is_dead())):
+		target = null
 	if not target:
 		return false
 	if distance_to_target() > max_tracking_distance:
 		target = null
 		return false
 	return true
+
+
+## Re-scan de la zone de vision (les corps déjà présents n'émettent pas de
+## signal d'entrée) : l'ennemi le plus proche, borné par la distance d'oubli.
+## Commun à tous les monstres depuis les camps (chacun avait sa copie qui ne
+## cherchait que le joueur).
+func _rescan_vision() -> void:
+	var meilleur: Node2D = null
+	var meilleure_dist := max_tracking_distance
+	for b in vision.get_overlapping_bodies():
+		if b == self or not est_ennemi(b):
+			continue
+		if b is BaseAI and b._is_dead():
+			continue
+		var d: float = b.global_position.distance_to(global_position)
+		if d <= meilleure_dist:
+			meilleure_dist = d
+			meilleur = b
+	if meilleur != null:
+		target = meilleur
+
+
+# ============================================================
+#  CAMPS
+# ============================================================
+
+## camp d'un nœud : le sien s'il en a un, −1 sinon (décor, projectile…)
+static func faction_de(n: Node) -> int:
+	if n != null and is_instance_valid(n) and "faction" in n:
+		return int(n.faction)
+	return -1
+
+
+## un ennemi = quelqu'un qui a un camp, et pas le nôtre
+func est_ennemi(n: Node) -> bool:
+	if n == self:
+		return false
+	var f := faction_de(n)
+	return f >= 0 and f != faction
+
+
+## LE point d'entrée des coups de ce monstre : choisit l'échelle de dégâts
+## (cœurs pour le joueur, points de vie pour un monstre), refuse les alliés,
+## et se déclare comme attaquant pour que la victime riposte contre NOUS
+func infliger(cible: Node, source_x: float, tag: String) -> void:
+	if not est_ennemi(cible) or not cible.has_method("apply_damage"):
+		return
+	if cible.is_in_group("Player"):
+		cible.apply_damage(attack_power, source_x, tag)
+	else:
+		cible.apply_damage(degats_monstres, source_x, tag, true, self)
 
 
 # ============================================================
@@ -221,7 +322,9 @@ func _flash_white() -> void:
 ## (ex. bloodball) — la réaction d'aggro/volte-face reste, seul le recul saute
 ## Retourne true si le coup a PORTÉ (false : déjà mort, ou invulnérable) — le
 ## joueur s'en sert pour recharger sa jauge bloodheal à chaque coup réel.
-func apply_damage(amount: int, source_x, _source_tag := "?", knockback := true) -> bool:
+## `attaquant` : qui frappe (un monstre d'un autre camp se déclare). Sans lui,
+## on suppose le joueur, comme avant.
+func apply_damage(amount: int, source_x, _source_tag := "?", knockback := true, attaquant: Node = null) -> bool:
 	if _is_dead():
 		return false
 	if invulnerable:
@@ -245,15 +348,20 @@ func apply_damage(amount: int, source_x, _source_tag := "?", knockback := true) 
 		_on_dead()
 		return true
 	# Attaqué — même de dos, même hors vision, même par un projectile : le
-	# monstre prend le joueur pour cible, se retourne vers LUI (pas vers le
-	# projectile, qui est déjà au contact) et réagit immédiatement sans
-	# attendre le prochain cycle de décision de son état
-	if target == null:
+	# monstre prend l'AGRESSEUR pour cible (le joueur si on ne sait pas qui a
+	# frappé), se retourne vers LUI (pas vers le projectile, qui est déjà au
+	# contact) et réagit immédiatement sans attendre le prochain cycle de
+	# décision de son état. Un coup venant d'un ALLIÉ ne provoque rien : pas
+	# de riposte, pas de changement de cible.
+	var agresseur: Node = attaquant
+	if agresseur == null:
 		var players := get_tree().get_nodes_in_group("Player")
 		if players.size() > 0:
-			target = players[0]
-			if has_method("decide"):
-				call_deferred("decide")
+			agresseur = players[0]
+	if agresseur != null and est_ennemi(agresseur) and target != agresseur:
+		target = agresseur
+		if has_method("decide"):
+			call_deferred("decide")
 	if target != null:
 		flip_toward(target.global_position.x)
 	elif source_x != null:

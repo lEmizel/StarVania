@@ -102,6 +102,8 @@ func idle_execute(_delta: float) -> void:
 		flip_toward(target.global_position.x)
 
 func idle_animation_looped() -> void:
+	if target == null:
+		_rescan_vision()        # camps : un ennemi déjà dans le champ
 	if target:
 		decide()
 

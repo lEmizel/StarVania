@@ -136,6 +136,8 @@ func idle_execute(delta: float) -> void:
 		v = vers_poste.normalized() * speed_retour
 	v.y += _ondulation(repos_amplitude, repos_frequence)
 	velocity = v
+	if target == null:
+		_rescan_vision()        # un ennemi déjà dans le champ (sa cible vient de mourir…)
 	if target != null:
 		flip_toward(target.global_position.x)
 	if _cible_valide():
@@ -226,18 +228,21 @@ func _souffler() -> void:
 	cercle.radius = rayon_explosion
 	params.shape = cercle
 	params.transform = Transform2D(0.0, _centre())
-	params.collision_mask = 1          # couche 1 : le joueur
+	params.collision_mask = 1 | 8      # le joueur (couche 1) et les monstres (8)
 	params.collide_with_areas = false
 	params.collide_with_bodies = true
 	for hit in get_world_2d().direct_space_state.intersect_shape(params, 8):
 		var corps = hit.get("collider")
-		if corps == null or not corps.is_in_group("Player"):
+		if corps == null or not est_ennemi(corps) or not corps.has_method("apply_damage"):
 			continue
-		if corps.has_method("apply_damage"):
+		if corps.is_in_group("Player"):
 			# dernier argument : le souffle passe outre le stun de 0,25 s. Il ne
 			# part qu'un coup par bombe, alors que quatre bombes qui sautent
 			# ensemble ne doivent pas coûter un seul cœur
 			corps.apply_damage(degats_explosion, global_position.x, "kamikaze:" + name, true)
+		else:
+			# un monstre d'un autre camp : en points de vie
+			corps.apply_damage(degats_monstres, global_position.x, "kamikaze:" + name, true, self)
 
 
 func _poser_explosion_violette() -> void:

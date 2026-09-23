@@ -5,6 +5,10 @@ enum States { IDLE, RUN, CHUTE, JUMP, WALL_GRIFFE, WALL_JUMP, CLIMB, ROLL, CHUTE
 
 
 
+# CAMP (23 sept. 2026) : même système que les monstres (`faction` de BASE_IA).
+# Un monstre du même camp ne nous attaque pas. 1 par défaut, les monstres à 0.
+@export_range(0, 10) var faction: int = 1
+
 @onready var wall_right: RayCast2D = $POINT/wall_right
 @onready var wall_left: RayCast2D = $POINT/wall_left
 @onready var climbcast_up: RayCast2D = $POINT/climbcast_up

@@ -1,0 +1,132 @@
+[gd_scene format=3 uid="uid://c1j5vepvh4nqd"]
+
+[ext_resource type="Script" uid="uid://cldc0dscj1uj1" path="res://SCRIPT/OUTILS/LEVEL_EXPORTER.gd" id="1_fruad"]
+[ext_resource type="PackedScene" uid="uid://47qcpwpulk4y" path="res://SCRIPT/grayboxing/800x400.tscn" id="2_5bgs1"]
+[ext_resource type="Texture2D" uid="uid://dqjy037jbh6cu" path="res://MEDIA/arene.png" id="3_h0txw"]
+[ext_resource type="Shader" uid="uid://jblop3f3vfan" path="res://SCRIPT/SHADER/flou_fond.gdshader" id="4_brwwg"]
+[ext_resource type="Texture2D" uid="uid://x774gue4he8e" path="res://MEDIA/scene 6/background/background.png" id="5_h0txw"]
+[ext_resource type="Texture2D" uid="uid://bnx8i3kgl6iic" path="res://MEDIA/scene 6/background/colonne.png" id="6_ngwr8"]
+[ext_resource type="PackedScene" uid="uid://bpeorkg8vsrcb" path="res://SCRIPT/MONSTER/SKELETON_blue.tscn" id="7_ngwr8"]
+[ext_resource type="PackedScene" uid="uid://cxw4a7pjhbq0m" path="res://SCRIPT/MONSTER/SKELETON_BOSS.tscn" id="8_jvts7"]
+[ext_resource type="PackedScene" uid="uid://lskntqxi822j" path="res://SCRIPT/MONSTER/Orbe.tscn" id="9_ngwr8"]
+[ext_resource type="PackedScene" uid="uid://bovko7646dmrg" path="res://SCRIPT/MONSTER/Kamikaze.tscn" id="10_5fpg4"]
+[ext_resource type="PackedScene" uid="uid://i3vr6r3pmxtp" path="res://SCRIPT/MONSTER/XENO.tscn" id="11_2m0i2"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_jvts7"]
+shader = ExtResource("4_brwwg")
+shader_parameter/blur_amount = 2.246000106685
+
+[node name="Node2D" type="Node2D" unique_id=1041136856]
+
+[node name="Camera2D" type="Camera2D" parent="." unique_id=922863564]
+position = Vector2(34, -170)
+
+[node name="screenshot" type="Node" parent="." unique_id=1803822617]
+script = ExtResource("1_fruad")
+export_path = "res://arène.png"
+bg_color = Color(0.101960786, 0.101960786, 0.101960786, 0)
+margin = 50
+
+[node name="800x400" parent="." unique_id=436297158 instance=ExtResource("2_5bgs1")]
+visible = false
+position = Vector2(16, 284)
+
+[node name="800x401" parent="." unique_id=1711493484 instance=ExtResource("2_5bgs1")]
+visible = false
+position = Vector2(816, 284)
+
+[node name="800x402" parent="." unique_id=924242599 instance=ExtResource("2_5bgs1")]
+visible = false
+position = Vector2(-784, 284)
+
+[node name="800x403" parent="." unique_id=1769962036 instance=ExtResource("2_5bgs1")]
+visible = false
+position = Vector2(-1369, -116)
+
+[node name="800x404" parent="." unique_id=1418026268 instance=ExtResource("2_5bgs1")]
+visible = false
+position = Vector2(1434, -116)
+
+[node name="VISUAL" type="Node2D" parent="." unique_id=1785262108]
+
+[node name="Sprite2D" type="Sprite2D" parent="VISUAL" unique_id=1785018952]
+z_index = -1
+position = Vector2(34, 84)
+texture = ExtResource("3_h0txw")
+
+[node name="Parallax2D" type="Parallax2D" parent="VISUAL" unique_id=1838420103]
+scroll_scale = Vector2(0, 0)
+
+[node name="ColorRect" type="ColorRect" parent="VISUAL/Parallax2D" unique_id=1210332598]
+z_index = -3
+material = SubResource("ShaderMaterial_jvts7")
+offset_left = -668.43994
+offset_top = -305.07593
+offset_right = 2081.56
+offset_bottom = 1339.9241
+metadata/_edit_use_anchors_ = true
+
+[node name="ColorRect3" type="ColorRect" parent="VISUAL/Parallax2D" unique_id=955359078]
+z_index = -4096
+offset_left = -36.940918
+offset_top = -36.343384
+offset_right = 1997.0591
+offset_bottom = 1246.6566
+color = Color(0.30980393, 0.4117647, 0.53333336, 1)
+metadata/_edit_use_anchors_ = true
+
+[node name="Parallax2D2" type="Parallax2D" parent="VISUAL" unique_id=1990517345]
+scroll_scale = Vector2(0.25, 0.25)
+
+[node name="Sprite2D3" type="Sprite2D" parent="VISUAL/Parallax2D2" unique_id=1567844395]
+z_index = -200
+position = Vector2(1143.887, -201.27637)
+scale = Vector2(0.5043707, 0.50128)
+texture = ExtResource("5_h0txw")
+
+[node name="Parallax2D3" type="Parallax2D" parent="VISUAL" unique_id=426618417]
+scroll_scale = Vector2(0.35, 0.35)
+
+[node name="Sprite2D" type="Sprite2D" parent="VISUAL/Parallax2D3" unique_id=621145704]
+z_index = -25
+position = Vector2(1733.115, -627.9154)
+scale = Vector2(0.7249403, 0.7249403)
+texture = ExtResource("6_ngwr8")
+
+[node name="enemi" parent="." unique_id=627255339 instance=ExtResource("7_ngwr8")]
+position = Vector2(-591, 78)
+
+[node name="enemi2" parent="." unique_id=1210961269 instance=ExtResource("7_ngwr8")]
+position = Vector2(493.62097, 78)
+
+[node name="skeleton_boss" parent="." unique_id=61355065 instance=ExtResource("8_jvts7")]
+position = Vector2(-56.37903, 83)
+faction = 1
+
+[node name="CharacterBody2D" parent="." unique_id=485432489 instance=ExtResource("9_ngwr8")]
+position = Vector2(-328, -373)
+faction = 3
+
+[node name="CharacterBody2D2" parent="." unique_id=318908570 instance=ExtResource("9_ngwr8")]
+position = Vector2(331, -373)
+faction = 3
+
+[node name="CharacterBody2D3" parent="." unique_id=622387084 instance=ExtResource("10_5fpg4")]
+position = Vector2(-727.133, -218)
+faction = 5
+
+[node name="CharacterBody2D4" parent="." unique_id=435355166 instance=ExtResource("10_5fpg4")]
+position = Vector2(610, -326.867)
+faction = 5
+
+[node name="CharacterBody2D5" parent="." unique_id=1580411424 instance=ExtResource("10_5fpg4")]
+position = Vector2(-525.867, -328.133)
+faction = 5
+
+[node name="enemi3" parent="." unique_id=1509042577 instance=ExtResource("11_2m0i2")]
+position = Vector2(-818, 78)
+faction = 6
+
+[node name="enemi4" parent="." unique_id=407937994 instance=ExtResource("11_2m0i2")]
+position = Vector2(790, 79.26599)
+faction = 6

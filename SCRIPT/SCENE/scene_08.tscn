@@ -123,13 +123,13 @@ position = Vector2(-528, -2959)
 
 [node name="SAWBLADE" parent="interactible" unique_id=388117046 instance=ExtResource("6_jjk24")]
 position = Vector2(1160, -2753)
-frame_progress = 0.81737316
+frame_progress = 0.8483005
 position_a = Vector2(1139, -2596.7803)
 position_b = Vector2(1139, -3572)
 
 [node name="SAWBLADE2" parent="interactible" unique_id=1554993943 instance=ExtResource("6_jjk24")]
 position = Vector2(1973, -3547)
-frame_progress = 0.1569167
+frame_progress = 0.1878445
 position_a = Vector2(1973, -2615)
 position_b = Vector2(1973, -3553)
 

@@ -30,6 +30,13 @@ const EXPLOSION := preload("res://SCRIPT/SPELL/explosion_feu.tscn")
 
 ## direction de vol, posée par le lanceur AVANT d'ajouter le nœud à la scène
 var direction := Vector2.RIGHT
+## CAMPS (23 sept. 2026) : posés par le lanceur. La boule traverse le tireur et
+## ses alliés, blesse le joueur en cœurs (`damage`) et les monstres ennemis en
+## points de vie (`degats_monstres`), en se déclarant comme venant de `tireur`
+## pour que la victime riposte contre lui.
+var faction: int = 0
+var degats_monstres: int = 70
+var tireur: Node = null
 
 var _parcouru := 0.0
 var _extinction := -1.0        # >= 0 : compte à rebours avant la disparition
@@ -40,6 +47,7 @@ var _extinction := -1.0        # >= 0 : compte à rebours avant la disparition
 
 func _ready() -> void:
 	body_entered.connect(_on_body_entered)
+	collision_mask |= 8               # les monstres aussi, pas seulement le joueur
 	if direction.length_squared() < 0.0001:
 		direction = Vector2.RIGHT
 	direction = direction.normalized()
@@ -64,8 +72,14 @@ func _physics_process(delta: float) -> void:
 func _on_body_entered(body: Node) -> void:
 	if _extinction >= 0.0:
 		return
+	var camp := BaseAI.faction_de(body)
+	# le tireur et ses alliés (monstres comme joueur) sont traversés sans exploser
+	if body == tireur or (camp >= 0 and camp == faction):
+		return
 	if body.is_in_group("Player") and body.has_method("apply_damage"):
 		body.apply_damage(damage, global_position.x, "boule_de_feu")
+	elif body is BaseAI:
+		body.apply_damage(degats_monstres, global_position.x, "boule_de_feu", true, tireur)
 	_exploser()
 
 

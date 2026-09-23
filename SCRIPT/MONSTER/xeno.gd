@@ -181,13 +181,8 @@ func idle_execute(delta: float) -> void:
 				goto_state(States.PATROL)
 
 
-## Re-scan de la zone de vision, borné par la distance d'oubli
-func _rescan_vision() -> void:
-	for b in vision.get_overlapping_bodies():
-		if b.is_in_group("Player") \
-			and b.global_position.distance_to(global_position) <= max_tracking_distance:
-			target = b
-			return
+# _rescan_vision() : désormais celui de BASE_IA (tout ennemi de camp, le plus
+# proche). La copie locale ne cherchait que le joueur.
 
 
 # --- PATROL (ronde entre les deux trous/murs les plus proches) ---

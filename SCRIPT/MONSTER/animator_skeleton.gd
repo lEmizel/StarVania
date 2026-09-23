@@ -18,11 +18,9 @@ func _ready() -> void:
 
 
 func _on_body_entered(body: Node) -> void:
-	if not body.is_in_group("Player"):
-		return
-	if not body.has_method("apply_damage"):
-		return
-	body.apply_damage(enemi.attack_power, enemi.global_position.x, "attaque:" + enemi.name)
+	# CAMPS : c'est le monstre qui décide qui est un ennemi et à quelle échelle
+	# il frappe (cœurs pour le joueur, points de vie pour un monstre)
+	enemi.infliger(body, enemi.global_position.x, "attaque:" + enemi.name)
 
 
 func _disable_all_hitboxes() -> void:

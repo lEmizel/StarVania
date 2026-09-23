@@ -20,15 +20,9 @@ func _process(delta):
 # 2) Ce handler est appelé à chaque fois qu'on change d'animation    
 
 func _on_body_entered(body: Node) -> void:
-	# 1) Vérifie que c'est bien un Player
-	if not body.is_in_group("Player"):
-		return
-
-	# 2) Vérifie que l'objet sait recevoir des dégâts
-	if not body.has_method("apply_damage"):
-		return
-	# 3) Applique les dégâts (attack_power du monstre) + la position X de la source
-	body.apply_damage(enemi.attack_power, enemi.global_position.x, "attaque:" + enemi.name)
+	# CAMPS : c'est le monstre qui décide qui est un ennemi et à quelle échelle
+	# il frappe (cœurs pour le joueur, points de vie pour un monstre)
+	enemi.infliger(body, enemi.global_position.x, "attaque:" + enemi.name)
 	
 
 func _disable_all_hitboxes() -> void:
