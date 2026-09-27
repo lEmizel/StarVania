@@ -287,6 +287,7 @@ position = Vector2(-9431, -1648)
 script = ExtResource("1_1b2e2")
 
 [node name="collision" type="Node2D" parent="." unique_id=1975112513]
+visible = false
 position = Vector2(14267, 1610)
 
 [node name="platforme" parent="collision" unique_id=856894921 instance=ExtResource("2_ktn18")]
