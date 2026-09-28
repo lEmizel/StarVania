@@ -638,6 +638,12 @@ func jump_enter():
 		_climb_auto_exit = false
 		_jump_timer = MAX_JUMP_HOLD  # ← désactive le hold
 		_saut_lance = true
+	elif _propulsion_pending:
+		# propulsion d'un passage vertical : vitesse imposée, pas de hold
+		_propulsion_pending = false
+		velocity = _propulsion_velocite
+		_jump_timer = MAX_JUMP_HOLD
+		_saut_lance = true
 	elif _grappin_pending:
 		# catapulte du grappin : vitesse imposée, gravité normale, pas de hold
 		_grappin_pending = false
@@ -2206,6 +2212,25 @@ var _grappin_tire := false
 var _grappin_dir := 1
 var _grappin_pending := false
 var _grappin_velocite := Vector2.ZERO
+
+# PROPULSION IMPOSÉE (28 sept. 2026) : un passage vertical projette le joueur
+# vers le haut quand il ARRIVE par le bas d'un tableau. Même mécanisme que la
+# catapulte du grappin : vitesse donnée, gravité de lancer, et le bouton de
+# saut n'y change rien — sinon un bouton relâché couperait la montée net.
+var _propulsion_pending := false
+var _propulsion_velocite := Vector2.ZERO
+
+
+func propulser(vitesse: Vector2) -> void:
+	if current_state == States.DEAD:
+		return
+	_propulsion_velocite = vitesse
+	_propulsion_pending = true
+	_recharge_air_moves()
+	if current_state == States.JUMP:
+		jump_enter()      # change_state refuse l'état courant : on rejoue l'entrée
+	else:
+		change_state(States.JUMP)
 
 
 ## Chaque pas de physique : quelle accroche est prenable ? À portée, au-dessus,

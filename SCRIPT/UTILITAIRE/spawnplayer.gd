@@ -3,6 +3,9 @@ extends Node
 const PLAYER_SCENE := preload("uid://vkm3ut4hytpr")
 const CAMERA_SCENE := preload("uid://bcr77cmqqqma4")
 
+## le passage par lequel le joueur arrive (null : checkpoint, début de partie)
+var _porte_arrivee: Node = null
+
 func _ready() -> void:
 	# Calcule la position de spawn avant d'instancier le joueur
 	await get_tree().process_frame
@@ -34,6 +37,12 @@ func _ready() -> void:
 		player_body.velocity = Vector2.ZERO
 		player_body.change_state(player_body.States.IDLE)
 		player_body.animator.play("idle")
+
+	# le passage d'arrivée a son mot à dire (passage vertical : il propulse le
+	# joueur vers le haut) — APRÈS l'élan et l'état, pour avoir le dernier mot
+	if _porte_arrivee != null and is_instance_valid(_porte_arrivee) \
+			and _porte_arrivee.has_method("joueur_arrive"):
+		_porte_arrivee.joueur_arrive(player_body)
 
 	# Cale la caméra immédiatement sur le joueur
 	var cam = get_tree().get_first_node_in_group("Camera")
@@ -72,6 +81,11 @@ func _get_spawn_position():
 		Player.last_door_id = -1
 		for p in get_tree().get_nodes_in_group("Porte"):
 			if p.id == door_id:
+				_porte_arrivee = p
+				# un passage sait où poser le joueur (sur lui-même s'il est
+				# vertical, sur son Marker2D sinon) ; les portes gardent l'ancien calcul
+				if p.has_method("point_arrivee"):
+					return p.point_arrivee()
 				if p.has_node("Marker2D"):
 					return p.get_node("Marker2D").global_position
 				return p.global_position

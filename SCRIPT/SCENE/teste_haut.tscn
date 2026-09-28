@@ -1,0 +1,37 @@
+[gd_scene format=3 uid="uid://m7x54xej8cdi"]
+
+[ext_resource type="Script" uid="uid://dftar4ptyhjxe" path="res://SCRIPT/UTILITAIRE/spawnplayer.gd" id="1_7h7l6"]
+[ext_resource type="PackedScene" uid="uid://ckxwmy0iav2h2" path="res://SCRIPT/INTERACTIBLE/Checkpoint.tscn" id="2_e042h"]
+[ext_resource type="PackedScene" uid="uid://47qcpwpulk4y" path="res://SCRIPT/grayboxing/800x400.tscn" id="3_7h7l6"]
+[ext_resource type="PackedScene" uid="uid://bobswn5tah03s" path="res://SCRIPT/INTERACTIBLE/passage.tscn" id="3_e042h"]
+[ext_resource type="PackedScene" path="res://SCRIPT/INTERACTIBLE/limite_camera.tscn" id="4_tkc66"]
+
+[node name="teste_haut" type="Node2D" unique_id=332428447]
+
+[node name="spawnplayer" type="Node" parent="." unique_id=1893052376]
+script = ExtResource("1_7h7l6")
+
+[node name="interactible" type="Node2D" parent="." unique_id=469718174]
+
+[node name="checkpoint" parent="interactible" unique_id=524856083 groups=["Checkpoint"] instance=ExtResource("2_e042h")]
+
+[node name="passage" parent="interactible" unique_id=1292859230 instance=ExtResource("3_e042h")]
+position = Vector2(-550, 407)
+target_scene = "uid://43gcmwq5twwb"
+vertical = true
+
+[node name="LIMITE_CAMERA" parent="interactible" unique_id=386645663 instance=ExtResource("4_tkc66")]
+position = Vector2(-557, 264)
+bord_bloque = 3
+
+[node name="grayboxing" type="Node2D" parent="." unique_id=1100417722]
+
+[node name="VISUAL" type="Node2D" parent="." unique_id=120861907]
+
+[node name="enemi" type="Node2D" parent="." unique_id=800829930]
+
+[node name="800x400" parent="." unique_id=436297158 instance=ExtResource("3_7h7l6")]
+position = Vector2(9, 197)
+
+[node name="800x401" parent="." unique_id=2125237909 instance=ExtResource("3_7h7l6")]
+position = Vector2(-1102, 199)

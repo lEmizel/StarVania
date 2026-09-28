@@ -18,6 +18,7 @@ extends Control
 const DEMOS := [
 	{"nom": "DEMO 1", "scene": "uid://gq88m0garham"},                 # la démo d'origine, démarre sur scene_7
 	{"nom": "DEMO 2", "scene": "res://SCRIPT/SCENE/scene_08.tscn"},
+	{"nom": "DEMO 3", "scene": "res://SCRIPT/SCENE/teste_bas.tscn"},   # banc d'essai des passages verticaux (teste_bas ↔ teste_haut)
 ]
 const OPTIONS_SCENE := preload("res://SCRIPT/MENU/options.tscn")
 
