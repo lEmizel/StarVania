@@ -84,10 +84,13 @@ func _on_body_entered(body: Node) -> void:
 
 
 func _exploser() -> void:
+	# l'explosion de FEU (1er oct. 2026 ; avant : l'éclaboussure de la bloodball
+	# recolorée, qui tournait en boucle faute de `demo_boucle = false`) : un
+	# Node2D centré sur l'impact, qui joue une fois et se supprime
 	var ex := EXPLOSION.instantiate()
+	ex.demo_boucle = false
 	get_tree().current_scene.add_child(ex)
-	# ColorRect : global_position = coin haut-gauche → on la recentre sur l'impact
-	ex.global_position = global_position - ex.size * 0.5
+	ex.global_position = global_position
 	queue_free()
 
 

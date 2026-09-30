@@ -31,6 +31,7 @@ const SHADERS: Array[String] = [
 	"res://SCRIPT/SHADER/flamme_cartoon.gdshader",     # flamme.tscn
 	"res://SCRIPT/SHADER/jet_flamme.gdshader",         # jet_flamme.tscn (prototype, sept. 2026)
 	"res://SCRIPT/SHADER/boule_de_feu.gdshader",       # boule_de_feu.tscn (projectile, sept. 2026)
+	"res://SCRIPT/SPELL/explosion_feu.gdshader",      # l'impact de la boule de feu (1er oct. 2026)
 	"res://SCRIPT/SHADER/explosion_violette.gdshader", # explosion du kamikaze (sept. 2026)
 	"res://SCRIPT/SHADER/cable_de_sang.gdshader",    # câble du grappin (sept. 2026)
 	"res://SCRIPT/SHADER/impact_blanc.gdshader",     # éclat d'un coup d'épée qui porte (sept. 2026)

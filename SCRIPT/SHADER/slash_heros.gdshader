@@ -19,6 +19,15 @@ render_mode unshaded;
 //     ceux du suivant apparaissent.
 // slash_heros.gd fait glisser tout ça d'un dessin au suivant au fil du temps.
 //
+// FEU (`feu` > 0, 1er oct. 2026 : le slash du squelette bleu, le lanceur de
+// boules de feu) : le même croissant, FAIT de feu. La famille du feu du jeu
+// (boule_de_feu, jet_flamme) : bruit à gradients qui MONTE (les flammes
+// s'élèvent à l'écran), aplats cartoon en bandes, même palette de quatre
+// couleurs. La lame garde sa silhouette mesurée, gonflée de quelques px et
+// rongée par le bruit ; la tête est la plus chaude (cœur clair), la queue
+// refroidit ; derrière elle, le chemin parcouru brûle encore un moment
+// (`residu_feu`) en se déchirant ; quelques braises montent.
+//
 // FOUDRE (`foudre` > 0) : le même croissant, mais FAIT de foudre. Sa chair
 // devient un plasma bleu pâle aux bords crénelés qui garde la silhouette, et
 // dedans courent des BRINS de foudre — des lignes brisées blanches qui se
@@ -58,6 +67,9 @@ uniform float temps = 0.0;
 uniform float origine = -2.5;
 uniform float vie = 1.0;
 uniform float graine = 0.0;
+// -1 : le slash a été mesuré sur ses dessins retournés gauche-droite (celui du
+// squelette tourne dans l'autre sens) ; on le retourne au rendu
+uniform float miroir = 1.0;
 // ------------------------------------------------------------------------------
 
 // --- l'allure ---
@@ -94,6 +106,39 @@ uniform vec4 couleur_foudre : source_color = vec4(0.45, 0.72, 1.0, 1.0);
 // le halo autour de la lame
 uniform vec4 couleur_halo : source_color = vec4(0.30, 0.42, 1.0, 1.0);
 
+// --- le feu (0 = le slash blanc des dessins, 1 = fait de feu) ---
+uniform float feu : hint_range(0.0, 1.0) = 0.0;
+// combien le bord de la lame est rongé par les flammes (0 = lisse)
+uniform float flammes : hint_range(0.0, 2.0) = 1.3;
+// de combien le feu déborde de la lame dessinée (px)
+uniform float gonflement : hint_range(0.0, 20.0) = 5.0;
+// épaisseur du feu par rapport à la lame dessinée (1 = la même)
+uniform float epaisseur_feu : hint_range(0.5, 4.0) = 1.9;
+// les LANGUES de flammes sur les bords : jusqu'où elles montent (px ; celles
+// du dessous de la lame restent courtes, les flammes montent), et leur largeur
+uniform float hauteur_flammes : hint_range(0.0, 60.0) = 28.0;
+uniform float largeur_langues : hint_range(2.0, 30.0) = 10.0;
+// taille des paquets de feu (px) et vitesse à laquelle ils montent (px/s)
+uniform float taille_flammes : hint_range(4.0, 60.0) = 12.0;
+uniform float vitesse_flammes : hint_range(0.0, 600.0) = 220.0;
+// sur quel angle (radians) le chemin parcouru brûle encore derrière la queue
+uniform float residu_feu : hint_range(0.0, 2.0) = 1.1;
+// chaleur maximale (1 = jusqu'au cœur clair)
+uniform float chaleur_max : hint_range(0.0, 1.3) = 1.0;
+// braises qui montent au-dessus du feu
+uniform float braises : hint_range(0.0, 1.0) = 0.5;
+// lueur autour du feu
+uniform float halo_feu : hint_range(0.0, 1.0) = 0.35;
+// 1 = aplats dessin animé (comme la boule de feu), 0 = dégradé doux
+uniform float style_cartoon_feu : hint_range(0.0, 1.0) = 1.0;
+uniform int nb_bandes_feu : hint_range(2, 8) = 4;
+// la palette de la boule de feu du squelette bleu, du plus froid au plus chaud
+uniform vec4 feu_exterieur : source_color = vec4(0.9, 0.05, 0.005, 1.0);
+uniform vec4 feu_milieu : source_color = vec4(1.0, 0.32, 0.01, 1.0);
+uniform vec4 feu_interieur : source_color = vec4(1.0, 0.85, 0.15, 1.0);
+uniform vec4 feu_coeur : source_color = vec4(1.0, 1.0, 0.75, 1.0);
+uniform vec4 couleur_halo_feu : source_color = vec4(1.0, 0.28, 0.04, 1.0);
+
 // (PI et TAU sont fournis par le langage de shader de Godot)
 
 float alea(vec2 p) {
@@ -118,6 +163,49 @@ float zig(float u, float g) {
 			+ 0.8 * brisee(u / 48.0 + 3.3, g + 4.1)) / 1.5;
 }
 
+// BRUIT À GRADIENTS du feu (repris de boule_de_feu.gdshader : hash sans sin,
+// grille tournée, 3 octaves ; pas de bruit de valeurs, sa grille se voit en
+// blocs quand on le seuille)
+vec2 gradient_feu(vec2 q) {
+	q = fract(q * vec2(123.34, 345.45));
+	q += dot(q, q + 34.345);
+	return fract(vec2(q.x * q.y, q.x + q.y)) * 2.0 - 1.0;
+}
+
+float bruit_feu(vec2 q) {
+	vec2 i = floor(q);
+	vec2 f = fract(q);
+	vec2 u = f * f * f * (f * (f * 6.0 - 15.0) + 10.0);
+	float a = dot(gradient_feu(i), f);
+	float b = dot(gradient_feu(i + vec2(1.0, 0.0)), f - vec2(1.0, 0.0));
+	float c = dot(gradient_feu(i + vec2(0.0, 1.0)), f - vec2(0.0, 1.0));
+	float d = dot(gradient_feu(i + vec2(1.0, 1.0)), f - vec2(1.0, 1.0));
+	return mix(mix(a, b, u.x), mix(c, d, u.x), u.y) * 0.75 + 0.5;
+}
+
+float fbm_feu(vec2 q) {
+	const mat2 ROT = mat2(vec2(0.8, 0.6), vec2(-0.6, 0.8));
+	q = ROT * q;
+	float v = 0.0;
+	float amp = 0.5;
+	for (int k = 0; k < 3; k++) {
+		v += bruit_feu(q) * amp;
+		q = ROT * q * 2.03 + vec2(17.1, 9.2);
+		amp *= 0.5;
+	}
+	return v / 0.875;
+}
+
+// la chaleur (0…1) en couleur : rouge, orange, jaune, cœur clair
+vec3 rampe_feu(float h) {
+	if (h < 0.30) {
+		return mix(feu_exterieur.rgb, feu_milieu.rgb, h / 0.30);
+	} else if (h < 0.70) {
+		return mix(feu_milieu.rgb, feu_interieur.rgb, (h - 0.30) / 0.40);
+	}
+	return mix(feu_interieur.rgb, feu_coeur.rgb, (h - 0.70) / 0.30);
+}
+
 // `dessus` posé sur `dessous` (couleurs non prémultipliées)
 vec4 par_dessus(vec4 dessous, vec4 dessus) {
 	float a = dessus.a + dessous.a * (1.0 - dessus.a);
@@ -125,7 +213,9 @@ vec4 par_dessus(vec4 dessous, vec4 dessus) {
 }
 
 void fragment() {
-	vec2 p = (UV - 0.5) * taille - centre;
+	vec2 p = (UV - 0.5) * taille;
+	p.x *= miroir;
+	p -= centre;
 	float r = length(p);
 	float theta = atan(p.y, p.x);
 	// un pixel d'écran, en pixels du rectangle : des bords nets à toute échelle
@@ -196,7 +286,105 @@ void fragment() {
 	}
 	filet *= traits;
 
-	if (electrique <= 0.001) {
+	float brulant = feu * vie;
+	if (brulant > 0.001) {
+		// =================== LE SLASH FAIT DE FEU ===================
+		// (2e version, 1er oct. 2026 : « plus épais, moins linéaire, plus
+		// flamme sur les bordures ») — une bande de feu bien plus épaisse que la
+		// lame, presque régulière (un feu ne s'effile pas en aiguille), dont les
+		// BORDS sont des langues de flammes qui montent, et dont les bandes de
+		// couleur suivent ces flammes au lieu de courir parallèles à la lame.
+		//
+		// où le feu vit : sur la lame, et derrière sa queue, là où elle est
+		// passée, en s'éteignant sur `residu_feu` — jamais avant l'angle où
+		// elle est née, jamais devant sa tête
+		float o = origine - milieu;
+		o -= TAU * floor((o + PI) / TAU);
+		o += milieu;
+		float derriere = queue - phi;                           // > 0 : déjà balayé
+		float age = clamp(derriere / max(residu_feu, 0.001), 0.0, 1.0);
+		float en_vie = (derriere <= 0.0)
+				? (1.0 - smoothstep(tete, tete + 0.06, phi))
+				: (1.0 - smoothstep(0.7, 1.0, age)) * (o < milieu ? smoothstep(o - 0.12, o, phi) : 1.0);
+		// L'ÉPAISSEUR : la moitié de l'épaisseur locale de la lame, la moitié de
+		// sa plus grande, fois `epaisseur_feu` ; arrondie sur le dernier sixième
+		// vers la tête ; plus mince en vieillissant derrière la queue
+		float epais_max = 0.0;
+		for (int k = 0; k < N; k++) {
+			epais_max = max(epais_max, large[k]);
+		}
+		float bout = sqrt(clamp((1.0 - s) * 6.0, 0.0, 1.0));
+		float demi = (mix(epais, epais_max, 0.5) * 0.5 * epaisseur_feu + gonflement) * bout * (1.0 - 0.45 * age);
+		// ... qui varie le long du coup : des renflements qui glissent
+		demi *= 0.78 + 0.44 * bruit_feu(vec2(le_long / 38.0 + graine, temps * 2.5));
+		// distance signée à la LIGNE MÉDIANE de la lame (> 0 vers le centre)
+		float w = au_trajet + sortie - epais * 0.5;
+		float hors = abs(w);
+		if (en_vie <= 0.001 || hors > demi + hauteur_flammes + 30.0) {
+			COLOR = vec4(0.0);
+		} else {
+			// LA MATIÈRE : du bruit qui MONTE à l'écran (vers le haut = -y)
+			vec2 q = vec2(p.x, p.y + temps * vitesse_flammes) / taille_flammes + vec2(graine * 3.7, graine * 1.3);
+			float gros = fbm_feu(q);
+			float fin = fbm_feu(q * 2.4 + vec2(5.3, temps * 3.0));
+			float matiere = clamp((mix(gros, fin, 0.35) - 0.28) / 0.44, 0.0, 1.0);
+			// LES LANGUES : un bruit étiré en hauteur (2,6 fois plus haut que
+			// large), qui monte plus vite que la matière : là où il est fort, le
+			// bord du feu s'allonge en flamme
+			vec2 ql = vec2(p.x / largeur_langues, (p.y + temps * vitesse_flammes * 1.5) / (largeur_langues * 2.6))
+					+ vec2(graine * 1.9, graine * 0.7);
+			float langue = smoothstep(0.42, 0.86, fbm_feu(ql));
+			// de quel côté de la lame est le pixel, et ce côté regarde-t-il le
+			// haut ? Les flammes montent : longues au-dessus, courtes dessous
+			vec2 cote = (w < 0.0 ? 1.0 : -1.0) * p / max(r, 0.001);
+			float vers_haut = clamp(-cote.y, 0.0, 1.0);
+			float portee = hauteur_flammes * mix(0.3, 1.0, vers_haut) * (1.0 - 0.4 * age);
+			// LE BORD DU FEU : la demi-épaisseur, allongée par les langues, rongée
+			// par la matière ; `e` > 0 dans le feu (px)
+			float e = demi + portee * langue + (matiere - 0.5) * flammes * (8.0 + 10.0 * age) - hors;
+			float forme_feu = smoothstep(-px, px, e);
+			// la traînée se déchire en vieillissant (le seuil monte avec l'âge)
+			float seuil = age * 0.9;
+			float garde = smoothstep(seuil - 0.12, seuil + 0.04, matiere);
+			float corps = forme_feu * garde * en_vie;
+			// LA CHALEUR : la distance au BORD DU FEU (pas à la lame) : les
+			// bandes de couleur épousent les flammes ; plus chaude vers la tête,
+			// refroidit derrière la queue, ce qui se dissout rougit
+			float profond = clamp(e / max(demi * 0.9, 1.0), 0.0, 1.0);
+			float chaleur = profond * mix(0.62, 1.0, clamp(s, 0.0, 1.0)) * (1.0 - age * 0.8)
+					+ (fin - 0.5) * 0.3;
+			chaleur *= 0.6 + 0.4 * smoothstep(seuil, seuil + 0.3, matiere);
+			chaleur = clamp(chaleur * chaleur_max, 0.0, 1.0);
+			float aplat = (floor(chaleur * float(nb_bandes_feu)) + 0.5) / float(nb_bandes_feu);
+			chaleur = mix(chaleur, aplat, style_cartoon_feu);
+			vec3 rgb_corps = rampe_feu(chaleur);
+			float a_corps = mix(corps, smoothstep(0.35, 0.62, corps), style_cartoon_feu);
+			// les filets des dessins : de minces langues jaunes
+			float a_filet = filet * en_vie * 0.9;
+			// LES BRAISES : une grille qui monte avec les flammes, une braise par
+			// case de temps en temps, qui scintille, seulement tout près du feu
+			vec2 gb = vec2(p.x, p.y + temps * vitesse_flammes * 0.8) / 16.0;
+			vec2 cel = floor(gb);
+			float braise = 0.0;
+			float pres = 1.0 - smoothstep(4.0, 26.0, max(-e, 0.0));
+			if (pres > 0.001 && e < 0.0 && alea(cel + vec2(graine, 0.0)) < braises * 0.22) {
+				vec2 ou = cel + 0.2 + 0.6 * vec2(alea(cel + vec2(3.1, graine)), alea(cel + vec2(7.7, graine)));
+				float db = length((gb - ou) * 16.0);
+				float scint = 0.6 + 0.4 * alea(cel + vec2(floor(temps * 14.0), 5.0));
+				braise = en_vie * pres * scint * (1.0 - smoothstep(0.9 - px, 1.1 + px, db));
+			}
+			// LA LUEUR autour du feu
+			float lueur = halo_feu * en_vie * (1.0 - age) * (1.0 - smoothstep(0.0, 24.0, max(-e, 0.0)));
+			// du fond vers le dessus : la lueur, le feu, les filets, les braises
+			vec4 c = vec4(couleur_halo_feu.rgb, lueur * couleur_halo_feu.a);
+			c = par_dessus(c, vec4(rgb_corps, a_corps));
+			c = par_dessus(c, vec4(rampe_feu(0.8), a_filet));
+			c = par_dessus(c, vec4(mix(feu_milieu.rgb, feu_interieur.rgb, 0.65), braise));
+			// jamais coupé net par le bord du rectangle
+			float bord_rect = smoothstep(0.0, 10.0, min(min(UV.x, 1.0 - UV.x) * taille.x, min(UV.y, 1.0 - UV.y) * taille.y));
+			COLOR = vec4(c.rgb, c.a * opacite * bord_rect);
+		}
+	} else if (electrique <= 0.001) {
 		// le slash des dessins, tel quel
 		COLOR = vec4(couleur.rgb, couleur.a * max(lame, filet) * opacite);
 	} else {

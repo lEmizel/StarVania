@@ -10,7 +10,10 @@ extends Node2D
 ## USAGE EN JEU : animator.gd en garde un, enfant de POINT (il se retourne avec
 ## le perso), et appelle `jouer("new_slash_1")` ou `jouer("slash_air")` à
 ## l'image où le coup part, `couper()` quand le coup est interrompu. Il se
-## cache tout seul à la fin.
+## cache tout seul à la fin. Les SQUELETTES (classique et bleu) en gardent un
+## aussi et jouent `"slash_squelette"` (1er oct. 2026) : le nom du fichier est
+## resté « héros », mais c'est LE slash en shader du jeu, tous les slashs
+## mesurés sont dans MESURES.
 ##
 ## D'OÙ VIENNENT LES CHIFFRES : de tes dessins, mesurés un par un (MESURES, plus
 ## bas). Le trajet de la lame est le bord extérieur de tous les croissants mis
@@ -122,17 +125,60 @@ const MESURES := {
 			[0.29, 0.61, -16.1, -7.9, 3.3, 0.96,  0.92, 1.08, 22.9, 22.7, 3.6, 0.96,  0.50, 0.73, 33.6, 34.4, 2.6, 0.97,  1.05, 1.19, -5.6, 3.5, 3.0, 1.00],
 		],
 	},
+	"slash_squelette": {
+		# le slash des SQUELETTES (classique et bleu : les mêmes dessins), mesuré
+		# sur ses dessins retournés en miroir (il tourne dans l'autre sens)
+		"images_par_seconde": 35.0,
+		"miroir": true,
+		"rectangle": Vector2(340, 340),
+		"centre": Vector2(-9.5, 5.0),
+		"forme": [112.98, 4.73, 0.90, 4.61, 3.09],
+		"queue": [49.0, 87.7, 104.2, 120.0, 204.6, 262.8],
+		"tete": [76.4, 152.4, 222.6, 301.4, 329.3, 329.3],
+		"dehors": [
+			[7.8, 7.2, 6.3, 5.4, 4.3, 2.9, 1.5, 0.2, -1.4, -2.7, -3.8, -4.9],
+			[-4.2, -3.4, -2.3, -1.5, -1.0, -0.8, -0.7, -0.7, -0.8, -1.2, -2.3, -3.5],
+			[-1.9, -1.0, -0.1, 0.4, 0.6, 0.6, 0.2, -0.6, -1.6, -2.6, -3.1, -3.1],
+			[3.2, 3.2, 3.2, 3.4, 2.8, 1.1, -0.6, -1.5, -1.1, 0.0, 1.1, 1.5],
+			[-0.7, -0.4, -0.1, 0.6, 1.7, 2.3, 2.5, 2.1, 1.3, 0.0, -1.4, -2.4],
+			[1.3, 1.9, 2.3, 2.2, 1.8, 1.1, 0.3, -0.3, -1.1, -1.9, -2.6, -3.0],
+		],
+		"large": [
+			[3.8, 4.1, 4.5, 5.0, 5.5, 5.2, 4.7, 4.4, 3.7, 2.9, 2.3, 1.7],
+			[5.4, 6.8, 8.6, 10.0, 10.8, 10.7, 10.3, 9.8, 9.2, 8.1, 6.3, 4.6],
+			[9.6, 11.4, 13.0, 13.7, 14.1, 14.4, 14.3, 13.1, 10.9, 8.1, 5.2, 3.4],
+			[15.2, 16.4, 17.9, 18.9, 18.4, 16.8, 14.6, 12.1, 9.7, 7.4, 5.2, 3.6],
+			[12.9, 14.1, 14.6, 14.1, 12.8, 11.0, 9.4, 7.8, 6.2, 5.0, 3.8, 2.9],
+			[8.3, 8.8, 8.7, 8.0, 6.9, 5.9, 5.1, 4.6, 4.2, 3.7, 2.8, 2.0],
+		],
+		"voile": [
+			[1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 0.99, 0.98],
+			[0.23, 0.30, 0.41, 0.54, 0.70, 0.87, 0.97, 1.00, 1.00, 1.00, 1.00, 1.00],
+			[0.35, 0.53, 0.74, 0.89, 0.97, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00],
+			[0.50, 0.72, 0.91, 0.98, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00],
+			[0.53, 0.74, 0.91, 0.97, 0.99, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00],
+			[0.47, 0.67, 0.87, 0.97, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00],
+		],
+		"filets": [
+			[0.41, 0.64, 10.4, 14.7, 1.2, 1.00,  0.38, 0.66, -10.3, -3.8, 1.2, 1.00,  0.00, 0.00, 0.0, 0.0, 0.0, 0.00,  0.00, 0.00, 0.0, 0.0, 0.0, 0.00],
+			[0.69, 0.82, -4.6, -5.0, 1.2, 1.00,  0.59, 0.76, 15.9, 15.9, 1.2, 1.00,  0.00, 0.00, 0.0, 0.0, 0.0, 0.00,  0.00, 0.00, 0.0, 0.0, 0.0, 0.00],
+			[0.46, 0.75, -9.5, -5.2, 1.8, 1.00,  0.58, 0.92, 27.2, 15.1, 1.5, 1.00,  0.00, 0.00, 0.0, 0.0, 0.0, 0.00,  0.00, 0.00, 0.0, 0.0, 0.0, 0.00],
+			[0.52, 0.67, -6.5, -7.8, 1.2, 1.00,  0.50, 0.67, 22.4, 17.3, 1.2, 1.00,  0.00, 0.00, 0.0, 0.0, 0.0, 0.00,  0.00, 0.00, 0.0, 0.0, 0.0, 0.00],
+			[0.48, 0.65, -9.9, -11.2, 1.4, 1.00,  0.46, 0.55, 15.3, 15.4, 1.2, 1.00,  0.00, 0.00, 0.0, 0.0, 0.0, 0.00,  0.00, 0.00, 0.0, 0.0, 0.0, 0.00],
+			[0.55, 0.69, 14.8, 15.7, 1.2, 1.00,  0.70, 0.82, -7.0, -5.9, 1.2, 1.00,  0.00, 0.00, 0.0, 0.0, 0.0, 0.00,  0.00, 0.00, 0.0, 0.0, 0.0, 0.00],
+		],
+	},
 }
 
 ## le slash montré dans l'éditeur et par la démo
-@export_enum("new_slash_1", "slash_air") var apercu := "new_slash_1":
+@export_enum("new_slash_1", "slash_air", "slash_squelette") var apercu := "new_slash_1":
 	set(v):
 		apercu = v
 		_nom = v
 		_appliquer()
 ## l'habillage du slash : "aucun" = le croissant blanc des dessins,
-## "foudre" = le même croissant, fait de foudre
-@export_enum("aucun", "foudre") var effet := "aucun":
+## "foudre" = le même croissant, fait de foudre ; "feu" = fait de feu
+@export_enum("aucun", "foudre", "feu") var effet := "aucun":
 	set(v):
 		effet = v
 		_appliquer()
@@ -153,6 +199,14 @@ const MESURES := {
 		_appliquer()
 
 @onready var _lame: ColorRect = $Lame
+
+## le rectangle de dessin d'un slash qui n'en précise pas (celui des dessins du
+## héros) ; un slash plus petit en donne un à sa taille (`"rectangle"`) : moins
+## de pixels à calculer
+const RECTANGLE_DEFAUT := Vector2(650.0, 650.0)
+## un effet (foudre, feu) déborde de la lame : le rectangle réduit d'un slash
+## s'agrandit d'autant quand il en porte un
+const MARGE_EFFET := 80.0
 
 var _nom := "new_slash_1"
 var _t := 0.0
@@ -248,11 +302,21 @@ func _appliquer() -> void:
 	# l'effet : la foudre a besoin du temps qui passe, de l'angle de naissance
 	# de la lame (l'électricité ne traîne pas avant), de sa vie, d'une graine
 	mat.set_shader_parameter("foudre", 1.0 if effet == "foudre" else 0.0)
+	mat.set_shader_parameter("feu", 1.0 if effet == "feu" else 0.0)
 	mat.set_shader_parameter("temps", progression * duree() if Engine.is_editor_hint() else _t)
 	mat.set_shader_parameter("origine", deg_to_rad(debut))
 	mat.set_shader_parameter("vie", vie)
 	mat.set_shader_parameter("graine", _graine)
-	mat.set_shader_parameter("taille", _lame.size)
+	# le rectangle à la taille de CE slash, centré sur le nœud
+	var rect: Vector2 = m.get("rectangle", RECTANGLE_DEFAUT)
+	if m.has("rectangle") and effet != "aucun":
+		rect += Vector2(MARGE_EFFET, MARGE_EFFET)
+	if _lame.size != rect:
+		_lame.size = rect
+		_lame.position = -rect * 0.5
+	mat.set_shader_parameter("taille", rect)
+	# mesuré sur les dessins retournés : le shader les retourne au rendu
+	mat.set_shader_parameter("miroir", -1.0 if m.get("miroir", false) else 1.0)
 	mat.set_shader_parameter("centre", m["centre"])
 	var f: Array = m["forme"]
 	mat.set_shader_parameter("forme", Vector4(f[0], f[1], f[2], f[3]))

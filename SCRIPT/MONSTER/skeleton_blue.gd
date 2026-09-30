@@ -14,6 +14,14 @@ extends BaseAI
 enum States { IDLE, PATROL, APPROACH, ATTACK, RETURN, DEAD }
 
 @export var speed := 341.0   # squelette 280 → 364 → 455 → −25 % le 18 sept. 2026 (trop rapide à la manette) = 341
+## Le slash de l'attaque joué EN SHADER (SCRIPT/SHADER/slash_heros.tscn : le
+## même croissant que les dessins, mais à chaque image d'écran). Décoché : retour
+## au dessin d'origine. Visuel seulement, la hitbox ne change pas.
+@export var slash_en_shader := true
+## l'habillage de ce slash en shader : le squelette bleu, lanceur de boules de
+## feu, frappe avec un slash DE FEU (1er oct. 2026) ; "aucun" = le croissant
+## blanc des dessins
+@export_enum("aucun", "foudre", "feu") var slash_effet := "feu"
 ## Temps de réflexion en idle avant la prochaine décision (indépendant
 ## de la durée de l'animation d'idle, qui fait 0.75s par boucle)
 @export var reaction_time := 0.3

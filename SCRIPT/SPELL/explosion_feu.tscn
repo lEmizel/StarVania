@@ -1,21 +1,39 @@
 [gd_scene format=3]
 
-[ext_resource type="Script" path="res://SCRIPT/SPELL/bloodball_explosion.gd" id="1_script"]
-[ext_resource type="Shader" path="res://SCRIPT/SPELL/bloodball_explosion.gdshader" id="2_shader"]
+[ext_resource type="Script" path="res://SCRIPT/SPELL/explosion_feu.gd" id="1_expf"]
+[ext_resource type="Shader" path="res://SCRIPT/SPELL/explosion_feu.gdshader" id="2_expf"]
 
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_expl_feu"]
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_expf"]
 resource_local_to_scene = true
-shader = ExtResource("2_shader")
-shader_parameter/progress = 0.0
+shader = ExtResource("2_expf")
+shader_parameter/progress = 0.3
+shader_parameter/puissance = 1.0
+shader_parameter/graine = 0.0
+shader_parameter/rayon = 0.6
+shader_parameter/montee = 0.16
+shader_parameter/detail = 4.5
+shader_parameter/langues = 0.5
+shader_parameter/lueur = 0.35
+shader_parameter/nb_braises = 12
+shader_parameter/nb_lignes = 13
+shader_parameter/lignes = 1.0
+shader_parameter/longueur_lignes = 0.44
+shader_parameter/epaisseur_lignes = 0.015
+shader_parameter/style_cartoon = 1.0
+shader_parameter/nb_bandes = 4
+shader_parameter/outer_color = Color(0.9, 0.05, 0.005, 1)
+shader_parameter/middle_color = Color(1, 0.32, 0.01, 1)
+shader_parameter/inner_color = Color(1, 0.85, 0.15, 1)
 shader_parameter/core_color = Color(1, 1, 0.75, 1)
-shader_parameter/blood_color = Color(1, 0.45, 0.02, 1)
-shader_parameter/dark_color = Color(0.62, 0.06, 0.005, 1)
 
-[node name="ExplosionFeu" type="ColorRect"]
-material = SubResource("ShaderMaterial_expl_feu")
-offset_left = -80.0
-offset_top = -80.0
-offset_right = 80.0
-offset_bottom = 80.0
+[node name="ExplosionFeu" type="Node2D"]
+z_index = 5
+script = ExtResource("1_expf")
+
+[node name="Feu" type="ColorRect" parent="."]
+material = SubResource("ShaderMaterial_expf")
+offset_left = -100.0
+offset_top = -100.0
+offset_right = 100.0
+offset_bottom = 100.0
 mouse_filter = 2
-script = ExtResource("1_script")

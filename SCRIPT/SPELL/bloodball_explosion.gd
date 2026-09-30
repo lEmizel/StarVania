@@ -37,6 +37,11 @@ extends ColorRect
 
 var _t := 0.0
 var _graine := 0.0
+## la boucle de démo n'existe QUE lancée seule (F6). Avant le 1er oct. 2026 elle
+## suivait `demo_boucle` seul : la boule de feu du squelette bleu, qui posait
+## cette scène recolorée sans décocher la case, faisait exploser son impact en
+## boucle pour toujours.
+var _demo := false
 
 
 func _ready() -> void:
@@ -45,7 +50,8 @@ func _ready() -> void:
 		_appliquer()
 		return
 	# lancée seule (F6) : au milieu de l'écran, pas dans le coin en haut à gauche
-	if demo_boucle and get_parent() == get_tree().root:
+	_demo = demo_boucle and get_parent() == get_tree().root
+	if _demo:
 		position = get_viewport_rect().size * 0.5 - size * 0.5
 	progression = 0.0
 
@@ -58,7 +64,7 @@ func _process(delta: float) -> void:
 		progression = _t / duration
 		return
 	progression = 1.0
-	if not demo_boucle:
+	if not _demo:
 		queue_free()
 	elif _t >= duration + demo_pause:
 		_graine = randf_range(1.0, 100.0)       # une éclaboussure différente à chaque tour

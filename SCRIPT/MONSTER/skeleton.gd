@@ -4,6 +4,12 @@ extends BaseAI
 enum States { IDLE, PATROL, APPROACH, ATTACK, RETURN, DEAD }
 
 @export var speed := 280.0
+## Le slash de l'attaque joué EN SHADER (SCRIPT/SHADER/slash_heros.tscn : le
+## même croissant que les dessins, mais à chaque image d'écran). Décoché : retour
+## au dessin d'origine. Visuel seulement, la hitbox ne change pas.
+@export var slash_en_shader := true
+## l'habillage de ce slash en shader : "aucun" = le croissant blanc des dessins
+@export_enum("aucun", "foudre", "feu") var slash_effet := "aucun"
 ## Temps de réflexion en idle avant la prochaine décision (indépendant
 ## de la durée de l'animation d'idle, qui fait 0.75s par boucle)
 @export var reaction_time := 0.3
