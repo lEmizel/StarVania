@@ -1,0 +1,40 @@
+[gd_scene format=3 uid="uid://b071losbfl3ia"]
+
+[ext_resource type="Script" uid="uid://c0en1fsvuttvc" path="res://SCRIPT/SHADER/sillage_sang.gd" id="1_sil"]
+[ext_resource type="Shader" uid="uid://b6kq5643cn4ae" path="res://SCRIPT/SHADER/sillage_sang.gdshader" id="2_sil"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_sil"]
+resource_local_to_scene = true
+shader = ExtResource("2_sil")
+shader_parameter/taille = Vector2(400, 200)
+shader_parameter/origine_rect = Vector2(0, 0)
+shader_parameter/points = PackedVector2Array(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+shader_parameter/naissances = PackedFloat32Array(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+shader_parameter/nb_points = 0
+shader_parameter/temps = 0.0
+shader_parameter/duree = 3.0
+shader_parameter/graine = 0.0
+shader_parameter/epaisseur = 56.0
+shader_parameter/montee = 120.0
+shader_parameter/echelle = 120.0
+shader_parameter/tourbillon = 1.0
+shader_parameter/vitesse = 0.35
+shader_parameter/opacite = 0.85
+shader_parameter/filaments = 0.9
+shader_parameter/profondeur = 0.45
+shader_parameter/toon = 1.0
+shader_parameter/nb_aplats = 3
+shader_parameter/lisere = 0.07
+shader_parameter/couleur_sombre = Color(0.12, 0, 0.02, 1)
+shader_parameter/couleur_fumee = Color(0.78, 0.07, 0.1, 1)
+shader_parameter/couleur_filament = Color(0.9808503, 0, 0.17121467, 1)
+
+[node name="SillageSang" type="Node2D" unique_id=1741113820]
+z_index = 3
+script = ExtResource("1_sil")
+
+[node name="Brume" type="ColorRect" parent="." unique_id=1010987027]
+material = SubResource("ShaderMaterial_sil")
+offset_right = 400.0
+offset_bottom = 200.0
+mouse_filter = 2

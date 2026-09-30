@@ -147,6 +147,7 @@ func _physics_process(delta: float) -> void:
 	if _knock != Vector2.ZERO:
 		velocity.x = _knock.x
 	_trainee_tick()          # la traînée du dash / de la roulade (avant de bouger)
+	_sillage_tick()          # le talisman « sillage de sang » (même moment)
 	move_and_slide()
 	# le câble du grappin se trace APRÈS le déplacement (sinon il part de la
 	# main du pas précédent et dépasse du bras, voir _grappin_tracer_cable)
@@ -452,6 +453,68 @@ func _z_absolu(ci: CanvasItem) -> int:
 @export var trainee_duree := 0.22
 @export var trainee_couleur := Color(1.0, 0.72, 0.78, 0.5)
 var _trainee_derniere := Vector2.INF     # où a été posée la dernière copie (INF = pas en traînée)
+
+## --- le sillage de sang (talisman) ---
+
+## TALISMAN « SILLAGE DE SANG » (1er oct. 2026, id "sillage") : porté, la
+## roulade et le dash laissent derrière le perso une BRUME DE SANG qui reste
+## `sillage_duree` s et ronge à petit feu les ennemis pris dedans (toutes les
+## `sillage_intervalle` s : `sillage_degats` PV, sans recul). Le visuel ET les
+## dégâts sont dans SCRIPT/SHADER/sillage_sang.gd ; ici on ne fait que semer
+## les points du trajet.
+const SILLAGE_SCENE := preload("res://SCRIPT/SHADER/sillage_sang.tscn")
+const TALISMAN_SILLAGE := "sillage"
+## combien de temps la brume vit en chaque endroit (s)
+@export var sillage_duree := 3.0
+## dégâts d'un tick de brume (le coup d'épée fait 70 ; 12 au départ, ×3 le
+## 1er oct. 2026 : « sinon c'est trop faible »), et temps entre deux ticks (s)
+@export var sillage_degats := 36
+@export var sillage_intervalle := 0.5
+## tolérance (px) au-delà de la brume visible : un ennemi dont le corps
+## l'effleure est « dedans » (la zone de dégâts suit la brume dessinée)
+@export var sillage_marge := 16.0
+## un point de brume tous les tant de px parcourus
+@export var sillage_espacement := 36.0
+## hauteur de la brume au-dessus des pieds (px) : à mi-corps
+const SILLAGE_HAUTEUR := 48.0
+var _sillage: Node2D = null
+var _sillage_dernier := Vector2.INF
+
+func _sillage_tick() -> void:
+	var actif := (current_state == States.ROLL or current_state == States.DASH) \
+			and Player.talisman_equipe(TALISMAN_SILLAGE)
+	if _sillage != null and not is_instance_valid(_sillage):
+		_sillage = null
+	if not actif:
+		if _sillage != null:
+			# un dernier point À L'ARRIVÉE : sans lui, la brume s'arrêtait jusqu'à
+			# un espacement avant la fin réelle du mouvement, et l'ennemi posé
+			# là n'était jamais dedans
+			_sillage.ajouter(global_position + Vector2(0.0, -SILLAGE_HAUTEUR))
+			_sillage.fermer()            # la brume semée vit sa vie
+			_sillage = null
+		return
+	var ici := global_position + Vector2(0.0, -SILLAGE_HAUTEUR)
+	if _sillage != null and ici.distance_to(_sillage_dernier) < sillage_espacement:
+		return
+	if _sillage == null or not _sillage.ajouter(ici):
+		# un nouveau sillage (le premier du mouvement, ou le précédent est plein)
+		if _sillage != null:
+			_sillage.fermer()
+		_sillage = SILLAGE_SCENE.instantiate()
+		_sillage.demo_boucle = false
+		_sillage.joueur = self
+		_sillage.duree = sillage_duree
+		_sillage.degats = sillage_degats
+		_sillage.intervalle = sillage_intervalle
+		_sillage.marge = sillage_marge
+		var hote: Node = get_tree().current_scene
+		if hote == null:
+			hote = get_parent()
+		hote.add_child(_sillage)
+		_sillage.ajouter(ici)
+	_sillage_dernier = ici
+
 
 ## appelé à chaque pas de physique, AVANT le déplacement : la première copie
 ## tombe pile au point de départ

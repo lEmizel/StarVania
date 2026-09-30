@@ -33,16 +33,17 @@ extends RefCounted
 ## Nombre d'emplacements RONDS de la collection dans le menu. Ceux qui n'ont pas
 ## encore de talisman dans LISTE restent des emplacements vides « à découvrir ».
 ## S'il y a plus de talismans que d'emplacements, la grille s'agrandit seule.
-## CINQ pour le moment (Kaoru, 30 sept. 2026) : monte ce nombre quand il y en
-## aura d'autres à découvrir.
-const NB_EMPLACEMENTS := 5
+## SIX pour le moment (5 le 30 sept. 2026, le sillage de sang le 1er oct.) :
+## monte ce nombre quand il y en aura d'autres à découvrir.
+const NB_EMPLACEMENTS := 6
 
-## Les CINQ talismans du jeu (30 sept. 2026), tous branchés :
+## Les SIX talismans du jeu (1er oct. 2026), tous branchés :
 ##   tornade  → SCRIPT/CHARACHTER/player.gd, région BLOODBALL
 ##   foudre   → SCRIPT/CHARACHTER/animator.gd (le slash, l'arc qui bondit, le +10 %)
 ##   bouclier → player.gd (`apply_damage` / `apply_environment_damage`)
 ##   esquive  → player.gd (`_esquive_tente`, dans `apply_damage`)
 ##   soif     → SCRIPT/AUTOLOAD/player.gd (`recolter_blood`)
+##   sillage  → player.gd (`_sillage_tick`) + SCRIPT/SHADER/sillage_sang.gd
 ## Les clés chiffrées (`degats_pourcent`, `esquive_pourcent`, `blood_pourcent`)
 ## sont lues par `Player.bonus_talismans(cle)` : deux talismans qui portent la
 ## même clé s'additionnent.
@@ -52,11 +53,12 @@ const LISTE := [
 	{"id": "bouclier", "nom": "Bouclier de sang", "description": "Encaisser un coup dresse un bouclier de sang qui pare tous les suivants pendant deux secondes.", "couleur": Color(0.72, 0.13, 0.17), "dessin": "res://SCRIPT/TALISMAN/dessin_bouclier.gdshader"},
 	{"id": "esquive", "nom": "Pas de côté", "description": "Une chance sur cinq qu'un coup d'ennemi passe au travers de vous.", "couleur": Color(0.84, 0.79, 0.66), "dessin": "res://SCRIPT/TALISMAN/dessin_esquive.gdshader", "esquive_pourcent": 20},
 	{"id": "soif", "nom": "Soif de sang", "description": "Chaque récolte de sang rapporte 10 % de plus.", "couleur": Color(0.55, 0.05, 0.08), "dessin": "res://SCRIPT/TALISMAN/dessin_soif.gdshader", "blood_pourcent": 10},
+	{"id": "sillage", "nom": "Sillage de sang", "description": "La roulade et le dash laissent une brume de sang qui ronge à petit feu les ennemis pris dedans.", "couleur": Color(0.7, 0.05, 0.1), "dessin": "res://SCRIPT/TALISMAN/dessin_sillage.gdshader"},
 ]
 
 ## POUR TESTER LE MENU : les talismans déjà découverts au début d'une partie.
 ## À vider ([]) quand ils se trouveront dans les niveaux.
-const DECOUVERTS_AU_DEPART := ["tornade_bloodball", "foudre", "bouclier", "esquive", "soif"]
+const DECOUVERTS_AU_DEPART := ["tornade_bloodball", "foudre", "bouclier", "esquive", "soif", "sillage"]
 
 
 ## la ligne du catalogue qui porte cet id ({} si aucune)
