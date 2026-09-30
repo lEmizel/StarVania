@@ -102,6 +102,7 @@ func _ready() -> void:
 	set_floor_snap_length(6.0)
 	print(Player.hp,"hp")
 	_griffe_preparer()
+	_aile_preparer()
 	initialize_states()
 	change_state(States.IDLE)
 
@@ -643,6 +644,7 @@ func _try_double_jump() -> bool:
 		return false
 	print("[DJ] double saut  depuis=", States.keys()[current_state])
 	_double_jump_used = true
+	_aile_battre()
 	if _wj_lock_timer > 0.0:
 		print("[WJ] verrou coupé par DOUBLE SAUT")
 	_wj_lock_timer = 0.0  # le double saut interrompt le verrou du saut mural
@@ -655,6 +657,31 @@ func _try_double_jump() -> bool:
 		_dj_pending = true
 		change_state(States.JUMP)
 	return true
+
+
+# --- L'aile blanche du double saut (30 sept. 2026) ---
+const AILE_DOUBLE_SAUT := preload("res://SCRIPT/SHADER/aile_double_saut.tscn")
+## Où l'aile s'attache dans le dos, dans le repère de POINT (perso tourné vers
+## la droite).
+@export var AILE_ATTACHE := Vector2(-16.0, -90.0)
+var _aile: Node2D = null   # une seule, créée à l'apparition du joueur
+
+
+## Enfant de POINT : l'aile suit le joueur et se retourne avec lui. Le sprite
+## du perso a un z_index de 1 : l'aile, restée à 0, se dessine derrière lui.
+func _aile_preparer() -> void:
+	var aile := AILE_DOUBLE_SAUT.instantiate() as Node2D
+	aile.demo_boucle = false
+	aile.auto_detruire = false
+	point.add_child(aile)
+	_aile = aile
+
+
+func _aile_battre() -> void:
+	if _aile == null:
+		return
+	_aile.position = AILE_ATTACHE
+	_aile.jouer()
 
 func jump_enter():
 	animator.play("jump")

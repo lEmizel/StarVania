@@ -1,0 +1,67 @@
+[gd_scene format=3 uid="uid://c4hjvemudpsux"]
+
+[ext_resource type="Shader" uid="uid://b17p1x14y1ra6" path="res://SCRIPT/SHADER/aile_double_saut.gdshader" id="1_ad"]
+[ext_resource type="Script" uid="uid://bfhu3can10oi0" path="res://SCRIPT/SHADER/aile_double_saut.gd" id="2_ad"]
+[ext_resource type="Shader" path="res://SCRIPT/SHADER/plumes_envolees.gdshader" id="3_ad"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_ad"]
+resource_local_to_scene = true
+shader = ExtResource("1_ad")
+shader_parameter/progress = 0.0
+shader_parameter/aspect = 0.9362
+shader_parameter/origine = Vector2(0.6364, 0.5745)
+shader_parameter/graine = 0.0
+shader_parameter/nb_plumes = 7
+shader_parameter/envergure = 0.43
+shader_parameter/ouverture = 95.0
+shader_parameter/battement = 115.0
+shader_parameter/largeur = 1.0
+shader_parameter/courbure = 0.5
+shader_parameter/aile_arriere = 0.8
+shader_parameter/eclat = 0.8
+shader_parameter/trainee = 0.8
+shader_parameter/contour = 0.5
+shader_parameter/couleur = Color(0.64691436, 0.15927881, 0.23629895, 1)
+shader_parameter/couleur_arriere = Color(0.41429994, 0.043882422, 0.09803479, 1)
+shader_parameter/couleur_contour = Color(0.2071262, 0.07214067, 0.11077515, 1)
+shader_parameter/couleur_eclat = Color(1, 0.86, 0.82, 1)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_pe"]
+resource_local_to_scene = true
+shader = ExtResource("3_ad")
+shader_parameter/progress = 0.0
+shader_parameter/aspect = 0.8421
+shader_parameter/origine = Vector2(0.625, 0.2895)
+shader_parameter/graine = 0.0
+shader_parameter/nb_plumes = 5
+shader_parameter/taille_plume = 0.11
+shader_parameter/chute = 0.5
+shader_parameter/balancement = 0.5
+shader_parameter/souffle = 0.8
+shader_parameter/contour = 0.5
+shader_parameter/couleur = Color(0.64691436, 0.15927881, 0.23629895, 1)
+shader_parameter/couleur_contour = Color(0.2071262, 0.07214067, 0.11077515, 1)
+shader_parameter/couleur_souffle = Color(1, 0.9, 0.88, 1)
+
+[node name="AileDoubleSaut" type="Node2D" unique_id=1686499898]
+script = ExtResource("2_ad")
+
+[node name="Envol" type="Node2D" parent="."]
+top_level = true
+z_index = -1
+
+[node name="Plumes" type="ColorRect" parent="Envol"]
+material = SubResource("ShaderMaterial_pe")
+offset_left = -200.0
+offset_top = -110.0
+offset_right = 120.0
+offset_bottom = 270.0
+mouse_filter = 2
+
+[node name="Aile" type="ColorRect" parent="." unique_id=2060827815]
+material = SubResource("ShaderMaterial_ad")
+offset_left = -140.0
+offset_top = -135.0
+offset_right = 80.0
+offset_bottom = 100.0
+mouse_filter = 2
