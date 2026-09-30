@@ -1,0 +1,29 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://SCRIPT/SHADER/arc_foudre.gd" id="1_arc"]
+[ext_resource type="Shader" path="res://SCRIPT/SHADER/arc_foudre.gdshader" id="2_arc"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_arc"]
+resource_local_to_scene = true
+shader = ExtResource("2_arc")
+shader_parameter/taille = Vector2(320, 100)
+shader_parameter/progression = 0.3
+shader_parameter/temps = 0.0
+shader_parameter/graine = 0.0
+shader_parameter/ampleur = 0.2
+shader_parameter/epaisseur = 2.0
+shader_parameter/cadence = 30.0
+shader_parameter/eclat = 14.0
+shader_parameter/couleur = Color(1, 1, 1, 1)
+shader_parameter/couleur_foudre = Color(0.45, 0.72, 1, 1)
+
+[node name="ArcFoudre" type="Node2D"]
+z_index = 5
+script = ExtResource("1_arc")
+
+[node name="Trait" type="ColorRect" parent="."]
+material = SubResource("ShaderMaterial_arc")
+offset_top = -50.0
+offset_right = 320.0
+offset_bottom = 50.0
+mouse_filter = 2

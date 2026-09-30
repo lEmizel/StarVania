@@ -184,17 +184,25 @@ func _on_bloodheal_request(amount: float) -> void:
 		_bh_caler(clampf(total - amount, 0.0, _max_bloodheal))
 
 	if amount >= 0.0:
-		# GAIN : montée progressive et rapide, barre après barre
-		_bloodheal_gain_tween = create_tween() \
-			.set_trans(Tween.TRANS_QUAD) \
-			.set_ease(Tween.EASE_OUT) \
-			.set_parallel(true)
+		# GAIN : montée progressive et rapide, barre après barre.
+		# Le tween n'est créé que s'il y a vraiment une barre à bouger : un tween
+		# lancé vide fait crier Godot (« started with no Tweeners »), et ça
+		# arrivait à CHAQUE boule de sang (coût 0) et à chaque coup porté jauge
+		# pleine (30 sept. 2026).
+		var gain: Tween = null
 		for i in _bh_bars.size():
 			var cible := _bh_valeur_barre(i, total)
 			if is_equal_approx(_bh_bars[i].value, cible):
 				continue
-			_bloodheal_gain_tween.tween_property(_bh_bars[i], "value", cible, BLOODHEAL_GAIN_TWEEN_DURATION)
-			_bloodheal_gain_tween.tween_property(_bh_back_bars[i], "value", cible, BLOODHEAL_GAIN_TWEEN_DURATION)
+			if gain == null:
+				gain = create_tween() \
+					.set_trans(Tween.TRANS_QUAD) \
+					.set_ease(Tween.EASE_OUT) \
+					.set_parallel(true)
+			gain.tween_property(_bh_bars[i], "value", cible, BLOODHEAL_GAIN_TWEEN_DURATION)
+			gain.tween_property(_bh_back_bars[i], "value", cible, BLOODHEAL_GAIN_TWEEN_DURATION)
+		if gain != null:
+			_bloodheal_gain_tween = gain
 	elif _bh_depense_par_pastilles(clampf(total - amount, 0.0, _max_bloodheal), total):
 		pass  # un soin : pastille pleine consommée, puis report du reste (voir la fonction)
 	else:

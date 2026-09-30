@@ -39,11 +39,31 @@ var bloodheal := 0  # réserve courante, remplie COUP PAR COUP, de gauche à dro
 const BLOODHEAL_PAR_COUP := 15
 var MAX_BLOODHEAL := BARRES_BLOODHEAL_DEPART * BARRE_BLOODHEAL  # dérivé : nb_barres × BARRE, ne pas régler à la main
 
+# --- TALISMANS : ce que le joueur a découvert, et ce qu'il porte ---
+# Le catalogue (la liste de tous les talismans du jeu) est dans
+# SCRIPT/TALISMAN/talismans.gd ; le menu START, onglet Talismans, montre et
+# modifie ce qui suit. Vit le temps de la session, comme les cœurs ramassés : à
+# brancher sur la vraie sauvegarde disque quand elle existera.
+const Talismans := preload("res://SCRIPT/TALISMAN/talismans.gd")
+## émis à chaque découverte, équipement ou retrait : le menu se redessine, et le
+## gameplay pourra s'y brancher pour appliquer les effets
+signal talismans_changes
+## nombre d'emplacements où l'on équipe un talisman (règle-le ici)
+const EMPLACEMENTS_TALISMAN := 3
+var talismans_decouverts := {}             # id → true
+var talismans_equipes: Array[String] = []  # un id par emplacement, "" = libre
+
+
+func _ready() -> void:
+	_talismans_page_blanche()
+
+
 ## Réinitialise TOUT l'état de partie — appelé par PLAY au menu principal.
 ## Nouvelle partie = page blanche : cœurs ramassés compris.
 func reset_partie() -> void:
 	hearts_initialized = false  # le prochain spawn relira l'export du player
 	coeurs_ramasses.clear()
+	_talismans_page_blanche()
 	hp = 999999  # clampé au max par le _enter_tree du player
 	blood = 0
 	bloodheal = 0
@@ -130,6 +150,83 @@ func set_max_bloodheal(new_max: int) -> void:
 
 func add_max_bloodheal(delta: int) -> void:
 	set_max_bloodheal(MAX_BLOODHEAL + delta)
+
+
+# ---------- TALISMANS ----------
+
+## état de départ : rien d'équipé, seuls les talismans « de départ » du
+## catalogue sont découverts
+func _talismans_page_blanche() -> void:
+	talismans_decouverts.clear()
+	for id in Talismans.DECOUVERTS_AU_DEPART:
+		if not Talismans.trouver(id).is_empty():
+			talismans_decouverts[id] = true
+	talismans_equipes.resize(EMPLACEMENTS_TALISMAN)
+	talismans_equipes.fill("")
+	talismans_changes.emit()
+
+
+## Le joueur trouve un talisman : il apparaît dans la collection du menu.
+## Retourne true si c'est une découverte (false : id inconnu ou déjà trouvé).
+func decouvrir_talisman(id: String) -> bool:
+	if Talismans.trouver(id).is_empty() or talismans_decouverts.has(id):
+		return false
+	talismans_decouverts[id] = true
+	talismans_changes.emit()
+	return true
+
+
+func talisman_decouvert(id: String) -> bool:
+	return talismans_decouverts.has(id)
+
+
+## true si ce talisman est porté : c'est LA question à poser dans le gameplay
+## pour appliquer son effet
+func talisman_equipe(id: String) -> bool:
+	return id != "" and talismans_equipes.has(id)
+
+
+## Équipe un talisman découvert dans le premier emplacement libre. Retourne le
+## numéro de l'emplacement (0 = le premier), ou -1 si c'est refusé : pas
+## découvert, déjà porté, ou plus d'emplacement libre.
+func equiper_talisman(id: String) -> int:
+	if not talisman_decouvert(id) or talisman_equipe(id):
+		return -1
+	var libre := talismans_equipes.find("")
+	if libre == -1:
+		return -1
+	talismans_equipes[libre] = id
+	talismans_changes.emit()
+	return libre
+
+
+## Retire un talisman porté : son emplacement redevient libre (les autres ne
+## bougent pas). Retourne false s'il n'était pas porté.
+func retirer_talisman(id: String) -> bool:
+	if not talisman_equipe(id):
+		return false
+	talismans_equipes[talismans_equipes.find(id)] = ""
+	talismans_changes.emit()
+	return true
+
+
+## Le bonus de dégâts des COUPS D'ÉPÉE apporté par les talismans portés, en
+## pour cent : la somme des `degats_pourcent` du catalogue (10 = +10 %). Un
+## POURCENTAGE, jamais un ajout fixe (Kaoru, 30 sept. 2026) : quand les dégâts
+## de base du joueur monteront, le bonus suivra.
+func bonus_degats_pourcent() -> float:
+	var total := 0.0
+	for id in talismans_equipes:
+		if id == "":
+			continue
+		total += float(Talismans.trouver(id).get("degats_pourcent", 0))
+	return total
+
+
+## Ce par quoi multiplier les dégâts de base d'un coup d'épée (1.1 = +10 %).
+## À appliquer au moment du coup : `roundi(base * Player.multiplicateur_degats())`.
+func multiplicateur_degats() -> float:
+	return 1.0 + bonus_degats_pourcent() / 100.0
 
 
 #Player.add_max_sang(50)        # +50 de capacité de jauge de sang (la barre s'allonge)

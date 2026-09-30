@@ -66,6 +66,20 @@ const WALL_JUMP_SCENE = preload("uid://c5a6or75xrx3o")
 ## l'éclat blanc de l'épée (animator.gd) : même shader, sa propre scène
 const IMPACT_SANG := preload("res://SCRIPT/SHADER/impact_sang.tscn")
 
+## TALISMAN « BOUCLIER DE SANG » (30 sept. 2026, id "bouclier" dans
+## SCRIPT/TALISMAN/talismans.gd) : porté, ENCAISSER un coup dresse une bulle de
+## sang à facettes autour du joueur pendant `bouclier_duree` secondes, et elle
+## PARE tout autre coup (ni dégât, ni recul, ni stun) — voir `_bouclier_pare`.
+## L'allure de la bulle se règle dans SCRIPT/SHADER/bouclier_sang.tscn.
+const BOUCLIER_SCENE := preload("res://SCRIPT/SHADER/bouclier_sang.tscn")
+const TALISMAN_BOUCLIER := "bouclier"
+## combien de temps le bouclier tient (s)
+@export var bouclier_duree := 2.0
+## temps mort après sa chute avant qu'un coup puisse le relever (s, 0 = aucun)
+@export var bouclier_recharge := 0.0
+var _bouclier: Node2D
+var _bouclier_recharge_reste := 0.0
+
 # AMÉLIORATION: combo_count remplace le bool "combo" — plus clair et extensible
 var combo_buffered := false   # true si le joueur a appuyé pendant l'anim en cours
 
@@ -103,6 +117,7 @@ func _ready() -> void:
 	print(Player.hp,"hp")
 	_griffe_preparer()
 	_aile_preparer()
+	_bouclier_preparer()
 	initialize_states()
 	change_state(States.IDLE)
 
@@ -142,6 +157,7 @@ func _physics_process(delta: float) -> void:
 	_decay_knockback(delta)
 	_corde_cooldown = maxf(_corde_cooldown - delta, 0.0)
 	_grappin_cooldown = maxf(_grappin_cooldown - delta, 0.0)
+	_bouclier_recharge_reste = maxf(_bouclier_recharge_reste - delta, 0.0)
 	_grappin_scanner()
 
 
@@ -169,8 +185,7 @@ func cancel_movement_recoil() -> void:
 
 
 func _cut_slash_fx() -> void:
-	slash_attack.stop()
-	slash_attack.visible = false
+	animator.couper_slash()      # le slash dessiné ET le slash en shader
 
 
 ### GESTION DES INPUTS ###
@@ -228,6 +243,8 @@ func _handle_landing() -> void:
 func apply_damage(amount: int, source_x, source_tag := "?", perce_stun := false) -> void:
 	if current_state in [States.ROLL, States.DASH, States.DEAD]:
 		return
+	if _bouclier_pare(source_x, source_tag):
+		return
 	if current_state == States.HIT and not perce_stun:
 		# DEBUG dégâts : coup ignoré pendant le stun
 		print("[DMG bloqué/stun] f=", Engine.get_physics_frames(),
@@ -257,6 +274,47 @@ func apply_damage(amount: int, source_x, source_tag := "?", perce_stun := false)
 	# Soulèvement : impulsion verticale one-shot, appliquée APRÈS hit_enter
 	# (qui remet velocity à zéro) — la gravité gère la retombée
 	velocity.y = HIT_KNOCK_Y
+	# le coup est encaissé : le bouclier de sang se dresse du côté d'où il vient
+	_bouclier_lever(-sens_coup)
+
+
+## --- le bouclier de sang ---
+
+func _bouclier_preparer() -> void:
+	_bouclier = BOUCLIER_SCENE.instantiate()
+	_bouclier.demo_boucle = false
+	_bouclier.position = collision_normale.position      # au milieu du corps
+	_bouclier.tombe.connect(_on_bouclier_tombe)
+	add_child(_bouclier)
+
+
+## Un coup vient d'être ENCAISSÉ : si le talisman est porté (et son temps mort
+## passé), le bouclier se dresse depuis `cote`, le côté d'où le coup est venu
+## (vecteur unitaire, (-1, 0) = la gauche).
+func _bouclier_lever(cote: Vector2) -> void:
+	if _bouclier == null or not Player.talisman_equipe(TALISMAN_BOUCLIER):
+		return
+	if _bouclier_recharge_reste > 0.0:
+		return
+	_bouclier.lever(bouclier_duree, cote)
+
+
+## true si le bouclier est levé : le coup est PARÉ, rien ne passe (ni dégât,
+## ni recul, ni stun) ; l'onde de la parade part du côté d'où il venait.
+func _bouclier_pare(source_x, source_tag: String) -> bool:
+	if _bouclier == null or not _bouclier.actif():
+		return false
+	var cote := Vector2.UP
+	if source_x != null:
+		cote = Vector2(-1.0 if global_position.x > float(source_x) else 1.0, 0.0)
+	_bouclier.bloquer(cote)
+	print("[DMG paré] f=", Engine.get_physics_frames(), " src=", source_tag,
+		" bouclier encore ", snappedf(_bouclier.restant(), 0.01), " s")
+	return true
+
+
+func _on_bouclier_tombe() -> void:
+	_bouclier_recharge_reste = bouclier_recharge
 
 
 ## Renvoi des dégâts d'environnement (piques, scie). Le danger fournit une
@@ -302,6 +360,15 @@ func _eclat_sang(sens: Vector2) -> void:
 func apply_environment_damage(amount: int, direction: Vector2 = Vector2.UP) -> bool:
 	if current_state in [States.DEAD, States.HIT, States.ROLL, States.DASH]:
 		return false
+	var d := direction.normalized() if direction.length_squared() > 0.0001 else Vector2.UP
+	if _bouclier != null and _bouclier.actif():
+		# PARÉ par le bouclier de sang : ni dégât ni stun, mais le renvoi reste
+		# (sans lui on resterait planté dans les piques jusqu'à sa chute)
+		_bouclier.bloquer(-d)
+		print("[DMG paré] f=", Engine.get_physics_frames(), " src=environnement",
+			" bouclier encore ", snappedf(_bouclier.restant(), 0.01), " s")
+		_renvoi_environnement(d)
+		return true
 	print("[DMG] f=", Engine.get_physics_frames(),
 		" src=environnement amount=", amount,
 		" état=", States.keys()[current_state],
@@ -312,11 +379,19 @@ func apply_environment_damage(amount: int, direction: Vector2 = Vector2.UP) -> b
 		_knock = Vector2.ZERO
 		change_state(States.DEAD)
 		return true
-	var d := direction.normalized() if direction.length_squared() > 0.0001 else Vector2.UP
-	# latéral : poussée absolue amortie, le même mécanisme que les coups de monstres
-	_knock = Vector2(d.x * ENV_KNOCK_X, 0.0)
 	change_state(States.HIT)
-	# vertical : impulsion one-shot, APRÈS hit_enter (qui remet velocity à zéro)
+	_renvoi_environnement(d)
+	# le coup est encaissé : le bouclier de sang se dresse du côté d'où il vient
+	_bouclier_lever(-d)
+	return true
+
+
+## Le renvoi d'un danger d'environnement dans la direction `d` (unitaire) :
+## latéral = poussée absolue amortie, le même mécanisme que les coups de
+## monstres ; vertical = impulsion one-shot — à appeler APRÈS hit_enter (qui
+## remet velocity à zéro). Recharge le double saut + dash pour se rattraper.
+func _renvoi_environnement(d: Vector2) -> void:
+	_knock = Vector2(d.x * ENV_KNOCK_X, 0.0)
 	# haut, bas et soulèvement se raccordent SANS seuil : une pique murale donne
 	# d.y = ±0,00000004 (flottants) et un joueur qui tombe est vite quelques
 	# pixels sous le centre d'une scie ; un test « d.y <= 0 » sautait dans ces cas
@@ -327,7 +402,6 @@ func apply_environment_damage(amount: int, direction: Vector2 = Vector2.UP) -> b
 	var soulevement := ENV_KNOCK_SOULEVEMENT * absf(d.x) * (1.0 - maxf(d.y, 0.0))
 	velocity.y = bas - maxf(haut, soulevement)
 	_recharge_air_moves()
-	return true
 
 
 func goto_state(s: States) -> void:
@@ -1782,6 +1856,26 @@ func grab_exit() -> void:
 # - input: si le joueur appuie pendant l'anim principale → combo_buffered = true
 # - animation_finished: si combo_buffered → chaîne, sinon → recovery (anim _r)
 
+## Le slash des attaques est joué EN SHADER (SCRIPT/SHADER/slash_heros.tscn :
+## le même croissant que les dessins, mais à chaque image d'écran). Décoché :
+## retour aux dessins d'origine. Visuel seulement, la hitbox ne change pas.
+@export var slash_en_shader := true
+
+## TALISMAN « LAME DE FOUDRE » (30 sept. 2026, id "foudre" dans
+## SCRIPT/TALISMAN/talismans.gd) : porté, le slash est fait de foudre (réglages
+## sur le matériau de SCRIPT/SHADER/slash_heros.tscn), les coups font +10 %
+## (`degats_pourcent` du catalogue, un pourcentage des dégâts de base) et
+## chaque coup qui PORTE bondit sur l'ennemi le plus proche (animator.gd,
+## `_foudre_bondir`).
+## portée du bond, depuis le corps de l'ennemi touché (px) — 280 au départ,
+## +50 % demandé par Kaoru après essai en jeu (30 sept. 2026)
+@export var foudre_portee := 420.0
+## dégâts du premier bond, en PART des dégâts du coup qui l'a lancé (0.5 = la
+## moitié : 39 pour un coup de 77) ; chaque bond suivant en fait la moitié
+@export_range(0.05, 1.0, 0.05) var foudre_part := 0.5
+## nombre de bonds : 1 = l'éclair saute sur un seul voisin
+@export_range(1, 3) var foudre_sauts := 1
+
 ## Déplacement type RUN pendant les attaques : contrôle au stick, même vitesse
 ## et même inertie que run_execute. Pas de flip — le perso garde la direction
 ## de son attaque (il peut donc reculer en marche arrière pendant le coup).
@@ -2071,6 +2165,10 @@ func heal_exit() -> void:
 #region BLOODBALL
 
 const BLOODBALL_SCENE := preload("res://SCRIPT/SPELL/bloodball.tscn")
+## TALISMAN « Tornade de sang » : tant qu'il est équipé, le sort lance ce
+## projectile-là à la place de la boule (même coût, même geste)
+const TORNADE_SCENE := preload("res://SCRIPT/SPELL/tornade_de_sang.tscn")
+const TALISMAN_TORNADE := "tornade_bloodball"
 ## Durée du lancer avant de rendre la main (en attendant une anim de cast dédiée)
 @export var BLOODBALL_CAST_TIME: float = 0.25
 ## Coût en sang d'une boule
@@ -2108,7 +2206,8 @@ func bloodball_enter() -> void:
 		animator.play("cast_air")
 	_cast_timer = 0.0
 
-	var ball := BLOODBALL_SCENE.instantiate()
+	var scene := TORNADE_SCENE if Player.talisman_equipe(TALISMAN_TORNADE) else BLOODBALL_SCENE
+	var ball := scene.instantiate()
 	ball.dir = int(signf(point.scale.x))
 	get_tree().current_scene.add_child(ball)
 	ball.global_position = spellcast.global_position
@@ -2178,6 +2277,8 @@ const ECRAN_MORT_DEMO := preload("res://SCRIPT/UTILITAIRE/ecran_mort_demo.gd")
 func dead_enter() -> void:
 	animator.play("death")
 	velocity.x = 0.0            # FIX: stoppe le mouvement horizontal
+	if _bouclier != null:
+		_bouclier.tomber()      # le bouclier de sang meurt avec nous
 	add_child(ECRAN_MORT_DEMO.new())   # DÉMO — écran de mort (se retire seul)
 
 

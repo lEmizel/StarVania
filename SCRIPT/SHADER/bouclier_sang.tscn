@@ -1,0 +1,39 @@
+[gd_scene format=3 uid="uid://g6ea6y17jw8k"]
+
+[ext_resource type="Script" uid="uid://dgjdroned5tnc" path="res://SCRIPT/SHADER/bouclier_sang.gd" id="1_bcl"]
+[ext_resource type="Shader" uid="uid://4k1flufw1y2e" path="res://SCRIPT/SHADER/bouclier_sang.gdshader" id="2_bcl"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_bcl"]
+resource_local_to_scene = true
+shader = ExtResource("2_bcl")
+shader_parameter/taille = Vector2(258, 325.925)
+shader_parameter/rayons = Vector2(105, 120)
+shader_parameter/temps = 0.0
+shader_parameter/montee = 1.0
+shader_parameter/chute = 0.0
+shader_parameter/restant = 2.0
+shader_parameter/origine = Vector2(-1, 0)
+shader_parameter/onde = 9.0
+shader_parameter/onde_origine = Vector2(1, 0)
+shader_parameter/graine = 0.0
+shader_parameter/facette = 0.54800002277012
+shader_parameter/lignes = 2.0510000736725003
+shader_parameter/opacite_fond = 0.3050000144875
+shader_parameter/opacite_bord = 0.8
+shader_parameter/bombe = 1.0
+shader_parameter/clignote = 0.6
+shader_parameter/couleur = Color(0.5844256, 0.09146505, 0.12875316, 1)
+shader_parameter/couleur_arete = Color(0.99994355, 0.3464777, 0.34475964, 1)
+shader_parameter/couleur_eclat = Color(1, 0.93, 0.9, 1)
+
+[node name="BouclierSang" type="Node2D" unique_id=617528313]
+z_index = 3
+script = ExtResource("1_bcl")
+
+[node name="Bulle" type="ColorRect" parent="." unique_id=728529257]
+material = SubResource("ShaderMaterial_bcl")
+offset_left = -129.0
+offset_top = -144.0
+offset_right = 129.0
+offset_bottom = 144.0
+mouse_filter = 2

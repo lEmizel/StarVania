@@ -1,0 +1,34 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://SCRIPT/SHADER/slash_heros.gd" id="1_slash"]
+[ext_resource type="Shader" path="res://SCRIPT/SHADER/slash_heros.gdshader" id="2_shader"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_lame"]
+resource_local_to_scene = true
+shader = ExtResource("2_shader")
+shader_parameter/taille = Vector2(650, 650)
+shader_parameter/centre = Vector2(48.4, -36.1)
+shader_parameter/forme = Vector4(127.59, -10, -2.59, 17.62)
+shader_parameter/forme_b2 = 4.23
+shader_parameter/queue = -1.64
+shader_parameter/tete = 0.72
+shader_parameter/dehors = PackedFloat32Array(4.3, 4, 2.7, 0.8, -1.1, -2.4, -2.4, -1.6, -0.4, 1.3, 3.2, 4.2)
+shader_parameter/large = PackedFloat32Array(13.3, 15.6, 18.1, 20.4, 23.2, 26.2, 28.6, 29.3, 27.7, 23.8, 18, 12.9)
+shader_parameter/voile = PackedFloat32Array(0.46, 0.66, 0.85, 0.96, 1, 1, 1, 1, 1, 1, 1, 1)
+shader_parameter/filets = PackedFloat32Array(0.45, 0.7, 39.9, 42.2, 3.2, 0.78, 0.75, 0.84, -6.5, -7.2, 2.1, 0.68, 0.9, 0.94, 15.7, 10.8, 2, 0.64, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+shader_parameter/opacite = 1.0
+shader_parameter/traits = 1.0
+shader_parameter/flou_queue = 0.4
+shader_parameter/couleur = Color(1, 1, 1, 1)
+
+[node name="SlashHeros" type="Node2D"]
+z_index = 1
+script = ExtResource("1_slash")
+
+[node name="Lame" type="ColorRect" parent="."]
+material = SubResource("ShaderMaterial_lame")
+offset_left = -325.0
+offset_top = -325.0
+offset_right = 325.0
+offset_bottom = 325.0
+mouse_filter = 2

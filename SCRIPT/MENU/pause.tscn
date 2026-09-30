@@ -1,9 +1,135 @@
-[gd_scene load_steps=2 format=3]
+[gd_scene format=3]
 
 [ext_resource type="Script" path="res://SCRIPT/MENU/pause.gd" id="1_pause"]
+[ext_resource type="Script" path="res://SCRIPT/MENU/page_talismans.gd" id="2_page"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_onglet_actif"]
+content_margin_left = 20.0
+content_margin_right = 20.0
+bg_color = Color(0.078, 0.063, 0.09, 1)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_color = Color(0.45, 0.11, 0.14, 1)
+corner_radius_top_left = 5
+corner_radius_top_right = 5
+expand_margin_bottom = 4.0
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_onglet_inactif"]
+content_margin_left = 20.0
+content_margin_right = 20.0
+bg_color = Color(0.043, 0.035, 0.05, 0.94)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_color = Color(0.25, 0.1, 0.12, 1)
+corner_radius_top_left = 5
+corner_radius_top_right = 5
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_bouton"]
+content_margin_left = 16.0
+content_margin_top = 8.0
+content_margin_right = 16.0
+content_margin_bottom = 8.0
+bg_color = Color(0.118, 0.098, 0.13, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.3, 0.26, 0.28, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_bouton_survol"]
+content_margin_left = 16.0
+content_margin_top = 8.0
+content_margin_right = 16.0
+content_margin_bottom = 8.0
+bg_color = Color(0.17, 0.13, 0.17, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.45, 0.36, 0.38, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_bouton_presse"]
+content_margin_left = 16.0
+content_margin_top = 8.0
+content_margin_right = 16.0
+content_margin_bottom = 8.0
+bg_color = Color(0.45, 0.11, 0.14, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.86, 0.17, 0.2, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_bouton_focus"]
+bg_color = Color(0.62, 0.09, 0.13, 0.32)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(0.86, 0.17, 0.2, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[sub_resource type="Theme" id="Theme_pause"]
+Button/colors/font_color = Color(0.78, 0.74, 0.7, 1)
+Button/colors/font_focus_color = Color(1, 0.96, 0.9, 1)
+Button/colors/font_hover_color = Color(0.93, 0.89, 0.82, 1)
+Button/colors/font_pressed_color = Color(1, 0.96, 0.9, 1)
+Button/font_sizes/font_size = 24
+Button/styles/focus = SubResource("StyleBoxFlat_bouton_focus")
+Button/styles/hover = SubResource("StyleBoxFlat_bouton_survol")
+Button/styles/normal = SubResource("StyleBoxFlat_bouton")
+Button/styles/pressed = SubResource("StyleBoxFlat_bouton_presse")
+Label/colors/font_color = Color(0.93, 0.89, 0.82, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_fenetre"]
+bg_color = Color(0.078, 0.063, 0.09, 1)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(0.45, 0.11, 0.14, 1)
+corner_radius_top_right = 5
+corner_radius_bottom_right = 5
+corner_radius_bottom_left = 5
+shadow_color = Color(0, 0, 0, 0.45)
+shadow_size = 14
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_indice"]
+content_margin_left = 10.0
+content_margin_top = 3.0
+content_margin_right = 10.0
+content_margin_bottom = 3.0
+bg_color = Color(0.043, 0.035, 0.05, 0.85)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.3, 0.26, 0.28, 1)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
 
 [node name="PAUSE" type="Control"]
 process_mode = 3
+texture_filter = 2
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -11,6 +137,8 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_pause")
+style_onglet_actif = SubResource("StyleBoxFlat_onglet_actif")
+style_onglet_inactif = SubResource("StyleBoxFlat_onglet_inactif")
 
 [node name="Fond" type="ColorRect" parent="."]
 layout_mode = 1
@@ -21,55 +149,204 @@ grow_horizontal = 2
 grow_vertical = 2
 color = Color(0, 0, 0, 0.6)
 
-[node name="Panel" type="Panel" parent="."]
+[node name="Cadre" type="Control" parent="."]
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -240.0
-offset_top = -220.0
-offset_right = 240.0
-offset_bottom = 220.0
+offset_left = -410.0
+offset_top = -442.0
+offset_right = 410.0
+offset_bottom = 442.0
 grow_horizontal = 2
 grow_vertical = 2
+pivot_offset = Vector2(410, 442)
+theme = SubResource("Theme_pause")
 
-[node name="VBoxContainer" type="VBoxContainer" parent="Panel"]
+[node name="Fenetre" type="Panel" parent="Cadre"]
+layout_mode = 0
+offset_top = 64.0
+offset_right = 820.0
+offset_bottom = 884.0
+theme_override_styles/panel = SubResource("StyleBoxFlat_fenetre")
+
+[node name="Pages" type="Control" parent="Cadre/Fenetre"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="Talismans" type="Control" parent="Cadre/Fenetre/Pages"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("2_page")
+
+[node name="Colonne" type="VBoxContainer" parent="Cadre/Fenetre/Pages/Talismans"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 offset_left = 40.0
-offset_top = 24.0
+offset_top = 30.0
 offset_right = -40.0
 offset_bottom = -24.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_constants/separation = 20
+mouse_filter = 2
+theme_override_constants/separation = 12
 
-[node name="Titre" type="Label" parent="Panel/VBoxContainer"]
+[node name="TitreEquipements" type="Label" parent="Cadre/Fenetre/Pages/Talismans/Colonne"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 34
+theme_override_colors/font_color = Color(0.62, 0.56, 0.54, 1)
+theme_override_font_sizes/font_size = 19
+text = "ÉQUIPÉS"
+horizontal_alignment = 1
+
+[node name="Equipements" type="HBoxContainer" parent="Cadre/Fenetre/Pages/Talismans/Colonne"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 30
+alignment = 1
+
+[node name="Trait" type="ColorRect" parent="Cadre/Fenetre/Pages/Talismans/Colonne"]
+custom_minimum_size = Vector2(0, 2)
+layout_mode = 2
+mouse_filter = 2
+color = Color(0.45, 0.11, 0.14, 0.55)
+
+[node name="TitreCollection" type="Label" parent="Cadre/Fenetre/Pages/Talismans/Colonne"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.62, 0.56, 0.54, 1)
+theme_override_font_sizes/font_size = 19
+text = "COLLECTION"
+horizontal_alignment = 1
+
+[node name="Collection" type="GridContainer" parent="Cadre/Fenetre/Pages/Talismans/Colonne"]
+layout_mode = 2
+size_flags_horizontal = 4
+mouse_filter = 2
+theme_override_constants/h_separation = 22
+theme_override_constants/v_separation = 22
+columns = 6
+
+[node name="Nom" type="Label" parent="Cadre/Fenetre/Pages/Talismans/Colonne"]
+custom_minimum_size = Vector2(0, 58)
+layout_mode = 2
+theme_override_font_sizes/font_size = 30
+horizontal_alignment = 1
+vertical_alignment = 2
+
+[node name="Description" type="Label" parent="Cadre/Fenetre/Pages/Talismans/Colonne"]
+custom_minimum_size = Vector2(0, 62)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.72, 0.67, 0.64, 1)
+theme_override_font_sizes/font_size = 21
+horizontal_alignment = 1
+autowrap_mode = 3
+
+[node name="Ressort" type="Control" parent="Cadre/Fenetre/Pages/Talismans/Colonne"]
+layout_mode = 2
+size_flags_vertical = 3
+mouse_filter = 2
+
+[node name="Aide" type="Label" parent="Cadre/Fenetre/Pages/Talismans/Colonne"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.5, 0.45, 0.45, 1)
+theme_override_font_sizes/font_size = 17
+text = "X  équiper / retirer          O  fermer          L1 · R1  changer d'onglet"
+horizontal_alignment = 1
+
+[node name="Menu" type="Control" parent="Cadre/Fenetre/Pages"]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="Colonne" type="VBoxContainer" parent="Cadre/Fenetre/Pages/Menu"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -210.0
+offset_top = -230.0
+offset_right = 210.0
+offset_bottom = 230.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_constants/separation = 22
+alignment = 1
+
+[node name="Titre" type="Label" parent="Cadre/Fenetre/Pages/Menu/Colonne"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 40
 text = "PAUSE"
 horizontal_alignment = 1
 
-[node name="Reprendre" type="Button" parent="Panel/VBoxContainer"]
-custom_minimum_size = Vector2(0, 52)
+[node name="Reprendre" type="Button" parent="Cadre/Fenetre/Pages/Menu/Colonne"]
+custom_minimum_size = Vector2(0, 62)
 layout_mode = 2
 text = "Reprendre"
 
-[node name="Options" type="Button" parent="Panel/VBoxContainer"]
-custom_minimum_size = Vector2(0, 52)
+[node name="Options" type="Button" parent="Cadre/Fenetre/Pages/Menu/Colonne"]
+custom_minimum_size = Vector2(0, 62)
 layout_mode = 2
 text = "Options"
 
-[node name="MenuPrincipal" type="Button" parent="Panel/VBoxContainer"]
-custom_minimum_size = Vector2(0, 52)
+[node name="MenuPrincipal" type="Button" parent="Cadre/Fenetre/Pages/Menu/Colonne"]
+custom_minimum_size = Vector2(0, 62)
 layout_mode = 2
 text = "Menu principal"
 
-[node name="Quitter" type="Button" parent="Panel/VBoxContainer"]
-custom_minimum_size = Vector2(0, 52)
+[node name="Quitter" type="Button" parent="Cadre/Fenetre/Pages/Menu/Colonne"]
+custom_minimum_size = Vector2(0, 62)
 layout_mode = 2
 text = "Quitter"
+
+[node name="Onglets" type="HBoxContainer" parent="Cadre"]
+layout_mode = 0
+offset_right = 820.0
+offset_bottom = 64.0
+mouse_filter = 2
+theme_override_constants/separation = 14
+
+[node name="Boutons" type="HBoxContainer" parent="Cadre/Onglets"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 4
+
+[node name="Talismans" type="Button" parent="Cadre/Onglets/Boutons"]
+custom_minimum_size = Vector2(230, 0)
+layout_mode = 2
+focus_mode = 0
+text = "TALISMANS"
+
+[node name="Menu" type="Button" parent="Cadre/Onglets/Boutons"]
+custom_minimum_size = Vector2(230, 0)
+layout_mode = 2
+focus_mode = 0
+text = "MENU"
+
+[node name="Indice" type="Label" parent="Cadre/Onglets"]
+layout_mode = 2
+size_flags_vertical = 4
+theme_override_colors/font_color = Color(0.62, 0.56, 0.54, 1)
+theme_override_font_sizes/font_size = 17
+theme_override_styles/normal = SubResource("StyleBoxFlat_indice")
+text = "L1 · R1"

@@ -41,12 +41,19 @@ const SHADERS: Array[String] = [
 	"res://SCRIPT/SHADER/aile_double_saut.gdshader", # aile rouge sang du double saut (sept. 2026)
 	"res://SCRIPT/SHADER/plumes_envolees.gdshader",  # souffle et plumes que le coup d'aile laisse sur place
 	"res://SCRIPT/SHADER/griffure_xeno.gdshader",    # coups de griffes du xeno (sept. 2026)
+	"res://SCRIPT/SHADER/slash_heros.gdshader",      # le slash des attaques du héros, refait d'après ses dessins (sept. 2026)
+	"res://SCRIPT/SHADER/arc_foudre.gdshader",       # l'éclair qui bondit d'un ennemi à l'autre (talisman lame de foudre, sept. 2026)
+	"res://SCRIPT/TALISMAN/dessin_foudre.gdshader",  # le médaillon du talisman lame de foudre (menu START)
+	"res://SCRIPT/SHADER/bouclier_sang.gdshader",    # la bulle du talisman bouclier de sang (sept. 2026)
+	"res://SCRIPT/TALISMAN/dessin_bouclier.gdshader", # son dessin dans le menu START
 	"res://SCRIPT/SHADER/flou_fond.gdshader",          # flou de fond (scene_06, scene_7)
 	"res://SCRIPT/SCENE/ss.gdshader",                  # cadre mur griffe, grotte
 	"res://SCRIPT/SCENE/scene_3.gdshader",             # décor de scene_3
 	"res://SCRIPT/MONSTER/hit_flash.gdshader",         # flash de coup (BASE_IA)
 	"res://SCRIPT/SPELL/bloodball.gdshader",
 	"res://SCRIPT/SPELL/bloodball_explosion.gdshader",
+	"res://SCRIPT/SPELL/tornade_de_sang.gdshader",   # la boule de sang du talisman « Tornade de sang » (sept. 2026)
+	"res://SCRIPT/TALISMAN/dessin_tornade_de_sang.gdshader",  # le dessin de ce talisman dans le menu START
 ]
 ## scènes d'effets LÉGÈRES : matériaux et particules lus dans la scène SANS
 ## l'instancier (aucun script ne tourne). Couvre aussi les shaders écrits en
