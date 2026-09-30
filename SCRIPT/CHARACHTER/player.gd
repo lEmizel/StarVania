@@ -146,6 +146,7 @@ func _physics_process(delta: float) -> void:
 	# move_and_slide glisse le long du sol
 	if _knock != Vector2.ZERO:
 		velocity.x = _knock.x
+	_trainee_tick()          # la traînée du dash / de la roulade (avant de bouger)
 	move_and_slide()
 	# le câble du grappin se trace APRÈS le déplacement (sinon il part de la
 	# main du pas précédent et dépasse du bras, voir _grappin_tracer_cable)
@@ -375,34 +376,95 @@ func _esquive_tente(source_x, source_tag: String) -> bool:
 	return true
 
 
-## le fantôme du pas de côté : la pose EXACTE du perso à cet instant (même
-## image, même sens), hébergé par la scène, qui glisse un peu dans `sens` et
-## s'efface pendant que le vrai corps s'écarte
+## le fantôme du pas de côté : la pose du perso, DEVANT lui, qui glisse un peu
+## dans `sens` et s'efface pendant que le vrai corps s'écarte
 func _fantome_esquive(sens: Vector2) -> void:
+	_poser_fantome(esquive_fantome_couleur, esquive_fantome_duree, sens * esquive_fantome_distance, true)
+	# et le vrai corps blêmit une fraction de seconde
+	var tv := animator.create_tween()
+	animator.modulate.a = 0.35
+	tv.tween_property(animator, "modulate:a", 1.0, esquive_fantome_duree * 0.7)
+
+
+## UN FANTÔME : une copie de la pose EXACTE du perso à cet instant (même image
+## de l'animation, même sens, miroir de POINT compris), hébergée par la scène —
+## elle reste où elle a été posée pendant que le perso s'en va — qui glisse de
+## `glisse` px et s'efface en `duree` s, puis se supprime. `devant` : au-dessus
+## du perso (le pas de côté) ou juste derrière lui (la traînée). Pas de shader :
+## un Sprite2D teinté par `couleur`, rien à préchauffer.
+func _poser_fantome(couleur: Color, duree: float, glisse: Vector2, devant: bool) -> void:
 	var tex: Texture2D = animator.sprite_frames.get_frame_texture(animator.animation, animator.frame)
 	if tex == null:
 		return
 	var fantome := Sprite2D.new()
 	fantome.texture = tex
 	fantome.texture_filter = animator.texture_filter
+	fantome.light_mask = animator.light_mask          # pas plus éclairé par les lumières que le perso
 	fantome.offset = animator.offset
 	fantome.centered = animator.centered
-	fantome.z_index = 4                               # devant le perso
-	fantome.modulate = esquive_fantome_couleur
+	fantome.flip_h = animator.flip_h
+	fantome.flip_v = animator.flip_v
+	# rang absolu : juste au-dessus du perso, ou juste en dessous
+	fantome.z_as_relative = false
+	fantome.z_index = _z_absolu(animator) + (2 if devant else -1)
+	fantome.modulate = couleur
 	var hote: Node = get_tree().current_scene
 	if hote == null:
 		hote = get_parent()
 	hote.add_child(fantome)
-	fantome.global_transform = animator.global_transform   # le miroir de POINT compris
+	fantome.global_transform = animator.global_transform
 	var tw := fantome.create_tween().set_parallel(true)
-	tw.tween_property(fantome, "global_position", fantome.global_position + sens * esquive_fantome_distance, esquive_fantome_duree) \
-		.set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
-	tw.tween_property(fantome, "modulate:a", 0.0, esquive_fantome_duree)
+	if glisse != Vector2.ZERO:
+		tw.tween_property(fantome, "global_position", fantome.global_position + glisse, duree) \
+			.set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	tw.tween_property(fantome, "modulate:a", 0.0, duree)
 	tw.chain().tween_callback(fantome.queue_free)
-	# et le vrai corps blêmit une fraction de seconde
-	var tv := animator.create_tween()
-	animator.modulate.a = 0.35
-	tv.tween_property(animator, "modulate:a", 1.0, esquive_fantome_duree * 0.7)
+
+
+## le rang d'affichage (z) réel d'un nœud : le sien plus ceux de ses parents,
+## tant qu'ils sont relatifs
+func _z_absolu(ci: CanvasItem) -> int:
+	var z := 0
+	var n: Node = ci
+	while n is CanvasItem:
+		z += (n as CanvasItem).z_index
+		if not (n as CanvasItem).z_as_relative:
+			break
+		n = n.get_parent()
+	return z
+
+
+## --- la traînée fantomatique (dash aérien, roulade) ---
+
+## TRAÎNÉE (30 sept. 2026, demande de Kaoru) : pendant le dash aérien et la
+## roulade, le perso sème derrière lui des fantômes de sa pose — la même famille
+## que le pas de côté, en traînée. Une copie tous les `trainee_espacement` px
+## parcourus (donc la même densité au dash, 1400 px/s, qu'à la roulade,
+## 760 px/s), la première au point de départ ; chacune reste où elle a été
+## posée, derrière le perso, et s'efface en `trainee_duree` s : les plus
+## anciennes sont les plus pâles.
+@export var trainee_dash := true
+@export var trainee_roulade := true
+## une copie tous les tant de px parcourus (60 : des images bien distinctes ;
+## 42 faisait une bouillie, 75 une traînée trop clairsemée — essais du 30 sept.)
+@export var trainee_espacement := 60.0
+## durée de vie d'une copie (s) : la longueur de la traînée = vitesse × durée
+@export var trainee_duree := 0.22
+@export var trainee_couleur := Color(1.0, 0.72, 0.78, 0.5)
+var _trainee_derniere := Vector2.INF     # où a été posée la dernière copie (INF = pas en traînée)
+
+## appelé à chaque pas de physique, AVANT le déplacement : la première copie
+## tombe pile au point de départ
+func _trainee_tick() -> void:
+	var active := (current_state == States.DASH and trainee_dash) \
+			or (current_state == States.ROLL and trainee_roulade)
+	if not active:
+		_trainee_derniere = Vector2.INF
+		return
+	if _trainee_derniere != Vector2.INF and global_position.distance_to(_trainee_derniere) < trainee_espacement:
+		return
+	_trainee_derniere = global_position
+	_poser_fantome(trainee_couleur, trainee_duree, Vector2.ZERO, false)
 
 
 ## Renvoi des dégâts d'environnement (piques, scie). Le danger fournit une
