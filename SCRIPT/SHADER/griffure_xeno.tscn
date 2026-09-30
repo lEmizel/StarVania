@@ -1,0 +1,34 @@
+[gd_scene format=3]
+
+[ext_resource type="Shader" path="res://SCRIPT/SHADER/griffure_xeno.gdshader" id="1_gx"]
+[ext_resource type="Script" path="res://SCRIPT/SHADER/griffure_xeno.gd" id="2_gx"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_gx"]
+resource_local_to_scene = true
+shader = ExtResource("1_gx")
+shader_parameter/progress = 0.0
+shader_parameter/taille = Vector2(360, 340)
+shader_parameter/origine = Vector2(0.3611, 0.9118)
+shader_parameter/centre = Vector2(30, -146)
+shader_parameter/rayon = 136.0
+shader_parameter/angle_debut = -95.0
+shader_parameter/angle_fin = 120.0
+shader_parameter/graine = 0.0
+shader_parameter/nb_griffes = 4
+shader_parameter/ecart = 13.0
+shader_parameter/epaisseur = 5.2
+shader_parameter/voile = 0.22
+shader_parameter/contour = 0.5
+shader_parameter/couleur = Color(1, 1, 1, 1)
+shader_parameter/couleur_contour = Color(0.09, 0.11, 0.2, 1)
+
+[node name="GriffureXeno" type="Node2D"]
+script = ExtResource("2_gx")
+
+[node name="Griffure" type="ColorRect" parent="."]
+material = SubResource("ShaderMaterial_gx")
+offset_left = -130.0
+offset_top = -310.0
+offset_right = 230.0
+offset_bottom = 30.0
+mouse_filter = 2

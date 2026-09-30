@@ -40,6 +40,7 @@ const SHADERS: Array[String] = [
 	"res://SCRIPT/SHADER/trace_de_griffe.gdshader",  # sillons et étincelles de la griffe en wall run (sept. 2026)
 	"res://SCRIPT/SHADER/aile_double_saut.gdshader", # aile rouge sang du double saut (sept. 2026)
 	"res://SCRIPT/SHADER/plumes_envolees.gdshader",  # souffle et plumes que le coup d'aile laisse sur place
+	"res://SCRIPT/SHADER/griffure_xeno.gdshader",    # coups de griffes du xeno (sept. 2026)
 	"res://SCRIPT/SHADER/flou_fond.gdshader",          # flou de fond (scene_06, scene_7)
 	"res://SCRIPT/SCENE/ss.gdshader",                  # cadre mur griffe, grotte
 	"res://SCRIPT/SCENE/scene_3.gdshader",             # décor de scene_3

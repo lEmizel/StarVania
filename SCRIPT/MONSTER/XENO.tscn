@@ -306,10 +306,14 @@ polygon = PackedVector2Array(-49, -16, 387, -145, 385, 101, -47, 25)
 [node name="collision_attack" type="Area2D" parent="POINT" unique_id=371815366]
 
 [node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="POINT/collision_attack" unique_id=74740681]
-visible = false
 position = Vector2(35, -59)
-polygon = PackedVector2Array(11, -150, 58, -133, 92, -75, 92, 1, 58, 53, -28, 65, -26, 0, -18, -57, -20, -89, -43, -106, -83, -100, -121, -137, -59, -157)
+polygon = PackedVector2Array(-5, -87, 2, -217, 36, -210, 67, -195, 93, -172, 112, -144, 123, -111, 125, -76, 117, -42, 101, -12, 77, 14, 48, 32, 14, 42, -20, 42, -54, 34)
 disabled = true
+
+[node name="coup_2" type="CollisionPolygon2D" parent="POINT/collision_attack"]
+polygon = PackedVector2Array(56, -152, 20, -269, 52, -274, 85, -271, 115, -259, 141, -240, 161, -214, 174, -184, 178, -152, 174, -120, 161, -90, 141, -64, 115, -45, 85, -33, 52, -30, 20, -35)
+disabled = true
+
 
 [node name="langue" type="CollisionPolygon2D" parent="POINT/collision_attack" unique_id=432742997]
 visible = false

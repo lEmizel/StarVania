@@ -71,9 +71,11 @@ position = Vector2(5221, -2197)
 position = Vector2(1141, -3291)
 
 [node name="CadreMurGriffe" parent="interactible" unique_id=138821927 instance=ExtResource("3_r6nkk")]
+z_index = -1
 position = Vector2(3524, -2368)
 
 [node name="CadreMurGriffe3" parent="interactible" unique_id=1056835809 instance=ExtResource("3_r6nkk")]
+z_index = -1
 position = Vector2(7036, -3815)
 
 [node name="piques 400x100" parent="interactible" unique_id=1466333129 instance=ExtResource("4_528hl")]
@@ -107,9 +109,11 @@ position = Vector2(4430, -3341)
 position = Vector2(5230, -3341)
 
 [node name="CadreMurGriffe4" parent="interactible" unique_id=754336148 instance=ExtResource("3_r6nkk")]
+z_index = -1
 position = Vector2(3305, -3505)
 
 [node name="CadreMurGriffe5" parent="interactible" unique_id=403302281 instance=ExtResource("3_r6nkk")]
+z_index = -1
 position = Vector2(2493, -3493)
 
 [node name="piques 400x103" parent="interactible" unique_id=1334523007 instance=ExtResource("4_528hl")]

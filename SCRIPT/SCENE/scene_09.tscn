@@ -165,12 +165,15 @@ position = Vector2(3273, -3900)
 position = Vector2(3587, -3336)
 
 [node name="CadreMurGriffe" parent="interactible" unique_id=138821927 instance=ExtResource("7_urmcn")]
+z_index = -1
 position = Vector2(3625, -1261)
 
 [node name="CadreMurGriffe2" parent="interactible" unique_id=1427212184 instance=ExtResource("7_urmcn")]
+z_index = -1
 position = Vector2(1816, -3545)
 
 [node name="CadreMurGriffe3" parent="interactible" unique_id=1008341798 instance=ExtResource("7_urmcn")]
+z_index = -1
 position = Vector2(2748, -3559)
 
 [node name="piques 400x200" parent="interactible" unique_id=1466333129 instance=ExtResource("8_rlp1r")]
@@ -194,28 +197,28 @@ position = Vector2(3917, -481)
 [node name="SAWBLADE" parent="interactible" unique_id=388117046 instance=ExtResource("9_jb0e2")]
 z_index = 1
 position = Vector2(-344, -3811)
-frame_progress = 0.5617876
+frame_progress = 0.6886775
 position_a = Vector2(-344, -3109)
 position_b = Vector2(-344, -3811)
 
 [node name="SAWBLADE2" parent="interactible" unique_id=246594848 instance=ExtResource("9_jb0e2")]
 z_index = 1
 position = Vector2(590, -3104)
-frame_progress = 0.9137235
+frame_progress = 0.040613286
 position_a = Vector2(590, -3100)
 position_b = Vector2(590, -3767)
 
 [node name="SAWBLADE3" parent="interactible" unique_id=105869148 instance=ExtResource("9_jb0e2")]
 z_index = 1
 position = Vector2(2074, -2095)
-frame_progress = 0.9137235
+frame_progress = 0.040613286
 position_a = Vector2(2074, -3057)
 position_b = Vector2(2074, -2095)
 
 [node name="SAWBLADE4" parent="interactible" unique_id=1759190604 instance=ExtResource("9_jb0e2")]
 z_index = 1
 position = Vector2(3027, -3036)
-frame_progress = 0.9137235
+frame_progress = 0.040613286
 position_a = Vector2(3027, -3036)
 position_b = Vector2(3027, -2095)
 
@@ -902,11 +905,6 @@ z_index = -200
 position = Vector2(1061.7476, -156.50085)
 scale = Vector2(2.85704, 2.8395324)
 texture = ExtResource("23_m7nq5")
-
-[node name="Amphore" type="Sprite2D" parent="VISUAL" unique_id=1859706024]
-z_index = -1
-position = Vector2(-1501, -1553)
-texture = ExtResource("24_hcd51")
 
 [node name="Amphore2" type="Sprite2D" parent="VISUAL" unique_id=1102014825]
 z_index = -1

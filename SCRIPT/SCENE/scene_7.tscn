@@ -74,6 +74,7 @@ position = Vector2(-1504, -2102)
 scale = Vector2(0.5331485, 0.5331485)
 
 [node name="CadreMurGriffe" parent="interactible" unique_id=138821927 instance=ExtResource("8_6j52v")]
+z_index = -1
 position = Vector2(1426, -2197)
 
 [node name="grayboxing" type="Node2D" parent="." unique_id=2076599395]
