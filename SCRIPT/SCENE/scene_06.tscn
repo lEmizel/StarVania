@@ -1,6 +1,7 @@
 [gd_scene format=3 uid="uid://dsq0ieef7wjgl"]
 
 [ext_resource type="Script" uid="uid://dftar4ptyhjxe" path="res://SCRIPT/UTILITAIRE/spawnplayer.gd" id="1_mikhl"]
+[ext_resource type="Texture2D" uid="uid://dcxq08l4g0hxq" path="res://MEDIA/scene_06.png" id="1_s06png"]
 [ext_resource type="PackedScene" uid="uid://ckxwmy0iav2h2" path="res://SCRIPT/INTERACTIBLE/Checkpoint.tscn" id="2_k6qtm"]
 [ext_resource type="PackedScene" uid="uid://lfopd74ueqri" path="res://SCRIPT/INTERACTIBLE/cadre_mur_griffe.tscn" id="3_r6nkk"]
 [ext_resource type="PackedScene" uid="uid://jxp4cxeqdyhv" path="res://SCRIPT/grayboxing/400x100.tscn" id="3_tdfyb"]
@@ -29,8 +30,7 @@
 [ext_resource type="PackedScene" uid="uid://d0a63sa43lpwp" path="res://SCRIPT/INTERACTIBLE/flamme.tscn" id="29_sebwa"]
 [ext_resource type="PackedScene" uid="uid://b1fje6n3t7rv5" path="res://SCRIPT/MONSTER/LARVE_PIQUE.tscn" id="34_xccp3"]
 [ext_resource type="PackedScene" uid="uid://bobswn5tah03s" path="res://SCRIPT/INTERACTIBLE/passage.tscn" id="35_kv4j8"]
-[ext_resource type="Shader" path="res://SCRIPT/SHADER/flou_fond.gdshader" id="flou_fond_1"]
-[ext_resource type="Texture2D" uid="uid://dcxq08l4g0hxq" path="res://MEDIA/scene_06.png" id="1_s06png"]
+[ext_resource type="Shader" uid="uid://jblop3f3vfan" path="res://SCRIPT/SHADER/flou_fond.gdshader" id="flou_fond_1"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_7amkf"]
 shader = ExtResource("flou_fond_1")

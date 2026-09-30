@@ -76,22 +76,22 @@ position = Vector2(-1882, -578)
 bord_bloque = 1
 
 [node name="CadreMurGriffe" parent="interactible" unique_id=138821927 instance=ExtResource("5_2c2r7")]
+z_index = -1
 position = Vector2(3361, -1599)
 
 [node name="CadreMurGriffe2" parent="interactible" unique_id=1836036392 instance=ExtResource("5_2c2r7")]
+z_index = -1
 position = Vector2(1488.5, -3666)
 
 [node name="CadreMurGriffe3" parent="interactible" unique_id=310749421 instance=ExtResource("5_2c2r7")]
+z_index = -1
 position = Vector2(2395.5, -3663)
 
 [node name="SAWBLADE" parent="interactible" unique_id=388117046 instance=ExtResource("6_5ylk2")]
 position = Vector2(1466, -999)
-frame_progress = 0.49447116
+frame_progress = 0.25991374
 position_a = Vector2(1466, -999)
 position_b = Vector2(1466, -2128)
-
-[node name="Node2D" parent="interactible" unique_id=1766281021 instance=ExtResource("8_v7ylp")]
-position = Vector2(-473, -336)
 
 [node name="Node2D2" parent="interactible" unique_id=1223787924 instance=ExtResource("8_v7ylp")]
 position = Vector2(-473, -2676)

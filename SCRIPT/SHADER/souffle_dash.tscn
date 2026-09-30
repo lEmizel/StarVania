@@ -1,0 +1,31 @@
+[gd_scene format=3 uid="uid://bd64siqtxs7gp"]
+
+[ext_resource type="Shader" uid="uid://dr4irv1e83pww" path="res://SCRIPT/SHADER/souffle_dash.gdshader" id="1_sd"]
+[ext_resource type="Script" uid="uid://dh2awrb4sjiqg" path="res://SCRIPT/SHADER/souffle_dash.gd" id="2_sd"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_sd"]
+resource_local_to_scene = true
+shader = ExtResource("1_sd")
+shader_parameter/progress = 0.0
+shader_parameter/parcouru = 0.0
+shader_parameter/aspect = 1.55
+shader_parameter/origine = Vector2(0.29032257, 0.5)
+shader_parameter/nb_filets = 6
+shader_parameter/longueur = 1.0
+shader_parameter/etalement = 0.3
+shader_parameter/epaisseur = 0.5
+shader_parameter/ondulation = 0.5
+shader_parameter/anneau = 0.7
+shader_parameter/graine = 16.541020383494313
+shader_parameter/couleur = Color(1, 1, 1, 1)
+
+[node name="SouffleDash" type="Node2D" unique_id=1456416007]
+script = ExtResource("2_sd")
+
+[node name="Souffle" type="ColorRect" parent="." unique_id=2092590055]
+material = SubResource("ShaderMaterial_sd")
+offset_left = -76.0
+offset_top = -84.0
+offset_right = 185.0
+offset_bottom = 84.0
+mouse_filter = 2

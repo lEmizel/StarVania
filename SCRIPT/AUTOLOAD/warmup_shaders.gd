@@ -34,6 +34,10 @@ const SHADERS: Array[String] = [
 	"res://SCRIPT/SHADER/explosion_violette.gdshader", # explosion du kamikaze (sept. 2026)
 	"res://SCRIPT/SHADER/cable_de_sang.gdshader",    # câble du grappin (sept. 2026)
 	"res://SCRIPT/SHADER/impact_blanc.gdshader",     # éclat d'un coup d'épée qui porte (sept. 2026)
+	"res://SCRIPT/SHADER/souffle_dash.gdshader",     # souffle d'air au départ du dash (sept. 2026)
+	"res://SCRIPT/SHADER/onde_de_choc.gdshader",     # onde de choc du coup de pied du boss (sept. 2026)
+	"res://SCRIPT/SHADER/impulsion_saut.gdshader",   # impulsion d'air au départ du saut simple (sept. 2026)
+	"res://SCRIPT/SHADER/trace_de_griffe.gdshader",  # sillons et étincelles de la griffe en wall run (sept. 2026)
 	"res://SCRIPT/SHADER/flou_fond.gdshader",          # flou de fond (scene_06, scene_7)
 	"res://SCRIPT/SCENE/ss.gdshader",                  # cadre mur griffe, grotte
 	"res://SCRIPT/SCENE/scene_3.gdshader",             # décor de scene_3

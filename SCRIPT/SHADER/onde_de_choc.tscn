@@ -1,0 +1,38 @@
+[gd_scene format=3]
+
+[ext_resource type="Shader" path="res://SCRIPT/SHADER/onde_de_choc.gdshader" id="1_oc"]
+[ext_resource type="Script" path="res://SCRIPT/SHADER/onde_de_choc.gd" id="2_oc"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_oc"]
+resource_local_to_scene = true
+shader = ExtResource("1_oc")
+shader_parameter/progress = 0.0
+shader_parameter/taille = Vector2(1560, 290)
+shader_parameter/origine = Vector2(0.5, 0.724)
+shader_parameter/sol = 22.0
+shader_parameter/centre_x = 2.5
+shader_parameter/demi_largeur = 555.5
+shader_parameter/debut_coup = 0.556
+shader_parameter/fin_coup = 0.778
+shader_parameter/nb_eclats = 30
+shader_parameter/hauteur = 95.0
+shader_parameter/penche = 0.5
+shader_parameter/courbe = 0.5
+shader_parameter/epaisseur = 1.0
+shader_parameter/anneau = 0.7
+shader_parameter/ecrasement = 1.0
+shader_parameter/contour = 0.5
+shader_parameter/graine = 0.0
+shader_parameter/couleur = Color(1, 1, 1, 1)
+shader_parameter/couleur_contour = Color(0.05, 0.03, 0.06, 1)
+
+[node name="OndeDeChoc" type="Node2D"]
+script = ExtResource("2_oc")
+
+[node name="Onde" type="ColorRect" parent="."]
+material = SubResource("ShaderMaterial_oc")
+offset_left = -780.0
+offset_top = -210.0
+offset_right = 780.0
+offset_bottom = 80.0
+mouse_filter = 2

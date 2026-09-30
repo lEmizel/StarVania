@@ -1,0 +1,39 @@
+[gd_scene format=3]
+
+[ext_resource type="Shader" path="res://SCRIPT/SHADER/trace_de_griffe.gdshader" id="1_tg"]
+[ext_resource type="Script" path="res://SCRIPT/SHADER/trace_de_griffe.gd" id="2_tg"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_tg"]
+resource_local_to_scene = true
+shader = ExtResource("1_tg")
+shader_parameter/taille = Vector2(480, 270)
+shader_parameter/origine = Vector2(0.9167, 0.4444)
+shader_parameter/parcouru = 400.0
+shader_parameter/vitesse = 700.0
+shader_parameter/temps_lache = 0.0
+shader_parameter/contact = 1.0
+shader_parameter/graine = 0.0
+shader_parameter/nb_doigts = 4
+shader_parameter/ecart = 7.3
+shader_parameter/epaisseur = 2.0
+shader_parameter/tremble = 0.5
+shader_parameter/vie = 0.42
+shader_parameter/etincelles = 0.75
+shader_parameter/pas = 12.0
+shader_parameter/vie_etincelles = 0.36
+shader_parameter/taille_etincelles = 1.25
+shader_parameter/gravite = 900.0
+shader_parameter/eclat = 0.8
+shader_parameter/couleur = Color(1, 1, 1, 1)
+shader_parameter/couleur_fin = Color(0.8, 0.62, 1, 1)
+
+[node name="TraceDeGriffe" type="Node2D"]
+script = ExtResource("2_tg")
+
+[node name="Trace" type="ColorRect" parent="."]
+material = SubResource("ShaderMaterial_tg")
+offset_left = -440.0
+offset_top = -120.0
+offset_right = 40.0
+offset_bottom = 150.0
+mouse_filter = 2

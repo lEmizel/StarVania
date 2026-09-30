@@ -101,6 +101,7 @@ func _ready() -> void:
 	set_floor_max_angle(deg_to_rad(60))
 	set_floor_snap_length(6.0)
 	print(Player.hp,"hp")
+	_griffe_preparer()
 	initialize_states()
 	change_state(States.IDLE)
 
@@ -134,6 +135,9 @@ func _physics_process(delta: float) -> void:
 	# main du pas précédent et dépasse du bras, voir _grappin_tracer_cable)
 	if current_state == States.GRAPPIN:
 		_grappin_tracer_cable()
+	# la trace de la griffe aussi, pour la même raison
+	if current_state == States.WALL_GRIFFE:
+		_griffe_tracer()
 	_decay_knockback(delta)
 	_corde_cooldown = maxf(_corde_cooldown - delta, 0.0)
 	_grappin_cooldown = maxf(_grappin_cooldown - delta, 0.0)
@@ -698,6 +702,26 @@ func jump_enter():
 			" vx=", velocity.x, " verrou=", WALL_JUMP_LOCK_TIME, "s")
 	else:
 		velocity.y = JUMP_VELOCITY
+		_poser_impulsion_saut()
+
+
+## l'impulsion d'air sous les pieds au départ du saut SIMPLE (30 sept. 2026) :
+## ni le double saut, ni le saut mural, ni les sauts lancés (grappin, corde…)
+const IMPULSION_SAUT := preload("res://SCRIPT/SHADER/impulsion_saut.tscn")
+
+## Posée aux pieds et hébergée par la scène, derrière le joueur : elle reste au
+## point d'appel. Son sillage part dans le sens du saut — droit pour un saut sur
+## place, penché pour un saut en courant.
+func _poser_impulsion_saut() -> void:
+	var fx := IMPULSION_SAUT.instantiate()
+	fx.demo_boucle = false
+	fx.direction = velocity.normalized()
+	fx.vitesse = velocity.length()
+	var hote: Node = get_tree().current_scene
+	if hote == null:
+		hote = get_parent()
+	hote.add_child(fx)
+	fx.global_position = global_position
 
 
 func jump_execute(delta):
@@ -944,7 +968,58 @@ func wall_griffe_animation_finished():
 	change_state(States.CHUTE)
 
 func wall_griffe_exit():
-	pass
+	_griffe_lacher()
+
+
+# --- La trace que la griffe laisse sur le mur (30 sept. 2026) ---
+const TRACE_GRIFFE := preload("res://SCRIPT/SHADER/trace_de_griffe.tscn")
+## Bout des doigts de la griffe pendant le wall run, dans le repère de POINT
+## (perso tourné vers la droite). Mesuré sur l'animation `wall_griffe`.
+@export var GRIFFE_BOUT := Vector2(-62.0, -112.0)
+## La griffe n'est tendue contre le mur que sur ces images de l'animation
+## (la première et la dernière la montrent ramenée contre le corps).
+const GRIFFE_IMAGE_DEBUT := 1
+const GRIFFE_IMAGE_FIN := 9
+var _traces_griffe: Array[Node] = []   # deux, créées une fois pour toutes
+var _trace_griffe: Node = null         # celle du trait en cours
+
+
+## Deux traces suffisent : un trait s'éteint en moins d'une demi-seconde, bien
+## avant que la griffe ait refait un tour d'animation. Créées ici, à
+## l'apparition du joueur, jamais en plein jeu. Elles vivent dans le repère du
+## monde (top_level) et se dessinent juste sous le joueur.
+func _griffe_preparer() -> void:
+	for i in 2:
+		var trace := TRACE_GRIFFE.instantiate()
+		trace.demo_boucle = false
+		trace.top_level = true
+		trace.z_index = -1
+		add_child(trace)
+		_traces_griffe.append(trace)
+
+
+## Appelée à chaque pas de physique du wall run, APRÈS le déplacement.
+func _griffe_tracer() -> void:
+	var racle: bool = animator.frame >= GRIFFE_IMAGE_DEBUT and animator.frame <= GRIFFE_IMAGE_FIN
+	if not racle:
+		_griffe_lacher()
+		return
+	var bout: Vector2 = point.to_global(GRIFFE_BOUT)
+	if _trace_griffe != null:
+		_trace_griffe.suivre(bout)
+		return
+	for trace in _traces_griffe:
+		if trace.libre():
+			_trace_griffe = trace
+			trace.vitesse = maxf(absf(velocity.x), 1.0)
+			trace.poser(bout, last_direction)
+			return
+
+
+func _griffe_lacher() -> void:
+	if _trace_griffe != null:
+		_trace_griffe.lacher()
+		_trace_griffe = null
 #endregion
 
 
@@ -1438,6 +1513,10 @@ func roll_exit() -> void:
 @export var DASH_DURATION: float = 0.2363
 var _air_dash_used := false
 var _dash_timer := 0.0
+## le souffle d'air laissé au point de départ du dash (30 sept. 2026)
+const SOUFFLE_DASH := preload("res://SCRIPT/SHADER/souffle_dash.tscn")
+var _souffle_dash: Node = null
+var _dash_depart_x := 0.0
 
 
 ## Tente le dash aérien (touche esquive en l'air, depuis JUMP ou CHUTE)
@@ -1458,6 +1537,25 @@ func dash_enter() -> void:
 	_dash_timer = 0.0
 	velocity = Vector2(last_direction * DASH_SPEED, 0.0)
 	animator.play("dash")
+	_poser_souffle_dash()
+
+
+## Le souffle reste AU POINT DE DÉPART (hébergé par la scène, derrière le
+## joueur) : on s'en éloigne. Il connaît la vitesse et la portée du dash pour
+## que son sillage ne nous dépasse jamais.
+func _poser_souffle_dash() -> void:
+	var fx := SOUFFLE_DASH.instantiate()
+	fx.demo_boucle = false
+	fx.vitesse = DASH_SPEED
+	fx.distance = DASH_SPEED * DASH_DURATION
+	var hote: Node = get_tree().current_scene
+	if hote == null:
+		hote = get_parent()
+	hote.add_child(fx)
+	fx.global_position = centre_corps()
+	fx.scale = Vector2(last_direction, 1.0)
+	_souffle_dash = fx
+	_dash_depart_x = global_position.x
 
 
 func dash_execute(delta: float) -> void:
@@ -1480,6 +1578,10 @@ func dash_execute(delta: float) -> void:
 
 func dash_exit() -> void:
 	velocity.x = 0.0
+	# dash coupé court (mur, sol) : le sillage s'arrête où l'on s'est arrêté
+	if is_instance_valid(_souffle_dash):
+		_souffle_dash.arreter_a(absf(global_position.x - _dash_depart_x))
+	_souffle_dash = null
 #endregion
 
 
