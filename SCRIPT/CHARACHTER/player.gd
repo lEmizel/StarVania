@@ -126,6 +126,10 @@ var _facing_prev := 1.0
 
 func _physics_process(delta: float) -> void:
 	state_functions[current_state]["execute"].call(delta)
+	# le plané ne vit que dans les états qui l'entretiennent (chute, coup ou
+	# sort en l'air) : sol, mur, dash, coup reçu, double saut… replient l'aile
+	if _plane and _plane_frame != Engine.get_physics_frames():
+		_planer_arreter()
 	# Le slash FX est enfant de POINT : si le perso se retourne pendant que
 	# la traînée joue, elle partirait en miroir avec lui → on la coupe.
 	# Détection centralisée ici pour couvrir tous les flips (run, jump, chute...)
@@ -973,16 +977,24 @@ const AILE_DOUBLE_SAUT := preload("res://SCRIPT/SHADER/aile_double_saut.tscn")
 ## la droite).
 @export var AILE_ATTACHE := Vector2(-16.0, -90.0)
 var _aile: Node2D = null   # une seule, créée à l'apparition du joueur
+var _aile_plane: Node2D = null   # la même aile, tenue ouverte quand on plane
 
 
 ## Enfant de POINT : l'aile suit le joueur et se retourne avec lui. Le sprite
 ## du perso a un z_index de 1 : l'aile, restée à 0, se dessine derrière lui.
+## Une seconde instance, en mode plané, sert d'aile tenue ouverte (PLANER).
 func _aile_preparer() -> void:
 	var aile := AILE_DOUBLE_SAUT.instantiate() as Node2D
 	aile.demo_boucle = false
 	aile.auto_detruire = false
 	point.add_child(aile)
 	_aile = aile
+	var plane := AILE_DOUBLE_SAUT.instantiate() as Node2D
+	plane.demo_boucle = false
+	plane.auto_detruire = false
+	plane.mode_plane = true
+	point.add_child(plane)
+	_aile_plane = plane
 
 
 func _aile_battre() -> void:
@@ -990,6 +1002,66 @@ func _aile_battre() -> void:
 		return
 	_aile.position = AILE_ATTACHE
 	_aile.jouer()
+
+
+# --- PLANER (1er oct. 2026) ---
+## Capacité metroidvania : MAINTENIR le saut pendant qu'on retombe — après un
+## saut simple comme après un double saut — ouvre l'aile de sang et fait
+## PLANER : la chute est freinée jusqu'à `PLANER_VITESSE` et le reste tant que
+## le bouton est tenu. Lâcher : l'aile se replie, la chute normale reprend.
+## Tient aussi pendant un coup ou un sort en l'air. Désactivable tant qu'elle
+## n'est pas débloquée, comme le double saut et le dash aérien.
+@export var planer_enabled := true
+## vitesse de chute en planant (px/s ; la chute libre plafonne à MAX_FALL_SPEED)
+@export var PLANER_VITESSE: float = 150.0
+## freinage quand l'aile s'ouvre sur une chute plus rapide (px/s², en plus de
+## la gravité : 8000 ramène une chute à pleine vitesse au plané en ~0,2 s)
+@export var PLANER_FREIN: float = 8000.0
+## l'animation du perso en plané, si Kaoru la dessine (sinon, celle de chute)
+const ANIM_PLANE := "plane"
+var _plane := false
+var _plane_frame := -1   # dernière image de physique où un état a entretenu le plané
+
+
+## Appelé par les états aériens qui permettent de planer (chute, coup en l'air,
+## sort en l'air), APRÈS leur gravité : saut tenu en descendant → la chute est
+## freinée jusqu'à PLANER_VITESSE et l'aile reste ouverte. Tout autre état
+## replie l'aile (voir _physics_process).
+func _planer_tick(delta: float) -> void:
+	_plane_frame = Engine.get_physics_frames()
+	var veut := planer_enabled and Input.is_action_pressed("jump") \
+		and velocity.y > 0.0 and not is_on_floor()
+	if veut:
+		if velocity.y > PLANER_VITESSE:
+			velocity.y = maxf(velocity.y - PLANER_FREIN * delta, PLANER_VITESSE)
+		# une descente en plané n'est pas une chute : les dégâts de chute ne
+		# comptent qu'à partir de l'endroit où l'on cesse de planer
+		FALL_POINT = global_position.y
+	if veut and not _plane:
+		_planer_ouvrir()
+	elif _plane and not veut:
+		_planer_arreter()
+
+
+func _planer_ouvrir() -> void:
+	_plane = true
+	if _aile_plane != null:
+		_aile_plane.position = AILE_ATTACHE
+		_aile_plane.ouvrir()
+	if current_state == States.CHUTE and _anim_existe(ANIM_PLANE):
+		animator.play(ANIM_PLANE)
+	print("[PLANE] ouverte  état=", States.keys()[current_state], " vy=", int(velocity.y))
+
+
+func _planer_arreter() -> void:
+	if not _plane:
+		return
+	_plane = false
+	if _aile_plane != null:
+		_aile_plane.fermer()
+	if current_state == States.CHUTE and animator.animation == ANIM_PLANE:
+		animator.play("chute")
+	print("[PLANE] repliée  état=", States.keys()[current_state])
 
 func jump_enter():
 	animator.play("jump")
@@ -1174,7 +1246,8 @@ func chute_enter() -> void:
 		_walkoff_jump = true
 	else:
 		_coyote_timer = 0.0
-	animator.play("chute")
+	# (retour d'un coup en l'air pendant qu'on plane : l'anim de plané)
+	animator.play(ANIM_PLANE if _plane and _anim_existe(ANIM_PLANE) else "chute")
 
 
 func chute_execute(delta: float) -> void:
@@ -1189,6 +1262,7 @@ func chute_execute(delta: float) -> void:
 			point.scale.x = last_direction
 
 	velocity.y = minf(velocity.y + gravity * GRAVITY_FALL * delta, MAX_FALL_SPEED)
+	_planer_tick(delta)
 
 	if direction != 0:
 		velocity.x = lerp(velocity.x, direction * AIR_SPEED, AIR_CONTROL)
@@ -2310,6 +2384,7 @@ func attack_air_enter() -> void:
 
 func attack_air_execute(delta: float) -> void:
 	velocity.y = minf(velocity.y + gravity * GRAVITY_FALL * delta, MAX_FALL_SPEED)
+	_planer_tick(delta)   # on peut frapper en planant : l'aile reste ouverte
 
 	if is_on_floor():
 		_handle_landing()
@@ -2427,6 +2502,8 @@ func bloodball_enter() -> void:
 
 func bloodball_execute(delta: float) -> void:
 	velocity.y += gravity * delta
+	if not is_on_floor():
+		_planer_tick(delta)   # un sort en planant : l'aile reste ouverte
 	_cast_timer += delta
 	if _cast_timer >= BLOODBALL_CAST_TIME:
 		if not is_on_floor():

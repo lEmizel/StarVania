@@ -43,6 +43,7 @@ const SHADERS: Array[String] = [
 	"res://SCRIPT/SHADER/trace_de_griffe.gdshader",  # sillons et étincelles de la griffe en wall run (sept. 2026)
 	"res://SCRIPT/SHADER/aile_double_saut.gdshader", # aile rouge sang du double saut (sept. 2026)
 	"res://SCRIPT/SHADER/plumes_envolees.gdshader",  # souffle et plumes que le coup d'aile laisse sur place
+	"res://SCRIPT/SHADER/plume_planee.gdshader",     # plume que l'aile de plané perd en route (1er oct. 2026)
 	"res://SCRIPT/SHADER/griffure_xeno.gdshader",    # coups de griffes du xeno (sept. 2026)
 	"res://SCRIPT/SHADER/slash_heros.gdshader",      # le slash des attaques du héros, refait d'après ses dessins (sept. 2026)
 	"res://SCRIPT/SHADER/arc_foudre.gdshader",       # l'éclair qui bondit d'un ennemi à l'autre (talisman lame de foudre, sept. 2026)

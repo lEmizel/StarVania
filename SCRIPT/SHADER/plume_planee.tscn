@@ -1,0 +1,30 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://SCRIPT/SHADER/plume_planee.gd" id="1_pp"]
+[ext_resource type="Shader" path="res://SCRIPT/SHADER/plume_planee.gdshader" id="2_pp"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_pp"]
+resource_local_to_scene = true
+shader = ExtResource("2_pp")
+shader_parameter/progress = 0.0
+shader_parameter/aspect = 0.6667
+shader_parameter/origine = Vector2(0.5, 0.2667)
+shader_parameter/graine = 0.0
+shader_parameter/angle_depart = 1.0
+shader_parameter/taille_plume = 0.15
+shader_parameter/chute = 0.3
+shader_parameter/balancement = 0.6
+shader_parameter/contour = 0.5
+shader_parameter/couleur = Color(0.64691436, 0.15927881, 0.23629895, 1)
+shader_parameter/couleur_contour = Color(0.2071262, 0.07214067, 0.11077515, 1)
+
+[node name="PlumePlanee" type="Node2D"]
+script = ExtResource("1_pp")
+
+[node name="Plume" type="ColorRect" parent="."]
+material = SubResource("ShaderMaterial_pp")
+offset_left = -100.0
+offset_top = -80.0
+offset_right = 100.0
+offset_bottom = 220.0
+mouse_filter = 2

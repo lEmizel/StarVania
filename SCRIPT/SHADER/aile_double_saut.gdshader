@@ -25,6 +25,15 @@ render_mode unshaded;
 //   3. la SUITE : elle finit sa course en se refermant un peu ;
 //   4. elle SE DÉFAIT : chaque plume décolle de la racine et maigrit, pas
 //      toutes au même instant.
+//
+// LE PLANÉ (1er oct. 2026, `plane` = 1) : la MÊME aile, dans une seconde
+// instance que le script pilote, TENUE OUVERTE tant que le joueur plane. Pas de
+// coup : elle surgit dressée et tombe aussitôt sur sa pose de plané en un seul
+// rebond (c'est elle qui « accroche » l'air, dès la première image), puis elle
+// houle lentement, ses plumes frémissent et leurs pointes plient vers le haut
+// sous l'air qui porte le joueur. Quand il lâche le bouton, elle se replie en
+// se défaisant comme après le coup. `plane` = 0 : le coup du double saut,
+// exactement comme avant.
 
 uniform float progress : hint_range(0.0, 1.0) = 0.0;
 
@@ -61,6 +70,26 @@ uniform vec4 couleur_arriere : source_color = vec4(0.414, 0.044, 0.098, 1.0);
 uniform vec4 couleur_contour : source_color = vec4(0.207, 0.072, 0.111, 1.0);
 // l'éclat du surgissement et la traînée du coup
 uniform vec4 couleur_eclat : source_color = vec4(1.0, 0.86, 0.82, 1.0);
+
+// --- LE PLANÉ : TOUT est fourni par aile_double_saut.gd à chaque image -------
+// (les réglages de la pose sont dans le groupe « Plané » du nœud racine de la
+// scène, pas ici : le script écrase ces valeurs)
+// 0 = le coup du double saut ; 1 = l'aile tenue ouverte
+uniform float plane : hint_range(0.0, 1.0) = 0.0;
+// secondes depuis l'ouverture, et 0 → 1 à la fermeture
+uniform float plane_temps = 0.0;
+uniform float plane_fin : hint_range(0.0, 1.0) = 0.0;
+// angle de la plume du haut une fois l'aile ouverte (degrés, 0 = vers le haut)
+uniform float plane_angle : hint_range(-30.0, 90.0) = 40.0;
+// écartement de l'éventail en plané (1 = celui du coup)
+uniform float plane_eventail : hint_range(0.5, 1.6) = 1.0;
+// taille de l'aile en plané (1 = celle du coup)
+uniform float plane_taille : hint_range(0.5, 1.6) = 1.1;
+// la houle lente de toute l'aile : amplitude (degrés) et vitesse
+uniform float plane_houle : hint_range(0.0, 15.0) = 3.0;
+uniform float plane_houle_vitesse : hint_range(0.0, 15.0) = 4.8;
+// de combien l'air plie les pointes des plumes vers le haut (0 = pas du tout)
+uniform float plane_portance : hint_range(0.0, 1.0) = 1.0;
 
 // (PI est fourni par le langage de shader de Godot)
 
@@ -126,6 +155,22 @@ void fragment() {
 	float suite = smoothstep(0.35, 0.82, t);
 	float fin = clamp((t - 0.46) / 0.54, 0.0, 1.0);
 
+	// LE PLANÉ : rien de ce coup n'est joué, l'aile est tenue ouverte
+	bool pl = plane > 0.5;
+	float pt = max(plane_temps, 0.0);
+	// l'ouverture accroche l'air : l'aile surgit dressée et tombe sur sa pose
+	// de plané en un seul rebond amorti (1 au départ, puis vers 0)
+	float accroche = exp(-pt * 13.0) * cos(pt * 21.0);
+	if (pl) {
+		surgit = smoothstep(0.0, 0.05, pt);
+		rebond = 1.0 + 0.08 * sin(smoothstep(0.0, 0.2, pt) * PI);
+		flash = eclat * 0.6 * (1.0 - smoothstep(0.02, 0.16, pt));
+		coup = 0.0;
+		vite = 0.0;
+		suite = 0.0;
+		fin = clamp(plane_fin, 0.0, 1.0);
+	}
+
 	vec3 rgb = couleur.rgb;
 	float a = 0.0;
 	// 0 = l'aile arrière, dessinée d'abord ; 1 = l'aile avant
@@ -142,6 +187,17 @@ void fragment() {
 		// l'éventail s'écarte au milieu du coup, puis se referme un peu
 		float eventail = mix(1.0, 0.72, suite) * (1.0 + 0.10 * sin(coup * PI));
 		float taille = envergure * mix(1.0, 0.8, arr) * mix(0.75, 1.0, surgit) * rebond;
+		if (pl) {
+			// la pose de plané, qui houle lentement (l'aile arrière décalée :
+			// les deux ne houlent pas ensemble) ; à la fermeture elle se
+			// replie vers le bas en se défaisant
+			float houle = sin(pt * plane_houle_vitesse + arr * 0.8);
+			phi0 = radians(mix(-30.0, plane_angle, 1.0 - accroche) - 12.0 * arr
+					+ plane_houle * houle + 25.0 * fin);
+			eventail = (plane_eventail - 0.35 * accroche + 0.04 * sin(pt * plane_houle_vitesse + 1.3))
+					* mix(1.0, 0.65, fin);
+			taille *= plane_taille;
+		}
 		vec3 teinte = mix(mix(couleur.rgb, couleur_arriere.rgb, arr), couleur_eclat.rgb, flash);
 
 		// la TRAÎNÉE du coup : trois arcs là où le bord de l'aile avant vient de
@@ -176,6 +232,13 @@ void fragment() {
 				float demi = largeur * l * mix(0.115, 0.21, fr);
 				// pendant le coup, les pointes traînent derrière (elles plient vers le haut)
 				float cambre = courbure * 0.22 - 0.30 * vite * mix(1.0, 0.4, fr);
+				if (pl) {
+					// en plané, l'air qui porte le joueur plie les pointes vers le
+					// haut, et chaque plume frémit (celles du bas, plus)
+					float frisson = sin(pt * 11.0 + fi * 1.9 + fr * 0.7 + arr * 2.3);
+					phi += radians(2.2) * frisson * place;
+					cambre = courbure * 0.22 - plane_portance * (0.16 + 0.05 * frisson) * mix(1.0, 0.5, fr);
+				}
 				// elle se défait : pas toutes les plumes au même instant
 				float part = clamp(fin * 1.5 - 0.5 * alea(fi * 3.7 + fr * 11.0 + arr * 23.0 + graine), 0.0, 1.0);
 				vec2 d = plume(e, phi, l * (1.0 + 0.25 * part), demi * (1.0 - part * part),

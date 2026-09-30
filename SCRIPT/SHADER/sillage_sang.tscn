@@ -22,11 +22,11 @@ shader_parameter/vitesse = 0.35
 shader_parameter/opacite = 0.85
 shader_parameter/filaments = 0.9
 shader_parameter/profondeur = 0.45
-shader_parameter/toon = 1.0
+shader_parameter/toon = 0.0
 shader_parameter/nb_aplats = 3
 shader_parameter/lisere = 0.07
 shader_parameter/couleur_sombre = Color(0.12, 0, 0.02, 1)
-shader_parameter/couleur_fumee = Color(0.78, 0.07, 0.1, 1)
+shader_parameter/couleur_fumee = Color(0.43354747, 0.020001227, 0.03588896, 1)
 shader_parameter/couleur_filament = Color(0.9808503, 0, 0.17121467, 1)
 
 [node name="SillageSang" type="Node2D" unique_id=1741113820]

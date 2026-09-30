@@ -5,9 +5,9 @@ render_mode unshaded;
 // `eveil` et `temps`.
 // TOUT LE ROND est au dessin : un disque de nuit cerné d'un trait d'encre, et
 // la même FUMÉE DE SANG que dans le jeu (bruits empilés qui s'enroulent en
-// volutes, filaments clairs, profondeurs sombres), qui monte en diagonale du
-// bas à gauche vers le haut à droite. Pointé ou porté (`eveil`), elle
-// tourbillonne et monte.
+// volutes), rendue en TOON comme elle (aplats, liseré d'encre, traits
+// clairs), qui monte en diagonale du bas à gauche vers le haut à droite.
+// Pointé ou porté (`eveil`), elle tourbillonne et monte.
 // À dessiner dans un CARRÉ : le disque le remplit.
 
 // --- fournis par emplacement_talisman.gd (les mêmes pour tout dessin de talisman) ---
@@ -87,12 +87,24 @@ void fragment() {
 	float demi = mix(0.52, 0.18, clamp(le_long * 0.55 + 0.5, 0.0, 1.0));
 	float env = (1.0 - smoothstep(demi * 0.3, demi, abs(travers))) * (1.0 - smoothstep(0.7, 1.0, le_long));
 	float voile = smoothstep(0.3, 0.72, fumee);
-	float densite = pow(env * voile, 1.1);
-	vec3 f_rgb = couleur_fumee.rgb * mix(0.75, 1.15, fumee);
-	f_rgb = mix(f_rgb, couleur_sombre.rgb, 0.45 * smoothstep(0.55, 1.0, densite * voile));
-	float lumiere = filament * 0.9 * env;
-	f_rgb = mix(f_rgb, couleur_filament.rgb, clamp(lumiere * 1.4, 0.0, 1.0));
-	float f_a = clamp(densite * 1.2 + lumiere * 0.5, 0.0, 1.0);
+	float densite = clamp(pow(env * voile, 1.1) * 1.25, 0.0, 1.0);
+	// en TOON, comme la brume du jeu : trois aplats (bord sombre, corps, cœur
+	// clair), un liseré d'encre, des traits clairs nets
+	float w = max(fwidth(densite), 0.002);
+	float palier = 0.0;
+	for (int k = 1; k <= 3; k++) {
+		float bk = (float(k) - 0.75) / 3.0;
+		palier += smoothstep(bk - w, bk + w, densite);
+	}
+	palier /= 3.0;
+	float b1 = 0.25 / 3.0;
+	float encre = smoothstep(b1 - 0.07 - w, b1 - 0.07 + w, densite) * (1.0 - smoothstep(b1 - w, b1 + w, densite));
+	vec3 clair = mix(couleur_fumee.rgb, couleur_filament.rgb, 0.45);
+	vec3 f_rgb = mix(couleur_sombre.rgb * 2.2, couleur_fumee.rgb, smoothstep(0.2, 0.55, palier));
+	f_rgb = mix(f_rgb, clair, smoothstep(0.7, 0.9, palier));
+	f_rgb = mix(f_rgb, couleur_filament.rgb, smoothstep(0.78, 0.82, crete) * step(0.4, palier));
+	f_rgb = mix(f_rgb, couleur_sombre.rgb, encre);
+	float f_a = max(smoothstep(0.0, 0.34, palier), encre);
 	rgb = mix(rgb, f_rgb, f_a * champ);
 
 	COLOR = vec4(rgb, a * opacite);

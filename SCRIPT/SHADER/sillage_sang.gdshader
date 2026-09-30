@@ -212,16 +212,16 @@ void fragment() {
 				if (k > nb_aplats) {
 					break;
 				}
-				float b = (float(k) - 0.55) / n_ap;
+				float b = (float(k) - 0.75) / n_ap;
 				palier += smoothstep(b - w, b + w, dens);
 			}
 			palier /= n_ap;
-			float b1 = 0.45 / n_ap;                      // le bord du premier aplat
+			float b1 = 0.25 / n_ap;                      // le bord du premier aplat
 			float encre = smoothstep(b1 - lisere - w, b1 - lisere + w, dens) * (1.0 - smoothstep(b1 - w, b1 + w, dens));
 			vec3 clair = mix(couleur_fumee.rgb, couleur_filament.rgb, 0.45);
 			vec3 rgb_t = mix(couleur_sombre.rgb * 2.2, couleur_fumee.rgb, smoothstep(0.2, 0.55, palier));
-			rgb_t = mix(rgb_t, clair, smoothstep(0.75, 0.95, palier));
-			float trait = smoothstep(0.84 - 0.02, 0.84 + 0.02, crete) * step(0.5, palier) * filaments * (1.0 - vie * 0.6);
+			rgb_t = mix(rgb_t, clair, smoothstep(0.7, 0.9, palier));
+			float trait = smoothstep(0.8 - 0.02, 0.8 + 0.02, crete) * step(0.4, palier) * filaments * (1.0 - vie * 0.6);
 			rgb_t = mix(rgb_t, couleur_filament.rgb, trait);
 			rgb_t = mix(rgb_t, couleur_sombre.rgb, encre);
 			float a_t = max(mix(0.0, 0.92, smoothstep(0.0, 0.34, palier)) * mix(0.62, 1.0, palier), encre * 0.85) * opacite;
