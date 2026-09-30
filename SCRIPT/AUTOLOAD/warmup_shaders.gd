@@ -46,6 +46,8 @@ const SHADERS: Array[String] = [
 	"res://SCRIPT/TALISMAN/dessin_foudre.gdshader",  # le médaillon du talisman lame de foudre (menu START)
 	"res://SCRIPT/SHADER/bouclier_sang.gdshader",    # la bulle du talisman bouclier de sang (sept. 2026)
 	"res://SCRIPT/TALISMAN/dessin_bouclier.gdshader", # son dessin dans le menu START
+	"res://SCRIPT/TALISMAN/dessin_esquive.gdshader",  # talisman pas de côté (menu START)
+	"res://SCRIPT/TALISMAN/dessin_soif.gdshader",     # talisman soif de sang (menu START)
 	"res://SCRIPT/SHADER/flou_fond.gdshader",          # flou de fond (scene_06, scene_7)
 	"res://SCRIPT/SCENE/ss.gdshader",                  # cadre mur griffe, grotte
 	"res://SCRIPT/SCENE/scene_3.gdshader",             # décor de scene_3

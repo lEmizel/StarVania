@@ -158,6 +158,7 @@ func _physics_process(delta: float) -> void:
 	_corde_cooldown = maxf(_corde_cooldown - delta, 0.0)
 	_grappin_cooldown = maxf(_grappin_cooldown - delta, 0.0)
 	_bouclier_recharge_reste = maxf(_bouclier_recharge_reste - delta, 0.0)
+	_esquive_grace_reste = maxf(_esquive_grace_reste - delta, 0.0)
 	_grappin_scanner()
 
 
@@ -243,12 +244,19 @@ func _handle_landing() -> void:
 func apply_damage(amount: int, source_x, source_tag := "?", perce_stun := false) -> void:
 	if current_state in [States.ROLL, States.DASH, States.DEAD]:
 		return
-	if _bouclier_pare(source_x, source_tag):
-		return
 	if current_state == States.HIT and not perce_stun:
 		# DEBUG dégâts : coup ignoré pendant le stun
+		# (AVANT le bouclier et le pas de côté : un coup déjà encaissé ne doit
+		#  plus rien déclencher. Le contact d'une larve rappelle apply_damage à
+		#  chaque image pendant le stun ; le dé du pas de côté tombait alors
+		#  APRÈS le dégât et on voyait le fantôme d'un coup pourtant pris —
+		#  Kaoru, 30 sept. 2026.)
 		print("[DMG bloqué/stun] f=", Engine.get_physics_frames(),
 			" src=", source_tag, " amount=", amount)
+		return
+	if _bouclier_pare(source_x, source_tag):
+		return
+	if _esquive_tente(source_x, source_tag):
 		return
 	print("[DMG] f=", Engine.get_physics_frames(),
 		" src=", source_tag, " amount=", amount,
@@ -315,6 +323,86 @@ func _bouclier_pare(source_x, source_tag: String) -> bool:
 
 func _on_bouclier_tombe() -> void:
 	_bouclier_recharge_reste = bouclier_recharge
+
+
+## --- le pas de côté ---
+
+## TALISMAN « PAS DE CÔTÉ » (30 sept. 2026, id "esquive") : à chaque coup
+## d'ENNEMI (pas les pièges : leur renvoi doit rester), une chance
+## (`Player.chance_esquive()`, 20 %) que le coup soit ignoré — ni dégât, ni
+## stun. Le corps fait un VRAI pas de côté : il est repoussé hors du coup (le
+## recul d'un coup encaissé, réduit à `esquive_recul`), et laisse derrière lui
+## un FANTÔME à sa pose exacte, qui encaisse à sa place et s'efface. Sans ce
+## déplacement (première version), on restait DANS la source — les piques
+## d'une larve, un monstre au contact — et le coup revenait à la fin de la
+## grâce : « je vois le fantôme mais je prends quand même le dégât » (Kaoru).
+## part du recul d'un coup encaissé (HIT_KNOCK_X / HIT_KNOCK_Y) que fait le
+## pas de côté (1 = autant qu'un coup pris)
+@export var esquive_recul := 0.6
+## durée du fantôme (s) et distance dont il glisse vers le coup (px)
+@export var esquive_fantome_duree := 0.28
+@export var esquive_fantome_distance := 14.0
+@export var esquive_fantome_couleur := Color(1.0, 0.72, 0.78, 0.7)
+## GRÂCE après un pas de côté (s) : le temps pendant lequel le même coup ne
+## peut pas revenir. Sans elle, une source CONTINUE (le contact d'un monstre
+## est relu à CHAQUE image de physique, un jet de flammes aussi) retirait un
+## nouveau dé l'image d'après et touchait à 80 % — Kaoru voyait le fantôme et
+## prenait quand même le dégât (30 sept. 2026). Un coup encaissé, lui, a le
+## stun de l'état HIT (0,25 s) pour ça ; le pas de côté n'a pas de stun, il a
+## cette grâce. Pas de recul non plus : si on reste dans le monstre, le coup
+## suivant se rejoue normalement à la fin de la grâce.
+@export var esquive_grace := 0.35
+var _esquive_grace_reste := 0.0
+
+func _esquive_tente(source_x, source_tag: String) -> bool:
+	if _esquive_grace_reste > 0.0:
+		return true                       # le même coup qui revient : toujours au travers
+	var chance := Player.chance_esquive()
+	if chance <= 0.0 or randf() >= chance:
+		return false
+	_esquive_grace_reste = esquive_grace
+	# d'où vient le coup : le pas de côté part de l'autre côté
+	var dir := 0
+	if source_x != null:
+		dir = 1 if (global_position.x - float(source_x)) > 0.0 else -1
+	elif last_direction != 0:
+		dir = -last_direction
+	# le fantôme reste sur place et glisse VERS le coup ; le corps, lui, s'écarte
+	_fantome_esquive(Vector2(-dir, 0.0))
+	_knock = Vector2(dir * HIT_KNOCK_X * esquive_recul, 0.0)
+	velocity.y = minf(velocity.y, HIT_KNOCK_Y * esquive_recul)   # petit bond, pour décoller d'une larve
+	print("[DMG esquivé] f=", Engine.get_physics_frames(), " src=", source_tag, " chance ", chance)
+	return true
+
+
+## le fantôme du pas de côté : la pose EXACTE du perso à cet instant (même
+## image, même sens), hébergé par la scène, qui glisse un peu dans `sens` et
+## s'efface pendant que le vrai corps s'écarte
+func _fantome_esquive(sens: Vector2) -> void:
+	var tex: Texture2D = animator.sprite_frames.get_frame_texture(animator.animation, animator.frame)
+	if tex == null:
+		return
+	var fantome := Sprite2D.new()
+	fantome.texture = tex
+	fantome.texture_filter = animator.texture_filter
+	fantome.offset = animator.offset
+	fantome.centered = animator.centered
+	fantome.z_index = 4                               # devant le perso
+	fantome.modulate = esquive_fantome_couleur
+	var hote: Node = get_tree().current_scene
+	if hote == null:
+		hote = get_parent()
+	hote.add_child(fantome)
+	fantome.global_transform = animator.global_transform   # le miroir de POINT compris
+	var tw := fantome.create_tween().set_parallel(true)
+	tw.tween_property(fantome, "global_position", fantome.global_position + sens * esquive_fantome_distance, esquive_fantome_duree) \
+		.set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	tw.tween_property(fantome, "modulate:a", 0.0, esquive_fantome_duree)
+	tw.chain().tween_callback(fantome.queue_free)
+	# et le vrai corps blêmit une fraction de seconde
+	var tv := animator.create_tween()
+	animator.modulate.a = 0.35
+	tv.tween_property(animator, "modulate:a", 1.0, esquive_fantome_duree * 0.7)
 
 
 ## Renvoi des dégâts d'environnement (piques, scie). Le danger fournit une

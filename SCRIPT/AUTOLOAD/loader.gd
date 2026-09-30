@@ -15,12 +15,14 @@ var _target_scene_path: String
 ##   scene_06 : 795 Mo   scene_7 : 177 Mo   scene_08 : 275 Mo   scene_09 : 81 Mo
 ##   → 1,35 Go à quatre. scene_06 pèse à elle seule 60 % du total : c'est elle
 ##   qu'il faudra alléger le jour où la mémoire pose problème, pas les autres.
-## Depuis le menu on ne précharge que les ENTRÉES des deux démos (23 sept. 2026,
-## demande de Kaoru) : scene_7 (DEMO 1) et scene_08 (DEMO 2). Leurs suites
-## (scene_06, scene_09) ne sont pas gardées en mémoire au menu.
+## Depuis le menu on ne précharge que les ENTRÉES des démos (23 sept. 2026,
+## demande de Kaoru) : scene_7 (DEMO 1), scene_08 (DEMO 2) et, depuis le
+## 30 sept., sc_10 (DEMO 3). Leurs suites (scene_06, scene_09) ne sont pas
+## gardées en mémoire au menu.
 const SCENES_PRECHARGEES: Array[String] = [
 	"res://SCRIPT/SCENE/scene_7.tscn",
 	"res://SCRIPT/SCENE/scene_08.tscn",
+	"res://SCRIPT/SCENE/sc_10.tscn",
 ]
 ## Le menu principal : ses « voisins » sont les entrées des démos ci-dessus
 const MENU_SCENE := "uid://dm012xrdmag4v"        # SCRIPT/MENU/menu.tscn

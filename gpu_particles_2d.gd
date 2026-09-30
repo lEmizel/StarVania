@@ -132,7 +132,7 @@ func _start_fade() -> void:
 	_tween = create_tween().set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
 	_tween.tween_property(self, "self_modulate:a", 0.0, fade_duration)
 	_tween.finished.connect(func () -> void:
-		Player.changement_de_blood(blood_reward)
+		Player.recolter_blood(blood_reward)   # avec le bonus des talismans (soif de sang)
 		if gauge_fill > 0:
 			Player.changement_de_bloodheal(gauge_fill)
 		Pool.rendre_sang(get_parent() as Node2D)  # retour au pool, jamais de queue_free

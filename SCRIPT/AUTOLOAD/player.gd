@@ -210,23 +210,50 @@ func retirer_talisman(id: String) -> bool:
 	return true
 
 
+## La somme, sur les talismans PORTÉS, d'une clé chiffrée du catalogue
+## (`degats_pourcent`, `esquive_pourcent`, `blood_pourcent`…) : c'est ainsi que
+## tout bonus chiffré d'un talisman arrive dans le jeu, et que deux talismans
+## qui portent la même clé s'additionnent.
+func bonus_talismans(cle: String) -> float:
+	var total := 0.0
+	for id in talismans_equipes:
+		if id == "":
+			continue
+		total += float(Talismans.trouver(id).get(cle, 0))
+	return total
+
+
 ## Le bonus de dégâts des COUPS D'ÉPÉE apporté par les talismans portés, en
 ## pour cent : la somme des `degats_pourcent` du catalogue (10 = +10 %). Un
 ## POURCENTAGE, jamais un ajout fixe (Kaoru, 30 sept. 2026) : quand les dégâts
 ## de base du joueur monteront, le bonus suivra.
 func bonus_degats_pourcent() -> float:
-	var total := 0.0
-	for id in talismans_equipes:
-		if id == "":
-			continue
-		total += float(Talismans.trouver(id).get("degats_pourcent", 0))
-	return total
+	return bonus_talismans("degats_pourcent")
 
 
 ## Ce par quoi multiplier les dégâts de base d'un coup d'épée (1.1 = +10 %).
 ## À appliquer au moment du coup : `roundi(base * Player.multiplicateur_degats())`.
 func multiplicateur_degats() -> float:
 	return 1.0 + bonus_degats_pourcent() / 100.0
+
+
+## La chance qu'un coup d'ennemi soit ignoré, de 0 à 1 (talisman « Pas de
+## côté » : 0.2). Tirée au moment du coup par le joueur (`_esquive_tente`).
+func chance_esquive() -> float:
+	return clampf(bonus_talismans("esquive_pourcent") / 100.0, 0.0, 1.0)
+
+
+## Ce par quoi multiplier une RÉCOLTE de sang (talisman « Soif de sang » :
+## 1.1 = +10 %). Un pourcentage de la récolte, pas un ajout fixe.
+func multiplicateur_blood() -> float:
+	return 1.0 + bonus_talismans("blood_pourcent") / 100.0
+
+
+## Une RÉCOLTE de sang arrive au joueur (la particule de sang d'un monstre
+## mort) : créditée avec le bonus des talismans. Les autres mouvements du
+## compteur (dépenses à venir) passent par `changement_de_blood`, sans bonus.
+func recolter_blood(montant: int) -> void:
+	changement_de_blood(roundi(montant * multiplicateur_blood()))
 
 
 #Player.add_max_sang(50)        # +50 de capacité de jauge de sang (la barre s'allonge)

@@ -22,6 +22,10 @@ extends RefCounted
 ##                 cent (10 = +10 %) — un pourcentage des dégâts de base, pas
 ##                 un ajout fixe ; plusieurs talismans portés s'additionnent
 ##                 (Player.multiplicateur_degats())
+##   "esquive_pourcent" (facultatif) chance, en pour cent, qu'un coup d'ennemi
+##                 soit ignoré (Player.chance_esquive())
+##   "blood_pourcent" (facultatif) bonus, en pour cent, sur chaque récolte de
+##                 sang — le compteur chiffré (Player.multiplicateur_blood())
 ## Le dessin passe avant l'icône, qui passe avant le rond de couleur ; les deux
 ## sont posés dans l'emplacement, à sa taille.
 ## ============================================================================
@@ -29,28 +33,30 @@ extends RefCounted
 ## Nombre d'emplacements RONDS de la collection dans le menu. Ceux qui n'ont pas
 ## encore de talisman dans LISTE restent des emplacements vides « à découvrir ».
 ## S'il y a plus de talismans que d'emplacements, la grille s'agrandit seule.
-const NB_EMPLACEMENTS := 18
+## CINQ pour le moment (Kaoru, 30 sept. 2026) : monte ce nombre quand il y en
+## aura d'autres à découvrir.
+const NB_EMPLACEMENTS := 5
 
-## Les trois premiers sont de VRAIS talismans : la tornade est branchée dans
-## SCRIPT/CHARACHTER/player.gd (région BLOODBALL), la lame de foudre dans
-## SCRIPT/CHARACHTER/animator.gd (le slash et l'arc qui bondit), le bouclier
-## de sang dans player.gd (`apply_damage` / `apply_environment_damage`). Les
-## « Talisman 2 » à « Talisman 6 » sont des EXEMPLES sans effet, pour faire
-## tourner le menu : à remplacer par les vrais au fur et à mesure.
+## Les CINQ talismans du jeu (30 sept. 2026), tous branchés :
+##   tornade  → SCRIPT/CHARACHTER/player.gd, région BLOODBALL
+##   foudre   → SCRIPT/CHARACHTER/animator.gd (le slash, l'arc qui bondit, le +10 %)
+##   bouclier → player.gd (`apply_damage` / `apply_environment_damage`)
+##   esquive  → player.gd (`_esquive_tente`, dans `apply_damage`)
+##   soif     → SCRIPT/AUTOLOAD/player.gd (`recolter_blood`)
+## Les clés chiffrées (`degats_pourcent`, `esquive_pourcent`, `blood_pourcent`)
+## sont lues par `Player.bonus_talismans(cle)` : deux talismans qui portent la
+## même clé s'additionnent.
 const LISTE := [
 	{"id": "tornade_bloodball", "nom": "Tornade de sang", "description": "La boule de sang file en spirale et repousse les ennemis qu'elle touche.", "couleur": Color(0.72, 0.13, 0.17), "dessin": "res://SCRIPT/TALISMAN/dessin_tornade_de_sang.gdshader"},
 	{"id": "foudre", "nom": "Lame de foudre", "description": "Le coup d'épée devient foudre : +10 % de dégâts, et quand il porte, l'éclair bondit sur l'ennemi le plus proche.", "couleur": Color(0.45, 0.72, 1.0), "dessin": "res://SCRIPT/TALISMAN/dessin_foudre.gdshader", "degats_pourcent": 10},
 	{"id": "bouclier", "nom": "Bouclier de sang", "description": "Encaisser un coup dresse un bouclier de sang qui pare tous les suivants pendant deux secondes.", "couleur": Color(0.72, 0.13, 0.17), "dessin": "res://SCRIPT/TALISMAN/dessin_bouclier.gdshader"},
-	{"id": "talisman_2", "nom": "Talisman 2", "description": "Effet à définir.", "couleur": Color(0.85, 0.55, 0.16)},
-	{"id": "talisman_3", "nom": "Talisman 3", "description": "Effet à définir.", "couleur": Color(0.84, 0.79, 0.66)},
-	{"id": "talisman_4", "nom": "Talisman 4", "description": "Effet à définir.", "couleur": Color(0.2, 0.55, 0.55)},
-	{"id": "talisman_5", "nom": "Talisman 5", "description": "Effet à définir.", "couleur": Color(0.47, 0.28, 0.62)},
-	{"id": "talisman_6", "nom": "Talisman 6", "description": "Effet à définir.", "couleur": Color(0.38, 0.55, 0.25)},
+	{"id": "esquive", "nom": "Pas de côté", "description": "Une chance sur cinq qu'un coup d'ennemi passe au travers de vous.", "couleur": Color(0.84, 0.79, 0.66), "dessin": "res://SCRIPT/TALISMAN/dessin_esquive.gdshader", "esquive_pourcent": 20},
+	{"id": "soif", "nom": "Soif de sang", "description": "Chaque récolte de sang rapporte 10 % de plus.", "couleur": Color(0.55, 0.05, 0.08), "dessin": "res://SCRIPT/TALISMAN/dessin_soif.gdshader", "blood_pourcent": 10},
 ]
 
 ## POUR TESTER LE MENU : les talismans déjà découverts au début d'une partie.
 ## À vider ([]) quand ils se trouveront dans les niveaux.
-const DECOUVERTS_AU_DEPART := ["tornade_bloodball", "foudre", "bouclier", "talisman_2", "talisman_3", "talisman_4"]
+const DECOUVERTS_AU_DEPART := ["tornade_bloodball", "foudre", "bouclier", "esquive", "soif"]
 
 
 ## la ligne du catalogue qui porte cet id ({} si aucune)
