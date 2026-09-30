@@ -378,6 +378,27 @@ func _raycast_hits_group(rc: RayCast2D, group_name: String, body_only := false) 
 	return false
 
 
+## Comme `_raycast_hits_group` pour une Area2D, mais renvoie la ZONE touchée
+## (null si aucune) : le wall run a besoin de savoir SUR QUEL mur il court.
+func _raycast_zone_du_groupe(rc: RayCast2D, group_name: String) -> Area2D:
+	var ignored: Array[RID] = []
+	var trouvee: Area2D = null
+	rc.clear_exceptions()
+	while rc.is_colliding():
+		var zone := rc.get_collider() as Area2D
+		if zone != null and zone.is_in_group(group_name):
+			trouvee = zone
+			break
+		var rid := rc.get_collider_rid()
+		rc.add_exception_rid(rid)
+		ignored.append(rid)
+		rc.force_raycast_update()
+	for rid in ignored:
+		rc.remove_exception_rid(rid)
+	rc.force_raycast_update()
+	return trouvee
+
+
 
 ## Dégâts de chute activables/désactivables depuis l'inspecteur
 ## (désactivés pour le moment — la logique reste calculée et loguée)
@@ -979,11 +1000,46 @@ func wall_griffe_enter():
 	# Le mur bloque le déplacement réel, mais la vélocité garde le contact
 	velocity.x = 700.0 * last_direction   # 500 → 700 (Kaoru, sept. 2026) : c'est la "vitesse du wall run"
 
+## Le wall run se cale sur le MILIEU du mur (30 sept. 2026) : où qu'on
+## l'accroche, trop haut ou trop bas, le perso glisse vers la ligne médiane du
+## mur de griffe pendant qu'il court, et y reste.
+## Hauteur, depuis ses pieds, du point du perso qu'on amène sur ce milieu
+## (le milieu de sa silhouette en course murale).
+@export var WALL_GRIFFE_MILIEU_PERSO: float = -78.0
+## Vivacité du recentrage (par seconde) : 22 = l'écart est rattrapé en un
+## dixième de seconde environ. 0 = pas de recentrage, comme avant.
+@export var WALL_GRIFFE_RECENTRAGE: float = 22.0
+## vitesse verticale plafond pendant le recentrage (px/s)
+@export var WALL_GRIFFE_RECENTRAGE_MAX: float = 1600.0
+
 func wall_griffe_execute(_delta: float) -> void:
 	FALL_POINT = global_position.y  # appui légitime : accroché au mur
-	if _raycast_hits_group(climbcast_right, "GRIFFE"):
+	var mur := _raycast_zone_du_groupe(climbcast_right, "GRIFFE")
+	if mur == null:
+		change_state(States.CHUTE)
 		return
-	change_state(States.CHUTE)
+	# recentrage : la vitesse verticale est proportionnelle à l'écart restant,
+	# donc on arrive en douceur, sans dépasser
+	var ecart := _milieu_vertical(mur) - (global_position.y + WALL_GRIFFE_MILIEU_PERSO)
+	velocity.y = clampf(ecart * WALL_GRIFFE_RECENTRAGE,
+			-WALL_GRIFFE_RECENTRAGE_MAX, WALL_GRIFFE_RECENTRAGE_MAX)
+
+
+## Milieu vertical (coordonnées du monde) d'une zone : le milieu de ses formes
+## de collision, quelles que soient leur position et leur échelle.
+func _milieu_vertical(zone: Area2D) -> float:
+	var haut := INF
+	var bas := -INF
+	for enfant in zone.get_children():
+		var forme := enfant as CollisionShape2D
+		if forme == null or forme.shape == null:
+			continue
+		var boite: Rect2 = forme.global_transform * forme.shape.get_rect()
+		haut = minf(haut, boite.position.y)
+		bas = maxf(bas, boite.end.y)
+	if haut > bas:
+		return zone.global_position.y   # aucune forme lisible : l'origine de la zone
+	return (haut + bas) * 0.5
 
 func wall_griffe_input(event: InputEvent):
 	# _fresh_press : jump partage le bouton de griffe — la pression qui a
@@ -1027,7 +1083,10 @@ func _griffe_preparer() -> void:
 
 ## Appelée à chaque pas de physique du wall run, APRÈS le déplacement.
 func _griffe_tracer() -> void:
-	var racle: bool = animator.frame >= GRIFFE_IMAGE_DEBUT and animator.frame <= GRIFFE_IMAGE_FIN
+	# pas de trait tant que le perso glisse encore vers le milieu du mur : la
+	# trace suppose une course horizontale
+	var racle: bool = animator.frame >= GRIFFE_IMAGE_DEBUT and animator.frame <= GRIFFE_IMAGE_FIN \
+			and absf(velocity.y) < 120.0
 	if not racle:
 		_griffe_lacher()
 		return
