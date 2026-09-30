@@ -1,0 +1,30 @@
+[gd_scene format=3 uid="uid://xsppitl1hkhm"]
+
+[ext_resource type="Shader" uid="uid://c76f0wwfr7fd4" path="res://SCRIPT/SHADER/impact_blanc.gdshader" id="1_imp"]
+[ext_resource type="Script" uid="uid://c32qrrag2n86x" path="res://SCRIPT/SHADER/impact_blanc.gd" id="2_imp"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_imp"]
+resource_local_to_scene = true
+shader = ExtResource("1_imp")
+shader_parameter/progress = 0.35200001672
+shader_parameter/nb_traits = 11
+shader_parameter/longueur = 0.5
+shader_parameter/epaisseur = 0.5
+shader_parameter/directivite = 0.1470000069825
+shader_parameter/lame = 1.0
+shader_parameter/coeur = 0.075
+shader_parameter/contour = 0.5
+shader_parameter/graine = 0.0
+shader_parameter/couleur = Color(1, 1, 1, 1)
+shader_parameter/couleur_contour = Color(0.05, 0.03, 0.06, 1)
+
+[node name="ImpactBlanc" type="Node2D" unique_id=959441791]
+script = ExtResource("2_imp")
+
+[node name="Eclat" type="ColorRect" parent="." unique_id=841635405]
+material = SubResource("ShaderMaterial_imp")
+offset_left = -196.0
+offset_top = -195.0
+offset_right = 194.0
+offset_bottom = 195.0
+mouse_filter = 2

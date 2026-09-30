@@ -62,6 +62,9 @@ var current_grab_area: Area2D = null
 const FOOTSTEP_SCENE = preload("uid://bc2iigjdyudgm")
 const CHUTE_SCENE = preload("uid://bfwic6xtfgc4p")
 const WALL_JUMP_SCENE = preload("uid://c5a6or75xrx3o")
+## l'éclat rouge sang qui marque un coup REÇU (30 sept. 2026) — le jumeau de
+## l'éclat blanc de l'épée (animator.gd) : même shader, sa propre scène
+const IMPACT_SANG := preload("res://SCRIPT/SHADER/impact_sang.tscn")
 
 # AMÉLIORATION: combo_count remplace le bool "combo" — plus clair et extensible
 var combo_buffered := false   # true si le joueur a appuyé pendant l'anim en cours
@@ -230,6 +233,12 @@ func apply_damage(amount: int, source_x, source_tag := "?", perce_stun := false)
 		" état=", States.keys()[current_state],
 		" hp ", Player.hp, " -> ", Player.hp - amount)
 	Player.changement_de_vie(-amount)
+	# l'éclat de sang part dans le sens où le coup nous envoie ; source
+	# inconnue (une chute) : vers le haut
+	var sens_coup := Vector2.UP
+	if source_x != null:
+		sens_coup = Vector2(1.0 if global_position.x > float(source_x) else -1.0, 0.0)
+	_eclat_sang(sens_coup)
 	if Player.hp <= 0:
 		_knock = Vector2.ZERO
 		change_state(States.DEAD)
@@ -260,6 +269,24 @@ func centre_corps() -> Vector2:
 	return collision_normale.global_position
 
 
+## L'éclat de sang d'un coup REÇU : posé au milieu du corps, du côté d'où vient
+## le coup, et tourné dans le `sens` où il nous envoie. Hébergé par la scène,
+## pas par le joueur — il reste où le coup est tombé pendant qu'on recule.
+func _eclat_sang(sens: Vector2) -> void:
+	var d := sens.normalized() if sens.length_squared() > 0.0001 else Vector2.UP
+	var fx := IMPACT_SANG.instantiate()
+	fx.demo_boucle = false
+	fx.z_index = 5                                    # devant le joueur
+	var hote: Node = get_tree().current_scene
+	if hote == null:
+		hote = get_parent()
+	hote.add_child(fx)
+	# jamais deux fois au même endroit ni sous le même angle
+	fx.global_position = centre_corps() - d * 14.0 \
+			+ Vector2(randf_range(-10.0, 10.0), randf_range(-10.0, 10.0))
+	fx.rotation = d.angle() + randf_range(-0.3, 0.3)
+
+
 ## Dégâts d'environnement (piques & co) : perte de cœur(s), renvoi fort dans la
 ## `direction` fournie par le danger (le sens où pointent les piques, ou du
 ## centre de la scie vers nous), et recharge du double saut + dash pour pouvoir
@@ -275,6 +302,7 @@ func apply_environment_damage(amount: int, direction: Vector2 = Vector2.UP) -> b
 		" état=", States.keys()[current_state],
 		" hp ", Player.hp, " -> ", Player.hp - amount)
 	Player.changement_de_vie(-amount)
+	_eclat_sang(direction)
 	if Player.hp <= 0:
 		_knock = Vector2.ZERO
 		change_state(States.DEAD)

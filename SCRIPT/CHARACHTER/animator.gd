@@ -12,6 +12,11 @@ extends AnimatedSprite2D
 
 var damage = 70
 
+## l'éclat blanc qui marque un coup qui porte (30 sept. 2026)
+const IMPACT := preload("res://SCRIPT/SHADER/impact_blanc.tscn")
+## l'éclat reste à cette distance du bord de la zone balayée par la lame
+const MARGE_ZONE := 24.0
+
 func _ready() -> void:
 	# 1) on connecte une fois les deux signaux
 	SignalUtils.connect_signal(self, "frame_changed",    self, "_on_frame_changed")
@@ -40,10 +45,61 @@ func _on_body_entered(body):
 		# c'est le coup qui recharge, plus le kill)
 		if porte != false:
 			Player.changement_de_bloodheal(Player.BLOODHEAL_PAR_COUP)
+			_eclat_impact(body)
 		# Ennemi inébranlable : le contrecoup annule l'élan du joueur
 		# au lieu de faire reculer l'ennemi
 		if body is BaseAI and body.inebranlable:
 			player.cancel_movement_recoil()
+
+
+## L'éclat d'impact : posé là où la lame rencontre le corps, tourné dans le sens
+## du coup. Seulement quand le coup PORTE (ni sur un mort, ni sur un blindé) :
+## c'est la confirmation visuelle que l'épée a mordu. Hébergé par la scène, pas
+## par le monstre — il doit finir de jouer même si le monstre meurt du coup, et
+## il reste où le coup est tombé pendant que le monstre recule.
+func _eclat_impact(body: Node) -> void:
+	if not (body is Node2D):
+		return
+	var centre: Vector2 = body.global_position
+	if body is BaseAI and body.collision != null:
+		centre = body.collision.global_position      # le milieu du corps, pas ses pieds
+	var sens := signf(centre.x - player.global_position.x)
+	if sens == 0.0:
+		sens = float(player.last_direction)
+	# un gros monstre a son milieu hors de portée de l'épée : l'éclat ne sort
+	# jamais de la zone que la lame balaie vraiment
+	var zone := _zone_du_coup()
+	if zone.has_area():
+		centre = centre.clamp(zone.position, zone.end)
+	var fx := IMPACT.instantiate()
+	fx.demo_boucle = false
+	fx.z_index = 5                                    # devant le monstre et son flash
+	var hote: Node = get_tree().current_scene
+	if hote == null:
+		hote = player.get_parent()
+	hote.add_child(fx)
+	# jamais deux fois au même endroit ni sous le même angle
+	fx.global_position = centre + Vector2(-sens * 8.0, randf_range(-16.0, 16.0))
+	fx.scale = Vector2(sens, 1.0)
+	fx.rotation = randf_range(-0.3, 0.3)
+
+
+## Le rectangle (en coordonnées du monde) que couvrent les hitbox d'attaque
+## actives, un peu rentré. Vide si aucune n'est active.
+func _zone_du_coup() -> Rect2:
+	var zone := Rect2()
+	var vide := true
+	for hb: CollisionPolygon2D in [hitbox_1, hitbox_2, hitbox_3, hitbox_4]:
+		if hb.disabled:
+			continue
+		for pt in hb.polygon:
+			var g: Vector2 = hb.global_transform * pt
+			if vide:
+				zone = Rect2(g, Vector2.ZERO)
+				vide = false
+			else:
+				zone = zone.expand(g)
+	return zone.grow(-MARGE_ZONE) if not vide else zone
 
 # play() ne redémarre pas une anim déjà en cours de lecture —
 # on force le stop pour que le slash reparte toujours de la frame 0

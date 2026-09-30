@@ -1,0 +1,30 @@
+[gd_scene format=3]
+
+[ext_resource type="Shader" uid="uid://c76f0wwfr7fd4" path="res://SCRIPT/SHADER/impact_blanc.gdshader" id="1_imp"]
+[ext_resource type="Script" uid="uid://c32qrrag2n86x" path="res://SCRIPT/SHADER/impact_blanc.gd" id="2_imp"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_sang"]
+resource_local_to_scene = true
+shader = ExtResource("1_imp")
+shader_parameter/progress = 0.0
+shader_parameter/nb_traits = 11
+shader_parameter/longueur = 0.5
+shader_parameter/epaisseur = 0.5
+shader_parameter/directivite = 0.147
+shader_parameter/lame = 1.0
+shader_parameter/coeur = 0.075
+shader_parameter/contour = 0.5
+shader_parameter/graine = 0.0
+shader_parameter/couleur = Color(0.85, 0.06, 0.08, 1)
+shader_parameter/couleur_contour = Color(0.3, 0, 0.05, 1)
+
+[node name="ImpactSang" type="Node2D"]
+script = ExtResource("2_imp")
+
+[node name="Eclat" type="ColorRect" parent="."]
+material = SubResource("ShaderMaterial_sang")
+offset_left = -156.0
+offset_top = -156.0
+offset_right = 156.0
+offset_bottom = 156.0
+mouse_filter = 2

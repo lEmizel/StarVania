@@ -11,12 +11,20 @@
 [ext_resource type="PackedScene" uid="uid://cxca5jid2onov" path="res://SCRIPT/INTERACTIBLE/SAWBLADE.tscn" id="6_5ylk2"]
 [ext_resource type="PackedScene" uid="uid://c1t2vi32cjp0d" path="res://SCRIPT/grayboxing/200x50.tscn" id="7_5ylk2"]
 [ext_resource type="PackedScene" uid="uid://dx851ijsrvbgf" path="res://SCRIPT/grayboxing/400x200.tscn" id="7_dj6aq"]
+[ext_resource type="PackedScene" uid="uid://d0a63sa43lpwp" path="res://SCRIPT/INTERACTIBLE/flamme.tscn" id="8_v7ylp"]
 [ext_resource type="PackedScene" uid="uid://jkojvyshl67j" path="res://SCRIPT/INTERACTIBLE/accroche_grappin.tscn" id="8_xj2qt"]
 [ext_resource type="PackedScene" uid="uid://cxb1r4knfgy12" path="res://SCRIPT/grayboxing/400x200 slide.tscn" id="10_fnlew"]
 [ext_resource type="PackedScene" uid="uid://jxp4cxeqdyhv" path="res://SCRIPT/grayboxing/400x100.tscn" id="13_1q33d"]
 [ext_resource type="PackedScene" uid="uid://d0g8jaoqx2mu6" path="res://SCRIPT/grayboxing/400x100 slide.tscn" id="14_i8d02"]
 [ext_resource type="Script" uid="uid://cldc0dscj1uj1" path="res://SCRIPT/OUTILS/LEVEL_EXPORTER.gd" id="16_1q33d"]
 [ext_resource type="Texture2D" uid="uid://cpqt5ypnkxf7x" path="res://MEDIA/sc_10_out.png" id="16_i8d02"]
+[ext_resource type="Shader" uid="uid://jblop3f3vfan" path="res://SCRIPT/SHADER/flou_fond.gdshader" id="17_vw2kw"]
+[ext_resource type="Texture2D" uid="uid://x774gue4he8e" path="res://MEDIA/scene 6/background/background.png" id="18_v7ylp"]
+[ext_resource type="Texture2D" uid="uid://bnx8i3kgl6iic" path="res://MEDIA/scene 6/background/colonne.png" id="19_6t8y0"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_ubcjy"]
+shader = ExtResource("17_vw2kw")
+shader_parameter/blur_amount = 2.246000106685
 
 [node name="sc_10" type="Node2D" unique_id=275902353]
 
@@ -26,6 +34,21 @@ script = ExtResource("1_b1u0x")
 [node name="interactible" type="Node2D" parent="." unique_id=1625063554]
 
 [node name="checkpoint" parent="interactible" unique_id=524856083 groups=["Checkpoint"] instance=ExtResource("2_hqu2c")]
+
+[node name="AccrocheGrappin" parent="interactible" unique_id=1635525328 instance=ExtResource("8_xj2qt")]
+z_index = 1
+position = Vector2(3964, -1360)
+portee_indicative = 700.0
+
+[node name="AccrocheGrappin2" parent="interactible" unique_id=736104020 instance=ExtResource("8_xj2qt")]
+z_index = 1
+position = Vector2(125, -2128)
+portee_indicative = 700.0
+
+[node name="AccrocheGrappin3" parent="interactible" unique_id=2136515137 instance=ExtResource("8_xj2qt")]
+z_index = 1
+position = Vector2(-615, -3053)
+portee_indicative = 700.0
 
 [node name="piques 400x200" parent="interactible" unique_id=1466333129 instance=ExtResource("3_xsdbu")]
 position = Vector2(1299, 25)
@@ -63,23 +86,33 @@ position = Vector2(2395.5, -3663)
 
 [node name="SAWBLADE" parent="interactible" unique_id=388117046 instance=ExtResource("6_5ylk2")]
 position = Vector2(1466, -999)
-frame_progress = 0.8004375
+frame_progress = 0.49447116
 position_a = Vector2(1466, -999)
 position_b = Vector2(1466, -2128)
 
-[node name="200x50" parent="interactible" unique_id=436297158 instance=ExtResource("7_5ylk2")]
-position = Vector2(-254, -3220)
+[node name="Node2D" parent="interactible" unique_id=1766281021 instance=ExtResource("8_v7ylp")]
+position = Vector2(-473, -336)
 
-[node name="200x51" parent="interactible" unique_id=616493478 instance=ExtResource("7_5ylk2")]
-position = Vector2(301, -3328)
+[node name="Node2D2" parent="interactible" unique_id=1223787924 instance=ExtResource("8_v7ylp")]
+position = Vector2(-473, -2676)
 
-[node name="200x52" parent="interactible" unique_id=2063106006 instance=ExtResource("7_5ylk2")]
-position = Vector2(814, -3423)
-
-[node name="200x53" parent="interactible" unique_id=1877815879 instance=ExtResource("7_5ylk2")]
-position = Vector2(3146, -3528)
+[node name="Node2D3" parent="interactible" unique_id=1750518316 instance=ExtResource("8_v7ylp")]
+position = Vector2(4396, -925)
 
 [node name="grayboxing" type="Node2D" parent="." unique_id=1166067719]
+visible = false
+
+[node name="200x50" parent="grayboxing" unique_id=436297158 instance=ExtResource("7_5ylk2")]
+position = Vector2(-254, -3220)
+
+[node name="200x51" parent="grayboxing" unique_id=616493478 instance=ExtResource("7_5ylk2")]
+position = Vector2(301, -3328)
+
+[node name="200x52" parent="grayboxing" unique_id=2063106006 instance=ExtResource("7_5ylk2")]
+position = Vector2(814, -3423)
+
+[node name="200x53" parent="grayboxing" unique_id=1877815879 instance=ExtResource("7_5ylk2")]
+position = Vector2(3146, -3528)
 
 [node name="800x400" parent="grayboxing" unique_id=2054291590 instance=ExtResource("4_dj6aq")]
 position = Vector2(0, 201)
@@ -262,18 +295,6 @@ position = Vector2(4200, 372)
 [node name="400x206" parent="grayboxing" unique_id=164545220 instance=ExtResource("7_dj6aq")]
 position = Vector2(4200, -628)
 
-[node name="AccrocheGrappin" parent="grayboxing" unique_id=1635525328 instance=ExtResource("8_xj2qt")]
-position = Vector2(3964, -1360)
-portee_indicative = 700.0
-
-[node name="AccrocheGrappin2" parent="grayboxing" unique_id=736104020 instance=ExtResource("8_xj2qt")]
-position = Vector2(125, -2128)
-portee_indicative = 700.0
-
-[node name="AccrocheGrappin3" parent="grayboxing" unique_id=2136515137 instance=ExtResource("8_xj2qt")]
-position = Vector2(-615, -3053)
-portee_indicative = 700.0
-
 [node name="800x410" parent="grayboxing" unique_id=1531251295 instance=ExtResource("4_dj6aq")]
 position = Vector2(4800, -528)
 
@@ -384,8 +405,48 @@ scale = Vector2(-1, -1)
 [node name="VISUAL" type="Node2D" parent="." unique_id=904244772]
 
 [node name="Sprite2D" type="Sprite2D" parent="VISUAL" unique_id=667308393]
-position = Vector2(1852, -1799)
+z_index = -1
+position = Vector2(1978, -1779)
 texture = ExtResource("16_i8d02")
+
+[node name="Parallax2D" type="Parallax2D" parent="VISUAL" unique_id=170738066]
+scroll_scale = Vector2(0, 0)
+
+[node name="ColorRect" type="ColorRect" parent="VISUAL/Parallax2D" unique_id=785805463]
+z_index = -3
+material = SubResource("ShaderMaterial_ubcjy")
+offset_left = -668.43994
+offset_top = -305.07593
+offset_right = 2081.56
+offset_bottom = 1339.9241
+metadata/_edit_use_anchors_ = true
+
+[node name="ColorRect3" type="ColorRect" parent="VISUAL/Parallax2D" unique_id=2033441348]
+z_index = -4096
+offset_left = -36.940918
+offset_top = -36.343384
+offset_right = 1997.0591
+offset_bottom = 1246.6566
+color = Color(0.30980393, 0.4117647, 0.53333336, 1)
+metadata/_edit_use_anchors_ = true
+
+[node name="Parallax2D2" type="Parallax2D" parent="VISUAL" unique_id=529487561]
+scroll_scale = Vector2(0.25, 0.25)
+
+[node name="Sprite2D3" type="Sprite2D" parent="VISUAL/Parallax2D2" unique_id=263257212]
+z_index = -200
+position = Vector2(1143.887, -201.27637)
+scale = Vector2(0.5043707, 0.50128)
+texture = ExtResource("18_v7ylp")
+
+[node name="Parallax2D3" type="Parallax2D" parent="VISUAL" unique_id=131001582]
+scroll_scale = Vector2(0.35, 0.35)
+
+[node name="Sprite2D" type="Sprite2D" parent="VISUAL/Parallax2D3" unique_id=125888882]
+z_index = -25
+position = Vector2(1733.115, -627.9154)
+scale = Vector2(0.7249403, 0.7249403)
+texture = ExtResource("19_6t8y0")
 
 [node name="enemi" type="Node2D" parent="." unique_id=1354596315]
 

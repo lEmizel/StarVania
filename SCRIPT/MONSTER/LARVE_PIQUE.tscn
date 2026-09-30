@@ -161,6 +161,7 @@ position = Vector2(-90, -120)
 scale = Vector2(0.37, 0.37)
 
 [node name="Collision" type="CollisionShape2D" parent="." unique_id=287775973]
+visible = false
 light_mask = 0
 position = Vector2(0, -28.538246)
 rotation = 1.5587568

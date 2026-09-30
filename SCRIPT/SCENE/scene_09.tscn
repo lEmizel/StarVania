@@ -24,10 +24,19 @@
 [ext_resource type="PackedScene" uid="uid://caq8nkv6ng2f" path="res://SCRIPT/grayboxing/800x400 slide.tscn" id="19_vlh48"]
 [ext_resource type="PackedScene" uid="uid://do2lu22wxi4r4" path="res://SCRIPT/grayboxing/200x400.tscn" id="20_80qe0"]
 [ext_resource type="PackedScene" uid="uid://lskntqxi822j" path="res://SCRIPT/MONSTER/Orbe.tscn" id="20_sdkh0"]
+[ext_resource type="Texture2D" uid="uid://rg4b88v5l17c" path="res://MEDIA/scene_9.png" id="21_af0xv"]
 [ext_resource type="PackedScene" uid="uid://bs1685hwv6d0w" path="res://SCRIPT/MONSTER/SKELETON.tscn" id="21_xgre4"]
+[ext_resource type="Shader" uid="uid://jblop3f3vfan" path="res://SCRIPT/SHADER/flou_fond.gdshader" id="22_hcd51"]
 [ext_resource type="PackedScene" uid="uid://b1fje6n3t7rv5" path="res://SCRIPT/MONSTER/LARVE_PIQUE.tscn" id="22_vlh48"]
+[ext_resource type="Texture2D" uid="uid://cisdy5yixbx7q" path="res://MEDIA/imagefondscene8.png" id="23_m7nq5"]
+[ext_resource type="Texture2D" uid="uid://nl6vqciu1e8w" path="res://MEDIA/asset/amphore.png" id="24_hcd51"]
 [ext_resource type="PackedScene" uid="uid://i3vr6r3pmxtp" path="res://SCRIPT/MONSTER/XENO.tscn" id="26_1qbxx"]
 [ext_resource type="PackedScene" uid="uid://mluwyom1v02y" path="res://SCRIPT/INTERACTIBLE/piques 400x100.tscn" id="26_vlh48"]
+[ext_resource type="Script" uid="uid://cldc0dscj1uj1" path="res://SCRIPT/OUTILS/LEVEL_EXPORTER.gd" id="29_r8xrw"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_dg3lt"]
+shader = ExtResource("22_hcd51")
+shader_parameter/blur_amount = 2.246000106685
 
 [node name="scene_09" type="Node2D" unique_id=1699024437]
 
@@ -183,26 +192,30 @@ position = Vector2(3516, -487)
 position = Vector2(3917, -481)
 
 [node name="SAWBLADE" parent="interactible" unique_id=388117046 instance=ExtResource("9_jb0e2")]
+z_index = 1
 position = Vector2(-344, -3811)
-frame_progress = 0.5854006
+frame_progress = 0.5617876
 position_a = Vector2(-344, -3109)
 position_b = Vector2(-344, -3811)
 
 [node name="SAWBLADE2" parent="interactible" unique_id=246594848 instance=ExtResource("9_jb0e2")]
+z_index = 1
 position = Vector2(590, -3104)
-frame_progress = 0.9373367
+frame_progress = 0.9137235
 position_a = Vector2(590, -3100)
 position_b = Vector2(590, -3767)
 
 [node name="SAWBLADE3" parent="interactible" unique_id=105869148 instance=ExtResource("9_jb0e2")]
+z_index = 1
 position = Vector2(2074, -2095)
-frame_progress = 0.9373367
+frame_progress = 0.9137235
 position_a = Vector2(2074, -3057)
 position_b = Vector2(2074, -2095)
 
 [node name="SAWBLADE4" parent="interactible" unique_id=1759190604 instance=ExtResource("9_jb0e2")]
+z_index = 1
 position = Vector2(3027, -3036)
-frame_progress = 0.9373367
+frame_progress = 0.9137235
 position_a = Vector2(3027, -3036)
 position_b = Vector2(3027, -2095)
 
@@ -213,6 +226,7 @@ position = Vector2(5865, -4310)
 position = Vector2(5776, -4261)
 
 [node name="grayboxing" type="Node2D" parent="." unique_id=452309352]
+visible = false
 
 [node name="400x200" parent="grayboxing" unique_id=436297158 instance=ExtResource("3_txbwx")]
 position = Vector2(18, 107)
@@ -852,6 +866,73 @@ position = Vector2(-1405, -2294)
 
 [node name="VISUAL" type="Node2D" parent="." unique_id=1258805921]
 
+[node name="Sprite2D" type="Sprite2D" parent="VISUAL" unique_id=195496976]
+modulate = Color(0.918091, 0.91809106, 0.91809094, 1)
+position = Vector2(1754, -1730)
+texture = ExtResource("21_af0xv")
+
+[node name="Parallax2D" type="Parallax2D" parent="VISUAL" unique_id=1836103620]
+scroll_scale = Vector2(0, 0)
+scroll_offset = Vector2(-4, -93)
+
+[node name="ColorRect" type="ColorRect" parent="VISUAL/Parallax2D" unique_id=953110174]
+z_index = -3
+material = SubResource("ShaderMaterial_dg3lt")
+offset_left = -668.43994
+offset_top = -305.07593
+offset_right = 2081.56
+offset_bottom = 1339.9241
+metadata/_edit_use_anchors_ = true
+
+[node name="ColorRect3" type="ColorRect" parent="VISUAL/Parallax2D" unique_id=299639010]
+z_index = -4096
+offset_left = -36.940918
+offset_top = -36.343384
+offset_right = 1997.0591
+offset_bottom = 1246.6566
+color = Color(0.30980393, 0.4117647, 0.53333336, 1)
+metadata/_edit_use_anchors_ = true
+
+[node name="Parallax2D2" type="Parallax2D" parent="VISUAL" unique_id=229181835]
+scroll_scale = Vector2(0.25, 0.25)
+
+[node name="Sprite2D3" type="Sprite2D" parent="VISUAL/Parallax2D2" unique_id=879298378]
+modulate = Color(0.73300546, 0.7330054, 0.7330054, 1)
+z_index = -200
+position = Vector2(1061.7476, -156.50085)
+scale = Vector2(2.85704, 2.8395324)
+texture = ExtResource("23_m7nq5")
+
+[node name="Amphore" type="Sprite2D" parent="VISUAL" unique_id=1859706024]
+z_index = -1
+position = Vector2(-1501, -1553)
+texture = ExtResource("24_hcd51")
+
+[node name="Amphore2" type="Sprite2D" parent="VISUAL" unique_id=1102014825]
+z_index = -1
+position = Vector2(-1425, -2746)
+texture = ExtResource("24_hcd51")
+
+[node name="Amphore3" type="Sprite2D" parent="VISUAL" unique_id=1135098312]
+z_index = -1
+position = Vector2(1832, -1149)
+texture = ExtResource("24_hcd51")
+
+[node name="Amphore4" type="Sprite2D" parent="VISUAL" unique_id=1460636990]
+z_index = -1
+position = Vector2(4487, -590)
+texture = ExtResource("24_hcd51")
+
+[node name="Amphore5" type="Sprite2D" parent="VISUAL" unique_id=118551877]
+z_index = -1
+position = Vector2(5369, -593)
+texture = ExtResource("24_hcd51")
+
+[node name="Amphore6" type="Sprite2D" parent="VISUAL" unique_id=1735187098]
+z_index = -1
+position = Vector2(5265, -4167)
+texture = ExtResource("24_hcd51")
+
 [node name="enemi" type="Node2D" parent="." unique_id=756758713]
 
 [node name="enemi2" parent="enemi" unique_id=627255339 instance=ExtResource("4_17cqj")]
@@ -900,3 +981,9 @@ position = Vector2(940.86694, -1595.867)
 
 [node name="CharacterBody2D2" parent="." unique_id=1396257988 instance=ExtResource("19_pav6v")]
 position = Vector2(-1574.133, -1845)
+
+[node name="screenshot" type="Node" parent="." unique_id=883422017]
+script = ExtResource("29_r8xrw")
+export_path = "res://scene_9.png"
+bg_color = Color(0.101960786, 0.101960786, 0.101960786, 0)
+margin = 50
