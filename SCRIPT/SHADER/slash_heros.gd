@@ -260,6 +260,26 @@ func duree() -> float:
 	return float(m["queue"].size()) / float(m["images_par_seconde"])
 
 
+## La géométrie d'un slash à l'instant `prog` (0 → 1 de son animation), pour
+## qui veut se caler dessus (le croissant de sang, lâché sur la lame) : le
+## centre du trajet (px, repère de ce nœud), sa courbe (`forme` : a0, a1, b1,
+## a2, b2), les angles de la queue et de la tête de la lame (rad), et la durée
+## du slash (s).
+func geometrie(nom: String, prog: float) -> Dictionary:
+	var m: Dictionary = MESURES[nom]
+	var n: int = m["queue"].size()
+	var x := clampf(prog, 0.0, 1.0) * float(n)
+	var debut: float = m["queue"][0]
+	var fin: float = m["tete"][n - 1]
+	return {
+		"centre": m["centre"],
+		"forme": m["forme"],
+		"queue": deg_to_rad(_angle(m["queue"], x, debut, fin)),
+		"tete": deg_to_rad(_angle(m["tete"], x, debut, fin)),
+		"duree": float(n) / float(m["images_par_seconde"]),
+	}
+
+
 func _process(delta: float) -> void:
 	if Engine.is_editor_hint() or not _joue:
 		return

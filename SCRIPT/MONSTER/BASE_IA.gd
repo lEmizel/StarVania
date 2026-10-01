@@ -401,6 +401,9 @@ func apply_damage(amount: int, source_x, _source_tag := "?", knockback := true, 
 		if not DebugPerf.sans_sang:
 			Pool.sang(global_position)   # instance recyclée : zéro création en jeu
 		_on_dead()
+		# un monstre tué : qui l'a tué (le joueur réagit à ses victimes, talisman
+		# « Essaim »). `attaquant` est nul pour les pièges et les sources anonymes.
+		Player.monstre_tue.emit(self, attaquant)
 		return true
 	# Attaqué — même de dos, même hors vision, même par un projectile : le
 	# monstre prend l'AGRESSEUR pour cible (le joueur si on ne sait pas qui a

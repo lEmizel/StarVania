@@ -7,6 +7,10 @@ extends Area2D
 ## même nom) : même vol, même zone de touche, mais `recul` y est coché.
 
 const EXPLOSION_SCENE := preload("res://SCRIPT/SPELL/bloodball_explosion.tscn")
+## TALISMAN « MARQUE DE SANG » : l'ennemi touché (et resté en vie) est marqué ;
+## le prochain coup d'épée sur lui compte double (voir animator.gd)
+const MARQUE_SANG := preload("res://SCRIPT/SHADER/marque_sang.gd")
+const TALISMAN_MARQUE := "marque"
 
 @export var speed := 800.0
 @export var damage := 60  # sept. 2026 : un peu sous le coup léger au corps à corps (animator.gd : damage = 70)
@@ -42,14 +46,21 @@ func _on_body_entered(body: Node) -> void:
 	if _eclate or body.is_in_group("Player"):
 		return
 	if body.has_method("apply_damage"):
+		# CANON DE VERRE : tous les dégâts infligés sont multipliés
+		var degats := roundi(damage * Player.multiplicateur_infliges())
+		# le joueur est l'attaquant : ses victimes sont les siennes (Essaim)
+		var lanceur := get_tree().get_first_node_in_group("Player")
+		var porte
 		if recul:
 			# source placée juste derrière l'ennemi : il part TOUJOURS dans le
 			# sens du vol, même touché à bout portant
-			body.apply_damage(damage, (body as Node2D).global_position.x - dir, "tornade", true)
+			porte = body.apply_damage(degats, (body as Node2D).global_position.x - dir, "tornade", true, lanceur)
 		else:
 			# knockback = false : la bloodball pique sans déplacer (l'ennemi
 			# se retourne et aggro quand même via la réaction de BASE_IA)
-			body.apply_damage(damage, global_position.x, "bloodball", false)
+			porte = body.apply_damage(degats, global_position.x, "bloodball", false, lanceur)
+		if porte != false and body is BaseAI and Player.talisman_equipe(TALISMAN_MARQUE):
+			MARQUE_SANG.poser(body)
 	_explode()
 
 

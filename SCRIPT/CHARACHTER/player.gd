@@ -94,6 +94,116 @@ const TALISMAN_EPINES := "epines"
 ## dégâts : part d'un coup d'épée (1 = autant qu'un coup, bonus compris)
 @export var epines_part := 1.0
 
+## TALISMAN « SECOND SOUFFLE » (1er oct. 2026, id "souffle") : porté, un coup
+## qui devrait nous tuer nous laisse à UN cœur, puis plus aucun coup ne passe
+## pendant `second_souffle_grace` s (le temps de fuir ou de se soigner). Il se
+## recharge en `second_souffle_recharge` s, au respawn, et à chaque checkpoint
+## touché (Kaoru : « disons plutôt tous les 120 secondes et par checkpoint »).
+## Le cœur qui reste se fêle dans le HUD (gestion_interface.gd, `souffle_fx`).
+## L'attente vit dans l'autoload (`Player.second_souffle_attente`) : le joueur
+## est recréé à chaque respawn.
+const TALISMAN_SOUFFLE := "souffle"
+@export var second_souffle_recharge := 120.0
+@export var second_souffle_grace := 1.0
+var _souffle_grace_reste := 0.0
+
+## TALISMAN « MARQUE DE SANG » (1er oct. 2026, id "marque") : la boule de sang
+## (et la tornade) marque l'ennemi qu'elle touche (SCRIPT/SPELL/bloodball.gd) ;
+## le prochain coup d'épée qui PORTE sur lui fait `marque_multiplicateur` fois
+## ses dégâts et efface la marque (animator.gd). La rune et sa durée :
+## SCRIPT/SHADER/marque_sang.tscn.
+@export var marque_multiplicateur := 1.5     # +50 % (Kaoru, 1er oct. 2026 : ×2 était trop fort)
+
+## TALISMAN « CANON DE VERRE » (1er oct. 2026, id "canon", idée de Kaoru) :
+## tous les dégâts infligés ×2 et tous les dégâts reçus ×2 — des stats seules
+## (clés du catalogue lues par `Player.multiplicateur_infliges()` /
+## `Player.multiplicateur_recus()`, appliquées dans `_degats_recus`).
+
+## TALISMAN « ALLONGE » (1er oct. 2026, id "allonge") : la lame porte plus loin
+## — clé `allonge_pourcent` du catalogue (20 = +20 %), appliquée par animator.gd
+## à chaque coup (`_play_slash`) : la zone de touche ET le slash grandissent
+## ensemble autour du centre du coup.
+
+## TALISMAN « VENGEANCE » (1er oct. 2026, id "vengeance") : porté, ENCAISSER un
+## coup la charge pour `vengeance_duree` s ; tant qu'elle dure, TOUS les coups
+## d'épée qui portent font `vengeance_multiplicateur` fois leurs dégâts
+## (animator.gd) — elle ne s'use pas au premier coup (Kaoru, 1er oct. 2026 :
+## « tous les coups d'épée, pas un, et pendant 5 secondes » ; la première
+## version ne donnait que le prochain coup, dans les 3 s). Un nouveau coup
+## encaissé la relance pour toute sa durée. Tant qu'elle est chargée, une
+## COURONNE de sang flotte au-dessus du perso (idée de Kaoru : « on ne voit
+## pas l'épée hors des coups ») : SCRIPT/SHADER/couronne_vengeance.tscn ; ses
+## pointes rentrent avec le temps qui reste, elle bat à chaque coup vengeur,
+## s'efface quand le temps est écoulé.
+const TALISMAN_VENGEANCE := "vengeance"
+const COURONNE_SCENE := preload("res://SCRIPT/SHADER/couronne_vengeance.tscn")
+@export var vengeance_duree := 5.0
+@export var vengeance_multiplicateur := 1.5
+## où flotte la couronne (repère du joueur : ses pieds sont à 0) : son bas
+## reste à ~177 au-dessus des pieds, comme la première (le haut des cheveux
+## est vers 170, coups d'épée compris)
+@export var couronne_position := Vector2(0.0, -192.0)
+var vengeance_reste := 0.0
+var _couronne: Node2D
+
+## TALISMAN « CROISSANT DE SANG » (1er oct. 2026, id "croissant") : le DERNIER
+## coup du combo (le 2e : le combo n'en a que deux) projette son slash vers
+## l'avant (animator.gd, `_croissant`) ; ses
+## dégâts = cette part d'un coup d'épée (bonus compris). Sa vitesse et sa
+## portée : SCRIPT/SHADER/croissant_sang.tscn.
+@export var croissant_part := 1.0
+## à quel moment du slash il s'en détache (0 = au départ du coup, 1 = à la
+## fin ; 0,5 = quand la lame passe droit devant le perso)
+@export_range(0.0, 1.0, 0.01) var croissant_depart := 0.5
+## combien de temps avant ce départ il « prend » sur la lame, attaché à elle (s)
+@export var croissant_amorce := 0.05
+
+## TALISMAN « ESSAIM » (1er oct. 2026, id "essaim") : chaque ennemi que NOUS
+## tuons (épée, boule, épines, brume, croissant… et les chauves-souris
+## elles-mêmes : la chaîne est voulue) lâche `essaim_nombre` chauves-souris de
+## sang de son cadavre ; elles SUIVENT le joueur tant qu'elles n'ont pas de
+## proie, puis fondent sur les ennemis proches et les mordent pour
+## `essaim_part` d'un coup d'épée (bonus compris), sans recul — voir
+## `_on_monstre_tue`. Jamais plus de `essaim_max` en vol (0 = sans limite) :
+## elles s'accumulent entre deux combats. Elles nous suivent D'UN TABLEAU À
+## L'AUTRE (`_essaim_reprendre`, d'après `Player.essaim_en_vol`) ; la mort les
+## disperse. Leur vol et leur allure : SCRIPT/SHADER/chauve_souris_sang.tscn.
+const TALISMAN_ESSAIM := "essaim"
+const CHAUVE_SOURIS_SCENE := preload("res://SCRIPT/SHADER/chauve_souris_sang.tscn")
+@export var essaim_nombre := 2
+@export var essaim_part := 0.5
+@export var essaim_max := 10
+
+## TALISMAN « OFFRANDE » (1er oct. 2026, id "offrande") : se soigner fait
+## naître un SCEAU de sang sous nos pieds (au début du soin) ; à peine dessiné,
+## il lâche une ONDE qui court au sol jusqu'à `offrande_rayon` px et blesse
+## (`offrande_part` d'un coup d'épée, bonus compris) et repousse les ennemis
+## qu'elle atteint, sans passer les murs — de quoi finir son soin tranquille.
+## Le sceau brille tant que dure le soin et s'éteint avec lui (fini ou
+## interrompu) — voir `_offrande_lancer`. L'allure :
+## SCRIPT/SHADER/sceau_sang.tscn.
+const TALISMAN_OFFRANDE := "offrande"
+const SCEAU_SCENE := preload("res://SCRIPT/SHADER/sceau_sang.tscn")
+@export var offrande_rayon := 280.0
+@export var offrande_part := 1.0
+var _sceau: Node2D
+
+## TALISMAN « SANG BOUILLANT » (1er oct. 2026, id "bouillant") : chaque ennemi
+## que NOUS tuons se met à bouillir, puis EXPLOSE au bout de `bouillant_delai`
+## s : ses voisins à moins de `bouillant_rayon` px (sans mur entre eux) prennent
+## `bouillant_part` d'un coup d'épée (bonus compris) et sont repoussés ; ceux
+## qui en meurent bouillent et explosent à leur tour — la cascade est voulue
+## (et l'Essaim lâche ses chauves-souris sur chaque mort). Voir
+## `_on_monstre_tue`. L'allure (les bulles, l'explosion) :
+## SCRIPT/SHADER/bouillon_sang.tscn.
+const TALISMAN_BOUILLANT := "bouillant"
+const BOUILLON_SCENE := preload("res://SCRIPT/SHADER/bouillon_sang.tscn")
+@export var bouillant_rayon := 180.0
+@export var bouillant_part := 1.0
+@export var bouillant_delai := 0.2
+## la caméra tremble à chaque explosion (0 = pas du tout)
+@export var bouillant_secousse := 6.0
+
 # AMÉLIORATION: combo_count remplace le bool "combo" — plus clair et extensible
 var combo_buffered := false   # true si le joueur a appuyé pendant l'anim en cours
 
@@ -132,6 +242,13 @@ func _ready() -> void:
 	_griffe_preparer()
 	_aile_preparer()
 	_bouclier_preparer()
+	_couronne_preparer()
+	# nos victimes (talisman « Essaim ») ; le signal vit dans l'autoload, la
+	# connexion meurt avec ce joueur
+	Player.monstre_tue.connect(_on_monstre_tue)
+	# celles qui nous suivaient au tableau d'avant : relâchées une fois que le
+	# spawn nous a posés (il nous déplace juste après nous avoir ajoutés)
+	_essaim_reprendre.call_deferred()
 	initialize_states()
 	change_state(States.IDLE)
 
@@ -179,6 +296,12 @@ func _physics_process(delta: float) -> void:
 	_grappin_cooldown = maxf(_grappin_cooldown - delta, 0.0)
 	_bouclier_recharge_reste = maxf(_bouclier_recharge_reste - delta, 0.0)
 	_esquive_grace_reste = maxf(_esquive_grace_reste - delta, 0.0)
+	if vengeance_reste > 0.0:
+		vengeance_reste = maxf(vengeance_reste - delta, 0.0)
+		if vengeance_reste == 0.0 and _couronne != null:
+			_couronne.effacer()      # le temps a passé : la vengeance retombe
+	_souffle_grace_reste = maxf(_souffle_grace_reste - delta, 0.0)
+	Player.second_souffle_attente = maxf(Player.second_souffle_attente - delta, 0.0)
 	_grappin_scanner()
 
 
@@ -274,10 +397,16 @@ func apply_damage(amount: int, source_x, source_tag := "?", perce_stun := false)
 		print("[DMG bloqué/stun] f=", Engine.get_physics_frames(),
 			" src=", source_tag, " amount=", amount)
 		return
+	# le répit qui suit un second souffle : aucun coup ne passe
+	if _souffle_grace_reste > 0.0:
+		return
 	if _bouclier_pare(source_x, source_tag):
 		return
 	if _esquive_tente(source_x, source_tag):
 		return
+	# canon de verre (dégâts reçus multipliés), puis second souffle (un coup
+	# mortel nous laisse à un cœur)
+	amount = _second_souffle(_degats_recus(amount), source_tag)
 	print("[DMG] f=", Engine.get_physics_frames(),
 		" src=", source_tag, " amount=", amount,
 		" état=", States.keys()[current_state],
@@ -305,6 +434,70 @@ func apply_damage(amount: int, source_x, source_tag := "?", perce_stun := false)
 	# le coup est encaissé : le bouclier de sang se dresse du côté d'où il vient
 	_bouclier_lever(-sens_coup)
 	_epines_jaillir()
+	_vengeance_charger()
+
+
+## --- le canon de verre et le second souffle ---
+
+## les dégâts d'un coup reçu, multipliés par les talismans (Canon de verre : ×2)
+func _degats_recus(amount: int) -> int:
+	return roundi(amount * Player.multiplicateur_recus())
+
+
+## Un coup de `amount` arrive : s'il est MORTEL et que le Second souffle est
+## porté et prêt, il ne nous laisse qu'à un cœur, et le souffle repart pour
+## `second_souffle_recharge` s. Renvoie les dégâts à appliquer vraiment.
+func _second_souffle(amount: int, source_tag: String) -> int:
+	if Player.hp - amount > 0 or not Player.talisman_equipe(TALISMAN_SOUFFLE):
+		return amount
+	if Player.second_souffle_attente > 0.0:
+		return amount
+	Player.second_souffle_attente = second_souffle_recharge
+	_souffle_grace_reste = second_souffle_grace
+	# le cœur qui se brise et se reforme, en FIN d'image : le HUD repeint ses
+	# cœurs à chaque changement de vie (même nul) et effacerait l'effet
+	var huds := get_tree().get_nodes_in_group("UI_Health")
+	if not huds.is_empty() and huds[0].has_method("souffle_fx"):
+		huds[0].call_deferred("souffle_fx")
+	print("[SOUFFLE] f=", Engine.get_physics_frames(), " coup mortel (", source_tag,
+		", ", amount, ") : il reste un cœur ; de nouveau prêt dans ",
+		second_souffle_recharge, " s")
+	return maxi(Player.hp - 1, 0)
+
+
+## --- la vengeance ---
+
+func _couronne_preparer() -> void:
+	_couronne = COURONNE_SCENE.instantiate()
+	_couronne.demo_boucle = false
+	_couronne.position = couronne_position
+	_couronne.z_index = 2       # devant le sprite du perso
+	add_child(_couronne)
+
+
+## un coup vient d'être ENCAISSÉ (et on y a survécu) : la vengeance se charge
+## (ou repart pour toute sa durée)
+func _vengeance_charger() -> void:
+	if not Player.talisman_equipe(TALISMAN_VENGEANCE):
+		return
+	vengeance_reste = vengeance_duree
+	if _couronne != null:
+		_couronne.position = couronne_position
+		_couronne.lever(vengeance_duree)
+	print("[VENGEANCE] chargée pour ", vengeance_duree, " s")
+
+
+## la vengeance est-elle chargée ? Tant qu'elle l'est, TOUS les coups d'épée
+## en profitent
+func vengeance_active() -> bool:
+	return vengeance_reste > 0.0
+
+
+## un coup d'épée vient de porter avec la vengeance : la couronne bat (la
+## vengeance, elle, ne s'use pas : seul le temps l'éteint)
+func vengeance_frapper() -> void:
+	if _couronne != null:
+		_couronne.battre()
 
 
 ## --- le bouclier de sang ---
@@ -390,6 +583,103 @@ func _epines_jaillir() -> void:
 		c.apply_damage(degats, global_position.x, "epines", true, self)
 	print("[EPINES] f=", Engine.get_physics_frames(), " ", touches.size(),
 		" ennemi(s) touché(s), ", degats, " dégâts chacun")
+
+
+## --- l'essaim ---
+
+## Un monstre vient de mourir : si c'est NOUS qui l'avons tué, son cadavre
+## lâche l'essaim (talisman « Essaim ») et/ou se met à bouillir (« Sang
+## bouillant »).
+func _on_monstre_tue(monstre: Node, attaquant: Node) -> void:
+	if attaquant != self or not (monstre is Node2D):
+		return
+	var centre: Vector2 = (monstre as Node2D).global_position
+	if monstre is BaseAI and monstre.collision != null:
+		centre = monstre.collision.global_position       # le milieu du corps
+	# on peut être en plein rappel de physique (le coup d'épée tue dans son
+	# `body_entered`) : tout sort juste après
+	if Player.talisman_equipe(TALISMAN_ESSAIM):
+		_essaim_lacher.call_deferred(centre)
+	if Player.talisman_equipe(TALISMAN_BOUILLANT):
+		_bouillant_poser.call_deferred(monstre, centre)
+
+
+## le cadavre se met à bouillir (bouillon_sang.gd : il explose au bout de
+## `bouillant_delai` s)
+func _bouillant_poser(monstre: Node, centre: Vector2) -> void:
+	var b := BOUILLON_SCENE.instantiate()
+	b.demo_boucle = false
+	b.joueur = self
+	b.cadavre = monstre if is_instance_valid(monstre) else null
+	b.rayon = bouillant_rayon
+	b.delai = bouillant_delai
+	b.degats = maxi(roundi(animator.degats_du_coup() * bouillant_part), 1)
+	b.secousse = bouillant_secousse
+	_essaim_hote().add_child(b)
+	b.global_position = centre
+
+
+func _essaim_lacher(centre: Vector2) -> void:
+	var nombre := essaim_nombre
+	if essaim_max > 0:
+		var en_vol := get_tree().get_nodes_in_group("chauve_souris_sang").size()
+		nombre = mini(essaim_nombre, essaim_max - en_vol)
+		if nombre <= 0:
+			print("[ESSAIM] f=", Engine.get_physics_frames(), " déjà ", en_vol, " en vol : aucune de plus")
+			return
+	var hote := _essaim_hote()
+	for i in nombre:
+		var cs := _essaim_creer()
+		# en éventail vers le haut : la première part à gauche, la dernière à droite
+		var s := float(i) / maxf(nombre - 1, 1) * 2.0 - 1.0
+		var angle := -PI * 0.5 + s * 0.6 + randf_range(-0.15, 0.15)
+		cs.vitesse_depart = Vector2.from_angle(angle) * randf_range(420.0, 520.0)
+		hote.add_child(cs)
+		cs.global_position = centre
+	print("[ESSAIM] f=", Engine.get_physics_frames(), " ", nombre,
+		" chauve(s)-souris lâchée(s), ", essaim_degats(), " dégâts chacune")
+
+
+## Celles qui nous suivaient au tableau d'avant. Le changement de tableau a
+## tout détruit (le niveau, l'ancien joueur, elles) ; `Player.essaim_en_vol`
+## se souvient de leur nombre : on les relâche à leur place autour de nous,
+## déjà en vol. (La mort remet ce compte à zéro : `dead_input`.)
+func _essaim_reprendre() -> void:
+	var nombre := Player.essaim_en_vol
+	Player.essaim_en_vol = 0          # chacune se recompte en naissant
+	if nombre <= 0 or not Player.talisman_equipe(TALISMAN_ESSAIM):
+		return
+	if essaim_max > 0:
+		nombre = mini(nombre, essaim_max)
+	var hote := _essaim_hote()
+	for i in nombre:
+		var cs := _essaim_creer()
+		cs.deja_la = true
+		hote.add_child(cs)
+		cs.se_placer()
+	print("[ESSAIM] f=", Engine.get_physics_frames(), " ", nombre,
+		" chauve(s)-souris nous ont suivis dans ce tableau")
+
+
+## une chauve-souris prête à être posée dans la scène
+func _essaim_creer() -> Node2D:
+	var cs := CHAUVE_SOURIS_SCENE.instantiate()
+	cs.demo_boucle = false
+	cs.joueur = self
+	cs.degats = essaim_degats()
+	cs.graine = randf() * TAU
+	return cs
+
+
+func essaim_degats() -> int:
+	return maxi(roundi(animator.degats_du_coup() * essaim_part), 1)
+
+
+## où vivent les chauves-souris : dans la scène, pas sous le joueur (elles
+## volent dans le monde)
+func _essaim_hote() -> Node:
+	var hote: Node = get_tree().current_scene
+	return hote if hote != null else get_parent()
 
 
 ## --- le pas de côté ---
@@ -640,6 +930,8 @@ func _eclat_sang(sens: Vector2) -> void:
 func apply_environment_damage(amount: int, direction: Vector2 = Vector2.UP) -> bool:
 	if current_state in [States.DEAD, States.HIT, States.ROLL, States.DASH]:
 		return false
+	if _souffle_grace_reste > 0.0:
+		return false               # le répit qui suit un second souffle
 	var d := direction.normalized() if direction.length_squared() > 0.0001 else Vector2.UP
 	if _bouclier != null and _bouclier.actif():
 		# PARÉ par le bouclier de sang : ni dégât ni stun, mais le renvoi reste
@@ -649,6 +941,7 @@ func apply_environment_damage(amount: int, direction: Vector2 = Vector2.UP) -> b
 			" bouclier encore ", snappedf(_bouclier.restant(), 0.01), " s")
 		_renvoi_environnement(d)
 		return true
+	amount = _second_souffle(_degats_recus(amount), "environnement")
 	print("[DMG] f=", Engine.get_physics_frames(),
 		" src=environnement amount=", amount,
 		" état=", States.keys()[current_state],
@@ -664,6 +957,7 @@ func apply_environment_damage(amount: int, direction: Vector2 = Vector2.UP) -> b
 	# le coup est encaissé : le bouclier de sang se dresse du côté d'où il vient
 	_bouclier_lever(-d)
 	_epines_jaillir()
+	_vengeance_charger()
 	return true
 
 
@@ -2490,6 +2784,7 @@ func heal_enter() -> void:
 	# se soigner exige l'immobilité : on coupe tout élan résiduel
 	velocity.x = 0.0
 	animator.play("heal")
+	_offrande_lancer()
 
 func heal_execute(delta: float) -> void:
 	velocity.y += gravity * delta
@@ -2511,6 +2806,32 @@ func heal_animation_finished() -> void:
 
 func heal_exit() -> void:
 	velocity.x = 0
+	_offrande_eteindre()
+
+
+## TALISMAN « OFFRANDE » : le soin commence, le sceau naît à nos pieds (au sol
+## seulement : en l'air il n'aurait rien sur quoi se poser)
+func _offrande_lancer() -> void:
+	if not Player.talisman_equipe(TALISMAN_OFFRANDE) or not is_on_floor():
+		return
+	_offrande_eteindre()
+	var s := SCEAU_SCENE.instantiate()
+	s.demo_boucle = false
+	s.joueur = self
+	s.rayon = offrande_rayon
+	s.degats = maxi(roundi(animator.degats_du_coup() * offrande_part), 1)
+	get_tree().current_scene.add_child(s)
+	s.global_position = global_position          # sous nos pieds
+	_sceau = s
+	print("[OFFRANDE] f=", Engine.get_physics_frames(), " sceau posé, onde de ",
+		offrande_rayon, " px, ", s.degats, " dégâts")
+
+
+## le soin est fini (ou interrompu) : le sceau s'éteint (son onde finit sa course)
+func _offrande_eteindre() -> void:
+	if _sceau != null and is_instance_valid(_sceau):
+		_sceau.eteindre()
+	_sceau = null
 
 
 # =====================  BLOODBALL (sort de boule de sang)  ==================
@@ -2653,6 +2974,8 @@ func dead_input(event: InputEvent) -> void:
 	if Input.is_action_just_pressed("jump"):
 		print("okkkkkkkje suis mort")
 		Player.hp = Player.MAX_HP
+		Player.second_souffle_attente = 0.0     # nouvelle vie : le souffle est prêt
+		Player.essaim_en_vol = 0                # … et l'essaim est dispersé
 		# au respawn, la jauge de sang offre EXACTEMENT un soin : le joker
 		# du joueur, à dépenser au bon moment
 		Player.bloodheal = HEAL_COST

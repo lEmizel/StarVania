@@ -23,6 +23,10 @@ func _ready() -> void:
 	area.body_entered.connect(_on_body_entered)
 
 func _on_body_entered(body: Node2D) -> void:
+	# TALISMAN « SECOND SOUFFLE » : chaque checkpoint touché le recharge, même
+	# un checkpoint déjà allumé (1er oct. 2026)
+	if body.is_in_group("Player"):
+		Player.second_souffle_attente = 0.0
 	if active:
 		return
 	if body.is_in_group("Player"):

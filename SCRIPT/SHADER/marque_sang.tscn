@@ -1,0 +1,30 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://SCRIPT/SHADER/marque_sang.gd" id="1_mq"]
+[ext_resource type="Shader" path="res://SCRIPT/SHADER/marque_sang.gdshader" id="2_mq"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_mq"]
+resource_local_to_scene = true
+shader = ExtResource("2_mq")
+shader_parameter/taille = Vector2(112, 112)
+shader_parameter/apparition = 1.0
+shader_parameter/restant = 1.0
+shader_parameter/eclat = 0.0
+shader_parameter/efface = 0.0
+shader_parameter/rayon = 25.0
+shader_parameter/epaisseur = 4.0
+shader_parameter/goutte = 1.0
+shader_parameter/encre = 2.0
+shader_parameter/couleur = Color(0.76, 0.03, 0.11, 1)
+shader_parameter/couleur_encre = Color(0.12, 0, 0.03, 1)
+
+[node name="MarqueSang" type="Node2D"]
+script = ExtResource("1_mq")
+
+[node name="Rune" type="ColorRect" parent="."]
+material = SubResource("ShaderMaterial_mq")
+offset_left = -56.0
+offset_top = -56.0
+offset_right = 56.0
+offset_bottom = 56.0
+mouse_filter = 2

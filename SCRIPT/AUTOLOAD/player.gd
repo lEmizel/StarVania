@@ -48,6 +48,16 @@ const Talismans := preload("res://SCRIPT/TALISMAN/talismans.gd")
 ## émis à chaque découverte, équipement ou retrait : le menu se redessine, et le
 ## gameplay pourra s'y brancher pour appliquer les effets
 signal talismans_changes
+## un monstre vient de mourir, et qui l'a tué (null : un piège, une source
+## anonyme) — émis par BASE_IA ; le joueur y branche ses talismans (Essaim)
+signal monstre_tue(monstre: Node, attaquant: Node)
+## TALISMAN « ESSAIM » : combien de chauves-souris de sang suivent le joueur.
+## Tenu par elles-mêmes (SCRIPT/SHADER/chauve_souris_sang.gd : une de plus à la
+## naissance, une de moins quand elle mord ou s'en va). Un changement de
+## tableau les détruit SANS les décompter : le joueur du tableau suivant relâche
+## ce compte autour de lui (player.gd, `_essaim_reprendre`). Remis à zéro à la
+## mort et en nouvelle partie.
+var essaim_en_vol := 0
 ## nombre d'emplacements où l'on équipe un talisman (règle-le ici)
 const EMPLACEMENTS_TALISMAN := 3
 var talismans_decouverts := {}             # id → true
@@ -74,6 +84,8 @@ func reset_partie() -> void:
 	last_checkpoint_pos = Vector2.ZERO
 	last_door_id = -1
 	has_transition_momentum = false
+	second_souffle_attente = 0.0
+	essaim_en_vol = 0
 
 
 func changement_de_vie(amount: int) -> void:
@@ -244,10 +256,44 @@ func frenesie_active() -> bool:
 	return hp == 1 and bonus_talismans("degats_pourcent_dernier_coeur") > 0.0
 
 
-## Ce par quoi multiplier les dégâts de base d'un coup d'épée (1.1 = +10 %).
+## Ce par quoi multiplier les dégâts de base d'un coup d'épée (1.1 = +10 %),
+## multiplicateur de TOUS les dégâts infligés compris (Canon de verre).
 ## À appliquer au moment du coup : `roundi(base * Player.multiplicateur_degats())`.
 func multiplicateur_degats() -> float:
-	return 1.0 + bonus_degats_pourcent() / 100.0
+	return (1.0 + bonus_degats_pourcent() / 100.0) * multiplicateur_infliges()
+
+
+## Le PRODUIT, sur les talismans portés, d'une clé multiplicative du catalogue
+## (1 si aucun ne la porte) : deux talismans qui doublent font ×4.
+func produit_talismans(cle: String) -> float:
+	var total := 1.0
+	for id in talismans_equipes:
+		if id == "":
+			continue
+		var v = Talismans.trouver(id).get(cle, null)
+		if v != null:
+			total *= float(v)
+	return total
+
+
+## Ce par quoi multiplier TOUS les dégâts que le joueur INFLIGE — épée (via
+## `multiplicateur_degats`, donc aussi les épines et l'éclair qui en découlent),
+## boule et tornade de sang, brume du sillage (talisman « Canon de verre » : ×2)
+func multiplicateur_infliges() -> float:
+	return produit_talismans("degats_infliges_multiplicateur")
+
+
+## Ce par quoi multiplier TOUS les dégâts que le joueur REÇOIT, d'un ennemi
+## comme du décor (Canon de verre : ×2 → un coup coûte deux cœurs)
+func multiplicateur_recus() -> float:
+	return produit_talismans("degats_recus_multiplicateur")
+
+
+## SECOND SOUFFLE (talisman « souffle », 1er oct. 2026) : secondes avant qu'il
+## puisse resservir (0 = prêt). Il vit ICI et pas dans le joueur, qui est recréé
+## à chaque respawn ; remis à 0 au respawn, à chaque checkpoint touché et en
+## nouvelle partie. Le joueur le décompte (player.gd, `_second_souffle`).
+var second_souffle_attente := 0.0
 
 
 ## La chance qu'un coup d'ennemi soit ignoré, de 0 à 1 (talisman « Pas de

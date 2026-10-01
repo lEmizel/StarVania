@@ -1,0 +1,19 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://SCRIPT/SHADER/couronne_vengeance.gd" id="1_cv"]
+[ext_resource type="Shader" path="res://SCRIPT/SHADER/couronne_vengeance.gdshader" id="2_cv"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_cv"]
+resource_local_to_scene = true
+shader = ExtResource("2_cv")
+
+[node name="CouronneVengeance" type="Node2D"]
+script = ExtResource("1_cv")
+
+[node name="Couronne" type="ColorRect" parent="."]
+material = SubResource("ShaderMaterial_cv")
+offset_left = -65.0
+offset_top = -60.0
+offset_right = 65.0
+offset_bottom = 60.0
+mouse_filter = 2

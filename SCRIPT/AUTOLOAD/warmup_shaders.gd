@@ -37,6 +37,22 @@ const SHADERS: Array[String] = [
 	"res://SCRIPT/SHADER/epines_sang.gdshader",       # les pics du talisman épines de sang (1er oct. 2026)
 	"res://SCRIPT/TALISMAN/dessin_epines.gdshader",   # son dessin dans le menu START
 	"res://SCRIPT/TALISMAN/dessin_frenesie.gdshader", # le dessin du talisman frénésie dans le menu START (1er oct. 2026)
+	"res://SCRIPT/SHADER/marque_sang.gdshader",       # la rune du talisman marque de sang (1er oct. 2026)
+	"res://SCRIPT/TALISMAN/dessin_marque.gdshader",   # son dessin dans le menu START
+	"res://SCRIPT/TALISMAN/dessin_souffle.gdshader",  # talisman second souffle (menu START)
+	"res://SCRIPT/TALISMAN/dessin_canon.gdshader",    # talisman canon de verre (menu START)
+	"res://SCRIPT/SHADER/couronne_vengeance.gdshader", # la couronne du talisman vengeance (1er oct. 2026)
+	"res://SCRIPT/TALISMAN/dessin_vengeance.gdshader", # son dessin dans le menu START
+	"res://SCRIPT/TALISMAN/dessin_allonge.gdshader",  # talisman allonge (menu START)
+	"res://SCRIPT/SHADER/croissant_sang.gdshader",    # le projectile du talisman croissant de sang (1er oct. 2026)
+	"res://SCRIPT/TALISMAN/dessin_croissant.gdshader", # son dessin dans le menu START
+	"res://SCRIPT/SHADER/chauve_souris_sang.gdshader", # les chauves-souris du talisman essaim (1er oct. 2026)
+	"res://SCRIPT/TALISMAN/dessin_essaim.gdshader",   # son dessin dans le menu START
+	"res://SCRIPT/SHADER/sceau_sang.gdshader",        # le sceau du talisman offrande (1er oct. 2026)
+	"res://SCRIPT/TALISMAN/dessin_offrande.gdshader", # son dessin dans le menu START
+	"res://SCRIPT/SHADER/bouillon_sang.gdshader",     # les bulles du talisman sang bouillant (1er oct. 2026)
+	"res://SCRIPT/SHADER/explosion_sang.gdshader",    # son explosion
+	"res://SCRIPT/TALISMAN/dessin_bouillant.gdshader", # son dessin dans le menu START
 	"res://SCRIPT/SHADER/explosion_violette.gdshader", # explosion du kamikaze (sept. 2026)
 	"res://SCRIPT/SHADER/cable_de_sang.gdshader",    # câble du grappin (sept. 2026)
 	"res://SCRIPT/SHADER/impact_blanc.gdshader",     # éclat d'un coup d'épée qui porte (sept. 2026)

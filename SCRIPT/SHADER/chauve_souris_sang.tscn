@@ -1,0 +1,33 @@
+[gd_scene format=3 uid="uid://duaw58daeeutt"]
+
+[ext_resource type="Script" uid="uid://byvjjwww81uay" path="res://SCRIPT/SHADER/chauve_souris_sang.gd" id="1_cs"]
+[ext_resource type="Shader" uid="uid://qer6ohswqif1" path="res://SCRIPT/SHADER/chauve_souris_sang.gdshader" id="2_cs"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_cs"]
+resource_local_to_scene = true
+shader = ExtResource("2_cs")
+shader_parameter/taille = Vector2(120, 110)
+shader_parameter/phase = 0.0
+shader_parameter/repos = 0.35
+shader_parameter/amplitude = 0.85
+shader_parameter/apparition = 0.0
+shader_parameter/fin = 0.0
+shader_parameter/morsure = 0.0
+shader_parameter/echelle = 1.0
+shader_parameter/graine = 0.0
+shader_parameter/encre = 1.5
+shader_parameter/couleur = Color(0.56078434, 0.14117648, 0.16862746, 1)
+shader_parameter/couleur_arriere = Color(0.46, 0.02, 0.08, 1)
+shader_parameter/couleur_encre = Color(0.12, 0, 0.03, 1)
+
+[node name="ChauveSourisSang" type="Node2D" unique_id=1010726991]
+z_index = 5
+script = ExtResource("1_cs")
+
+[node name="Corps" type="ColorRect" parent="." unique_id=2138548487]
+material = SubResource("ShaderMaterial_cs")
+offset_left = -60.0
+offset_top = -52.0
+offset_right = 60.0
+offset_bottom = 58.0
+mouse_filter = 2

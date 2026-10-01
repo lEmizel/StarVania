@@ -447,6 +447,43 @@ func _heart_land_pulse() -> void:
 	pt.tween_property(h, "scale", base, 0.15)
 
 
+## SECOND SOUFFLE (talisman, 1er oct. 2026) : un coup mortel vient de nous
+## laisser à UN cœur — ce cœur (le premier de la rangée) SE BRISE comme un cœur
+## perdu (le plein disparaît, le brisé tremble)… puis SE REFORME avec la
+## pulsation d'un cœur ramassé : « il a cassé, et il a tenu ». (Un premier
+## essai posait le brisé PAR-DESSUS le plein : on lisait une goutte dédoublée,
+## pas une fêlure.)
+func souffle_fx() -> void:
+	if _hearts.is_empty():
+		return
+	var trio: Dictionary = _hearts[0]
+	var full: TextureRect = trio["full"]
+	var broken: TextureRect = trio["broken"]
+	if trio.has("tw") and trio["tw"] != null and trio["tw"].is_valid():
+		trio["tw"].kill()
+	full.visible = false
+	broken.visible = true
+	broken.modulate.a = 1.0
+	# le brisé tremble, en s'amortissant
+	var x0 := broken.position.x
+	var tw := create_tween()
+	for k in 6:
+		var amp := 5.0 * (1.0 - float(k) / 6.0)
+		tw.tween_property(broken, "position:x", x0 + (amp if k % 2 == 0 else -amp), 0.04)
+	tw.tween_property(broken, "position:x", x0, 0.04)
+	tw.tween_interval(0.17)
+	# … et le cœur se reforme : le plein revient en pulsant, le brisé s'efface
+	tw.tween_callback(func () -> void:
+		full.visible = Player.hp >= 1
+		var base: Vector2 = full.scale
+		var pt := create_tween()
+		pt.tween_property(full, "scale", base * 1.35, 0.08)
+		pt.tween_property(full, "scale", base, 0.15))
+	tw.tween_property(broken, "modulate:a", 0.0, 0.2)
+	tw.tween_callback(func () -> void: broken.visible = false)
+	trio["tw"] = tw
+
+
 func _on_bar_max_request(kind: String, new_max: float) -> void:
 	if kind == "bloodheal":
 		_apply_bloodheal_bar_max(new_max, true)

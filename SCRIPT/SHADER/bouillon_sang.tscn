@@ -1,0 +1,33 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://SCRIPT/SHADER/bouillon_sang.gd" id="1_bo"]
+[ext_resource type="Shader" path="res://SCRIPT/SHADER/bouillon_sang.gdshader" id="2_bo"]
+[ext_resource type="Shader" path="res://SCRIPT/SHADER/explosion_sang.gdshader" id="3_bo"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_bo"]
+resource_local_to_scene = true
+shader = ExtResource("2_bo")
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_ex"]
+resource_local_to_scene = true
+shader = ExtResource("3_bo")
+
+[node name="BouillonSang" type="Node2D"]
+z_index = 1
+script = ExtResource("1_bo")
+
+[node name="Bulles" type="ColorRect" parent="."]
+material = SubResource("ShaderMaterial_bo")
+offset_left = -60.0
+offset_top = -85.0
+offset_right = 60.0
+offset_bottom = 85.0
+mouse_filter = 2
+
+[node name="Explosion" type="ColorRect" parent="."]
+material = SubResource("ShaderMaterial_ex")
+offset_left = -360.0
+offset_top = -330.0
+offset_right = 360.0
+offset_bottom = 290.0
+mouse_filter = 2

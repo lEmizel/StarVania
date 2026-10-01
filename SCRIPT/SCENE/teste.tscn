@@ -1,0 +1,30 @@
+[gd_scene format=3 uid="uid://c4hc16wgfvp4f"]
+
+[ext_resource type="Script" uid="uid://dftar4ptyhjxe" path="res://SCRIPT/UTILITAIRE/spawnplayer.gd" id="1_f4l18"]
+[ext_resource type="PackedScene" uid="uid://ckxwmy0iav2h2" path="res://SCRIPT/INTERACTIBLE/Checkpoint.tscn" id="2_f4ood"]
+[ext_resource type="PackedScene" uid="uid://6c83u8ojkedm" path="res://SCRIPT/grayboxing/200x100.tscn" id="3_f4ood"]
+[ext_resource type="PackedScene" uid="uid://dx851ijsrvbgf" path="res://SCRIPT/grayboxing/400x200.tscn" id="4_70qjr"]
+
+[node name="teste" type="Node2D" unique_id=1353381737]
+
+[node name="spawnplayer" type="Node" parent="." unique_id=594016492]
+script = ExtResource("1_f4l18")
+
+[node name="interactible" type="Node2D" parent="." unique_id=388537198]
+
+[node name="checkpoint" parent="interactible" unique_id=524856083 groups=["Checkpoint"] instance=ExtResource("2_f4ood")]
+
+[node name="grayboxing" type="Node2D" parent="." unique_id=1471500640]
+
+[node name="200x100" parent="grayboxing" unique_id=436297158 instance=ExtResource("3_f4ood")]
+position = Vector2(11, 48)
+
+[node name="400x200" parent="grayboxing" unique_id=1001420575 instance=ExtResource("4_70qjr")]
+position = Vector2(311, 95)
+
+[node name="400x201" parent="grayboxing" unique_id=1333335055 instance=ExtResource("4_70qjr")]
+position = Vector2(-289, 96)
+
+[node name="VISUAL" type="Node2D" parent="." unique_id=1290216390]
+
+[node name="enemi" type="Node2D" parent="." unique_id=1244411597]

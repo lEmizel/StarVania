@@ -59,7 +59,30 @@ func _on_slash_finished() -> void:
 
 	
 func _process(delta):
-	pass
+	# le croissant de sang armé par le coup en cours (voir `_croissant`)
+	if _croissant_reste < 0.0:
+		return
+	# le coup a été interrompu, ou un autre a commencé : il ne part pas
+	if _croissant_coup != _coup_id or not _slash_a_l_ecran():
+		_croissant_annuler()
+		return
+	_croissant_reste -= delta
+	if _croissant_reste > player.croissant_amorce:
+		return
+	# il « prend » sur la lame : posé sur le trajet du slash, il la suit…
+	var reste := maxf(_croissant_reste, 0.0)
+	var prog := clampf(player.croissant_depart - reste / maxf(_croissant_duree, 0.001), 0.0, 1.0)
+	var g: Dictionary = _slash_shader.geometrie(SLASH_DU_CROISSANT, prog)
+	if _croissant_noeud == null:
+		_croissant_noeud = _croissant_creer(g)
+	_croissant_noeud.suivre_lame(slash_attack.to_global(g["centre"]), g["queue"], g["tete"],
+		1.0 - reste / maxf(player.croissant_amorce, 0.001))
+	# … et s'en détache quand elle passe devant le perso
+	if _croissant_reste <= 0.0:
+		_croissant_noeud.lacher()
+		print("[CROISSANT] lancé : ", _croissant_noeud.degats, " dégâts")
+		_croissant_noeud = null
+		_croissant_reste = -1.0
 # 2) Ce handler est appelé à chaque fois qu'on change d'animation    
 
 ## les dégâts d'un coup d'épée, bonus des talismans compris (70 → 77 avec la
@@ -68,15 +91,104 @@ func degats_du_coup() -> int:
 	return roundi(damage * Player.multiplicateur_degats())
 
 
+## la rune du talisman « Marque de sang » (posée par la boule de sang)
+const MARQUE_SANG := preload("res://SCRIPT/SHADER/marque_sang.gd")
+## le numéro du coup d'épée en cours (un par `_play_slash`) : le croissant de
+## sang armé par un coup ne part pas si un autre coup a commencé
+var _coup_id := 0
+
+## TALISMAN « CROISSANT DE SANG » (1er oct. 2026) : le DERNIER coup du combo
+## projette son slash vers l'avant (SCRIPT/SHADER/croissant_sang.gd). Le combo
+## n'a que DEUX coups en jeu (1 → 2 → 1…, ATTACK_LIGHT_3 n'est jamais atteint) :
+## c'est donc le 2e (« attack_02 ») ; si le 3e revient, déplacer l'appel. Il vaut
+## `player.croissant_part` d'un coup d'épée, bonus compris, et ignore les
+## ennemis que ce coup vient de toucher au corps à corps.
+## Il NAÎT SUR LE SLASH (Kaoru : « qu'il commence pile sur le slash FX du
+## joueur ») : `_croissant()` l'ARME au départ du coup. `_process` le crée
+## `player.croissant_amorce` s avant le départ, ATTACHÉ à la lame : posé sur le
+## centre du trajet du slash (le slash vit sous POINT : retourné avec le
+## perso, agrandi par l'Allonge), il suit la lame image après image et
+## « prend » dessus ; puis il est LÂCHÉ quand la lame passe devant le perso (à
+## `player.croissant_depart` de la durée du slash). Si le coup est interrompu
+## avant (plus de slash à l'écran, ou un autre coup a commencé), il ne part
+## pas.
+const TALISMAN_CROISSANT := "croissant"
+const CROISSANT := preload("res://SCRIPT/SHADER/croissant_sang.tscn")
+## le slash dont il se détache (celui des coups au sol)
+const SLASH_DU_CROISSANT := "new_slash_1"
+var _croissant_reste := -1.0     # temps avant de le lâcher (s) ; < 0 : rien d'armé
+var _croissant_duree := 0.24     # durée du slash qui le porte (s)
+var _croissant_coup := -1        # le coup d'épée qui l'a armé
+var _croissant_noeud: Node2D = null   # celui qui est en train de prendre sur la lame
+
+
+func _croissant() -> void:
+	if not Player.talisman_equipe(TALISMAN_CROISSANT) or _slash_shader == null:
+		return
+	_croissant_annuler()
+	_croissant_duree = float(_slash_shader.geometrie(SLASH_DU_CROISSANT, 0.0)["duree"])
+	_croissant_reste = _croissant_duree * player.croissant_depart
+	_croissant_coup = _coup_id
+
+
+## le slash du coup en cours est-il à l'écran (dessiné ou en shader) ?
+func _slash_a_l_ecran() -> bool:
+	return slash_attack.visible or (_slash_shader != null and _slash_shader.visible)
+
+
+## le croissant, attaché à la lame (géométrie `g` du slash à cet instant)
+func _croissant_creer(g: Dictionary) -> Node2D:
+	var c := CROISSANT.instantiate()
+	c.demo_boucle = false
+	c.attache = true
+	c.dir = -1 if player.point.scale.x < 0.0 else 1
+	c.degats = roundi(degats_du_coup() * player.croissant_part)
+	c.joueur = player
+	c.touches_du_coup = _foudre_touches
+	c.forme = g["forme"]
+	c.echelle = slash_attack.scale.x      # le talisman Allonge agrandit le slash
+	var hote: Node = get_tree().current_scene
+	if hote == null:
+		hote = player.get_parent()
+	hote.add_child(c)
+	return c
+
+
+## rien ne part : le croissant armé (ou déjà attaché à la lame) est retiré
+func _croissant_annuler() -> void:
+	_croissant_reste = -1.0
+	if _croissant_noeud != null and is_instance_valid(_croissant_noeud):
+		_croissant_noeud.queue_free()
+	_croissant_noeud = null
+
+
 func _on_body_entered(body):
 	# on passe en paramètre amount ET la position X du joueur
 	if body.has_method("apply_damage"):
 		var coup := degats_du_coup()
-		var porte = body.apply_damage(coup, player.global_position.x)
+		# MARQUE DE SANG : un ennemi marqué par la boule de sang prend
+		# `marque_multiplicateur` fois le coup ; la marque éclate s'il porte
+		var marque := MARQUE_SANG.est_marque(body)
+		if marque:
+			coup = roundi(coup * player.marque_multiplicateur)
+		# VENGEANCE : chargée par un coup encaissé, elle renforce TOUS les
+		# coups d'épée tant qu'elle dure
+		var venge: bool = player.vengeance_active()
+		if venge:
+			coup = roundi(coup * player.vengeance_multiplicateur)
+		# (le joueur se déclare comme attaquant : ses victimes sont les siennes)
+		var porte = body.apply_damage(coup, player.global_position.x, "epee", true, player)
 		# coup au corps à corps qui PORTE (pas sur un mort ni un blindé) :
 		# la jauge bloodheal se recharge de 20 % d'une barre (sept. 2026 :
 		# c'est le coup qui recharge, plus le kill)
 		if porte != false:
+			if marque:
+				MARQUE_SANG.consommer(body)
+				print("[MARQUE] coup d'épée marqué : ", coup, " dégâts")
+			if venge:
+				player.vengeance_frapper()
+				print("[VENGEANCE] coup vengeur : ", coup, " dégâts (encore ",
+					snappedf(player.vengeance_reste, 0.01), " s)")
 			Player.changement_de_bloodheal(Player.BLOODHEAL_PAR_COUP)
 			_eclat_impact(body)
 			_foudre_touches.append(body)
@@ -215,6 +327,17 @@ func _zone_du_coup() -> Rect2:
 func _play_slash(anim_name: String) -> void:
 	couper_slash()
 	_foudre_touches.clear()      # un nouveau coup : tout le monde est de nouveau frappable
+	_coup_id += 1
+	# TALISMAN « ALLONGE » : la lame porte plus loin — la zone de touche ET le
+	# slash (dessiné ou en shader) grandissent ensemble autour du centre du
+	# coup (là où player.gd vient de poser le slash), pour que ce qu'on voit
+	# reste ce qui touche
+	var f := 1.0 + Player.bonus_talismans("allonge_pourcent") / 100.0
+	var c := slash_attack.position
+	collision.transform = Transform2D(0.0, Vector2(f, f), 0.0, c * (1.0 - f))
+	slash_attack.scale = Vector2(f, f)
+	if _slash_shader != null:
+		_slash_shader.scale = Vector2(f, f)
 	# en shader si on sait le refaire : à la place exacte du dessin (player.gd
 	# la pose sur slash_attack à chaque attaque)
 	if player.slash_en_shader and _slash_shader.is_inside_tree() and _slash_shader.connait(anim_name):
@@ -280,6 +403,7 @@ func _process_frame_logic() -> void:
 				1:
 					_play_slash("new_slash_1")
 					hitbox_2.set_deferred("disabled", false)
+					_croissant()      # le DERNIER coup du combo (il n'en a que deux)
 				3:
 					_disable_all_hitboxes()
 

@@ -1,0 +1,19 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://SCRIPT/SHADER/sceau_sang.gd" id="1_sc"]
+[ext_resource type="Shader" path="res://SCRIPT/SHADER/sceau_sang.gdshader" id="2_sc"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_sc"]
+resource_local_to_scene = true
+shader = ExtResource("2_sc")
+
+[node name="SceauSang" type="Node2D"]
+script = ExtResource("1_sc")
+
+[node name="Sceau" type="ColorRect" parent="."]
+material = SubResource("ShaderMaterial_sc")
+offset_left = -320.0
+offset_top = -127.0
+offset_right = 320.0
+offset_bottom = 91.0
+mouse_filter = 2
