@@ -16,6 +16,12 @@ extends Area2D
 ## Couches : masque 1 = le joueur (couche 1) ET les blocs solides (couche 3,
 ## donc bit 1) ; les monstres sont couche 8, la boule ne peut donc jamais
 ## toucher celui qui l'a tirée ni ses congénères.
+##
+## TIR INTERCEPTABLE (1er oct. 2026) : elle est dans le groupe
+## "projectiles_ennemis" et répond à `interceptable()` / `intercepter()` — les
+## gouttes du talisman « Gardiennes » fondent dessus et l'arrêtent en vol
+## (SCRIPT/SHADER/gardiennes_sang.gd). Un futur projectile ennemi qui fait de
+## même sera gardé lui aussi.
 ## ============================================================================
 
 const EXPLOSION := preload("res://SCRIPT/SPELL/explosion_feu.tscn")
@@ -46,6 +52,7 @@ var _extinction := -1.0        # >= 0 : compte à rebours avant la disparition
 
 
 func _ready() -> void:
+	add_to_group("projectiles_ennemis")
 	body_entered.connect(_on_body_entered)
 	collision_mask |= 8               # les monstres aussi, pas seulement le joueur
 	if direction.length_squared() < 0.0001:
@@ -81,6 +88,17 @@ func _on_body_entered(body: Node) -> void:
 	elif body is BaseAI:
 		body.apply_damage(degats_monstres, global_position.x, "boule_de_feu", true, tireur)
 	_exploser()
+
+
+## encore en vol (pas en train de s'éteindre en bout de course)
+func interceptable() -> bool:
+	return _extinction < 0.0 and not is_queued_for_deletion()
+
+
+## arrêtée en vol (talisman « Gardiennes ») : elle explose là où elle est
+func intercepter() -> void:
+	if interceptable():
+		_exploser()
 
 
 func _exploser() -> void:

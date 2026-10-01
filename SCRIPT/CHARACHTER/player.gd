@@ -372,6 +372,24 @@ const POISON_SCENE := preload("res://SCRIPT/SHADER/poison_sang.tscn")
 @export var corrompu_couleur := Color(0.58, 0.14, 0.84)
 @export var corrompu_ombre := Color(0.19, 0.02, 0.31)
 
+## TALISMAN « GARDIENNES » (1er oct. 2026, id "gardiennes", choisi par Kaoru :
+## « je suis curieux de voir ce que tu peux faire ») : tant qu'il est porté,
+## deux gouttes de sang tournent autour de nous — elles blessent les ennemis
+## qu'elles touchent pour `gardiennes_part` d'un coup d'épée (bonus compris),
+## sans recul, et fondent sur les tirs ennemis qui nous visent pour éclater avec
+## eux, puis se reforment. Leur ronde, leur garde et leur allure :
+## SCRIPT/SHADER/gardiennes_sang.tscn, posé une fois par `_gardiennes_preparer`.
+const GARDIENNES_SCENE := preload("res://SCRIPT/SHADER/gardiennes_sang.tscn")
+@export var gardiennes_part := 0.5
+var _gardiennes: Node2D
+
+## TALISMAN « SOIN ÉCLAIR » (1er oct. 2026, id "soin_eclair", choisi par Kaoru) :
+## l'animation de soin — le temps où l'on reste planté, à la merci d'un coup qui
+## l'interrompt — joue `soin_eclair_vitesse` fois plus vite (0,73 s → 0,37 s).
+## Même coût, mêmes cœurs. Voir `heal_enter`.
+const TALISMAN_SOIN_ECLAIR := "soin_eclair"
+@export var soin_eclair_vitesse := 2.0
+
 # AMÉLIORATION: combo_count remplace le bool "combo" — plus clair et extensible
 var combo_buffered := false   # true si le joueur a appuyé pendant l'anim en cours
 
@@ -412,6 +430,7 @@ func _ready() -> void:
 	_bouclier_preparer()
 	_couronne_preparer()
 	_oeil_preparer()
+	_gardiennes_preparer()
 	# nos victimes (talisman « Essaim ») ; le signal vit dans l'autoload, la
 	# connexion meurt avec ce joueur
 	Player.monstre_tue.connect(_on_monstre_tue)
@@ -652,6 +671,21 @@ func _oeil_preparer() -> void:
 	_oeil.demo_boucle = false
 	_oeil.joueur = self
 	add_child(_oeil)
+
+
+## les gouttes des Gardiennes : elles se montrent et se cachent seules selon le
+## talisman
+func _gardiennes_preparer() -> void:
+	_gardiennes = GARDIENNES_SCENE.instantiate()
+	_gardiennes.demo_boucle = false
+	_gardiennes.joueur = self
+	add_child(_gardiennes)
+
+
+## ce que fait une goutte des Gardiennes qui touche (lu à chaque coup : les
+## bonus du moment comptent)
+func gardiennes_degats() -> int:
+	return maxi(roundi(animator.degats_du_coup() * gardiennes_part), 1)
 
 
 func _couronne_preparer() -> void:
@@ -3174,7 +3208,10 @@ func _try_heal() -> void:
 func heal_enter() -> void:
 	# se soigner exige l'immobilité : on coupe tout élan résiduel
 	velocity.x = 0.0
-	animator.play("heal")
+	# SOIN ÉCLAIR : la même animation, plus vite (elle seule : le coût et les
+	# cœurs rendus ne changent pas)
+	var vitesse_soin := soin_eclair_vitesse if Player.talisman_equipe(TALISMAN_SOIN_ECLAIR) else 1.0
+	animator.play("heal", vitesse_soin)
 	_offrande_lancer()
 
 func heal_execute(delta: float) -> void:

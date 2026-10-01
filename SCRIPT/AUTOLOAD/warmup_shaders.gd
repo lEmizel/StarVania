@@ -74,6 +74,9 @@ const SHADERS: Array[String] = [
 	"res://SCRIPT/SHADER/oeil_canon.gdshader",        # l'œil de feu du canon de verre (1er oct. 2026)
 	"res://SCRIPT/TALISMAN/dessin_sang_verse.gdshader", # talisman sang versé (menu START, 1er oct. 2026)
 	"res://SCRIPT/TALISMAN/dessin_reliquaire.gdshader", # talisman reliquaire (menu START, 1er oct. 2026)
+	"res://SCRIPT/SHADER/gardiennes_sang.gdshader",   # les gouttes du talisman gardiennes (1er oct. 2026)
+	"res://SCRIPT/TALISMAN/dessin_gardiennes.gdshader", # son dessin dans le menu START
+	"res://SCRIPT/TALISMAN/dessin_soin_eclair.gdshader", # talisman soin éclair (menu START, 1er oct. 2026)
 	"res://SCRIPT/SHADER/explosion_violette.gdshader", # explosion du kamikaze (sept. 2026)
 	"res://SCRIPT/SHADER/cable_de_sang.gdshader",    # câble du grappin (sept. 2026)
 	"res://SCRIPT/SHADER/impact_blanc.gdshader",     # éclat d'un coup d'épée qui porte (sept. 2026)

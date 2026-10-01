@@ -43,17 +43,17 @@ extends RefCounted
 ## Nombre d'emplacements RONDS de la collection dans le menu. Ceux qui n'ont pas
 ## encore de talisman dans LISTE restent des emplacements vides « à découvrir ».
 ## S'il y a plus de talismans que d'emplacements, la grille s'agrandit seule.
-## TRENTE ET UN pour le moment (5 le 30 sept. 2026 ; le sillage de sang, les
+## TRENTE-TROIS pour le moment (5 le 30 sept. 2026 ; le sillage de sang, les
 ## épines, la frénésie, la marque, le second souffle, le canon de verre,
 ## l'allonge, la vengeance, le croissant de sang, l'essaim, l'offrande, le
 ## sang bouillant, l'ombre de sang, le sang corrompu, le coup dans le dos, le
 ## crescendo, la parade, la lame corrompue, la prise ferme, le venin, le coup
 ## de grâce, le sang cristallisé, les plumes acérées, le sang plein, le sang
-## versé et le reliquaire le 1er oct.) : monte ce nombre quand il y en aura
-## d'autres à découvrir.
-const NB_EMPLACEMENTS := 31
+## versé, le reliquaire, les gardiennes et le soin éclair le 1er oct.) : monte
+## ce nombre quand il y en aura d'autres à découvrir.
+const NB_EMPLACEMENTS := 33
 
-## Les TRENTE ET UN talismans du jeu (1er oct. 2026), tous branchés :
+## Les TRENTE-TROIS talismans du jeu (1er oct. 2026), tous branchés :
 ##   tornade  → SCRIPT/CHARACHTER/player.gd, région BLOODBALL
 ##   foudre   → SCRIPT/CHARACHTER/animator.gd (le slash, l'arc qui bondit, le +10 %)
 ##   bouclier → player.gd (`apply_damage` / `apply_environment_damage`)
@@ -116,6 +116,10 @@ const NB_EMPLACEMENTS := 31
 ##              `sang_plein_actif`) — des stats seules, comme la Frénésie
 ##   sang_verse → player.gd (`_sang_verse`, quand un coup est encaissé)
 ##   reliquaire → player.gd (`_perdre_blood`, dans `dead_enter`)
+##   gardiennes → player.gd (`_gardiennes_preparer`, `gardiennes_degats`) +
+##              SCRIPT/SHADER/gardiennes_sang.gd (la ronde, les coups, la garde) +
+##              SCRIPT/SPELL/projectile_feu.gd (`intercepter` : le tir arrêté)
+##   soin_eclair → player.gd (`heal_enter` : l'animation de soin plus vite)
 ## Les clés chiffrées (`degats_pourcent`, `esquive_pourcent`, `blood_pourcent`,
 ## `degats_pourcent_dernier_coeur`)
 ## sont lues par `Player.bonus_talismans(cle)` : deux talismans qui portent la
@@ -152,11 +156,13 @@ const LISTE := [
 	{"id": "sang_plein", "nom": "Sang plein", "description": "Tant que votre jauge de sang est pleine, vos coups d'épée font 40 % de dégâts en plus. Vous soigner la vide…", "couleur": Color(0.78, 0.04, 0.12), "dessin": "res://SCRIPT/TALISMAN/dessin_sang_plein.gdshader", "degats_pourcent_jauge_pleine": 40},
 	{"id": "sang_verse", "nom": "Sang versé", "description": "Chaque cœur perdu remplit votre jauge de soin d'une demi-barre.", "couleur": Color(0.78, 0.04, 0.12), "dessin": "res://SCRIPT/TALISMAN/dessin_sang_verse.gdshader"},
 	{"id": "reliquaire", "nom": "Reliquaire", "description": "À votre mort, vous gardez la moitié du sang récolté au lieu de tout perdre.", "couleur": Color(0.62, 0.48, 0.26), "dessin": "res://SCRIPT/TALISMAN/dessin_reliquaire.gdshader"},
+	{"id": "gardiennes", "nom": "Gardiennes", "description": "Deux gouttes de sang tournent autour de vous : elles blessent les ennemis qu'elles touchent et fondent sur les tirs ennemis pour les arrêter, puis se reforment.", "couleur": Color(0.74, 0.04, 0.1), "dessin": "res://SCRIPT/TALISMAN/dessin_gardiennes.gdshader"},
+	{"id": "soin_eclair", "nom": "Soin éclair", "description": "Vous vous soignez deux fois plus vite.", "couleur": Color(0.86, 0.12, 0.2), "dessin": "res://SCRIPT/TALISMAN/dessin_soin_eclair.gdshader"},
 ]
 
 ## POUR TESTER LE MENU : les talismans déjà découverts au début d'une partie.
 ## À vider ([]) quand ils se trouveront dans les niveaux.
-const DECOUVERTS_AU_DEPART := ["tornade_bloodball", "foudre", "bouclier", "esquive", "soif", "sillage", "epines", "frenesie", "marque", "souffle", "canon", "allonge", "vengeance", "croissant", "essaim", "offrande", "bouillant", "ombre", "corrompu", "dos", "crescendo", "parade", "lame_corrompue", "prise", "venin", "grace", "cristal", "plumes", "sang_plein", "sang_verse", "reliquaire"]
+const DECOUVERTS_AU_DEPART := ["tornade_bloodball", "foudre", "bouclier", "esquive", "soif", "sillage", "epines", "frenesie", "marque", "souffle", "canon", "allonge", "vengeance", "croissant", "essaim", "offrande", "bouillant", "ombre", "corrompu", "dos", "crescendo", "parade", "lame_corrompue", "prise", "venin", "grace", "cristal", "plumes", "sang_plein", "sang_verse", "reliquaire", "gardiennes", "soin_eclair"]
 
 
 ## la ligne du catalogue qui porte cet id ({} si aucune)
