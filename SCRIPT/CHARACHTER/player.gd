@@ -277,10 +277,23 @@ const TALISMAN_SANG_VERSE := "sang_verse"
 ## `blood_perdu_a_la_mort` du sang récolté (le compteur `Player.blood`, les
 ## « âmes ») — 1 = tout, 0 = rien. JUSQUE-LÀ ON NE PERDAIT RIEN : ajouté avec le
 ## talisman « RELIQUAIRE » (id "reliquaire", idée de Kaoru), qui en GARDE
-## `reliquaire_part` (50 %). Voir `_perdre_blood`, dans `dead_enter`.
+## `reliquaire_part` (50 %) sur nous. Voir `_perdre_blood`, dans `dead_enter`.
+## CE QU'ON PERD N'EST PAS PERDU TOUT DE SUITE (1er oct. 2026, Kaoru : « comme
+## dans les Souls ») : il attend en ESPRIT DE SANG (SCRIPT/SHADER/esprit_sang.tscn)
+## à `ames_hauteur` px au-dessus du dernier sol sûr (`_dernier_sol_sur` : au
+## sol, ni mort ni sonné, depuis `SOL_SUR_IMAGES` images — jamais au fond d'un
+## trou ni dans des piques) ; le toucher le rend. Mourir de nouveau avant : il
+## est perdu pour de bon. Avec le Reliquaire, l'esprit ne porte que la moitié
+## qu'on n'a pas gardée. Voir `_ames_poser` et l'autoload (`laisser_ames`,
+## `reprendre_ames`).
 @export_range(0.0, 1.0) var blood_perdu_a_la_mort := 1.0
 const TALISMAN_RELIQUAIRE := "reliquaire"
 @export_range(0.0, 1.0) var reliquaire_part := 0.5
+const ESPRIT_SANG_SCENE := preload("res://SCRIPT/SHADER/esprit_sang.tscn")
+const SOL_SUR_IMAGES := 6
+@export var ames_hauteur := 64.0
+var _dernier_sol_sur := Vector2.INF
+var _au_sol_depuis := 0
 
 ## TALISMAN « CROISSANT DE SANG » (1er oct. 2026, id "croissant") : le DERNIER
 ## coup du combo (le 2e : le combo n'en a que deux) projette son slash vers
@@ -390,6 +403,43 @@ var _gardiennes: Node2D
 const TALISMAN_SOIN_ECLAIR := "soin_eclair"
 @export var soin_eclair_vitesse := 2.0
 
+## TALISMAN « CŒUR NOIR » (1er oct. 2026, id "coeur_noir", IDÉE DE KAORU) : un
+## cœur NOIR s'ajoute aux nôtres — un seul, jamais plus — `coeur_noir_recharge` s
+## après l'avoir perdu, et à chaque checkpoint touché (et au respawn, qui se fait
+## à un checkpoint). Il prend le PREMIER point de dégât d'un coup (Canon de
+## verre : un coup de 2 brise le cœur noir puis un rouge) ; le coup est encaissé
+## quand même (recul, Vengeance, Épines…). En se BRISANT, il frappe tous les
+## monstres VISIBLES À L'ÉCRAN (Kaoru : « autour de nous ou visibles à l'écran,
+## c'est le mieux ») pour `coeur_noir_part` d'un coup d'épée (bonus compris),
+## avec recul : une onde noire part de nous et les frappe quand elle les atteint
+## (SCRIPT/SHADER/coeur_noir_onde.tscn). Il vit dans l'autoload
+## (`Player.coeur_noir`, `coeur_noir_attente`) ; le HUD le montre après les
+## cœurs rouges (gestion_interface.gd, `coeur_noir_fx`). Voir `_coeur_noir_tick`,
+## `_coeur_noir_absorbe`, `_coeur_noir_eclater`.
+## TALISMAN « COURONNE DU DÉFI » (1er oct. 2026, id "defi", idée de Kaoru) :
+## un seul cœur, tous les autres talismans retirés et verrouillés (tout cela vit
+## dans l'autoload : `equiper_talisman`, `retirer_talisman`, `add_max_hp`) — et
+## une magnifique couronne d'or qui tourne au-dessus de la tête :
+## SCRIPT/SHADER/couronne_defi.tscn, posée une fois par `_couronne_defi_preparer`
+## (elle se montre et se cache seule).
+const COURONNE_DEFI_SCENE := preload("res://SCRIPT/SHADER/couronne_defi.tscn")
+
+const TALISMAN_COEUR_NOIR := "coeur_noir"
+const COEUR_NOIR_ONDE := preload("res://SCRIPT/SHADER/coeur_noir_onde.tscn")
+@export var coeur_noir_recharge := 120.0
+@export var coeur_noir_part := 2.0
+## la caméra tremble quand il éclate (0 = pas du tout)
+@export var coeur_noir_secousse := 7.0
+
+## TALISMAN « ENTRAVES » (1er oct. 2026, id "entraves", choisi par Kaoru) : chaque
+## coup d'épée qui porte ENTRAVE l'ennemi — il vit à `entraves_facteur` de sa
+## vitesse pendant `entraves_duree` s (marche, vol, chute, coups, animation), au
+## sol comme en vol ; un nouveau coup relance le temps, sans cumul. Un anneau de
+## sang l'enserre. Voir animator.gd (`_on_body_entered`) et BASE_IA.gd
+## (`entraver`) ; l'anneau : SCRIPT/SHADER/entrave_sang.tscn.
+@export var entraves_duree := 2.0
+@export var entraves_facteur := 0.6
+
 # AMÉLIORATION: combo_count remplace le bool "combo" — plus clair et extensible
 var combo_buffered := false   # true si le joueur a appuyé pendant l'anim en cours
 
@@ -431,12 +481,15 @@ func _ready() -> void:
 	_couronne_preparer()
 	_oeil_preparer()
 	_gardiennes_preparer()
+	_couronne_defi_preparer()
 	# nos victimes (talisman « Essaim ») ; le signal vit dans l'autoload, la
 	# connexion meurt avec ce joueur
 	Player.monstre_tue.connect(_on_monstre_tue)
 	# celles qui nous suivaient au tableau d'avant : relâchées une fois que le
 	# spawn nous a posés (il nous déplace juste après nous avoir ajoutés)
 	_essaim_reprendre.call_deferred()
+	# nos âmes perdues, si c'est ici qu'on est tombé
+	_ames_poser.call_deferred()
 	initialize_states()
 	change_state(States.IDLE)
 
@@ -471,6 +524,7 @@ func _physics_process(delta: float) -> void:
 		velocity.x = _knock.x
 	_trainee_tick()          # la traînée du dash / de la roulade (avant de bouger)
 	_sillage_tick()          # le talisman « sillage de sang » (même moment)
+	_coeur_noir_tick(delta)  # le talisman « cœur noir » : il revient
 	move_and_slide()
 	# le câble du grappin se trace APRÈS le déplacement (sinon il part de la
 	# main du pas précédent et dépasse du bras, voir _grappin_tracer_cable)
@@ -480,6 +534,13 @@ func _physics_process(delta: float) -> void:
 	if current_state == States.WALL_GRIFFE:
 		_griffe_tracer()
 	_decay_knockback(delta)
+	# le dernier sol sûr : nos âmes y attendront si on meurt
+	if is_on_floor() and current_state != States.DEAD and current_state != States.HIT:
+		_au_sol_depuis += 1
+		if _au_sol_depuis >= SOL_SUR_IMAGES:
+			_dernier_sol_sur = global_position
+	else:
+		_au_sol_depuis = 0
 	_corde_cooldown = maxf(_corde_cooldown - delta, 0.0)
 	_grappin_cooldown = maxf(_grappin_cooldown - delta, 0.0)
 	_bouclier_recharge_reste = maxf(_bouclier_recharge_reste - delta, 0.0)
@@ -600,9 +661,9 @@ func apply_damage(amount: int, source_x, source_tag := "?", perce_stun := false,
 		return
 	if _esquive_tente(source_x, source_tag):
 		return
-	# canon de verre (dégâts reçus multipliés), puis second souffle (un coup
-	# mortel nous laisse à un cœur)
-	amount = _second_souffle(_degats_recus(amount), source_tag)
+	# canon de verre (dégâts reçus multipliés), puis le cœur noir (il prend le
+	# premier point), puis second souffle (un coup mortel nous laisse à un cœur)
+	amount = _second_souffle(_coeur_noir_absorbe(_degats_recus(amount), source_tag), source_tag)
 	print("[DMG] f=", Engine.get_physics_frames(),
 		" src=", source_tag, " amount=", amount,
 		" état=", States.keys()[current_state],
@@ -633,6 +694,88 @@ func apply_damage(amount: int, source_x, source_tag := "?", perce_stun := false,
 	_epines_jaillir()
 	_vengeance_charger()
 	crescendo_casser()          # un coup encaissé : la série retombe
+
+
+## --- le cœur noir ---
+
+## porté, il revient s'il manque (au bout de son attente) ; ôté, il disparaît
+func _coeur_noir_tick(delta: float) -> void:
+	if not Player.talisman_equipe(TALISMAN_COEUR_NOIR):
+		if Player.coeur_noir:
+			Player.coeur_noir = false
+			_coeur_noir_hud("ote")
+		return
+	if Player.coeur_noir or Player.hp <= 0:
+		return
+	Player.coeur_noir_attente = maxf(Player.coeur_noir_attente - delta, 0.0)
+	if Player.coeur_noir_attente <= 0.0:
+		Player.coeur_noir = true
+		_coeur_noir_hud("gagne")
+		print("[CŒUR NOIR] f=", Engine.get_physics_frames(), " un cœur noir s'ajoute")
+
+
+## un coup de `amount` arrive : le cœur noir en prend le premier point et se
+## brise (il éclate : l'onde) ; renvoie ce qu'il reste pour les cœurs rouges
+func _coeur_noir_absorbe(amount: int, source_tag: String) -> int:
+	if amount <= 0 or not Player.coeur_noir or not Player.talisman_equipe(TALISMAN_COEUR_NOIR):
+		return amount
+	Player.coeur_noir = false
+	Player.coeur_noir_attente = coeur_noir_recharge
+	_coeur_noir_hud("perdu")
+	_sang_verse(1)                 # un cœur perdu, tout noir qu'il est
+	print("[CŒUR NOIR] f=", Engine.get_physics_frames(), " brisé par un coup (", source_tag, ", ", amount,
+		") : il en prend 1 ; de retour dans ", coeur_noir_recharge, " s ou au prochain checkpoint")
+	_coeur_noir_eclater()
+	return amount - 1
+
+
+## il éclate : tous les monstres visibles à l'écran seront frappés par l'onde
+func _coeur_noir_eclater() -> void:
+	var vp := get_viewport()
+	var vue: Rect2 = vp.get_canvas_transform().affine_inverse() * vp.get_visible_rect()
+	var c := centre_corps()
+	var rect := RectangleShape2D.new()
+	rect.size = vue.size
+	var requete := PhysicsShapeQueryParameters2D.new()
+	requete.shape = rect
+	requete.transform = Transform2D(0.0, vue.get_center())
+	requete.collision_mask = 8           # la couche des monstres
+	requete.collide_with_areas = false
+	var cibles := []
+	var vus := {}
+	for resultat in get_world_2d().direct_space_state.intersect_shape(requete, 64):
+		var m = resultat["collider"]
+		if not (m is BaseAI) or m.hp <= 0 or not m.est_ennemi(self) or vus.has(m.get_instance_id()):
+			continue
+		vus[m.get_instance_id()] = true
+		var milieu: Vector2 = m.collision.global_position if m.collision != null else m.global_position
+		cibles.append({"noeud": m, "id": m.get_instance_id(), "distance": milieu.distance_to(c)})
+	# l'onde court jusqu'au coin de l'écran le plus loin de nous
+	var loin := 0.0
+	for coin in [vue.position, vue.position + Vector2(vue.size.x, 0.0), vue.end, vue.position + Vector2(0.0, vue.size.y)]:
+		loin = maxf(loin, c.distance_to(coin))
+	var onde := COEUR_NOIR_ONDE.instantiate()
+	onde.demo_boucle = false
+	onde.joueur = self
+	onde.degats = maxi(roundi(animator.degats_du_coup() * coeur_noir_part), 1)
+	onde.rayon_max = loin + 40.0
+	onde.cibles = cibles
+	var hote: Node = get_tree().current_scene
+	if hote == null:
+		hote = get_parent()
+	hote.add_child(onde)
+	onde.global_position = c
+	var cam := get_tree().get_first_node_in_group("Camera")
+	if coeur_noir_secousse > 0.0 and cam != null and cam.has_method("shake"):
+		cam.shake(coeur_noir_secousse, 9.0)
+	print("[CŒUR NOIR] il éclate : ", cibles.size(), " monstre(s) à l'écran, ", onde.degats, " dégâts chacun")
+
+
+## le HUD montre le cœur noir : « gagne », « perdu » (il se brise), « ote »
+func _coeur_noir_hud(quoi: String) -> void:
+	var huds := get_tree().get_nodes_in_group("UI_Health")
+	if not huds.is_empty() and huds[0].has_method("coeur_noir_fx"):
+		huds[0].call_deferred("coeur_noir_fx", quoi)
 
 
 ## --- le canon de verre et le second souffle ---
@@ -671,6 +814,13 @@ func _oeil_preparer() -> void:
 	_oeil.demo_boucle = false
 	_oeil.joueur = self
 	add_child(_oeil)
+
+
+## la couronne d'or du défi : elle se montre et se cache seule selon le talisman
+func _couronne_defi_preparer() -> void:
+	var c := COURONNE_DEFI_SCENE.instantiate()
+	c.demo_boucle = false
+	add_child(c)
 
 
 ## les gouttes des Gardiennes : elles se montrent et se cachent seules selon le
@@ -818,7 +968,8 @@ func _sang_verse(coeurs: int) -> void:
 
 
 ## à la mort : on perd `blood_perdu_a_la_mort` du sang récolté — le Reliquaire
-## en garde `reliquaire_part`
+## en garde `reliquaire_part` — et ce qu'on perd attend en esprit de sang
+## au-dessus du dernier sol sûr (un esprit qui attendait encore est perdu)
 func _perdre_blood() -> void:
 	var part := blood_perdu_a_la_mort
 	if Player.talisman_equipe(TALISMAN_RELIQUAIRE):
@@ -826,7 +977,26 @@ func _perdre_blood() -> void:
 	var perte := int(floor(float(Player.blood) * part))
 	if perte > 0:
 		Player.changement_de_blood(-perte)
-	print("[MORT] sang perdu : ", perte, " (il en reste ", Player.blood, ")")
+	var lieu := _dernier_sol_sur if _dernier_sol_sur.is_finite() else global_position
+	var scene := get_tree().current_scene
+	Player.laisser_ames(perte, scene.scene_file_path if scene != null else "", lieu + Vector2(0.0, -ames_hauteur))
+	print("[MORT] sang perdu : ", perte, " (il en reste ", Player.blood, ")",
+		" — il attend en esprit de sang à ", Player.ames_position if perte > 0 else "nulle part")
+
+
+## à notre arrivée dans un tableau : si nos âmes perdues attendent ici, leur
+## esprit de sang y flotte (une seule fois : pas s'il y est déjà)
+func _ames_poser() -> void:
+	var scene := get_tree().current_scene
+	if Player.ames_perdues <= 0 or scene == null or scene.scene_file_path != Player.ames_scene:
+		return
+	if not get_tree().get_nodes_in_group("esprit_sang").is_empty():
+		return
+	var e := ESPRIT_SANG_SCENE.instantiate()
+	e.demo_boucle = false
+	e.position = Player.ames_position          # le tableau est à l'origine
+	scene.add_child(e)
+	print("[ÂMES] ", Player.ames_perdues, " âmes attendent ici, en esprit de sang, à ", Player.ames_position)
 
 
 ## --- le coup de grâce ---
@@ -1327,7 +1497,7 @@ func apply_environment_damage(amount: int, direction: Vector2 = Vector2.UP) -> b
 			" bouclier encore ", snappedf(_bouclier.restant(), 0.01), " s")
 		_renvoi_environnement(d)
 		return true
-	amount = _second_souffle(_degats_recus(amount), "environnement")
+	amount = _second_souffle(_coeur_noir_absorbe(_degats_recus(amount), "environnement"), "environnement")
 	print("[DMG] f=", Engine.get_physics_frames(),
 		" src=environnement amount=", amount,
 		" état=", States.keys()[current_state],
@@ -3407,6 +3577,7 @@ func dead_input(event: InputEvent) -> void:
 		print("okkkkkkkje suis mort")
 		Player.hp = Player.MAX_HP
 		Player.second_souffle_attente = 0.0     # nouvelle vie : le souffle est prêt
+		Player.coeur_noir_attente = 0.0         # … et le cœur noir revient
 		Player.essaim_en_vol = 0                # … et l'essaim est dispersé
 		# au respawn, la jauge de sang offre EXACTEMENT un soin : le joker
 		# du joueur, à dépenser au bon moment

@@ -43,6 +43,11 @@ var _bh_back_bars: Array[TextureProgressBar] = []   # fantômes, même ordre
 @onready var _heart_template_empty: TextureRect = $VIE/coeur_1_noir
 ## Décalage horizontal entre deux cœurs
 @export var HEART_SPACING: float = 45.0
+## TALISMAN « CŒUR NOIR » : la teinte de son cœur (le cœur rouge assombri), et
+## celle du liseré qui bat autour de lui — sans lui, on le prenait pour un cœur
+## vide (le cœur vide du HUD est déjà sombre)
+@export var COULEUR_COEUR_NOIR := Color(0.12, 0.04, 0.06)
+@export var COULEUR_LISERE_COEUR_NOIR := Color(1.0, 0.16, 0.22)
 ## Temps d'affichage du cœur brisé avant son fondu
 @export var BROKEN_LINGER_TIME: float = 0.33
 ## Durée du fondu de disparition du cœur brisé
@@ -63,6 +68,9 @@ func _ready() -> void:
 		" barres=", _bh_bars.size())
 
 	_build_hearts()
+	# le cœur noir qu'on avait au tableau d'avant
+	if Player.coeur_noir:
+		coeur_noir_fx("present")
 
 	connect("health_request", Callable(self, "_on_health_request"))
 	connect("bloodheal_request", Callable(self, "_on_bloodheal_request"))
@@ -484,6 +492,90 @@ func souffle_fx() -> void:
 	trio["tw"] = tw
 
 
+# ==================================================
+#  CŒUR NOIR (talisman, 1er oct. 2026, idée de Kaoru) : un cœur de plus, NOIR,
+#  après les cœurs rouges — le cœur rouge du HUD assombri (COULEUR_COEUR_NOIR),
+#  posé sur une copie un peu plus grande, rouge vif, qui BAT : un liseré rouge
+#  vivant (sinon on le prenait pour un cœur vide).
+#  « gagne » : il apparaît en pulsant ; « perdu » : il se brise (le brisé
+#  tremble puis s'efface) ; « present » : il est là, sans effet ; « ote » : il
+#  disparaît (talisman ôté).
+# ==================================================
+
+var _coeur_noir: TextureRect = null
+var _coeur_noir_lisere: TextureRect = null
+var _coeur_noir_brise: TextureRect = null
+var _coeur_noir_tw: Tween = null
+var _coeur_noir_bat: Tween = null
+
+
+func _coeur_noir_preparer() -> void:
+	if _coeur_noir == null:
+		_coeur_noir_lisere = _heart_template_full.duplicate()
+		_coeur_noir = _heart_template_full.duplicate()
+		_coeur_noir_brise = _heart_template_broken.duplicate()
+		_coeur_noir_lisere.modulate = COULEUR_LISERE_COEUR_NOIR
+		_coeur_noir.modulate = COULEUR_COEUR_NOIR
+		_coeur_noir_brise.modulate = COULEUR_COEUR_NOIR
+		for n in [_coeur_noir_lisere, _coeur_noir, _coeur_noir_brise]:
+			(n as TextureRect).pivot_offset = (n as TextureRect).size * 0.5
+		_vie_container.add_child(_coeur_noir_brise)
+		_vie_container.add_child(_coeur_noir_lisere)
+		_vie_container.add_child(_coeur_noir)
+		# le liseré bat, doucement, tant qu'il est là
+		_coeur_noir_bat = create_tween().set_loops()
+		_coeur_noir_bat.tween_property(_coeur_noir_lisere, "modulate:a", 0.45, 0.6).set_trans(Tween.TRANS_SINE)
+		_coeur_noir_bat.tween_property(_coeur_noir_lisere, "modulate:a", 1.0, 0.6).set_trans(Tween.TRANS_SINE)
+	# après le dernier cœur rouge
+	var x := HEART_SPACING * float(Player.max_hearts)
+	_coeur_noir.position = _heart_template_full.position + Vector2(x, 0.0)
+	_coeur_noir_lisere.position = _coeur_noir.position
+	_coeur_noir_brise.position = _heart_template_broken.position + Vector2(x, 0.0)
+	if _coeur_noir_tw != null and _coeur_noir_tw.is_valid():
+		_coeur_noir_tw.kill()
+	_coeur_noir.scale = _heart_template_full.scale
+	_coeur_noir_lisere.scale = _heart_template_full.scale * 1.22
+
+
+func coeur_noir_fx(quoi: String) -> void:
+	_coeur_noir_preparer()
+	match quoi:
+		"present":
+			_coeur_noir.visible = true
+			_coeur_noir_lisere.visible = true
+			_coeur_noir_brise.visible = false
+		"gagne":
+			_coeur_noir.visible = true
+			_coeur_noir_lisere.visible = true
+			_coeur_noir_brise.visible = false
+			var base: Vector2 = _coeur_noir.scale
+			var base_l: Vector2 = _coeur_noir_lisere.scale
+			_coeur_noir.scale = base * 0.2
+			_coeur_noir_lisere.scale = base_l * 0.2
+			_coeur_noir_tw = create_tween().set_parallel()
+			_coeur_noir_tw.tween_property(_coeur_noir, "scale", base * 1.35, 0.14)
+			_coeur_noir_tw.tween_property(_coeur_noir_lisere, "scale", base_l * 1.35, 0.14)
+			_coeur_noir_tw.chain().tween_property(_coeur_noir, "scale", base, 0.16)
+			_coeur_noir_tw.tween_property(_coeur_noir_lisere, "scale", base_l, 0.16)
+		"perdu":
+			_coeur_noir.visible = false
+			_coeur_noir_lisere.visible = false
+			_coeur_noir_brise.visible = true
+			_coeur_noir_brise.modulate.a = 1.0
+			var x0 := _coeur_noir_brise.position.x
+			_coeur_noir_tw = create_tween()
+			for k in 6:
+				var amp := 6.0 * (1.0 - float(k) / 6.0)
+				_coeur_noir_tw.tween_property(_coeur_noir_brise, "position:x", x0 + (amp if k % 2 == 0 else -amp), 0.04)
+			_coeur_noir_tw.tween_property(_coeur_noir_brise, "position:x", x0, 0.04)
+			_coeur_noir_tw.tween_property(_coeur_noir_brise, "modulate:a", 0.0, 0.35)
+			_coeur_noir_tw.tween_callback(func () -> void: _coeur_noir_brise.visible = false)
+		_:
+			_coeur_noir.visible = false
+			_coeur_noir_lisere.visible = false
+			_coeur_noir_brise.visible = false
+
+
 func _on_bar_max_request(kind: String, new_max: float) -> void:
 	if kind == "bloodheal":
 		_apply_bloodheal_bar_max(new_max, true)
@@ -491,6 +583,9 @@ func _on_bar_max_request(kind: String, new_max: float) -> void:
 		# le nombre de cœurs max a changé (cœur ramassé…) : on reconstruit
 		# la rangée — _build_hearts lit Player.max_hearts et repeint selon hp
 		_build_hearts()
+		# le cœur noir se range après le dernier cœur rouge
+		if _coeur_noir != null:
+			coeur_noir_fx("present" if Player.coeur_noir else "ote")
 
 
 # ==================================================

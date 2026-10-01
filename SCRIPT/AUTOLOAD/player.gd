@@ -58,6 +58,32 @@ signal monstre_tue(monstre: Node, attaquant: Node)
 ## ce compte autour de lui (player.gd, `_essaim_reprendre`). Remis à zéro à la
 ## mort et en nouvelle partie.
 var essaim_en_vol := 0
+## LES ÂMES PERDUES À LA MORT (1er oct. 2026, Kaoru : « comme dans les Souls ») :
+## le sang perdu en mourant attend en ESPRIT DE SANG dans le tableau où l'on est
+## tombé (`ames_scene`), au-dessus du dernier sol où l'on a posé le pied
+## (`ames_position`) — posé par le joueur à son arrivée dans ce tableau
+## (player.gd, `_ames_poser`) ; le toucher les rend (`reprendre_ames`). Une
+## nouvelle mort avant : l'ancien esprit est perdu pour de bon, le nouveau prend
+## sa place (`ames_id` change : l'ancien s'éteint). Vit le temps de la session,
+## comme les cœurs ramassés.
+var ames_perdues := 0
+## TALISMAN « CŒUR NOIR » (1er oct. 2026, idée de Kaoru) : le joueur a-t-il son
+## cœur noir (un seul, jamais plus), et dans combien de secondes il revient s'il
+## l'a perdu (0 : dès que le talisman est porté). Les checkpoints et le respawn
+## remettent l'attente à 0. Ici : le joueur est recréé à chaque tableau.
+var coeur_noir := false
+var coeur_noir_attente := 0.0
+## TALISMAN « COURONNE DU DÉFI » (1er oct. 2026, idée de Kaoru) : un défi — tant
+## qu'elle est portée on n'a plus qu'UN cœur, et tous les autres talismans sont
+## retirés et VERROUILLÉS (`talisman_verrouille`). `defi_max_hp` garde le vrai
+## nombre de cœurs pendant ce temps (0 : pas de défi) ; un cœur ramassé pendant
+## le défi s'y ajoute (`add_max_hp`) : on le retrouve en ôtant la couronne. Les
+## cœurs rendus en l'ôtant sont vides (pas de soin gratuit).
+const TALISMAN_DEFI := "defi"
+var defi_max_hp := 0
+var ames_scene := ""
+var ames_position := Vector2.ZERO
+var ames_id := 0
 ## nombre d'emplacements où l'on équipe un talisman (règle-le ici)
 const EMPLACEMENTS_TALISMAN := 3
 var talismans_decouverts := {}             # id → true
@@ -86,6 +112,12 @@ func reset_partie() -> void:
 	has_transition_momentum = false
 	second_souffle_attente = 0.0
 	essaim_en_vol = 0
+	ames_perdues = 0
+	ames_scene = ""
+	ames_id += 1
+	coeur_noir = false
+	coeur_noir_attente = 0.0
+	defi_max_hp = 0
 
 
 func changement_de_vie(amount: int) -> void:
@@ -103,6 +135,28 @@ func changement_de_bloodheal(amount: int) -> void:
 	var bars := get_tree().get_nodes_in_group("UI_Bloodheal")
 	if !bars.is_empty():
 		bars[0].emit_signal("bloodheal_request", float(delta))
+
+## une mort : `montant` âmes attendront là, dans `scene`, à `position` ; un
+## esprit qui attendait encore est perdu pour de bon
+func laisser_ames(montant: int, scene: String, position: Vector2) -> void:
+	if ames_perdues > 0:
+		print("[ÂMES] l'esprit de sang d'avant (", ames_perdues, " âmes) est perdu pour de bon")
+	ames_id += 1
+	ames_perdues = maxi(montant, 0)
+	ames_scene = scene if ames_perdues > 0 else ""
+	ames_position = position
+
+
+## l'esprit de sang est repris : ses âmes reviennent au compteur (sans bonus :
+## ce n'est pas une récolte) ; renvoie combien
+func reprendre_ames() -> int:
+	var n := ames_perdues
+	ames_perdues = 0
+	ames_scene = ""
+	ames_id += 1
+	changement_de_blood(n)
+	return n
+
 
 func changement_de_blood(amount: int) -> void:
 	if amount == 0:
@@ -134,6 +188,11 @@ func set_max_hp(new_max: int) -> void:
 		ui[0].emit_signal("bar_max_request", "hp", float(MAX_HP))  # pas de health_request
 
 func add_max_hp(delta: int) -> void:
+	# la Couronne du défi tient le max à UN cœur : le cœur ramassé compte pour
+	# après (on le retrouve en ôtant la couronne)
+	if defi_max_hp > 0:
+		defi_max_hp += delta
+		return
 	set_max_hp(MAX_HP + delta)  # <-- aucune mise à l’échelle
 
 # --- BARRES DE BLOODHEAL (capacité max = nombre de barres × un soin) ---
@@ -200,10 +259,16 @@ func talisman_equipe(id: String) -> bool:
 
 ## Équipe un talisman découvert dans le premier emplacement libre. Retourne le
 ## numéro de l'emplacement (0 = le premier), ou -1 si c'est refusé : pas
-## découvert, déjà porté, ou plus d'emplacement libre.
+## découvert, déjà porté, verrouillé par la Couronne du défi, ou plus
+## d'emplacement libre. La Couronne du défi, elle, RETIRE tous les autres
+## talismans portés avant de se poser — et on n'a plus qu'un cœur.
 func equiper_talisman(id: String) -> int:
-	if not talisman_decouvert(id) or talisman_equipe(id):
+	if not talisman_decouvert(id) or talisman_equipe(id) or talisman_verrouille(id):
 		return -1
+	if id == TALISMAN_DEFI:
+		talismans_equipes.fill("")
+		defi_max_hp = MAX_HP
+		set_max_hp(1)
 	var libre := talismans_equipes.find("")
 	if libre == -1:
 		return -1
@@ -218,8 +283,18 @@ func retirer_talisman(id: String) -> bool:
 	if not talisman_equipe(id):
 		return false
 	talismans_equipes[talismans_equipes.find(id)] = ""
+	if id == TALISMAN_DEFI and defi_max_hp > 0:
+		# le défi s'achève : les cœurs reviennent… vides
+		var vrai_max := defi_max_hp
+		defi_max_hp = 0
+		set_max_hp(vrai_max)
 	talismans_changes.emit()
 	return true
+
+
+## verrouillé : la Couronne du défi est portée, et ce n'est pas elle
+func talisman_verrouille(id: String) -> bool:
+	return id != TALISMAN_DEFI and talismans_equipes.has(TALISMAN_DEFI)
 
 
 ## La somme, sur les talismans PORTÉS, d'une clé chiffrée du catalogue

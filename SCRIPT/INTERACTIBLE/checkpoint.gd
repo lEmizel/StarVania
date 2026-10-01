@@ -27,6 +27,8 @@ func _on_body_entered(body: Node2D) -> void:
 	# un checkpoint déjà allumé (1er oct. 2026)
 	if body.is_in_group("Player"):
 		Player.second_souffle_attente = 0.0
+		# TALISMAN « CŒUR NOIR » : chaque checkpoint touché le rend (s'il manque)
+		Player.coeur_noir_attente = 0.0
 	if active:
 		return
 	if body.is_in_group("Player"):

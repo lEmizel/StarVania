@@ -49,6 +49,8 @@ signal pointe(emplacement: Control)     # vient de prendre le focus
 ## opacité d'un talisman de la collection pendant qu'il est porté : il reste
 ## visible à sa place, éteint
 @export_range(0.0, 1.0, 0.01) var opacite_porte := 0.28
+## le cadenas d'un emplacement verrouillé (Couronne du défi) : sa couleur
+@export var couleur_cadenas := Color(0.95, 0.72, 0.2)
 ## la pastille qui marque, dans la collection, un talisman porté
 @export var couleur_pastille := Color(0.86, 0.17, 0.2)
 ## un talisman qui a un "dessin" vit : son temps passe tant de fois plus vite
@@ -60,6 +62,9 @@ var numero := 0                 # écrit sur le rond tant qu'il n'a pas de dessi
 var decouvert := false
 var porte := false              # (collection) ce talisman est équipé
 var est_equipement := false     # true = un emplacement de la rangée du haut
+## VERROUILLÉ par la Couronne du défi : le talisman est éteint, un cadenas d'or
+## par-dessus (un emplacement d'équipement libre aussi : on ne peut rien y mettre)
+var verrouille := false
 ## (lu par la page) le focus vient d'arriver au survol de la souris
 var pointe_a_la_souris := false
 
@@ -226,7 +231,7 @@ func _animer_dessin(delta: float) -> void:
 	var mat := _dessin.material as ShaderMaterial
 	mat.set_shader_parameter("temps", _vie)
 	mat.set_shader_parameter("eveil", _eveil)
-	mat.set_shader_parameter("opacite", opacite_porte if porte else 1.0)
+	mat.set_shader_parameter("opacite", opacite_porte if (porte or verrouille) else 1.0)
 
 
 func _gui_input(event: InputEvent) -> void:
@@ -252,7 +257,7 @@ func _draw() -> void:
 
 	if a_un_talisman():
 		if not _a_un_dessin():
-			_dessiner_talisman(opacite_porte if porte else 1.0)
+			_dessiner_talisman(opacite_porte if (porte or verrouille) else 1.0)
 		if porte:
 			var p := Vector2(r, -r) * 0.66
 			draw_circle(p, 8.5, couleur_socle, true, -1.0, true)
@@ -260,10 +265,27 @@ func _draw() -> void:
 	elif not est_equipement:
 		_ecrire("?", int(r * 0.78), couleur_inconnu)
 
+	if verrouille:
+		_dessiner_cadenas(r)
+
 	if has_focus():
 		var souffle := 0.8 + 0.2 * cos(_t * 5.0)
 		draw_arc(Vector2.ZERO, r + ecart_focus, 0.0, TAU, 72,
 			Color(couleur_focus, souffle), epaisseur_focus, true)
+
+
+## un cadenas d'or au milieu du rond (Couronne du défi)
+func _dessiner_cadenas(r: float) -> void:
+	var s := r * 0.42
+	var sombre := Color(0.12, 0.07, 0.02)
+	# l'anse, puis le corps (cerné de sombre), puis le trou de la serrure
+	draw_arc(Vector2(0.0, -s * 0.18), s * 0.42, PI, TAU, 24, sombre, s * 0.3, true)
+	draw_arc(Vector2(0.0, -s * 0.18), s * 0.42, PI, TAU, 24, couleur_cadenas, s * 0.16, true)
+	var corps := Rect2(Vector2(-s * 0.62, -s * 0.2), Vector2(s * 1.24, s * 0.95))
+	draw_rect(corps.grow(s * 0.08), sombre, true)
+	draw_rect(corps, couleur_cadenas, true)
+	draw_circle(Vector2(0.0, s * 0.18), s * 0.13, sombre, true, -1.0, true)
+	draw_rect(Rect2(Vector2(-s * 0.05, s * 0.18), Vector2(s * 0.1, s * 0.3)), sombre, true)
 
 
 func _dessiner_talisman(opacite: float) -> void:

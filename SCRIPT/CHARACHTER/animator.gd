@@ -138,6 +138,9 @@ const TALISMAN_LAME_CORROMPUE := "lame_corrompue"
 ## TALISMAN « VENIN » : l'éclat d'un coup sur un ennemi empoisonné se cerne de
 ## violet (les dégâts en plus : BASE_IA `_venin`)
 const TALISMAN_VENIN := "venin"
+## TALISMAN « ENTRAVES » : chaque coup qui porte ralentit l'ennemi (BASE_IA
+## `entraver`, réglages sur le joueur)
+const TALISMAN_ENTRAVES := "entraves"
 const VENIN_ECLAT_CONTOUR := Color(0.6, 0.18, 0.9)
 ## les couleurs du slash en shader telles que réglées (lues une fois) : sa
 ## lame, sa foudre, le halo de sa foudre
@@ -260,6 +263,9 @@ func _on_body_entered(body):
 			# LAME CORROMPUE : le coup empoisonne (ou prolonge le poison)
 			if Player.talisman_equipe(TALISMAN_LAME_CORROMPUE) and body is BaseAI and body.hp > 0:
 				player.empoisonner(body)
+			# ENTRAVES : le coup l'entrave — au ralenti un moment, au sol comme en vol
+			if Player.talisman_equipe(TALISMAN_ENTRAVES) and body is BaseAI and body.hp > 0:
+				body.entraver(player.entraves_duree, player.entraves_facteur)
 			# COUP DE GRÂCE : il vole en éclats, la jauge se remplit
 			if grace:
 				player.grace_executer(body)

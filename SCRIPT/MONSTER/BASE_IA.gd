@@ -158,6 +158,14 @@ func _physics_process(delta: float) -> void:
 	if current_state < 0:
 		return
 	_tick_oubli_hors_vue(delta)
+	# ENTRAVÉ (talisman « Entraves ») : il vit au ralenti, `lent` fois sa vitesse
+	var lent := 1.0
+	if _entrave_reste > 0.0:
+		_entrave_reste -= delta
+		if _entrave_reste <= 0.0 or _is_dead() or current_state in _etats_de_mort():
+			_liberer()
+		else:
+			lent = _entrave_facteur
 	# sonné : il reste au repos (change_state refuse le reste) ; à la fin, il
 	# reprend ses esprits et décide de nouveau
 	if _etourdi_reste > 0.0:
@@ -177,16 +185,28 @@ func _physics_process(delta: float) -> void:
 	# seule la gravité (et le recul) le bougent
 	if _cristal:
 		velocity.x = 0.0
-		velocity.y += gravity * delta
+		velocity.y += gravity * delta * lent
 	else:
-		state_functions[current_state]["execute"].call(delta)
+		state_functions[current_state]["execute"].call(delta * lent)
 	# Knockback absolu : tant qu'il est actif, il REMPLACE le déplacement
 	# horizontal de l'état (l'ennemi ne peut pas compenser en marchant contre).
 	# Injecté dans velocity pour que move_and_slide glisse le long du sol,
 	# au lieu de move_and_collide qui se bloquait sur les jointures de tiles.
 	if _knock != Vector2.ZERO:
 		velocity.x = _knock.x
+	# ENTRAVÉ : ce pas-ci est raccourci (marche, vol, chute — pas le recul de nos
+	# coups) ; sa vitesse « à lui » est rendue après, pour que son état la
+	# retrouve telle qu'il l'a laissée
+	var freine_x := lent < 1.0 and _knock == Vector2.ZERO
+	if lent < 1.0:
+		velocity.y *= lent
+		if freine_x:
+			velocity.x *= lent
 	move_and_slide()
+	if lent < 1.0:
+		velocity.y /= lent
+		if freine_x:
+			velocity.x /= lent
 	_decay_knockback(delta)
 	_tick_contacts(delta)
 	_check_contact_damage()
@@ -526,6 +546,51 @@ func etourdir(duree: float, etoiles := true) -> void:
 
 func est_etourdi() -> bool:
 	return _etourdi_reste > 0.0
+
+
+## ENTRAVES (1er oct. 2026, talisman du joueur « Entraves ») : ENTRAVÉ pendant
+## `duree` s, il vit à `facteur` de sa vitesse — son état (marche, vol, chute,
+## coups) et son animation tournent au ralenti, AU SOL COMME EN VOL (Kaoru :
+## « faut que ça marche aussi sur les volants ») ; le recul de nos coups, lui,
+## n'est pas freiné. Un anneau de sang l'enserre à mi-hauteur — la couronne de
+## la Vengeance passée autour de lui, ses pointes qui rentrent avec le temps qui
+## reste (SCRIPT/SHADER/entrave_sang.gd). Entravé de nouveau : le temps repart,
+## sans cumul. Sans effet sur un mort.
+const ENTRAVE_SCENE := preload("res://SCRIPT/SHADER/entrave_sang.tscn")
+var _entrave_reste := 0.0
+var _entrave_facteur := 1.0
+var _entrave_vitesse_anim := 1.0     # la vitesse de son animation avant l'entrave
+var _entrave_fx: Node2D = null
+
+
+func entraver(duree: float, facteur: float) -> void:
+	if duree <= 0.0 or hp <= 0 or _is_dead() or current_state in _etats_de_mort():
+		return
+	if _entrave_reste <= 0.0:
+		_entrave_vitesse_anim = animator.speed_scale
+	_entrave_reste = maxf(_entrave_reste, duree)
+	_entrave_facteur = clampf(facteur, 0.05, 1.0)
+	animator.speed_scale = _entrave_vitesse_anim * _entrave_facteur
+	if _entrave_fx == null or not is_instance_valid(_entrave_fx):
+		_entrave_fx = ENTRAVE_SCENE.instantiate()
+		_entrave_fx.demo_boucle = false
+		_entrave_fx.cible = self
+		add_child(_entrave_fx)
+	_entrave_fx.serrer(duree)
+
+
+func est_entrave() -> bool:
+	return _entrave_reste > 0.0
+
+
+## le temps est écoulé (ou il meurt) : il reprend sa vitesse, l'anneau se desserre
+func _liberer() -> void:
+	_entrave_reste = 0.0
+	_entrave_facteur = 1.0
+	animator.speed_scale = _entrave_vitesse_anim
+	if _entrave_fx != null and is_instance_valid(_entrave_fx):
+		_entrave_fx.relacher()
+	_entrave_fx = null
 
 
 ## SANG CRISTALLISÉ (1er oct. 2026, talisman du joueur « Sang cristallisé ») :

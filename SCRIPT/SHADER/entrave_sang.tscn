@@ -1,0 +1,27 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://SCRIPT/SHADER/entrave_sang.gd" id="1_en"]
+[ext_resource type="Shader" path="res://SCRIPT/SHADER/entrave_sang.gdshader" id="2_en"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_en"]
+resource_local_to_scene = true
+shader = ExtResource("2_en")
+
+[node name="EntraveSang" type="Node2D"]
+script = ExtResource("1_en")
+
+[node name="Derriere" type="ColorRect" parent="."]
+material = SubResource("ShaderMaterial_en")
+offset_left = -84.0
+offset_top = -119.0
+offset_right = 84.0
+offset_bottom = 119.0
+mouse_filter = 2
+
+[node name="Devant" type="ColorRect" parent="."]
+material = SubResource("ShaderMaterial_en")
+offset_left = -84.0
+offset_top = -119.0
+offset_right = 84.0
+offset_bottom = 119.0
+mouse_filter = 2

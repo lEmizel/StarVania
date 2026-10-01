@@ -139,8 +139,11 @@ func _prendre_le_focus() -> void:
 
 ## relit l'état du joueur et le montre
 func _rafraichir() -> void:
+	# la Couronne du défi verrouille tout le reste (les emplacements libres aussi)
+	var defi := Player.talisman_equipe(Player.TALISMAN_DEFI)
 	for i in _equipements.size():
 		var id: String = Player.talismans_equipes[i] if i < Player.talismans_equipes.size() else ""
+		_equipements[i].verrouille = defi and id == ""
 		_equipements[i].montrer(Talismans.trouver(id), Talismans.numero(id), id != "", false)
 	var trouves := 0
 	for i in _collection.size():
@@ -149,6 +152,7 @@ func _rafraichir() -> void:
 		var decouvert := Player.talisman_decouvert(id)
 		if decouvert:
 			trouves += 1
+		_collection[i].verrouille = decouvert and Player.talisman_verrouille(id)
 		_collection[i].montrer(ligne, i + 1, decouvert, Player.talisman_equipe(id))
 	_titre_collection.text = "COLLECTION   %d / %d" % [trouves, _collection.size()]
 	_decrire(_pointe)
@@ -159,6 +163,11 @@ func _rafraichir() -> void:
 # --------------------------------------------------------------------------
 
 func _on_valide(e: Control) -> void:
+	if e.verrouille:
+		# la Couronne du défi ne souffre aucun autre talisman
+		e.refuser()
+		_dire_refus("Verrouillé", "La Couronne du défi ne tolère aucun autre talisman. Ôte-la pour les retrouver.")
+		return
 	if not e.a_un_talisman():
 		e.refuser()     # emplacement libre, ou talisman pas encore découvert
 		return
@@ -240,8 +249,12 @@ func _decrire(e: Control) -> void:
 		_nom.text = ""
 		_description.text = ""
 	elif e.a_un_talisman():
-		_nom.text = String(e.talisman["nom"]) + ("   (équipé)" if e.porte else "")
+		var etat := "   (équipé)" if e.porte else ("   (verrouillé)" if e.verrouille else "")
+		_nom.text = String(e.talisman["nom"]) + etat
 		_description.text = String(e.talisman.get("description", ""))
+	elif e.est_equipement and e.verrouille:
+		_nom.text = "Emplacement verrouillé"
+		_description.text = "La Couronne du défi ne tolère aucun autre talisman."
 	elif e.est_equipement:
 		_nom.text = "Emplacement libre"
 		_description.text = "Choisis un talisman dans la collection pour l'équiper."

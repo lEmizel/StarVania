@@ -1,0 +1,20 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://SCRIPT/SHADER/coeur_noir_onde.gd" id="1_cn"]
+[ext_resource type="Shader" path="res://SCRIPT/SHADER/coeur_noir_onde.gdshader" id="2_cn"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_cn"]
+resource_local_to_scene = true
+shader = ExtResource("2_cn")
+
+[node name="CoeurNoirOnde" type="Node2D"]
+z_index = 3
+script = ExtResource("1_cn")
+
+[node name="Dessin" type="ColorRect" parent="."]
+material = SubResource("ShaderMaterial_cn")
+offset_left = -600.0
+offset_top = -600.0
+offset_right = 600.0
+offset_bottom = 600.0
+mouse_filter = 2
