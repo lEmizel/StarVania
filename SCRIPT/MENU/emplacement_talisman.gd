@@ -60,6 +60,8 @@ var numero := 0                 # écrit sur le rond tant qu'il n'a pas de dessi
 var decouvert := false
 var porte := false              # (collection) ce talisman est équipé
 var est_equipement := false     # true = un emplacement de la rangée du haut
+## (lu par la page) le focus vient d'arriver au survol de la souris
+var pointe_a_la_souris := false
 
 var _icone: Texture2D = null
 var _dessin: ColorRect = null   # le rectangle qui porte le shader du talisman, s'il en a un
@@ -84,11 +86,19 @@ var decalage_dessin := 0.0:
 func _ready() -> void:
 	custom_minimum_size = Vector2(diametre, diametre)
 	focus_mode = Control.FOCUS_ALL
+	# la molette passe à la liste qui défile (le clic, lui, est gardé ici)
+	mouse_filter = Control.MOUSE_FILTER_PASS
 	set_process(false)
 	focus_entered.connect(_on_focus_entered)
 	focus_exited.connect(_on_focus_exited)
-	mouse_entered.connect(grab_focus)
+	mouse_entered.connect(_on_mouse_entered)
 	resized.connect(_placer_dessin)
+
+
+func _on_mouse_entered() -> void:
+	pointe_a_la_souris = true
+	grab_focus()
+	pointe_a_la_souris = false
 
 
 ## Ce que l'emplacement montre. `ligne` = la ligne du catalogue ({} = aucun

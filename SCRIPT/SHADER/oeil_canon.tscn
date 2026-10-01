@@ -1,0 +1,32 @@
+[gd_scene format=3 uid="uid://pv6imtwv1tyx"]
+
+[ext_resource type="Script" uid="uid://pospa2qk45h7" path="res://SCRIPT/SHADER/oeil_canon.gd" id="1_oc"]
+[ext_resource type="Shader" uid="uid://xmo6omvqkbsd" path="res://SCRIPT/SHADER/oeil_canon.gdshader" id="2_oc"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_oc"]
+resource_local_to_scene = true
+shader = ExtResource("2_oc")
+shader_parameter/taille = Vector2(90, 64)
+shader_parameter/temps = -0.88
+shader_parameter/ouvert = 1.0
+shader_parameter/regard = 1.0
+shader_parameter/amande = Vector2(25, 11)
+shader_parameter/encre_px = 0.722000034295
+shader_parameter/flammes = 9.0
+shader_parameter/encre = Color(0.08, 0.02, 0.03, 1)
+shader_parameter/coeur = Color(1, 0.86, 0.35, 1)
+shader_parameter/orange = Color(1, 0.45, 0.08, 1)
+shader_parameter/rouge = Color(0.82, 0.08, 0.06, 1)
+shader_parameter/sombre = Color(0.38, 0.02, 0.04, 1)
+
+[node name="OeilCanon" type="Node2D" unique_id=2122485070]
+z_index = 2
+script = ExtResource("1_oc")
+
+[node name="Oeil" type="ColorRect" parent="." unique_id=2144897663]
+material = SubResource("ShaderMaterial_oc")
+offset_left = -45.0
+offset_top = -32.0
+offset_right = 45.0
+offset_bottom = 32.0
+mouse_filter = 2

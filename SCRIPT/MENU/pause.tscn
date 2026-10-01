@@ -86,6 +86,33 @@ corner_radius_top_right = 4
 corner_radius_bottom_right = 4
 corner_radius_bottom_left = 4
 
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_glissiere"]
+content_margin_left = 3.0
+content_margin_right = 3.0
+bg_color = Color(0.043, 0.035, 0.05, 0.9)
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_poignee"]
+content_margin_left = 3.0
+content_margin_right = 3.0
+bg_color = Color(0.45, 0.11, 0.14, 1)
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_poignee_vive"]
+content_margin_left = 3.0
+content_margin_right = 3.0
+bg_color = Color(0.86, 0.17, 0.2, 1)
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
+
 [sub_resource type="Theme" id="Theme_pause"]
 Button/colors/font_color = Color(0.78, 0.74, 0.7, 1)
 Button/colors/font_focus_color = Color(1, 0.96, 0.9, 1)
@@ -97,6 +124,11 @@ Button/styles/hover = SubResource("StyleBoxFlat_bouton_survol")
 Button/styles/normal = SubResource("StyleBoxFlat_bouton")
 Button/styles/pressed = SubResource("StyleBoxFlat_bouton_presse")
 Label/colors/font_color = Color(0.93, 0.89, 0.82, 1)
+VScrollBar/styles/grabber = SubResource("StyleBoxFlat_poignee")
+VScrollBar/styles/grabber_highlight = SubResource("StyleBoxFlat_poignee_vive")
+VScrollBar/styles/grabber_pressed = SubResource("StyleBoxFlat_poignee_vive")
+VScrollBar/styles/scroll = SubResource("StyleBoxFlat_glissiere")
+VScrollBar/styles/scroll_focus = SubResource("StyleBoxFlat_glissiere")
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_fenetre"]
 bg_color = Color(0.078, 0.063, 0.09, 1)
@@ -231,11 +263,28 @@ theme_override_font_sizes/font_size = 19
 text = "COLLECTION"
 horizontal_alignment = 1
 
-[node name="Collection" type="GridContainer" parent="Cadre/Fenetre/Pages/Talismans/Colonne"]
+[node name="Defilement" type="ScrollContainer" parent="Cadre/Fenetre/Pages/Talismans/Colonne"]
+layout_mode = 2
+size_flags_vertical = 3
+mouse_filter = 1
+theme_override_colors/scroll_hint_vertical_color = Color(0.078, 0.063, 0.09, 1)
+horizontal_scroll_mode = 0
+vertical_scroll_mode = 4
+scroll_hint_mode = 1
+
+[node name="Marge" type="MarginContainer" parent="Cadre/Fenetre/Pages/Talismans/Colonne/Defilement"]
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_filter = 2
+theme_override_constants/margin_left = 6
+theme_override_constants/margin_top = 22
+theme_override_constants/margin_bottom = 22
+
+[node name="Collection" type="GridContainer" parent="Cadre/Fenetre/Pages/Talismans/Colonne/Defilement/Marge"]
 layout_mode = 2
 size_flags_horizontal = 4
 mouse_filter = 2
-theme_override_constants/h_separation = 22
+theme_override_constants/h_separation = 20
 theme_override_constants/v_separation = 22
 columns = 6
 
@@ -253,11 +302,6 @@ theme_override_colors/font_color = Color(0.72, 0.67, 0.64, 1)
 theme_override_font_sizes/font_size = 21
 horizontal_alignment = 1
 autowrap_mode = 3
-
-[node name="Ressort" type="Control" parent="Cadre/Fenetre/Pages/Talismans/Colonne"]
-layout_mode = 2
-size_flags_vertical = 3
-mouse_filter = 2
 
 [node name="Aide" type="Label" parent="Cadre/Fenetre/Pages/Talismans/Colonne"]
 layout_mode = 2

@@ -43,16 +43,17 @@ extends RefCounted
 ## Nombre d'emplacements RONDS de la collection dans le menu. Ceux qui n'ont pas
 ## encore de talisman dans LISTE restent des emplacements vides « à découvrir ».
 ## S'il y a plus de talismans que d'emplacements, la grille s'agrandit seule.
-## VINGT-NEUF pour le moment (5 le 30 sept. 2026 ; le sillage de sang, les
+## TRENTE ET UN pour le moment (5 le 30 sept. 2026 ; le sillage de sang, les
 ## épines, la frénésie, la marque, le second souffle, le canon de verre,
 ## l'allonge, la vengeance, le croissant de sang, l'essaim, l'offrande, le
 ## sang bouillant, l'ombre de sang, le sang corrompu, le coup dans le dos, le
 ## crescendo, la parade, la lame corrompue, la prise ferme, le venin, le coup
-## de grâce, le sang cristallisé, les plumes acérées et le sang plein le 1er
-## oct.) : monte ce nombre quand il y en aura d'autres à découvrir.
-const NB_EMPLACEMENTS := 29
+## de grâce, le sang cristallisé, les plumes acérées, le sang plein, le sang
+## versé et le reliquaire le 1er oct.) : monte ce nombre quand il y en aura
+## d'autres à découvrir.
+const NB_EMPLACEMENTS := 31
 
-## Les VINGT-NEUF talismans du jeu (1er oct. 2026), tous branchés :
+## Les TRENTE ET UN talismans du jeu (1er oct. 2026), tous branchés :
 ##   tornade  → SCRIPT/CHARACHTER/player.gd, région BLOODBALL
 ##   foudre   → SCRIPT/CHARACHTER/animator.gd (le slash, l'arc qui bondit, le +10 %)
 ##   bouclier → player.gd (`apply_damage` / `apply_environment_damage`)
@@ -68,7 +69,8 @@ const NB_EMPLACEMENTS := 29
 ##   souffle  → player.gd (`_second_souffle`, `Player.second_souffle_attente`),
 ##              checkpoint.gd (recharge), gestion_interface.gd (`souffle_fx`)
 ##   canon    → SCRIPT/AUTOLOAD/player.gd (`multiplicateur_infliges` /
-##              `multiplicateur_recus`) — des stats seules
+##              `multiplicateur_recus`) + l'œil de feu au-dessus de la tête
+##              (SCRIPT/SHADER/oeil_canon.gd, posé par player.gd `_oeil_preparer`)
 ##   allonge  → SCRIPT/CHARACHTER/animator.gd (`_play_slash`)
 ##   vengeance → player.gd (`_vengeance_charger`, `vengeance_active`) +
 ##              animator.gd (les coups ×1,5 tant qu'elle dure) +
@@ -112,6 +114,8 @@ const NB_EMPLACEMENTS := 29
 ##              SCRIPT/SHADER/plume_aceree.gd (la plume-lame) — il faut le double saut
 ##   sang_plein → SCRIPT/AUTOLOAD/player.gd (`bonus_degats_pourcent`,
 ##              `sang_plein_actif`) — des stats seules, comme la Frénésie
+##   sang_verse → player.gd (`_sang_verse`, quand un coup est encaissé)
+##   reliquaire → player.gd (`_perdre_blood`, dans `dead_enter`)
 ## Les clés chiffrées (`degats_pourcent`, `esquive_pourcent`, `blood_pourcent`,
 ## `degats_pourcent_dernier_coeur`)
 ## sont lues par `Player.bonus_talismans(cle)` : deux talismans qui portent la
@@ -146,11 +150,13 @@ const LISTE := [
 	{"id": "cristal", "nom": "Sang cristallisé", "description": "Une boule de sang sur cinq fige l'ennemi dans le cristal pendant un instant ; votre coup d'épée suivant le brise avec 50 % de dégâts en plus.", "couleur": Color(0.86, 0.12, 0.2), "dessin": "res://SCRIPT/TALISMAN/dessin_cristal.gdshader"},
 	{"id": "plumes", "nom": "Plumes acérées", "description": "Nécessite le double saut. À chaque double saut, l'aile lâche des plumes acérées qui fondent vers le sol et blessent les ennemis en dessous.", "couleur": Color(0.65, 0.16, 0.24), "dessin": "res://SCRIPT/TALISMAN/dessin_plumes.gdshader"},
 	{"id": "sang_plein", "nom": "Sang plein", "description": "Tant que votre jauge de sang est pleine, vos coups d'épée font 40 % de dégâts en plus. Vous soigner la vide…", "couleur": Color(0.78, 0.04, 0.12), "dessin": "res://SCRIPT/TALISMAN/dessin_sang_plein.gdshader", "degats_pourcent_jauge_pleine": 40},
+	{"id": "sang_verse", "nom": "Sang versé", "description": "Chaque cœur perdu remplit votre jauge de soin d'une demi-barre.", "couleur": Color(0.78, 0.04, 0.12), "dessin": "res://SCRIPT/TALISMAN/dessin_sang_verse.gdshader"},
+	{"id": "reliquaire", "nom": "Reliquaire", "description": "À votre mort, vous gardez la moitié du sang récolté au lieu de tout perdre.", "couleur": Color(0.62, 0.48, 0.26), "dessin": "res://SCRIPT/TALISMAN/dessin_reliquaire.gdshader"},
 ]
 
 ## POUR TESTER LE MENU : les talismans déjà découverts au début d'une partie.
 ## À vider ([]) quand ils se trouveront dans les niveaux.
-const DECOUVERTS_AU_DEPART := ["tornade_bloodball", "foudre", "bouclier", "esquive", "soif", "sillage", "epines", "frenesie", "marque", "souffle", "canon", "allonge", "vengeance", "croissant", "essaim", "offrande", "bouillant", "ombre", "corrompu", "dos", "crescendo", "parade", "lame_corrompue", "prise", "venin", "grace", "cristal", "plumes", "sang_plein"]
+const DECOUVERTS_AU_DEPART := ["tornade_bloodball", "foudre", "bouclier", "esquive", "soif", "sillage", "epines", "frenesie", "marque", "souffle", "canon", "allonge", "vengeance", "croissant", "essaim", "offrande", "bouillant", "ombre", "corrompu", "dos", "crescendo", "parade", "lame_corrompue", "prise", "venin", "grace", "cristal", "plumes", "sang_plein", "sang_verse", "reliquaire"]
 
 
 ## la ligne du catalogue qui porte cet id ({} si aucune)

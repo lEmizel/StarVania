@@ -115,9 +115,14 @@ var _souffle_grace_reste := 0.0
 @export var marque_multiplicateur := 1.5     # +50 % (Kaoru, 1er oct. 2026 : ×2 était trop fort)
 
 ## TALISMAN « CANON DE VERRE » (1er oct. 2026, id "canon", idée de Kaoru) :
-## tous les dégâts infligés ×2 et tous les dégâts reçus ×2 — des stats seules
-## (clés du catalogue lues par `Player.multiplicateur_infliges()` /
-## `Player.multiplicateur_recus()`, appliquées dans `_degats_recus`).
+## tous les dégâts infligés ×2 et tous les dégâts reçus ×2 (clés du catalogue
+## lues par `Player.multiplicateur_infliges()` / `Player.multiplicateur_recus()`,
+## appliquées dans `_degats_recus`). Tant qu'il est porté, un petit ŒIL DE FEU
+## (l'œil de Sauron, idée de Kaoru) flotte au-dessus de la tête — au-dessus de
+## la couronne de la Vengeance quand elle est levée : SCRIPT/SHADER/oeil_canon.tscn,
+## posé une fois par `_oeil_preparer`.
+const OEIL_CANON := preload("res://SCRIPT/SHADER/oeil_canon.tscn")
+var _oeil: Node2D
 
 ## TALISMAN « ALLONGE » (1er oct. 2026, id "allonge") : la lame porte plus loin
 ## — clé `allonge_pourcent` du catalogue (20 = +20 %), appliquée par animator.gd
@@ -260,6 +265,23 @@ const PLUME_ACEREE := preload("res://SCRIPT/SHADER/plume_aceree.tscn")
 @export var plumes_vitesse := 950.0
 @export var plumes_eventail := 36.0
 
+## TALISMAN « SANG VERSÉ » (1er oct. 2026, id "sang_verse", idée de Kaoru) :
+## chaque cœur perdu remplit la jauge de soin de `sang_verse_par_coeur` (50 = une
+## demi-barre ; un soin coûte `HEAL_COST`, 100) — voir `_sang_verse`, appelé
+## quand un coup est VRAIMENT encaissé (`apply_damage`, `apply_environment_damage` :
+## pas s'il est paré, esquivé, ou si on en meurt).
+const TALISMAN_SANG_VERSE := "sang_verse"
+@export var sang_verse_par_coeur := 50
+
+## LE SANG PERDU À LA MORT (1er oct. 2026) : en mourant, on perd
+## `blood_perdu_a_la_mort` du sang récolté (le compteur `Player.blood`, les
+## « âmes ») — 1 = tout, 0 = rien. JUSQUE-LÀ ON NE PERDAIT RIEN : ajouté avec le
+## talisman « RELIQUAIRE » (id "reliquaire", idée de Kaoru), qui en GARDE
+## `reliquaire_part` (50 %). Voir `_perdre_blood`, dans `dead_enter`.
+@export_range(0.0, 1.0) var blood_perdu_a_la_mort := 1.0
+const TALISMAN_RELIQUAIRE := "reliquaire"
+@export_range(0.0, 1.0) var reliquaire_part := 0.5
+
 ## TALISMAN « CROISSANT DE SANG » (1er oct. 2026, id "croissant") : le DERNIER
 ## coup du combo (le 2e : le combo n'en a que deux) projette son slash vers
 ## l'avant (animator.gd, `_croissant`) ; ses
@@ -389,6 +411,7 @@ func _ready() -> void:
 	_aile_preparer()
 	_bouclier_preparer()
 	_couronne_preparer()
+	_oeil_preparer()
 	# nos victimes (talisman « Essaim ») ; le signal vit dans l'autoload, la
 	# connexion meurt avec ce joueur
 	Player.monstre_tue.connect(_on_monstre_tue)
@@ -566,6 +589,7 @@ func apply_damage(amount: int, source_x, source_tag := "?", perce_stun := false,
 		" état=", States.keys()[current_state],
 		" hp ", Player.hp, " -> ", Player.hp - amount)
 	Player.changement_de_vie(-amount)
+	_sang_verse(amount)
 	# l'éclat de sang part dans le sens où le coup nous envoie ; source
 	# inconnue (une chute) : vers le haut
 	var sens_coup := Vector2.UP
@@ -621,6 +645,14 @@ func _second_souffle(amount: int, source_tag: String) -> int:
 
 
 ## --- la vengeance ---
+
+## l'œil du Canon de verre : il se montre et se cache seul selon le talisman
+func _oeil_preparer() -> void:
+	_oeil = OEIL_CANON.instantiate()
+	_oeil.demo_boucle = false
+	_oeil.joueur = self
+	add_child(_oeil)
+
 
 func _couronne_preparer() -> void:
 	_couronne = COURONNE_SCENE.instantiate()
@@ -738,6 +770,29 @@ func _epines_jaillir() -> void:
 		c.apply_damage(degats, global_position.x, "epines", true, self)
 	print("[EPINES] f=", Engine.get_physics_frames(), " ", touches.size(),
 		" ennemi(s) touché(s), ", degats, " dégâts chacun")
+
+
+## --- le sang versé, le sang perdu à la mort ---
+
+## SANG VERSÉ : `coeurs` cœurs viennent d'être perdus — la jauge de soin s'en
+## remplit (pas si on en meurt : on ne se soigne plus)
+func _sang_verse(coeurs: int) -> void:
+	if coeurs <= 0 or Player.hp <= 0 or not Player.talisman_equipe(TALISMAN_SANG_VERSE):
+		return
+	Player.changement_de_bloodheal(sang_verse_par_coeur * coeurs)
+	print("[SANG VERSÉ] +", sang_verse_par_coeur * coeurs, " de jauge (", coeurs, " cœur(s) perdu(s))")
+
+
+## à la mort : on perd `blood_perdu_a_la_mort` du sang récolté — le Reliquaire
+## en garde `reliquaire_part`
+func _perdre_blood() -> void:
+	var part := blood_perdu_a_la_mort
+	if Player.talisman_equipe(TALISMAN_RELIQUAIRE):
+		part *= 1.0 - reliquaire_part
+	var perte := int(floor(float(Player.blood) * part))
+	if perte > 0:
+		Player.changement_de_blood(-perte)
+	print("[MORT] sang perdu : ", perte, " (il en reste ", Player.blood, ")")
 
 
 ## --- le coup de grâce ---
@@ -1244,6 +1299,7 @@ func apply_environment_damage(amount: int, direction: Vector2 = Vector2.UP) -> b
 		" état=", States.keys()[current_state],
 		" hp ", Player.hp, " -> ", Player.hp - amount)
 	Player.changement_de_vie(-amount)
+	_sang_verse(amount)
 	_eclat_sang(direction)
 	if Player.hp <= 0:
 		_knock = Vector2.ZERO
@@ -3289,6 +3345,7 @@ const ECRAN_MORT_DEMO := preload("res://SCRIPT/UTILITAIRE/ecran_mort_demo.gd")
 # --------------------------------------------------------------------------
 func dead_enter() -> void:
 	animator.play("death")
+	_perdre_blood()
 	velocity.x = 0.0            # FIX: stoppe le mouvement horizontal
 	if _bouclier != null:
 		_bouclier.tomber()      # le bouclier de sang meurt avec nous

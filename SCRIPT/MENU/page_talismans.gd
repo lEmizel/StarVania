@@ -3,7 +3,10 @@ extends Control
 ## ONGLET TALISMANS du menu START.
 ##   • en haut, les emplacements où l'on ÉQUIPE (Player.EMPLACEMENTS_TALISMAN) ;
 ##   • dessous, la COLLECTION : un emplacement rond par talisman à découvrir
-##     (le catalogue est dans SCRIPT/TALISMAN/talismans.gd).
+##     (le catalogue est dans SCRIPT/TALISMAN/talismans.gd). Elle DÉFILE quand
+##     elle ne tient pas en hauteur : les ronds gardent leur taille (Kaoru,
+##     1er oct. 2026 : « plutôt que les réduire, plus gros et dans un menu
+##     déroulant ») et la liste suit le rond pointé.
 ##
 ## MANETTE : croix ou stick pour se déplacer, Croix pour équiper un talisman de
 ## la collection dans le premier emplacement libre, ou pour le retirer (depuis
@@ -19,10 +22,14 @@ const EMPLACEMENT := preload("res://SCRIPT/MENU/emplacement_talisman.tscn")
 
 ## diamètre des emplacements d'équipement (rangée du haut)
 @export var diametre_equipement := 112.0
-## diamètre des emplacements de la collection
-@export var diametre_collection := 92.0
-## (s'il y a plus d'emplacements que la fenêtre n'en contient à ces tailles, les
-## ronds rétrécissent tout seuls pour tenir : voir _tenir_dans_la_fenetre)
+## diamètre des emplacements de la collection (92 avant la liste qui défile ;
+## à 96, trois rangées entières tiennent dans la liste : celle du rond pointé et
+## ses deux voisines). Trop de ronds pour la LARGEUR de la fenêtre : ils
+## rétrécissent tout seuls pour tenir (_tenir_dans_la_fenetre) ; en hauteur, la
+## collection défile.
+@export var diametre_collection := 96.0
+## durée du défilement de la collection jusqu'au rond pointé (s)
+@export var duree_defilement := 0.16
 ## couleur du message de refus (plus d'emplacement libre)
 @export var couleur_refus := Color(0.95, 0.32, 0.32)
 ## durée d'affichage du message de refus (s)
@@ -30,7 +37,9 @@ const EMPLACEMENT := preload("res://SCRIPT/MENU/emplacement_talisman.tscn")
 
 @onready var _colonne: VBoxContainer = $Colonne
 @onready var _rangee: HBoxContainer = $Colonne/Equipements
-@onready var _grille: GridContainer = $Colonne/Collection
+@onready var _defilement: ScrollContainer = $Colonne/Defilement
+@onready var _marge: MarginContainer = $Colonne/Defilement/Marge
+@onready var _grille: GridContainer = $Colonne/Defilement/Marge/Collection
 @onready var _titre_collection: Label = $Colonne/TitreCollection
 @onready var _nom: Label = $Colonne/Nom
 @onready var _description: Label = $Colonne/Description
@@ -39,6 +48,8 @@ var _equipements: Array[Control] = []
 var _collection: Array[Control] = []
 var _pointe: Control = null         # l'emplacement qui a le focus
 var _message: Tween = null          # le message de refus en cours d'affichage
+var _defile: Tween = null           # le défilement de la collection en cours
+var _sans_animation := false        # (prendre_le_focus) la liste saute, sans glisser
 
 
 func _ready() -> void:
@@ -49,6 +60,7 @@ func _ready() -> void:
 	for i in Talismans.nb_emplacements():
 		_collection.append(_nouvel_emplacement(_grille, "Emplacement%d" % (i + 1), diametre_collection))
 	_tenir_dans_la_fenetre()
+	_fixer_hauteur_description()
 	_cabler_focus()
 	Player.talismans_changes.connect(_rafraichir)
 	_rafraichir()
@@ -64,24 +76,22 @@ func _nouvel_emplacement(parent: Node, nom: String, diametre: float) -> Control:
 	return e
 
 
-## Plus d'emplacements que la fenêtre n'en contient à cette taille (on a monté
-## Player.EMPLACEMENTS_TALISMAN, le nombre d'emplacements du catalogue ou les
-## colonnes de la grille) : les ronds rétrécissent juste assez pour tenir, rien
-## ne sort du cadre.
+## Plus d'emplacements que la fenêtre n'en contient EN LARGEUR (on a monté
+## Player.EMPLACEMENTS_TALISMAN ou les colonnes de la grille) : les ronds
+## rétrécissent juste assez pour tenir, rien ne sort du cadre. En HAUTEUR, ils
+## ne rétrécissent plus : la collection défile (avant, à 31 talismans, ils
+## étaient tombés à ~40 px).
 func _tenir_dans_la_fenetre() -> void:
 	var place := _colonne.size
-	if place.x <= 0.0 or place.y <= 0.0:
+	if place.x <= 0.0:
 		return
 	var trop := _rangee.get_combined_minimum_size().x - place.x
 	if trop > 0.0:
 		_retrecir(_equipements, trop / float(_equipements.size()))
-	trop = _grille.get_combined_minimum_size().x - place.x
+	# la liste : la grille, ses marges et la place de l'ascenseur
+	trop = _defilement.get_combined_minimum_size().x - place.x
 	if trop > 0.0:
 		_retrecir(_collection, trop / float(mini(_grille.columns, _collection.size())))
-	trop = _colonne.get_combined_minimum_size().y - place.y
-	if trop > 0.0:
-		var rangees := ceili(float(_collection.size()) / float(_grille.columns))
-		_retrecir(_collection, trop / float(rangees))
 
 
 func _retrecir(emplacements: Array[Control], de: float) -> void:
@@ -89,9 +99,34 @@ func _retrecir(emplacements: Array[Control], de: float) -> void:
 		e.diametre = maxf(e.diametre - ceilf(de), 24.0)
 
 
+## La description prend d'emblée la hauteur de la plus longue du catalogue :
+## c'est la liste qui s'étire dans la place qui reste, et une ligne de plus d'un
+## talisman à l'autre la faisait sauter.
+func _fixer_hauteur_description() -> void:
+	var largeur := _colonne.size.x
+	var police := _description.get_theme_font("font")
+	if largeur <= 0.0 or police == null:
+		return
+	var taille := _description.get_theme_font_size("font_size")
+	var ligne := police.get_height(taille)
+	var pas_ligne := ligne + float(_description.get_theme_constant("line_spacing"))
+	var plus_haute := 0.0
+	for talisman in Talismans.LISTE:
+		var texte := String(talisman.get("description", ""))
+		var lignes := roundf(police.get_multiline_string_size(texte, HORIZONTAL_ALIGNMENT_CENTER, largeur, taille).y / ligne)
+		plus_haute = maxf(plus_haute, lignes * pas_ligne)
+	_description.custom_minimum_size.y = maxf(_description.custom_minimum_size.y, ceilf(plus_haute))
+
+
 ## appelé par le menu quand l'onglet s'ouvre : le focus revient là où il était,
 ## sinon sur le premier talisman de la collection qu'on peut équiper
 func prendre_le_focus() -> void:
+	_sans_animation = true
+	_prendre_le_focus()
+	_sans_animation = false
+
+
+func _prendre_le_focus() -> void:
 	if _pointe != null:
 		_pointe.grab_focus()
 		return
@@ -152,6 +187,49 @@ func _on_valide(e: Control) -> void:
 func _on_pointe(e: Control) -> void:
 	_pointe = e
 	_decrire(e)
+	# la liste suit le rond pointé — pas s'il l'a été au survol de la souris :
+	# elle bougerait sous le curseur (à la souris, c'est la molette qui la fait
+	# défiler)
+	if not e.est_equipement and not e.pointe_a_la_souris:
+		_faire_defiler_vers(e, not _sans_animation)
+
+
+# --------------------------------------------------------------------------
+#  La collection qui défile
+# --------------------------------------------------------------------------
+
+## La liste glisse le MOINS possible pour montrer la rangée du rond pointé ET
+## ses voisines du dessus et du dessous (on voit ce qui vient) ; elle ne bouge
+## pas tant qu'on les voit déjà. S'il n'y a pas la place de trois rangées, celle
+## du rond pointé est mise au milieu.
+func _faire_defiler_vers(e: Control, anime: bool) -> void:
+	var vu := _defilement.size.y
+	var contenu := _marge.size.y
+	if vu <= 0.0 or contenu <= 0.0:
+		# la page vient de s'ouvrir : sa mise en page n'est pas encore faite
+		await get_tree().process_frame
+		if _pointe == e:
+			_faire_defiler_vers(e, false)
+		return
+	var pas := e.size.y + float(_grille.get_theme_constant("v_separation"))
+	var haut := _grille.position.y + e.position.y
+	var bas := haut + e.size.y
+	var cible := float(_defilement.scroll_vertical)
+	if bas - haut + 2.0 * pas > vu:
+		cible = (haut + bas - vu) * 0.5
+	elif haut - pas < cible:
+		cible = haut - pas
+	elif bas + pas > cible + vu:
+		cible = bas + pas - vu
+	var fin := roundi(clampf(cible, 0.0, maxf(contenu - vu, 0.0)))
+	if _defile != null and _defile.is_valid():
+		_defile.kill()
+	if not anime or fin == _defilement.scroll_vertical:
+		_defilement.scroll_vertical = fin
+		return
+	_defile = create_tween()
+	_defile.tween_property(_defilement, "scroll_vertical", fin, duree_defilement) \
+		.set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
 
 
 func _decrire(e: Control) -> void:
@@ -185,8 +263,11 @@ func _dire_refus(titre: String, texte: String) -> void:
 
 # --------------------------------------------------------------------------
 #  Navigation à la manette : chaque emplacement connaît ses quatre voisins.
-#  (La recherche géométrique de Godot saute parfois une rangée ; ici un bord
-#  est un bord : on n'en sort pas par le côté.)
+#  (La recherche géométrique de Godot saute parfois une rangée.) Dans la
+#  collection, droite au bout d'une rangée passe au premier rond de la
+#  suivante, gauche au début d'une rangée au dernier de la précédente (Kaoru,
+#  1er oct. 2026) ; bas vers une dernière rangée plus courte va à son dernier
+#  rond.
 # --------------------------------------------------------------------------
 
 func _cabler_focus() -> void:
@@ -201,9 +282,13 @@ func _cabler_focus() -> void:
 	var premiere_rangee := mini(colonnes, n)
 	for i in n:
 		var colonne := i % colonnes
-		var gauche := i - 1 if colonne > 0 else i
-		var droite := i + 1 if colonne < colonnes - 1 and i + 1 < n else i
-		var bas := i + colonnes if i + colonnes < n else i
+		var gauche := maxi(i - 1, 0)
+		var droite := mini(i + 1, n - 1)
+		var bas := i
+		if i + colonnes < n:
+			bas = i + colonnes
+		elif i - colonne + colonnes < n:
+			bas = n - 1         # la rangée du dessous est plus courte
 		var haut: Control = _collection[i]      # pas de rangée au-dessus : on reste
 		if i >= colonnes:
 			haut = _collection[i - colonnes]
