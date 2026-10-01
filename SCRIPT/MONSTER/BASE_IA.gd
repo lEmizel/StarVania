@@ -164,12 +164,22 @@ func _physics_process(delta: float) -> void:
 		_etourdi_reste -= delta
 		if _etourdi_reste <= 0.0:
 			_etourdi_reste = 0.0
-			call_deferred("decide")
+			if _cristal:
+				briser_cristal()          # le temps est écoulé : il se brise
+			else:
+				call_deferred("decide")
+	_cristal_immunite = maxf(_cristal_immunite - delta, 0.0)
 	# à portée d'exécution (talisman « Coup de grâce ») : ses fissures battent
 	if _fissuree:
 		_fissure_t += delta
 		_flash_material.set_shader_parameter("fissure", 0.72 + 0.28 * sin(_fissure_t * 6.0))
-	state_functions[current_state]["execute"].call(delta)
+	# figé dans le cristal : une statue — il ne se tourne plus, ne marche plus ;
+	# seule la gravité (et le recul) le bougent
+	if _cristal:
+		velocity.x = 0.0
+		velocity.y += gravity * delta
+	else:
+		state_functions[current_state]["execute"].call(delta)
 	# Knockback absolu : tant qu'il est actif, il REMPLACE le déplacement
 	# horizontal de l'état (l'ennemi ne peut pas compenser en marchant contre).
 	# Injecté dans velocity pour que move_and_slide glisse le long du sol,
@@ -433,6 +443,9 @@ func apply_damage(amount: int, source_x, _source_tag := "?", knockback := true, 
 	_maj_fissures()
 	if hp <= 0:
 		_knock = Vector2.ZERO
+		# figé dans le cristal : la statue vole en éclats
+		if _cristal:
+			briser_cristal(false)
 		# Cadavre inerte : plus détectable ni bloquant (layer 0), mais il garde
 		# son mask pour continuer de reposer sur le sol
 		set_deferred("collision_layer", 0)
@@ -463,7 +476,11 @@ func apply_damage(amount: int, source_x, _source_tag := "?", knockback := true, 
 		target = agresseur
 		if has_method("decide"):
 			call_deferred("decide")
-	if target != null:
+	# (gelé, une statue ne se retourne pas : une morsure de poison le faisait
+	# pivoter vers le héros)
+	if _cristal:
+		pass
+	elif target != null:
 		flip_toward(target.global_position.x)
 	elif source_x != null:
 		flip_toward(source_x)
@@ -490,14 +507,14 @@ func _is_dead() -> bool:
 ## Sans effet sur un mort, sur un monstre dans sa séquence de mort (le
 ## kamikaze qui gonfle) ou sans état IDLE. Sonné de nouveau : le plus long des
 ## deux temps.
-func etourdir(duree: float) -> void:
+func etourdir(duree: float, etoiles := true) -> void:
 	if duree <= 0.0 or _is_dead() or _etat_idle < 0 or current_state in _etats_de_mort():
 		return
 	var deja := _etourdi_reste > 0.0
 	_etourdi_reste = maxf(_etourdi_reste, duree)
 	if current_state != _etat_idle:
 		change_state(_etat_idle)
-	if not deja:
+	if not deja and etoiles:
 		var e := ETOURDI_SCENE.instantiate()
 		e.demo_boucle = false
 		e.monstre = self
@@ -509,6 +526,74 @@ func etourdir(duree: float) -> void:
 
 func est_etourdi() -> bool:
 	return _etourdi_reste > 0.0
+
+
+## SANG CRISTALLISÉ (1er oct. 2026, talisman du joueur « Sang cristallisé ») :
+## FIGÉ pendant `duree` s — une STATUE dans la pose du moment : son animation
+## s'arrête là où elle en est, son état ne change plus (ni décision, ni repos),
+## son coup en cours est coupé, il ne se retourne plus (pas d'`execute` d'état,
+## pas de demi-tour quand on le frappe), et il vire au cristal de sang
+## (hit_flash.gdshader, `cristal`). Le temps écoulé ou notre
+## coup d'épée le BRISE (`briser_cristal` : éclats, il repart). Après, il ne peut
+## pas être refigé pendant `CRISTAL_IMMUNITE` s (la boule ne coûte rien : sinon on
+## le tiendrait figé en boucle). Pas un `vrai_boss`. Renvoie true s'il est figé.
+const CRISTAL_IMMUNITE := 2.0
+const CRISTAL_ECLATS := preload("res://SCRIPT/SHADER/grace_eclats.tscn")
+var _cristal := false
+var _cristal_immunite := 0.0
+
+
+func cristalliser(duree: float) -> bool:
+	if _cristal or _cristal_immunite > 0.0 or vrai_boss or duree <= 0.0 or hp <= 0 \
+			or _is_dead() or current_state in _etats_de_mort():
+		return false
+	# FIGÉ DANS LA POSE DU MOMENT (en pleine marche, en plein coup…) : d'abord
+	# je le repassais au repos, il prenait la 1re image de son idle avant de se
+	# figer. Son état ne change pas (change_state refuse tout, voir plus haut) ;
+	# son animation s'arrête là où elle en est ; son coup en cours est coupé —
+	# ses zones de coup éteintes, son slash effacé — sans changer d'animation.
+	_etourdi_reste = maxf(_etourdi_reste, duree)
+	_cristal = true
+	animator.pause()
+	if animator.has_method("_disable_all_hitboxes"):
+		animator._disable_all_hitboxes()
+	if animator.has_method("_stop_slash"):
+		animator._stop_slash()
+	_flash_material.set_shader_parameter("cristal", 1.0)
+	return true
+
+
+func est_cristallise() -> bool:
+	return _cristal
+
+
+## le cristal se brise : les éclats du Coup de grâce, plus petits, TELS QUE
+## KAORU LES A RÉGLÉS (grace_eclats.tscn : un seul ton, sans encre — ne pas les
+## recolorer ici) ; il reprend son animation et ses esprits (`reprendre` : faux
+## quand il meurt — sa mort décide de la suite)
+func briser_cristal(reprendre := true) -> void:
+	if not _cristal:
+		return
+	_cristal = false
+	_etourdi_reste = 0.0
+	_cristal_immunite = CRISTAL_IMMUNITE
+	_flash_material.set_shader_parameter("cristal", 0.0)
+	if reprendre and _etat_idle >= 0 and current_state != _etat_idle:
+		# il repart d'un état neuf (son coup gelé ne reprend pas en plein élan,
+		# sa zone de coup ne se rallume pas) : au repos, puis il décide
+		change_state(_etat_idle)
+	else:
+		animator.play()     # déjà au repos (ou il meurt) : l'animation reprend
+	var fx := CRISTAL_ECLATS.instantiate()
+	fx.demo_boucle = false
+	fx.scale = Vector2(0.7, 0.7)
+	var hote: Node = get_tree().current_scene
+	if hote == null:
+		hote = get_parent()
+	hote.add_child(fx)
+	fx.global_position = collision.global_position if collision != null else global_position
+	if reprendre:
+		call_deferred("decide")
 
 
 ## VENIN (1er oct. 2026, talisman du joueur « Venin ») : un monstre EMPOISONNÉ
@@ -616,6 +701,11 @@ func change_state(new_state: int) -> void:
 	# kamikaze avant ce garde-fou.
 	if _is_dead() and not (new_state in _etats_de_mort()):
 		return
+	# GELÉ (talisman « Sang cristallisé ») : il ne change plus d'état du tout —
+	# pas même pour le repos, qui relançait son idle (Kaoru : « il arrive
+	# toujours à jouer son idle ») — sauf pour mourir
+	if _cristal and not (new_state in _etats_de_mort()):
+		return
 	# SONNÉ (talisman « Parade ») : il reste au repos jusqu'à la fin
 	if _etourdi_reste > 0.0 and new_state != _etat_idle and not (new_state in _etats_de_mort()):
 		return
@@ -719,6 +809,11 @@ func direction_to_target() -> int:
 func force_reenter_state() -> void:
 	# (un mort ne rejoue pas sa mort, ni rien d'autre)
 	if _is_dead():
+		return
+	# GELÉ (Sang cristallisé) : il ne rejoue pas son état non plus — `decide`
+	# repassait par ici quand il choisissait l'état où il était déjà figé
+	# (ATTACK) : `attack_enter` relançait son coup, et il frappait en plein gel
+	if _cristal:
 		return
 	_changing_now = true
 	if state_functions[current_state].has("exit"):

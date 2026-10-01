@@ -398,6 +398,18 @@ func _physics_process(delta: float) -> void:
 
 
 func _tick_boule_de_feu(delta: float) -> void:
+	# SONNÉ (talisman « Parade ») ou GELÉ (« Sang cristallisé ») : pas de sort.
+	# Le geste en cours avorte — la boule dans sa main s'éteint, sans toucher à
+	# son animation (gelé, il garde sa pose) — et rien ne repart avant qu'il ait
+	# repris ses esprits, plus un petit temps de réaction. Ce sort tourne à part
+	# de son état : gelé, il lançait encore ses boules de feu (Kaoru, 1er oct. 2026).
+	if est_etourdi():
+		if _pose_cast > 0.0 or _charge >= 0.0:
+			_charge = -1.0
+			_pose_cast = 0.0
+			_eteindre_charge()
+			_cast_timer = maxf(_cast_timer, cast_delai_aggro)
+		return
 	# LE GESTE EN COURS : main levée, puis tir au bout du délai.
 	if _pose_cast > 0.0:
 		if current_state == States.DEAD or current_state == States.ATTACK:

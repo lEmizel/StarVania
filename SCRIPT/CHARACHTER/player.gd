@@ -179,16 +179,16 @@ var _crescendo_reste := 0.0       # avant que la série s'éteigne (s)
 ## BASE_IA.infliger) qui nous arrive DE FACE pendant que notre lame est sortie
 ## — ou sur le point de sortir, l'image d'avant — est PARÉ : aucun dégât, et
 ## l'ennemi reste sonné `parade_etourdi` s (BASE_IA.etourdir : son coup s'arrête
-## net, des étoiles tournent au-dessus de sa tête — idée de Kaoru aussi). Un
-## ennemi inébranlable (le boss) n'est sonné que `parade_part_inebranlable` de
-## ce temps. Passe avant le Bouclier et le Pas de côté ; le coup n'est pas
+## net, des étoiles tournent au-dessus de sa tête — idée de Kaoru aussi), le
+## skeleton_boss autant que les autres (une version le sonnait deux fois moins
+## longtemps : « pas nécessaire », Kaoru). Passe avant le Bouclier et le Pas de
+## côté ; le coup n'est pas
 ## encaissé (la Vengeance ne se charge pas, le Crescendo ne casse pas). Voir
 ## `_parade_tente` ; la lame en garde : animator.gd `lame_en_garde` ; le choc :
 ## SCRIPT/SHADER/parade_choc.tscn.
 const TALISMAN_PARADE := "parade"
 const PARADE_CHOC_SCENE := preload("res://SCRIPT/SHADER/parade_choc.tscn")
 @export var parade_etourdi := 1.0
-@export var parade_part_inebranlable := 0.5
 ## la caméra tremble au choc (0 = pas du tout)
 @export var parade_secousse := 3.0
 
@@ -231,6 +231,17 @@ const TALISMAN_GRACE := "grace"
 const GRACE_SCENE := preload("res://SCRIPT/SHADER/grace_eclats.tscn")
 @export var grace_bloodheal := 50
 @export var grace_secousse := 5.0
+
+## TALISMAN « SANG CRISTALLISÉ » (1er oct. 2026, id "cristal") : une boule de
+## sang (ou la Tornade) qui touche a `cristal_chance` (une sur cinq, le choix de
+## Kaoru : à chaque boule c'était trop fort) de FIGER l'ennemi `cristal_duree` s
+## dans le cristal (BASE_IA.cristalliser : une statue rouge, sobre — pas de
+## bulle comme le Bouclier, trop gros) ; notre coup d'épée suivant le BRISE pour
+## `cristal_bonus` fois ses dégâts. Voir bloodball.gd et animator.gd.
+const TALISMAN_CRISTAL := "cristal"
+@export_range(0.0, 1.0) var cristal_chance := 0.2
+@export var cristal_duree := 1.5
+@export var cristal_bonus := 1.5
 
 ## TALISMAN « CROISSANT DE SANG » (1er oct. 2026, id "croissant") : le DERNIER
 ## coup du combo (le 2e : le combo n'en a que deux) projette son slash vers
@@ -753,8 +764,6 @@ func _parade_tente(source_x, source_tag: String, attaquant: Node) -> bool:
 	if cote != 0.0 and cote != signf(point.scale.x):
 		return false
 	var duree := parade_etourdi
-	if attaquant is BaseAI and attaquant.inebranlable:
-		duree *= parade_part_inebranlable
 	print("[PARADE] f=", Engine.get_physics_frames(), " coup paré (", source_tag,
 		") : sonné ", duree, " s")
 	if attaquant != null and attaquant.has_method("etourdir"):

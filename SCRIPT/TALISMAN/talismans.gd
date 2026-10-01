@@ -43,16 +43,16 @@ extends RefCounted
 ## Nombre d'emplacements RONDS de la collection dans le menu. Ceux qui n'ont pas
 ## encore de talisman dans LISTE restent des emplacements vides « à découvrir ».
 ## S'il y a plus de talismans que d'emplacements, la grille s'agrandit seule.
-## VINGT-SIX pour le moment (5 le 30 sept. 2026 ; le sillage de sang, les
+## VINGT-SEPT pour le moment (5 le 30 sept. 2026 ; le sillage de sang, les
 ## épines, la frénésie, la marque, le second souffle, le canon de verre,
 ## l'allonge, la vengeance, le croissant de sang, l'essaim, l'offrande, le
 ## sang bouillant, l'ombre de sang, le sang corrompu, le coup dans le dos, le
-## crescendo, la parade, la lame corrompue, la prise ferme, le venin et le coup
-## de grâce le 1er oct.) : monte ce nombre quand il y en aura d'autres à
-## découvrir.
-const NB_EMPLACEMENTS := 26
+## crescendo, la parade, la lame corrompue, la prise ferme, le venin, le coup
+## de grâce et le sang cristallisé le 1er oct.) : monte ce nombre quand il y en
+## aura d'autres à découvrir.
+const NB_EMPLACEMENTS := 27
 
-## Les VINGT-SIX talismans du jeu (1er oct. 2026), tous branchés :
+## Les VINGT-SEPT talismans du jeu (1er oct. 2026), tous branchés :
 ##   tornade  → SCRIPT/CHARACHTER/player.gd, région BLOODBALL
 ##   foudre   → SCRIPT/CHARACHTER/animator.gd (le slash, l'arc qui bondit, le +10 %)
 ##   bouclier → player.gd (`apply_damage` / `apply_environment_damage`)
@@ -105,6 +105,9 @@ const NB_EMPLACEMENTS := 26
 ##   grace    → BASE_IA.gd (`executable`, `_maj_fissures`) + hit_flash.gdshader
 ##              (les fissures) + animator.gd (`_on_body_entered`) + player.gd
 ##              (`grace_executer`) + SCRIPT/SHADER/grace_eclats.gd (les éclats)
+##   cristal  → SCRIPT/SPELL/bloodball.gd (la chance de figer) + BASE_IA.gd
+##              (`cristalliser`, `briser_cristal`) + hit_flash.gdshader (la statue) +
+##              animator.gd (le coup d'épée qui le brise)
 ## Les clés chiffrées (`degats_pourcent`, `esquive_pourcent`, `blood_pourcent`,
 ## `degats_pourcent_dernier_coeur`)
 ## sont lues par `Player.bonus_talismans(cle)` : deux talismans qui portent la
@@ -136,11 +139,12 @@ const LISTE := [
 	{"id": "prise", "nom": "Prise ferme", "description": "Accroché à un mur, vous ne glissez plus : vous restez où vous êtes. Maintenez bas pour descendre.", "couleur": Color(0.78, 0.04, 0.12), "dessin": "res://SCRIPT/TALISMAN/dessin_prise.gdshader"},
 	{"id": "venin", "nom": "Venin", "description": "Les ennemis empoisonnés prennent 30 % de dégâts en plus de toutes vos attaques.", "couleur": Color(0.58, 0.14, 0.84), "dessin": "res://SCRIPT/TALISMAN/dessin_venin.gdshader"},
 	{"id": "grace", "nom": "Coup de grâce", "description": "Un ennemi à moins d'un quart de sa vie se fissure de rouge : votre prochain coup d'épée l'achève net et vous rend du sang. Les boss y échappent.", "couleur": Color(0.78, 0.04, 0.12), "dessin": "res://SCRIPT/TALISMAN/dessin_grace.gdshader"},
+	{"id": "cristal", "nom": "Sang cristallisé", "description": "Une boule de sang sur cinq fige l'ennemi dans le cristal pendant un instant ; votre coup d'épée suivant le brise avec 50 % de dégâts en plus.", "couleur": Color(0.86, 0.12, 0.2), "dessin": "res://SCRIPT/TALISMAN/dessin_cristal.gdshader"},
 ]
 
 ## POUR TESTER LE MENU : les talismans déjà découverts au début d'une partie.
 ## À vider ([]) quand ils se trouveront dans les niveaux.
-const DECOUVERTS_AU_DEPART := ["tornade_bloodball", "foudre", "bouclier", "esquive", "soif", "sillage", "epines", "frenesie", "marque", "souffle", "canon", "allonge", "vengeance", "croissant", "essaim", "offrande", "bouillant", "ombre", "corrompu", "dos", "crescendo", "parade", "lame_corrompue", "prise", "venin", "grace"]
+const DECOUVERTS_AU_DEPART := ["tornade_bloodball", "foudre", "bouclier", "esquive", "soif", "sillage", "epines", "frenesie", "marque", "souffle", "canon", "allonge", "vengeance", "croissant", "essaim", "offrande", "bouillant", "ombre", "corrompu", "dos", "crescendo", "parade", "lame_corrompue", "prise", "venin", "grace", "cristal"]
 
 
 ## la ligne du catalogue qui porte cet id ({} si aucune)

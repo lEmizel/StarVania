@@ -1,17 +1,29 @@
-[gd_scene format=3]
+[gd_scene format=3 uid="uid://dspu3ukx8xy1x"]
 
-[ext_resource type="Script" path="res://SCRIPT/SHADER/grace_eclats.gd" id="1_ge"]
-[ext_resource type="Shader" path="res://SCRIPT/SHADER/grace_eclats.gdshader" id="2_ge"]
+[ext_resource type="Script" uid="uid://b1rtwc0ikelfo" path="res://SCRIPT/SHADER/grace_eclats.gd" id="1_ge"]
+[ext_resource type="Shader" uid="uid://qc35mo15sl37" path="res://SCRIPT/SHADER/grace_eclats.gdshader" id="2_ge"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_ge"]
 resource_local_to_scene = true
 shader = ExtResource("2_ge")
+shader_parameter/taille = Vector2(320, 320)
+shader_parameter/progress = 0.3
+shader_parameter/graine = 0.0
+shader_parameter/nb_eclats = 13
+shader_parameter/portee = Vector2(70, 140)
+shader_parameter/grosseur = Vector2(10, 22)
+shader_parameter/chute = 50.0
+shader_parameter/encre_px = 0.0
+shader_parameter/couleur = Color(0.86, 0.06, 0.12, 1)
+shader_parameter/sombre = Color(0.85882354, 0.05882353, 0.12156863, 1)
+shader_parameter/vive = Color(1, 0.25, 0.25, 1)
+shader_parameter/encre = Color(0.08, 0.02, 0.04, 1)
 
-[node name="GraceEclats" type="Node2D"]
+[node name="GraceEclats" type="Node2D" unique_id=1446246008]
 z_index = 5
 script = ExtResource("1_ge")
 
-[node name="Eclats" type="ColorRect" parent="."]
+[node name="Eclats" type="ColorRect" parent="." unique_id=1167720540]
 material = SubResource("ShaderMaterial_ge")
 offset_left = -160.0
 offset_top = -160.0

@@ -15,6 +15,9 @@ const TALISMAN_MARQUE := "marque"
 ## plus, comme sous l'épée ; à la 3e charge il explose (player.gd,
 ## `bouillant_charger`)
 const TALISMAN_BOUILLANT := "bouillant"
+## TALISMAN « SANG CRISTALLISÉ » : une chance (player.gd `cristal_chance`) de
+## figer l'ennemi touché (BASE_IA.cristalliser)
+const TALISMAN_CRISTAL := "cristal"
 ## TALISMAN « SANG CORROMPU » : posé par le joueur au lancer (`corrompre`) — la
 ## boule (ou la tornade) vire au violet, son impact aussi, et l'ennemi touché
 ## est empoisonné (player.gd, `empoisonner` ; SCRIPT/SHADER/poison_sang.gd)
@@ -91,6 +94,11 @@ func _on_body_entered(body: Node) -> void:
 			lanceur.bouillant_charger(body)
 		if corrompu and porte != false and body is BaseAI and body.hp > 0 and lanceur != null:
 			lanceur.empoisonner(body)
+		# SANG CRISTALLISÉ : une chance sur cinq de le figer dans le cristal
+		if porte != false and body is BaseAI and body.hp > 0 and lanceur != null \
+				and Player.talisman_equipe(TALISMAN_CRISTAL) and randf() < float(lanceur.cristal_chance):
+			if body.cristalliser(float(lanceur.cristal_duree)):
+				print("[CRISTAL] f=", Engine.get_physics_frames(), " figé ", lanceur.cristal_duree, " s")
 	_explode()
 
 

@@ -220,6 +220,10 @@ func _on_body_entered(body):
 		var serie: float = player.crescendo_pourcent(_coup_id)
 		if serie > 0.0:
 			coup = roundi(coup * (1.0 + serie / 100.0))
+		# SANG CRISTALLISÉ : figé, ce coup brise le cristal et compte plus
+		var cristal: bool = body is BaseAI and body.est_cristallise()
+		if cristal:
+			coup = roundi(coup * player.cristal_bonus)
 		# COUP DE GRÂCE : fissuré (à portée d'exécution), ce coup l'achève
 		var grace: bool = body is BaseAI and body.executable()
 		if grace:
@@ -259,6 +263,10 @@ func _on_body_entered(body):
 			# COUP DE GRÂCE : il vole en éclats, la jauge se remplit
 			if grace:
 				player.grace_executer(body)
+			# SANG CRISTALLISÉ : le cristal vole en éclats, il repart
+			if cristal:
+				body.briser_cristal()
+				print("[CRISTAL] brisé par l'épée : ", coup, " dégâts")
 			_foudre_touches.append(body)
 			if Player.talisman_equipe(TALISMAN_FOUDRE):
 				_foudre_bondir(body, coup)
