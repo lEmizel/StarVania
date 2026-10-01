@@ -19,6 +19,12 @@ render_mode unshaded;
 //     même espace déformé) — les voiles de fumée vus par la tranche.
 //   • Les PROFONDEURS : là où la fumée est la plus dense, elle s'assombrit vers
 //     le noir-rouge.
+//   • EFFILÉE AUX DEUX BOUTS (1er oct. 2026, Kaoru : « pour éviter le côté
+//     rectangulaire, qu'en début et en fin elle soit plus petite ») : à moins
+//     d'`effilage` px d'un bout du trajet, l'épaisseur ET la montée
+//     rapetissent jusqu'à `bout_min` ; un sillage court devient une lentille.
+//     Le bout qui se trace suit le perso en continu (`longueur` compte le bout
+//     vivant), sinon il sauterait à chaque point posé.
 //   • TOON (`toon`, 1er oct. 2026 : « un peu trop réaliste, faudrait la rendre
 //     plus toon ») : la même forme, mais la densité en APLATS nets (bord
 //     sombre, corps, cœur clair), un fin LISERÉ d'encre autour, des filaments
@@ -43,6 +49,11 @@ uniform int nb_points = 0;
 uniform float temps = 0.0;
 uniform float duree = 3.0;
 uniform float graine = 0.0;
+// la longueur du trajet (px), bout vivant compris, et son effilage aux deux
+// bouts (réglés sur le nœud SillageSang : le script les donne à chaque image)
+uniform float longueur = 0.0;
+uniform float effilage = 110.0;
+uniform float bout_min = 0.3;
 // ------------------------------------
 
 // --- l'allure ---
@@ -126,12 +137,16 @@ void fragment() {
 		vec2 proche = points[0];
 		float dmin = length(pos - points[0]);
 		float naissance = naissances[0];
+		// (et à combien de px du début du trajet il se trouve : pour l'effilage)
+		float cumul = 0.0;
+		float s_proche = 0.0;
 		for (int i = 0; i < MAX_POINTS - 1; i++) {
 			if (i >= nb_points - 1) {
 				break;
 			}
 			vec2 a = points[i];
 			vec2 ab = points[i + 1] - a;
+			float lab = length(ab);
 			float t = clamp(dot(pos - a, ab) / max(dot(ab, ab), 0.0001), 0.0, 1.0);
 			vec2 c = a + ab * t;
 			float d = length(pos - c);
@@ -139,8 +154,14 @@ void fragment() {
 				dmin = d;
 				proche = c;
 				naissance = mix(naissances[i], naissances[i + 1], t);
+				s_proche = cumul + lab * t;
 			}
+			cumul += lab;
 		}
+		// L'EFFILAGE : 1 au milieu du trajet, `bout_min` à ses deux bouts
+		float l_trajet = max(longueur, cumul);
+		float lt = max(min(effilage, l_trajet * 0.5), 1.0);
+		float effile = mix(bout_min, 1.0, smoothstep(0.0, lt, min(s_proche, l_trajet - s_proche)));
 		float age = temps - naissance;
 		float vie = clamp(age / max(duree, 0.001), 0.0, 1.0);
 		float rayon_max = epaisseur * 1.4 + montee * 1.4 + 20.0;
@@ -172,9 +193,9 @@ void fragment() {
 			// et rubans) ---
 			float ouverture = smoothstep(0.0, 0.2, age);
 			float renfle = 0.7 + 0.6 * bruit(vec2(proche.x / 90.0 + graine, graine * 0.37));
-			float R = epaisseur * renfle * mix(0.5, 1.0, ouverture);
+			float R = epaisseur * renfle * mix(0.5, 1.0, ouverture) * effile;
 			float colonne = mix(0.45, 1.35, bruit(vec2(proche.x / 55.0 + graine * 2.0, temps * 0.25)));
-			float h_haut = R + montee * (1.0 - (1.0 - vie) * (1.0 - vie)) * colonne;
+			float h_haut = R + montee * (1.0 - (1.0 - vie) * (1.0 - vie)) * colonne * effile;
 			float h_bas = R * 0.55;
 			// hauteur du pixel au-dessus du trajet : 0 à la base, 1 au sommet
 			float hauteur = clamp((proche.y - pos.y) / max(h_haut, 1.0), 0.0, 1.0);

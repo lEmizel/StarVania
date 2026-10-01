@@ -80,6 +80,20 @@ const TALISMAN_BOUCLIER := "bouclier"
 var _bouclier: Node2D
 var _bouclier_recharge_reste := 0.0
 
+## TALISMAN « ÉPINES DE SANG » (1er oct. 2026, id "epines") : porté, ENCAISSER
+## un coup (d'un ennemi ou du décor) fait jaillir de tout le corps des pics de
+## sang cristallisé : chaque ennemi dont le corps est à moins de `epines_rayon`
+## px du milieu du nôtre, sans mur entre nous, prend `epines_part` × les dégâts
+## d'un coup d'épée (bonus en pourcentage compris) et est repoussé — voir
+## `_epines_jaillir`. Un coup paré (bouclier) ou esquivé ne compte pas.
+## L'allure des pics se règle dans SCRIPT/SHADER/epines_sang.tscn.
+const EPINES_SCENE := preload("res://SCRIPT/SHADER/epines_sang.tscn")
+const TALISMAN_EPINES := "epines"
+## portée des pics depuis le milieu du corps (px) — le dessin la suit
+@export var epines_rayon := 200.0
+## dégâts : part d'un coup d'épée (1 = autant qu'un coup, bonus compris)
+@export var epines_part := 1.0
+
 # AMÉLIORATION: combo_count remplace le bool "combo" — plus clair et extensible
 var combo_buffered := false   # true si le joueur a appuyé pendant l'anim en cours
 
@@ -290,6 +304,7 @@ func apply_damage(amount: int, source_x, source_tag := "?", perce_stun := false)
 	velocity.y = HIT_KNOCK_Y
 	# le coup est encaissé : le bouclier de sang se dresse du côté d'où il vient
 	_bouclier_lever(-sens_coup)
+	_epines_jaillir()
 
 
 ## --- le bouclier de sang ---
@@ -329,6 +344,52 @@ func _bouclier_pare(source_x, source_tag: String) -> bool:
 
 func _on_bouclier_tombe() -> void:
 	_bouclier_recharge_reste = bouclier_recharge
+
+
+## --- les épines de sang ---
+
+## Un coup vient d'être ENCAISSÉ (et on y a survécu) : si le talisman est
+## porté, les pics jaillissent et mordent TOUT DE SUITE (ils sortent en moins
+## de 0,1 s) les ennemis proches, sans mur entre eux et nous.
+func _epines_jaillir() -> void:
+	if not Player.talisman_equipe(TALISMAN_EPINES):
+		return
+	var centre := centre_corps()
+	var fx := EPINES_SCENE.instantiate()
+	fx.demo_boucle = false
+	fx.rayon = epines_rayon
+	# au sol, les pics ne partent que vers le haut et les côtés (l'origine du
+	# joueur est à ses pieds)
+	fx.sol_monde = global_position.y if is_on_floor() else INF
+	fx.z_index = 0          # derrière le sprite du perso (z 1) : il reste lisible au milieu
+	add_child(fx)
+	fx.global_position = centre
+	var espace := get_world_2d().direct_space_state
+	var cercle := CircleShape2D.new()
+	cercle.radius = epines_rayon
+	var requete := PhysicsShapeQueryParameters2D.new()
+	requete.shape = cercle
+	requete.transform = Transform2D(0.0, centre)
+	requete.collision_mask = 8               # la couche des monstres
+	requete.collide_with_areas = false
+	var degats := roundi(animator.degats_du_coup() * epines_part)
+	var touches: Array[Node] = []
+	for resultat in espace.intersect_shape(requete, 32):
+		var c: Node = resultat["collider"]
+		if not (c is BaseAI) or touches.has(c):
+			continue
+		if c.hp <= 0 or c.invulnerable or not c.est_ennemi(self):
+			continue
+		# un mur entre nous ? (murs solides = couche 1, où est aussi le joueur)
+		var la: Vector2 = c.collision.global_position if c.collision != null else (c as Node2D).global_position
+		var rayon := PhysicsRayQueryParameters2D.create(centre, la, 1)
+		rayon.exclude = [get_rid()]
+		if not espace.intersect_ray(rayon).is_empty():
+			continue
+		touches.append(c)
+		c.apply_damage(degats, global_position.x, "epines", true, self)
+	print("[EPINES] f=", Engine.get_physics_frames(), " ", touches.size(),
+		" ennemi(s) touché(s), ", degats, " dégâts chacun")
 
 
 ## --- le pas de côté ---
@@ -499,6 +560,8 @@ func _sillage_tick() -> void:
 			_sillage = null
 		return
 	var ici := global_position + Vector2(0.0, -SILLAGE_HAUTEUR)
+	if _sillage != null:
+		_sillage.suivre(ici)         # le bout du sillage avance en continu avec nous
 	if _sillage != null and ici.distance_to(_sillage_dernier) < sillage_espacement:
 		return
 	if _sillage == null or not _sillage.ajouter(ici):
@@ -600,6 +663,7 @@ func apply_environment_damage(amount: int, direction: Vector2 = Vector2.UP) -> b
 	_renvoi_environnement(d)
 	# le coup est encaissé : le bouclier de sang se dresse du côté d'où il vient
 	_bouclier_lever(-d)
+	_epines_jaillir()
 	return true
 
 

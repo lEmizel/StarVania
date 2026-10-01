@@ -34,6 +34,9 @@ const SHADERS: Array[String] = [
 	"res://SCRIPT/SPELL/explosion_feu.gdshader",      # l'impact de la boule de feu (1er oct. 2026)
 	"res://SCRIPT/SHADER/sillage_sang.gdshader",      # la brume du talisman sillage de sang (1er oct. 2026)
 	"res://SCRIPT/TALISMAN/dessin_sillage.gdshader",  # son dessin dans le menu START
+	"res://SCRIPT/SHADER/epines_sang.gdshader",       # les pics du talisman épines de sang (1er oct. 2026)
+	"res://SCRIPT/TALISMAN/dessin_epines.gdshader",   # son dessin dans le menu START
+	"res://SCRIPT/TALISMAN/dessin_frenesie.gdshader", # le dessin du talisman frénésie dans le menu START (1er oct. 2026)
 	"res://SCRIPT/SHADER/explosion_violette.gdshader", # explosion du kamikaze (sept. 2026)
 	"res://SCRIPT/SHADER/cable_de_sang.gdshader",    # câble du grappin (sept. 2026)
 	"res://SCRIPT/SHADER/impact_blanc.gdshader",     # éclat d'un coup d'épée qui porte (sept. 2026)

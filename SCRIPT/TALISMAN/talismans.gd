@@ -26,6 +26,10 @@ extends RefCounted
 ##                 soit ignoré (Player.chance_esquive())
 ##   "blood_pourcent" (facultatif) bonus, en pour cent, sur chaque récolte de
 ##                 sang — le compteur chiffré (Player.multiplicateur_blood())
+##   "degats_pourcent_dernier_coeur" (facultatif) bonus de dégâts des coups
+##                 d'épée, en pour cent, compté SEULEMENT quand il ne reste
+##                 qu'un cœur (Player.frenesie_active()) ; s'ajoute aux
+##                 `degats_pourcent`
 ## Le dessin passe avant l'icône, qui passe avant le rond de couleur ; les deux
 ## sont posés dans l'emplacement, à sa taille.
 ## ============================================================================
@@ -33,18 +37,24 @@ extends RefCounted
 ## Nombre d'emplacements RONDS de la collection dans le menu. Ceux qui n'ont pas
 ## encore de talisman dans LISTE restent des emplacements vides « à découvrir ».
 ## S'il y a plus de talismans que d'emplacements, la grille s'agrandit seule.
-## SIX pour le moment (5 le 30 sept. 2026, le sillage de sang le 1er oct.) :
-## monte ce nombre quand il y en aura d'autres à découvrir.
-const NB_EMPLACEMENTS := 6
+## HUIT pour le moment (5 le 30 sept. 2026 ; le sillage de sang, puis les
+## épines et la frénésie le 1er oct.) : monte ce nombre quand il y en aura
+## d'autres à découvrir.
+const NB_EMPLACEMENTS := 8
 
-## Les SIX talismans du jeu (1er oct. 2026), tous branchés :
+## Les HUIT talismans du jeu (1er oct. 2026), tous branchés :
 ##   tornade  → SCRIPT/CHARACHTER/player.gd, région BLOODBALL
 ##   foudre   → SCRIPT/CHARACHTER/animator.gd (le slash, l'arc qui bondit, le +10 %)
 ##   bouclier → player.gd (`apply_damage` / `apply_environment_damage`)
 ##   esquive  → player.gd (`_esquive_tente`, dans `apply_damage`)
 ##   soif     → SCRIPT/AUTOLOAD/player.gd (`recolter_blood`)
 ##   sillage  → player.gd (`_sillage_tick`) + SCRIPT/SHADER/sillage_sang.gd
-## Les clés chiffrées (`degats_pourcent`, `esquive_pourcent`, `blood_pourcent`)
+##   epines   → player.gd (`_epines_jaillir`, après un coup encaissé) +
+##              SCRIPT/SHADER/epines_sang.gd
+##   frenesie → SCRIPT/AUTOLOAD/player.gd (`bonus_degats_pourcent`,
+##              `frenesie_active`) — des stats seules, voulu sans effet à l'écran
+## Les clés chiffrées (`degats_pourcent`, `esquive_pourcent`, `blood_pourcent`,
+## `degats_pourcent_dernier_coeur`)
 ## sont lues par `Player.bonus_talismans(cle)` : deux talismans qui portent la
 ## même clé s'additionnent.
 const LISTE := [
@@ -54,11 +64,13 @@ const LISTE := [
 	{"id": "esquive", "nom": "Pas de côté", "description": "Une chance sur cinq qu'un coup d'ennemi passe au travers de vous.", "couleur": Color(0.84, 0.79, 0.66), "dessin": "res://SCRIPT/TALISMAN/dessin_esquive.gdshader", "esquive_pourcent": 20},
 	{"id": "soif", "nom": "Soif de sang", "description": "Chaque récolte de sang rapporte 10 % de plus.", "couleur": Color(0.55, 0.05, 0.08), "dessin": "res://SCRIPT/TALISMAN/dessin_soif.gdshader", "blood_pourcent": 10},
 	{"id": "sillage", "nom": "Sillage de sang", "description": "La roulade et le dash laissent une brume de sang qui ronge à petit feu les ennemis pris dedans.", "couleur": Color(0.7, 0.05, 0.1), "dessin": "res://SCRIPT/TALISMAN/dessin_sillage.gdshader"},
+	{"id": "epines", "nom": "Épines de sang", "description": "Encaisser un coup fait jaillir des pics de sang qui blessent et repoussent les ennemis proches.", "couleur": Color(0.78, 0.04, 0.12), "dessin": "res://SCRIPT/TALISMAN/dessin_epines.gdshader"},
+	{"id": "frenesie", "nom": "Frénésie", "description": "Au dernier cœur, les coups d'épée font 50 % de dégâts en plus.", "couleur": Color(0.85, 0.05, 0.12), "dessin": "res://SCRIPT/TALISMAN/dessin_frenesie.gdshader", "degats_pourcent_dernier_coeur": 50},
 ]
 
 ## POUR TESTER LE MENU : les talismans déjà découverts au début d'une partie.
 ## À vider ([]) quand ils se trouveront dans les niveaux.
-const DECOUVERTS_AU_DEPART := ["tornade_bloodball", "foudre", "bouclier", "esquive", "soif", "sillage"]
+const DECOUVERTS_AU_DEPART := ["tornade_bloodball", "foudre", "bouclier", "esquive", "soif", "sillage", "epines", "frenesie"]
 
 
 ## la ligne du catalogue qui porte cet id ({} si aucune)

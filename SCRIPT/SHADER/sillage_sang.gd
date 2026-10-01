@@ -42,6 +42,15 @@ const MAX_POINTS := 24
 ## tolérance (px) au-delà de la brume visible : un corps qui l'effleure
 ## compte comme dedans
 @export var marge := 16.0
+## EFFILÉE AUX DEUX BOUTS (1er oct. 2026, Kaoru : « pour éviter le côté
+## rectangulaire, qu'en début et en fin elle soit plus petite ») : sur cette
+## longueur (px) depuis chaque bout du trajet, la brume rapetisse — épaisseur ET
+## montée — jusqu'à `bout_min` de sa taille ; un sillage plus court que deux
+## fois cette longueur devient une lentille. Réglé ici et pas sur le matériau :
+## c'est ce script qui le donne au shader, et la zone de dégâts suit la même
+## forme.
+@export var effilage := 110.0
+@export_range(0.0, 1.0) var bout_min := 0.3
 ## lancé seul (F6) : un sillage est semé en boucle
 @export var demo_boucle := true
 
@@ -52,6 +61,11 @@ var joueur: Node2D = null
 
 var _points: Array[Vector2] = []          # dans le repère du nœud
 var _naissances := PackedFloat32Array()
+# le BOUT VIVANT du sillage tant qu'il se trace : là où est le perso, entre deux
+# points (repère du nœud ; INF = fermé ou inconnu). Sans lui, la longueur ne
+# grandirait que par sauts de 36 px à chaque point posé, et l'effilage du bout
+# sauterait avec elle.
+var _bout_vivant := Vector2.INF
 var _t := 0.0
 var _ferme := false
 var _tick := 0.2
@@ -79,9 +93,34 @@ func ajouter(point_monde: Vector2) -> bool:
 	return true
 
 
+## le perso est ICI (coordonnées MONDE), entre deux points : le bout du sillage
+## avance en continu avec lui (à appeler à chaque image tant qu'il se trace)
+func suivre(point_monde: Vector2) -> void:
+	if not _ferme:
+		_bout_vivant = to_local(point_monde)
+
+
 ## le mouvement est fini : plus de nouveaux points, la brume vit sa vie
 func fermer() -> void:
 	_ferme = true
+	_bout_vivant = Vector2.INF
+
+
+## la longueur du trajet (px), bout vivant compris
+func _longueur() -> float:
+	var l := 0.0
+	for i in _points.size() - 1:
+		l += _points[i].distance_to(_points[i + 1])
+	if not _ferme and is_finite(_bout_vivant.x) and not _points.is_empty():
+		l += _points[_points.size() - 1].distance_to(_bout_vivant)
+	return l
+
+
+## la taille de la brume à `s` px du début du trajet (1 au milieu, `bout_min`
+## aux deux bouts) — la MÊME formule que le shader
+func _effile(s: float, longueur: float) -> float:
+	var lt := maxf(minf(effilage, longueur * 0.5), 1.0)
+	return lerpf(bout_min, 1.0, smoothstep(0.0, lt, minf(s, longueur - s)))
 
 
 func _process(delta: float) -> void:
@@ -173,6 +212,8 @@ func dans_la_brume(p: Vector2, limite: float) -> bool:
 	var proche := _points[0]
 	var naissance := _naissances[0]
 	var dmin := p.distance_to(proche)
+	var cumul := 0.0
+	var s_proche := 0.0            # px depuis le début du trajet
 	for i in _points.size() - 1:
 		var a := _points[i]
 		var ab := _points[i + 1] - a
@@ -183,12 +224,15 @@ func dans_la_brume(p: Vector2, limite: float) -> bool:
 			dmin = d
 			proche = c
 			naissance = lerpf(_naissances[i], _naissances[i + 1], t)
+			s_proche = cumul + ab.length() * t
+		cumul += ab.length()
 	var age := _t - naissance
 	if age < 0.0 or age >= limite:
 		return false
 	var vie := age / maxf(duree, 0.001)
-	var rayon := _reglage("epaisseur", 56.0) * lerpf(0.5, 1.0, smoothstep(0.0, 0.2, age))
-	var h_haut := rayon + _reglage("montee", 120.0) * (1.0 - (1.0 - vie) * (1.0 - vie))
+	var effile := _effile(s_proche, maxf(_longueur(), cumul))
+	var rayon := _reglage("epaisseur", 56.0) * lerpf(0.5, 1.0, smoothstep(0.0, 0.2, age)) * effile
+	var h_haut := rayon + _reglage("montee", 120.0) * (1.0 - (1.0 - vie) * (1.0 - vie)) * effile
 	var h_bas := rayon * 0.55
 	var rel := p - proche
 	# on se ramène à un cercle de rayon `rayon`, comme le shader ; la marge,
@@ -250,6 +294,9 @@ func _appliquer() -> void:
 	mat.set_shader_parameter("temps", _t)
 	mat.set_shader_parameter("duree", duree)
 	mat.set_shader_parameter("graine", _graine)
+	mat.set_shader_parameter("longueur", _longueur())
+	mat.set_shader_parameter("effilage", effilage)
+	mat.set_shader_parameter("bout_min", bout_min)
 
 
 # --- la démo (F6) : une roulade vers la droite, semée en boucle ---
@@ -261,14 +308,18 @@ func _demo_semer() -> void:
 		return
 	var x := -210.0 + _t * 760.0
 	if x >= 210.0:
+		# un dernier point à l'arrivée, comme le joueur
+		ajouter(to_global(Vector2(210.0, 0.0)))
 		fermer()
 		return
+	suivre(to_global(Vector2(x, 0.0)))
 	if _points.is_empty() or x - _demo_x >= 36.0:
 		_demo_x = x
 		ajouter(to_global(Vector2(x, 0.0)))
 
 
 func _demo_relancer() -> void:
+	_bout_vivant = Vector2.INF
 	_points.clear()
 	_naissances = PackedFloat32Array()
 	_t = 0.0

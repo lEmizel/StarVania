@@ -227,8 +227,21 @@ func bonus_talismans(cle: String) -> float:
 ## pour cent : la somme des `degats_pourcent` du catalogue (10 = +10 %). Un
 ## POURCENTAGE, jamais un ajout fixe (Kaoru, 30 sept. 2026) : quand les dégâts
 ## de base du joueur monteront, le bonus suivra.
+## Plus, AU DERNIER CŒUR seulement, la somme des `degats_pourcent_dernier_coeur`
+## (talisman « Frénésie » : +50 %, 1er oct. 2026) — les deux s'additionnent.
 func bonus_degats_pourcent() -> float:
-	return bonus_talismans("degats_pourcent")
+	var total := bonus_talismans("degats_pourcent")
+	if frenesie_active():
+		total += bonus_talismans("degats_pourcent_dernier_coeur")
+	return total
+
+
+## Vrai quand un bonus « dernier cœur » est porté ET qu'il ne reste qu'un cœur.
+## Des STATS seulement, sans effet à l'écran : des veines au bord de l'écran et
+## un liseré rouge ont été essayés puis retirés (Kaoru, 1er oct. 2026 : « pas
+## nécessaire, pas beau, plus stressant pour le joueur »).
+func frenesie_active() -> bool:
+	return hp == 1 and bonus_talismans("degats_pourcent_dernier_coeur") > 0.0
 
 
 ## Ce par quoi multiplier les dégâts de base d'un coup d'épée (1.1 = +10 %).

@@ -98,6 +98,14 @@ func _is_dead() -> bool:
 	return _mort or current_state == States.BOOM
 
 
+## sa mort se joue en deux temps : une fois abattu, il ne peut plus que
+## gonfler puis exploser (BASE_IA refuse tout autre changement d'état à un
+## mort : avant, une poursuite programmée dans la même image annulait le
+## gonflement, et il flottait mort sans jamais exploser)
+func _etats_de_mort() -> Array:
+	return [States.GONFLE, States.BOOM]
+
+
 func _on_dead() -> void:
 	_mort = true
 	# Volontairement PAS d'explosion instantanée : abattu au corps à corps, il

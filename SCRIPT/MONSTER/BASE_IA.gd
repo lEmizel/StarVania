@@ -13,6 +13,9 @@ var current_state: int = -1
 var previous_state: int = 0
 var state_functions: Dictionary = {}
 var _changing_now := false
+## l'état « DEAD » de l'enum du monstre (-1 s'il n'en a pas) : voir
+## `_etats_de_mort()` et la garde de `change_state`
+var _etat_dead := -1
 
 var last_direction := 1
 var target: Node2D = null
@@ -455,6 +458,7 @@ func decide() -> void:
 # ============================================================
 
 func _register_states(states_enum: Dictionary) -> void:
+	_etat_dead = int(states_enum.get("DEAD", -1))
 	for state_name in states_enum:
 		var key: int = states_enum[state_name]
 		var name_lower: String = state_name.to_lower()
@@ -479,8 +483,26 @@ func _register_states(states_enum: Dictionary) -> void:
 			])
 
 
+## Les états où un monstre MORT a encore le droit d'aller : sa séquence de
+## mort. Par défaut, l'état « DEAD » de son enum. Un monstre dont la mort se
+## joue en plusieurs temps les liste lui-même (le kamikaze gonfle, puis explose).
+func _etats_de_mort() -> Array:
+	return [_etat_dead] if _etat_dead >= 0 else []
+
+
 func change_state(new_state: int) -> void:
 	if _changing_now or new_state == current_state:
+		return
+	# UN MORT NE SE RELÈVE PAS (1er oct. 2026). `goto_state` passe par
+	# call_deferred : l'IA programme son prochain état pendant son pas de
+	# physique, et ce changement n'arrive qu'en FIN d'image. Si le coup fatal
+	# tombe entre les deux (la brume du sillage frappe dans son propre pas de
+	# physique, juste après celui des monstres), le changement en attente
+	# sortait le monstre de DEAD : PV à 0, plus de barre de vie, intouchable
+	# (couche 0 depuis sa mort), mais son IA et ses attaques tournaient encore —
+	# la « larve immortelle » de Kaoru. Reproduit sur larve, squelette et
+	# kamikaze avant ce garde-fou.
+	if _is_dead() and not (new_state in _etats_de_mort()):
 		return
 	# Garde-fou : refuse un état inconnu ou incomplet au lieu de crasher
 	if not state_functions.has(new_state) or not state_functions[new_state].has("enter"):
@@ -580,6 +602,9 @@ func direction_to_target() -> int:
 	return last_direction
 
 func force_reenter_state() -> void:
+	# (un mort ne rejoue pas sa mort, ni rien d'autre)
+	if _is_dead():
+		return
 	_changing_now = true
 	if state_functions[current_state].has("exit"):
 		state_functions[current_state]["exit"].call()

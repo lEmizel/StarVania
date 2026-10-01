@@ -1,0 +1,39 @@
+[gd_scene format=3 uid="uid://cny3lrn565pvl"]
+
+[ext_resource type="Script" uid="uid://pem8rvm7m70v" path="res://SCRIPT/SHADER/epines_sang.gd" id="1_ep"]
+[ext_resource type="Shader" uid="uid://davbxx4ftawit" path="res://SCRIPT/SHADER/epines_sang.gdshader" id="2_ep"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_ep"]
+resource_local_to_scene = true
+shader = ExtResource("2_ep")
+shader_parameter/progress = 0.0
+shader_parameter/taille = Vector2(720, 720)
+shader_parameter/rayon = 200.0
+shader_parameter/graine = 41.5575363884184
+shader_parameter/duree = 0.5
+shader_parameter/sol = 63.0
+shader_parameter/nb_epines = 16
+shader_parameter/depart = 22.0
+shader_parameter/largeur = 0.065
+shader_parameter/courbure = 0.14
+shader_parameter/ecart_sol = 6.0
+shader_parameter/giclee = 1.0
+shader_parameter/encre = 0.0
+shader_parameter/casse_debut = 0.42
+shader_parameter/coupe = 0.6
+shader_parameter/biais = 1.2
+shader_parameter/envol = 300.0
+shader_parameter/gravite = 2200.0
+shader_parameter/couleur = Color(0.76, 0.03, 0.11, 1)
+shader_parameter/couleur_encre = Color(0.12, 0, 0.03, 1)
+
+[node name="EpinesSang" type="Node2D" unique_id=1378871987]
+script = ExtResource("1_ep")
+
+[node name="Pics" type="ColorRect" parent="." unique_id=1570698583]
+material = SubResource("ShaderMaterial_ep")
+offset_left = -360.0
+offset_top = -360.0
+offset_right = 360.0
+offset_bottom = 360.0
+mouse_filter = 2
