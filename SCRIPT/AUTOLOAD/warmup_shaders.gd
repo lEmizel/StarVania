@@ -84,6 +84,13 @@ const SHADERS: Array[String] = [
 	"res://SCRIPT/TALISMAN/dessin_coeur_noir.gdshader", # son dessin dans le menu START
 	"res://SCRIPT/SHADER/couronne_defi.gdshader",    # la couronne d'or du talisman couronne du défi (1er oct. 2026)
 	"res://SCRIPT/TALISMAN/dessin_defi.gdshader",    # son dessin dans le menu START
+	"res://SCRIPT/TALISMAN/dessin_chercheuse.gdshader", # talisman boule chercheuse (menu START, 2 oct. 2026)
+	"res://SCRIPT/SHADER/trop_plein_jauge.gdshader", # la roue (façon endurance de Zelda) du talisman trop-plein (2 oct. 2026)
+	"res://SCRIPT/TALISMAN/dessin_trop_plein.gdshader", # son dessin dans le menu START
+	"res://SCRIPT/TALISMAN/dessin_sang_neuf.gdshader", # talisman sang neuf (menu START, 2 oct. 2026)
+	"res://SCRIPT/TALISMAN/dessin_inebranlable.gdshader", # talisman inébranlable (menu START, 2 oct. 2026)
+	"res://SCRIPT/TALISMAN/dessin_sixieme.gdshader", # talisman sixième coup (menu START, 2 oct. 2026)
+	"res://SCRIPT/TALISMAN/dessin_pacte.gdshader",  # talisman pacte de sang (menu START, 2 oct. 2026)
 	"res://SCRIPT/SHADER/explosion_violette.gdshader", # explosion du kamikaze (sept. 2026)
 	"res://SCRIPT/SHADER/cable_de_sang.gdshader",    # câble du grappin (sept. 2026)
 	"res://SCRIPT/SHADER/impact_blanc.gdshader",     # éclat d'un coup d'épée qui porte (sept. 2026)

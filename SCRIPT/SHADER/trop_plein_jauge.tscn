@@ -1,0 +1,19 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://SCRIPT/SHADER/trop_plein_jauge.gd" id="1_tp"]
+[ext_resource type="Shader" path="res://SCRIPT/SHADER/trop_plein_jauge.gdshader" id="2_tp"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_tp"]
+resource_local_to_scene = true
+shader = ExtResource("2_tp")
+
+[node name="TropPlein" type="Node2D"]
+script = ExtResource("1_tp")
+
+[node name="Roue" type="ColorRect" parent="."]
+material = SubResource("ShaderMaterial_tp")
+offset_left = -48.0
+offset_top = -48.0
+offset_right = 48.0
+offset_bottom = 48.0
+mouse_filter = 2

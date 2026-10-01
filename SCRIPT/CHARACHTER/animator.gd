@@ -141,6 +141,15 @@ const TALISMAN_VENIN := "venin"
 ## TALISMAN « ENTRAVES » : chaque coup qui porte ralentit l'ennemi (BASE_IA
 ## `entraver`, réglages sur le joueur)
 const TALISMAN_ENTRAVES := "entraves"
+## TALISMAN « TROP-PLEIN » : chaque coup qui porte remplit la boule d'un cran
+## (player.gd, `trop_plein_charger`) — une fois par coup d'épée
+const TALISMAN_TROP_PLEIN := "trop_plein"
+var _trop_plein_coup := -1       # le coup d'épée qui a déjà rempli la boule
+## TALISMAN « SIXIÈME COUP » : un coup qui porte sur six est critique
+## (player.gd, `sixieme_critique` / `sixieme_porte`) ; son étoile blanche grandit
+## (`player.sixieme_eclat_taille`) et se cerne de sang (une étoile ROUGE, c'est
+## « le héros encaisse »)
+const TALISMAN_SIXIEME := "sixieme"
 const VENIN_ECLAT_CONTOUR := Color(0.6, 0.18, 0.9)
 ## les couleurs du slash en shader telles que réglées (lues une fois) : sa
 ## lame, sa foudre, le halo de sa foudre
@@ -227,6 +236,10 @@ func _on_body_entered(body):
 		var cristal: bool = body is BaseAI and body.est_cristallise()
 		if cristal:
 			coup = roundi(coup * player.cristal_bonus)
+		# SIXIÈME COUP : un coup d'épée qui porte sur six est critique
+		var critique: bool = body is BaseAI and body.hp > 0 and player.sixieme_critique(_coup_id)
+		if critique:
+			coup = roundi(coup * player.sixieme_multiplicateur)
 		# COUP DE GRÂCE : fissuré (à portée d'exécution), ce coup l'achève
 		var grace: bool = body is BaseAI and body.executable()
 		if grace:
@@ -251,7 +264,12 @@ func _on_body_entered(body):
 				print("[CRESCENDO] coup n°", player.crescendo_serie, " de la série : +",
 					serie, " % → ", coup, " dégâts")
 			Player.changement_de_bloodheal(Player.BLOODHEAL_PAR_COUP)
-			_eclat_impact(body, dos)
+			# SIXIÈME COUP : ce coup d'épée compte (une fois par coup)
+			if Player.talisman_equipe(TALISMAN_SIXIEME) and body is BaseAI:
+				player.sixieme_porte(_coup_id)
+			if critique:
+				print("[SIXIÈME] coup critique : ", coup, " dégâts")
+			_eclat_impact(body, dos, critique)
 			# l'ombre de sang surgit derrière le premier ennemi que ce coup touche
 			if Player.talisman_equipe(TALISMAN_OMBRE) and _ombre_coup != _coup_id \
 					and body is BaseAI and body.hp > 0:
@@ -266,6 +284,11 @@ func _on_body_entered(body):
 			# ENTRAVES : le coup l'entrave — au ralenti un moment, au sol comme en vol
 			if Player.talisman_equipe(TALISMAN_ENTRAVES) and body is BaseAI and body.hp > 0:
 				body.entraver(player.entraves_duree, player.entraves_facteur)
+			# TROP-PLEIN : le coup remplit la boule (une fois par coup d'épée)
+			if Player.talisman_equipe(TALISMAN_TROP_PLEIN) and _trop_plein_coup != _coup_id \
+					and body is BaseAI:
+				_trop_plein_coup = _coup_id
+				player.trop_plein_charger()
 			# COUP DE GRÂCE : il vole en éclats, la jauge se remplit
 			if grace:
 				player.grace_executer(body)
@@ -371,7 +394,7 @@ func _centre_du_corps(n: Node) -> Vector2:
 ## c'est la confirmation visuelle que l'épée a mordu. Hébergé par la scène, pas
 ## par le monstre — il doit finir de jouer même si le monstre meurt du coup, et
 ## il reste où le coup est tombé pendant que le monstre recule.
-func _eclat_impact(body: Node, dans_le_dos := false) -> void:
+func _eclat_impact(body: Node, dans_le_dos := false, critique := false) -> void:
 	if not (body is Node2D):
 		return
 	var centre: Vector2 = body.global_position
@@ -403,14 +426,16 @@ func _eclat_impact(body: Node, dans_le_dos := false) -> void:
 	# VENIN : un ennemi empoisonné prend plus — l'étoile se cerne de violet
 	var venin := not dans_le_dos and Player.talisman_equipe(TALISMAN_VENIN) \
 			and body.has_meta("poison") and is_instance_valid(body.get_meta("poison"))
-	if dans_le_dos:
-		fx.scale *= DOS_ECLAT_TAILLE
-	if dans_le_dos or venin:
+	# SIXIÈME COUP : le critique grandit plus encore (sans cumuler avec le dos :
+	# une étoile trop grande couvre le héros et l'ennemi)
+	if dans_le_dos or critique:
+		fx.scale *= maxf(DOS_ECLAT_TAILLE if dans_le_dos else 1.0, player.sixieme_eclat_taille if critique else 1.0)
+	if dans_le_dos or venin or critique:
 		# le matériau est sur l'enfant « Eclat » (propre à chaque éclat)
 		var eclat := fx.get_node_or_null("Eclat") as CanvasItem
 		if eclat != null and eclat.material is ShaderMaterial:
 			var mat := eclat.material as ShaderMaterial
-			mat.set_shader_parameter("couleur_contour", DOS_ECLAT_CONTOUR if dans_le_dos else VENIN_ECLAT_CONTOUR)
+			mat.set_shader_parameter("couleur_contour", DOS_ECLAT_CONTOUR if (dans_le_dos or critique) else VENIN_ECLAT_CONTOUR)
 			mat.set_shader_parameter("contour", 0.85)
 
 

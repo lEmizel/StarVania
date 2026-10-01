@@ -43,18 +43,20 @@ extends RefCounted
 ## Nombre d'emplacements RONDS de la collection dans le menu. Ceux qui n'ont pas
 ## encore de talisman dans LISTE restent des emplacements vides « à découvrir ».
 ## S'il y a plus de talismans que d'emplacements, la grille s'agrandit seule.
-## TRENTE-SIX pour le moment (5 le 30 sept. 2026 ; le sillage de sang, les
+## QUARANTE-DEUX (5 le 30 sept. 2026 ; le sillage de sang, les
 ## épines, la frénésie, la marque, le second souffle, le canon de verre,
 ## l'allonge, la vengeance, le croissant de sang, l'essaim, l'offrande, le
 ## sang bouillant, l'ombre de sang, le sang corrompu, le coup dans le dos, le
 ## crescendo, la parade, la lame corrompue, la prise ferme, le venin, le coup
 ## de grâce, le sang cristallisé, les plumes acérées, le sang plein, le sang
 ## versé, le reliquaire, les gardiennes, le soin éclair, les entraves, le cœur
-## noir et la couronne du défi le 1er oct.) : monte ce nombre quand il y en
-## aura d'autres à découvrir.
-const NB_EMPLACEMENTS := 36
+## noir et la couronne du défi le 1er oct. ; la boule chercheuse, le
+## trop-plein, le sang neuf, l'inébranlable, le sixième coup et le pacte de
+## sang le 2 oct. — la collection est complète, dit Kaoru) : monte ce nombre
+## s'il y en a un jour d'autres à découvrir.
+const NB_EMPLACEMENTS := 42
 
-## Les TRENTE-SIX talismans du jeu (1er oct. 2026), tous branchés :
+## Les QUARANTE-DEUX talismans du jeu (2 oct. 2026), tous branchés :
 ##   tornade  → SCRIPT/CHARACHTER/player.gd, région BLOODBALL
 ##   foudre   → SCRIPT/CHARACHTER/animator.gd (le slash, l'arc qui bondit, le +10 %)
 ##   bouclier → player.gd (`apply_damage` / `apply_environment_damage`)
@@ -134,6 +136,19 @@ const NB_EMPLACEMENTS := 36
 ##   entraves → animator.gd (`_on_body_entered` : le coup qui entrave) +
 ##              BASE_IA.gd (`entraver` : le ralenti, au sol comme en vol) +
 ##              SCRIPT/SHADER/entrave_sang.gd (l'anneau)
+##   chercheuse → SCRIPT/SPELL/bloodball.gd (`_virer` : la boule, et la Tornade,
+##              s'incurvent vers l'ennemi le plus proche devant elles)
+##   trop_plein → animator.gd (`_on_body_entered` : le coup qui remplit) +
+##              player.gd (`trop_plein_charger`, `bloodball_enter` : la grosse
+##              boule) + bloodball.gd (`grossir`) +
+##              SCRIPT/SHADER/trop_plein_jauge.gd (la roue de l'épaule)
+##   sang_neuf → player.gd (`dead_input` note la mort, `_sang_neuf` remplit la
+##              jauge à la réapparition) + l'autoload (`vient_de_mourir`)
+##   inebranlable → player.gd (`apply_damage` : ni recul ni vacillement, un répit)
+##   sixieme  → animator.gd (`_on_body_entered`, `_eclat_impact`) + player.gd
+##              (`sixieme_critique`, `sixieme_porte`)
+##   pacte    → player.gd (`bloodball_enter` : la jauge paie) + bloodball.gd
+##              (`pacte` : dégâts et sang sombre)
 ## Les clés chiffrées (`degats_pourcent`, `esquive_pourcent`, `blood_pourcent`,
 ## `degats_pourcent_dernier_coeur`)
 ## sont lues par `Player.bonus_talismans(cle)` : deux talismans qui portent la
@@ -175,11 +190,17 @@ const LISTE := [
 	{"id": "defi", "nom": "Couronne du défi", "description": "Un défi : tant que vous la portez, vous n'avez plus qu'un seul cœur, et tous les autres talismans sont retirés et verrouillés. Une magnifique couronne d'or vous en fait l'honneur.", "couleur": Color(0.93, 0.66, 0.14), "dessin": "res://SCRIPT/TALISMAN/dessin_defi.gdshader"},
 	{"id": "coeur_noir", "nom": "Cœur noir", "description": "Un cœur noir s'ajoute aux vôtres toutes les deux minutes et à chaque checkpoint, un seul à la fois. Quand il se brise, il frappe tous les ennemis à l'écran.", "couleur": Color(0.2, 0.07, 0.1), "dessin": "res://SCRIPT/TALISMAN/dessin_coeur_noir.gdshader"},
 	{"id": "entraves", "nom": "Entraves", "description": "Chaque coup d'épée entrave l'ennemi : il est ralenti pendant deux secondes, au sol comme en vol.", "couleur": Color(0.74, 0.04, 0.1), "dessin": "res://SCRIPT/TALISMAN/dessin_entraves.gdshader"},
+	{"id": "chercheuse", "nom": "Boule chercheuse", "description": "La boule de sang s'incurve vers l'ennemi le plus proche devant vous : plus besoin de viser juste, même les volants n'y échappent pas.", "couleur": Color(0.78, 0.04, 0.12), "dessin": "res://SCRIPT/TALISMAN/dessin_chercheuse.gdshader"},
+	{"id": "trop_plein", "nom": "Trop-plein", "description": "Trois coups d'épée qui portent remplissent votre boule de sang : la suivante sort deux fois plus grosse et plus forte. Une roue au-dessus de votre épaule montre sa charge.", "couleur": Color(0.78, 0.04, 0.12), "dessin": "res://SCRIPT/TALISMAN/dessin_trop_plein.gdshader"},
+	{"id": "sang_neuf", "nom": "Sang neuf", "description": "Quand vous mourez, vous réapparaissez avec votre jauge de soin pleine.", "couleur": Color(0.78, 0.04, 0.12), "dessin": "res://SCRIPT/TALISMAN/dessin_sang_neuf.gdshader"},
+	{"id": "inebranlable", "nom": "Inébranlable", "description": "Les coups des ennemis ne vous font plus reculer ni vaciller : vous perdez le cœur, mais vous gardez la main.", "couleur": Color(0.62, 0.1, 0.12), "dessin": "res://SCRIPT/TALISMAN/dessin_inebranlable.gdshader"},
+	{"id": "sixieme", "nom": "Sixième coup", "description": "Un coup d'épée sur six est critique : il fait deux fois plus de dégâts.", "couleur": Color(0.78, 0.04, 0.12), "dessin": "res://SCRIPT/TALISMAN/dessin_sixieme.gdshader"},
+	{"id": "pacte", "nom": "Pacte de sang", "description": "Chaque boule de sang boit un peu de votre jauge de soin, mais frappe trois fois plus fort. Jauge trop basse : elle part normale.", "couleur": Color(0.45, 0.02, 0.08), "dessin": "res://SCRIPT/TALISMAN/dessin_pacte.gdshader"},
 ]
 
 ## POUR TESTER LE MENU : les talismans déjà découverts au début d'une partie.
 ## À vider ([]) quand ils se trouveront dans les niveaux.
-const DECOUVERTS_AU_DEPART := ["tornade_bloodball", "foudre", "bouclier", "esquive", "soif", "sillage", "epines", "frenesie", "marque", "souffle", "canon", "allonge", "vengeance", "croissant", "essaim", "offrande", "bouillant", "ombre", "corrompu", "dos", "crescendo", "parade", "lame_corrompue", "prise", "venin", "grace", "cristal", "plumes", "sang_plein", "sang_verse", "reliquaire", "gardiennes", "soin_eclair", "entraves", "coeur_noir", "defi"]
+const DECOUVERTS_AU_DEPART := ["tornade_bloodball", "foudre", "bouclier", "esquive", "soif", "sillage", "epines", "frenesie", "marque", "souffle", "canon", "allonge", "vengeance", "croissant", "essaim", "offrande", "bouillant", "ombre", "corrompu", "dos", "crescendo", "parade", "lame_corrompue", "prise", "venin", "grace", "cristal", "plumes", "sang_plein", "sang_verse", "reliquaire", "gardiennes", "soin_eclair", "entraves", "coeur_noir", "defi", "chercheuse", "trop_plein", "sang_neuf", "inebranlable", "sixieme", "pacte"]
 
 
 ## la ligne du catalogue qui porte cet id ({} si aucune)

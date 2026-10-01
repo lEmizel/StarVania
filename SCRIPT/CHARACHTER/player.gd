@@ -440,6 +440,79 @@ const COEUR_NOIR_ONDE := preload("res://SCRIPT/SHADER/coeur_noir_onde.tscn")
 @export var entraves_duree := 2.0
 @export var entraves_facteur := 0.6
 
+## TALISMAN « TROP-PLEIN » (2 oct. 2026, id "trop_plein", choisi par Kaoru) : le
+## miroir de la Marque — `trop_plein_coups_requis` coups d'épée qui portent (un
+## par coup, même s'il touche plusieurs ennemis) remplissent la boule : la
+## suivante sort `trop_plein_taille` fois plus grosse et fait
+## `trop_plein_degats` fois ses dégâts (la Tornade aussi). Pour le voir venir :
+## une ROUE de sang au-dessus de l'épaule, comme la jauge d'endurance de Zelda
+## (Kaoru), qui se remplit en tournant d'un tiers à chaque coup ; pleine, son
+## cœur se remplit et bat ; elle crève au lancer
+## (SCRIPT/SHADER/trop_plein_jauge.tscn). Voir animator.gd (`_on_body_entered`)
+## et `bloodball_enter`.
+const TALISMAN_TROP_PLEIN := "trop_plein"
+const TROP_PLEIN_JAUGE := preload("res://SCRIPT/SHADER/trop_plein_jauge.tscn")
+@export var trop_plein_coups_requis := 3
+@export var trop_plein_taille := 2.0
+@export var trop_plein_degats := 2.0
+var trop_plein_coups := 0
+var _trop_plein: Node2D
+
+## TALISMAN « INÉBRANLABLE » (2 oct. 2026, id "inebranlable", choisi par Kaoru) :
+## un coup d'ENNEMI encaissé ne fait plus reculer ni vaciller — pas d'état HIT,
+## pas de recul : on garde la main (un coup d'épée en cours continue). Le cœur
+## est perdu quand même, et tout ce qu'un coup encaissé déclenche part
+## (Vengeance, Épines, Bouclier…). À la place du vacillement, l'effet du PAS
+## DE CÔTÉ (Kaoru, plutôt qu'un clignotement) : un fantôme reste sur place et
+## glisse vers le coup, le corps blêmit un instant (`_fantome_esquive`) ; et
+## pendant `inebranlable_repit` s — la grâce du pas de côté — le même coup ne
+## repasse pas (sauf ceux qui percent le vacillement, comme les explosions).
+## Les PIÈGES gardent leur renvoi (il nous sort des piques), et un coup
+## interrompt toujours le SOIN. Voir `apply_damage`.
+const TALISMAN_INEBRANLABLE := "inebranlable"
+@export var inebranlable_repit := 0.35
+var _inebranlable_reste := 0.0
+
+## TALISMAN « SIXIÈME COUP » (2 oct. 2026, id "sixieme", choisi par Kaoru) : un
+## coup d'épée qui porte sur `sixieme_tous_les` est CRITIQUE — il fait
+## `sixieme_multiplicateur` fois ses dégâts ; son étoile d'impact grandit et se
+## cerne de sang, la caméra tremble un peu. Compté une fois par coup d'épée,
+## même s'il touche plusieurs ennemis (tous prennent le critique). Voir
+## animator.gd (`_on_body_entered`), `sixieme_critique`, `sixieme_porte`.
+const TALISMAN_SIXIEME := "sixieme"
+@export var sixieme_tous_les := 6
+@export var sixieme_multiplicateur := 2.0
+## la caméra tremble au coup critique (0 = pas du tout)
+@export var sixieme_secousse := 4.0
+## la taille de son étoile d'impact (celle d'un coup dans le dos : 1,3 ; une
+## étoile ×2,2 couvrait le héros ET l'ennemi)
+@export var sixieme_eclat_taille := 1.6
+var sixieme_compte := 0
+var _sixieme_coup_compte := -1      # le coup d'épée déjà compté
+var _sixieme_coup_critique := -1    # le coup d'épée critique
+
+## TALISMAN « PACTE DE SANG » (2 oct. 2026, id "pacte", choisi par Kaoru) :
+## chaque boule de sang boit `pacte_cout` de la jauge de soin (un tiers de soin)
+## et fait `pacte_multiplicateur` fois ses dégâts, dans le sang sombre du pacte
+## (corrompue, elle reste violette) ; jauge trop basse : elle part normale,
+## gratuite. ×3 : Kaoru l'a d'abord voulu ×2 (« pas plus »), puis remis à ×3 le
+## même jour (« finalement le coût en vaut la peine »). Voir `bloodball_enter`
+## et bloodball.gd (`pacte`).
+const TALISMAN_PACTE := "pacte"
+@export var pacte_cout := 34
+@export var pacte_multiplicateur := 3.0
+@export var pacte_coeur := Color(1.0, 0.7, 0.58)
+@export var pacte_couleur := Color(0.52, 0.0, 0.07)
+@export var pacte_ombre := Color(0.15, 0.0, 0.03)
+
+## TALISMAN « SANG NEUF » (2 oct. 2026, id "sang_neuf", IDÉE DE KAORU : « quand on
+## meurt, remplit la jauge de soin à la réapparition ») : au respawn, la jauge
+## de soin se remplit jusqu'en haut (au lieu d'un seul soin) — le HUD la montre
+## monter `sang_neuf_delai` s après la réapparition. `dead_input` note la mort
+## dans l'autoload (`Player.vient_de_mourir`) ; voir `_sang_neuf`.
+const TALISMAN_SANG_NEUF := "sang_neuf"
+@export var sang_neuf_delai := 0.6
+
 # AMÉLIORATION: combo_count remplace le bool "combo" — plus clair et extensible
 var combo_buffered := false   # true si le joueur a appuyé pendant l'anim en cours
 
@@ -482,6 +555,9 @@ func _ready() -> void:
 	_oeil_preparer()
 	_gardiennes_preparer()
 	_couronne_defi_preparer()
+	_trop_plein_preparer()
+	# un talisman ôté : le Trop-plein se vide (la connexion meurt avec ce joueur)
+	Player.talismans_changes.connect(_trop_plein_verifier)
 	# nos victimes (talisman « Essaim ») ; le signal vit dans l'autoload, la
 	# connexion meurt avec ce joueur
 	Player.monstre_tue.connect(_on_monstre_tue)
@@ -490,6 +566,8 @@ func _ready() -> void:
 	_essaim_reprendre.call_deferred()
 	# nos âmes perdues, si c'est ici qu'on est tombé
 	_ames_poser.call_deferred()
+	# on revient d'une mort ? (talisman « Sang neuf » : la jauge se remplit)
+	_sang_neuf.call_deferred()
 	initialize_states()
 	change_state(States.IDLE)
 
@@ -556,6 +634,8 @@ func _physics_process(delta: float) -> void:
 			crescendo_casser()
 	_souffle_grace_reste = maxf(_souffle_grace_reste - delta, 0.0)
 	Player.second_souffle_attente = maxf(Player.second_souffle_attente - delta, 0.0)
+	# INÉBRANLABLE : la grâce qui suit un coup encaissé sans vaciller
+	_inebranlable_reste = maxf(_inebranlable_reste - delta, 0.0)
 	_grappin_scanner()
 
 
@@ -651,6 +731,10 @@ func apply_damage(amount: int, source_x, source_tag := "?", perce_stun := false,
 		print("[DMG bloqué/stun] f=", Engine.get_physics_frames(),
 			" src=", source_tag, " amount=", amount)
 		return
+	# INÉBRANLABLE : le répit qui suit un coup encaissé sans vaciller tient le
+	# rôle du vacillement : aucun coup ne passe (sauf ceux qui le percent)
+	if _inebranlable_reste > 0.0 and not perce_stun:
+		return
 	# le répit qui suit un second souffle : aucun coup ne passe
 	if _souffle_grace_reste > 0.0:
 		return
@@ -680,15 +764,29 @@ func apply_damage(amount: int, source_x, source_tag := "?", perce_stun := false,
 		_knock = Vector2.ZERO
 		change_state(States.DEAD)
 		return
-	# Knockback horizontal absolu, l'état HIT gère stun + anim
-	var dir := 0
-	if source_x != null:
-		dir = 1 if (global_position.x - source_x) > 0 else -1
-	_knock = Vector2(dir * HIT_KNOCK_X, 0.0)
-	change_state(States.HIT)
-	# Soulèvement : impulsion verticale one-shot, appliquée APRÈS hit_enter
-	# (qui remet velocity à zéro) — la gravité gère la retombée
-	velocity.y = HIT_KNOCK_Y
+	if Player.talisman_equipe(TALISMAN_INEBRANLABLE) and current_state != States.HEAL:
+		# INÉBRANLABLE : ni recul ni vacillement, on garde la main ; à la place,
+		# l'effet du pas de côté : un fantôme reste sur place et glisse vers le
+		# coup, le corps blêmit — et sa grâce : le même coup ne repasse pas
+		_inebranlable_reste = inebranlable_repit
+		var dir_coup := 0
+		if source_x != null:
+			dir_coup = 1 if (global_position.x - float(source_x)) > 0.0 else -1
+		elif last_direction != 0:
+			dir_coup = -last_direction
+		_fantome_esquive(Vector2(-dir_coup, 0.0))
+		print("[INÉBRANLABLE] f=", Engine.get_physics_frames(), " coup encaissé sans vaciller (",
+			States.keys()[current_state], ") ; répit ", inebranlable_repit, " s")
+	else:
+		# Knockback horizontal absolu, l'état HIT gère stun + anim
+		var dir := 0
+		if source_x != null:
+			dir = 1 if (global_position.x - source_x) > 0 else -1
+		_knock = Vector2(dir * HIT_KNOCK_X, 0.0)
+		change_state(States.HIT)
+		# Soulèvement : impulsion verticale one-shot, appliquée APRÈS hit_enter
+		# (qui remet velocity à zéro) — la gravité gère la retombée
+		velocity.y = HIT_KNOCK_Y
 	# le coup est encaissé : le bouclier de sang se dresse du côté d'où il vient
 	_bouclier_lever(-sens_coup)
 	_epines_jaillir()
@@ -821,6 +919,85 @@ func _couronne_defi_preparer() -> void:
 	var c := COURONNE_DEFI_SCENE.instantiate()
 	c.demo_boucle = false
 	add_child(c)
+
+
+## la roue du Trop-plein : elle se montre et se cache seule selon le compte
+func _trop_plein_preparer() -> void:
+	_trop_plein = TROP_PLEIN_JAUGE.instantiate()
+	_trop_plein.demo_boucle = false
+	_trop_plein.joueur = self
+	add_child(_trop_plein)
+
+
+## TROP-PLEIN : un coup d'épée qui porte (animator.gd, une fois par coup) remplit
+## la boule d'un cran
+func trop_plein_charger() -> void:
+	if not Player.talisman_equipe(TALISMAN_TROP_PLEIN) \
+			or trop_plein_coups >= trop_plein_coups_requis:
+		return
+	trop_plein_coups += 1
+	print("[TROP-PLEIN] f=", Engine.get_physics_frames(), " coup ", trop_plein_coups,
+		"/", trop_plein_coups_requis)
+
+
+## TROP-PLEIN : la prochaine boule sortira grosse
+func trop_plein_pret() -> bool:
+	return Player.talisman_equipe(TALISMAN_TROP_PLEIN) \
+		and trop_plein_coups >= trop_plein_coups_requis
+
+
+## le talisman ôté : la boule se vide
+func _trop_plein_verifier() -> void:
+	if not Player.talisman_equipe(TALISMAN_TROP_PLEIN):
+		trop_plein_coups = 0
+
+
+## SIXIÈME COUP : ce coup d'épée (son numéro) sera-t-il critique ? Demandé AVANT
+## de frapper : c'est le cas s'il est le `sixieme_tous_les`-ième à porter (un
+## coup déjà compté garde sa réponse : tous ses ennemis prennent le critique)
+func sixieme_critique(coup_id: int) -> bool:
+	if not Player.talisman_equipe(TALISMAN_SIXIEME):
+		return false
+	if coup_id == _sixieme_coup_compte:
+		return coup_id == _sixieme_coup_critique
+	return sixieme_compte + 1 >= sixieme_tous_les
+
+
+## SIXIÈME COUP : ce coup d'épée a porté — il compte, une fois ; le sixième
+## remet le compte à zéro et fait trembler la caméra
+func sixieme_porte(coup_id: int) -> void:
+	if coup_id == _sixieme_coup_compte:
+		return
+	_sixieme_coup_compte = coup_id
+	sixieme_compte += 1
+	if sixieme_compte >= sixieme_tous_les:
+		sixieme_compte = 0
+		_sixieme_coup_critique = coup_id
+		var camera := get_tree().get_first_node_in_group("Camera")
+		if camera != null and camera.has_method("shake") and sixieme_secousse > 0.0:
+			camera.shake(sixieme_secousse, 8.0)
+
+
+## SANG NEUF : on vient de réapparaître après une mort : la jauge de soin se
+## remplit, un instant après (pour qu'on la voie monter)
+func _sang_neuf() -> void:
+	if not Player.vient_de_mourir:
+		return
+	Player.vient_de_mourir = false
+	if not Player.talisman_equipe(TALISMAN_SANG_NEUF):
+		return
+	# une minuterie liée à ce joueur : s'il disparaît avant, elle ne fait rien
+	get_tree().create_timer(sang_neuf_delai).timeout.connect(_sang_neuf_remplir)
+
+
+func _sang_neuf_remplir() -> void:
+	if Player.hp <= 0:
+		return
+	var manque := Player.MAX_BLOODHEAL - Player.bloodheal
+	if manque > 0:
+		Player.changement_de_bloodheal(manque)
+	print("[SANG NEUF] f=", Engine.get_physics_frames(), " réapparition : la jauge de soin se remplit (+",
+		manque, " → ", Player.bloodheal, "/", Player.MAX_BLOODHEAL, ")")
 
 
 ## les gouttes des Gardiennes : elles se montrent et se cachent seules selon le
@@ -3480,9 +3657,25 @@ func bloodball_enter() -> void:
 	var scene := TORNADE_SCENE if Player.talisman_equipe(TALISMAN_TORNADE) else BLOODBALL_SCENE
 	var ball := scene.instantiate()
 	ball.dir = int(signf(point.scale.x))
+	# TROP-PLEIN : remplie par trois coups d'épée, elle sort grosse et forte ;
+	# la roue de l'épaule crève
+	if trop_plein_pret():
+		ball.grossir(trop_plein_taille, trop_plein_degats)
+		trop_plein_coups = 0
+		if _trop_plein != null:
+			_trop_plein.crever()
+		print("[TROP-PLEIN] f=", Engine.get_physics_frames(), " boule pleine : ×",
+			trop_plein_taille, " de taille, ×", trop_plein_degats, " de dégâts")
 	# SANG CORROMPU : violette, elle empoisonne (la Tornade aussi)
 	if Player.talisman_equipe(TALISMAN_CORROMPU):
 		ball.corrompre(corrompu_coeur, corrompu_couleur, corrompu_ombre)
+	# PACTE DE SANG : payée sur la jauge de soin, elle frappe trois fois plus
+	# fort ; jauge trop basse : elle part normale
+	if Player.talisman_equipe(TALISMAN_PACTE) and Player.bloodheal >= pacte_cout:
+		Player.changement_de_bloodheal(-pacte_cout)
+		ball.pacte(pacte_multiplicateur, pacte_coeur, pacte_couleur, pacte_ombre)
+		print("[PACTE] f=", Engine.get_physics_frames(), " boule payée ", pacte_cout,
+			" de jauge (reste ", Player.bloodheal, ") : ", ball.damage, " de dégâts")
 	get_tree().current_scene.add_child(ball)
 	ball.global_position = spellcast.global_position
 
@@ -3579,6 +3772,7 @@ func dead_input(event: InputEvent) -> void:
 		Player.second_souffle_attente = 0.0     # nouvelle vie : le souffle est prêt
 		Player.coeur_noir_attente = 0.0         # … et le cœur noir revient
 		Player.essaim_en_vol = 0                # … et l'essaim est dispersé
+		Player.vient_de_mourir = true           # … et le Sang neuf remplira la jauge
 		# au respawn, la jauge de sang offre EXACTEMENT un soin : le joker
 		# du joueur, à dépenser au bon moment
 		Player.bloodheal = HEAL_COST

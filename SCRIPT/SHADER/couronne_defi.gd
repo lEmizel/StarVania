@@ -16,8 +16,9 @@ extends Node2D
 
 ## lancée seule (F6) : posée, tenue, effacée, en boucle
 @export var demo_boucle := true
-## où elle flotte (repère du joueur : ses pieds à 0) — juste au-dessus des
-## cheveux (leur haut est vers −170)
+## où elle flotte (repère du joueur : ses pieds à 0) — son bas reste vers −172,
+## juste au-dessus des cheveux à leur plus haut (−170, coups d'épée compris ;
+## au repos ils sont vers −148)
 @export var hauteur := -188.0
 ## sa taille (1 = celle du dessin du shader ; à 1, « c'est trop gros », Kaoru)
 @export var echelle := 0.65

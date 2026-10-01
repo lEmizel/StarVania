@@ -73,6 +73,10 @@ var ames_perdues := 0
 ## remettent l'attente à 0. Ici : le joueur est recréé à chaque tableau.
 var coeur_noir := false
 var coeur_noir_attente := 0.0
+## TALISMAN « SANG NEUF » (2 oct. 2026, idée de Kaoru) : vrai entre une mort et
+## la réapparition qui la suit — le joueur qui naît alors sait qu'il revient
+## d'une mort (player.gd, `_sang_neuf` : la jauge de soin se remplit).
+var vient_de_mourir := false
 ## TALISMAN « COURONNE DU DÉFI » (1er oct. 2026, idée de Kaoru) : un défi — tant
 ## qu'elle est portée on n'a plus qu'UN cœur, et tous les autres talismans sont
 ## retirés et VERROUILLÉS (`talisman_verrouille`). `defi_max_hp` garde le vrai
@@ -117,6 +121,7 @@ func reset_partie() -> void:
 	ames_id += 1
 	coeur_noir = false
 	coeur_noir_attente = 0.0
+	vient_de_mourir = false
 	defi_max_hp = 0
 
 
