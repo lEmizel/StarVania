@@ -68,6 +68,9 @@ const SHADERS: Array[String] = [
 	"res://SCRIPT/TALISMAN/dessin_prise.gdshader",    # talisman prise ferme (menu START, 1er oct. 2026)
 	"res://SCRIPT/TALISMAN/dessin_venin.gdshader",    # talisman venin (menu START, 1er oct. 2026)
 	"res://SCRIPT/TALISMAN/dessin_cristal.gdshader",  # talisman sang cristallisé (menu START, 1er oct. 2026)
+	"res://SCRIPT/SHADER/plume_aceree.gdshader",      # la plume-lame du talisman plumes acérées (1er oct. 2026)
+	"res://SCRIPT/TALISMAN/dessin_plumes.gdshader",   # son dessin dans le menu START
+	"res://SCRIPT/TALISMAN/dessin_sang_plein.gdshader", # talisman sang plein (menu START, 1er oct. 2026)
 	"res://SCRIPT/SHADER/explosion_violette.gdshader", # explosion du kamikaze (sept. 2026)
 	"res://SCRIPT/SHADER/cable_de_sang.gdshader",    # câble du grappin (sept. 2026)
 	"res://SCRIPT/SHADER/impact_blanc.gdshader",     # éclat d'un coup d'épée qui porte (sept. 2026)

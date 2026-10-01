@@ -243,6 +243,23 @@ const TALISMAN_CRISTAL := "cristal"
 @export var cristal_duree := 1.5
 @export var cristal_bonus := 1.5
 
+## TALISMAN « PLUMES ACÉRÉES » (1er oct. 2026, id "plumes") — IL FAUT LE
+## DOUBLE SAUT (sans lui, rien : précisé dans la description, voulu par Kaoru) :
+## à chaque double saut, l'aile lâche `plumes_nombre` plumes acérées qui fondent
+## vers le sol en éventail (`plumes_eventail` degrés de part et d'autre de la
+## verticale) ; chacune blesse le premier ennemi qu'elle touche pour
+## `plumes_part` d'un coup d'épée (bonus compris), sans recul, puis se plante
+## (dans le sol aussi) et s'efface — SCRIPT/SHADER/plume_aceree.tscn, aux
+## couleurs de l'aile. Voir `_plumes_lancer` (appelé par `_try_double_jump`).
+const TALISMAN_PLUMES := "plumes"
+const PLUME_ACEREE := preload("res://SCRIPT/SHADER/plume_aceree.tscn")
+@export var plumes_nombre := 5
+## chaque plume vaut un coup d'épée entier (70 sans bonus) — à 0,35 (25) c'était
+## « trop faible » (Kaoru)
+@export var plumes_part := 1.0
+@export var plumes_vitesse := 950.0
+@export var plumes_eventail := 36.0
+
 ## TALISMAN « CROISSANT DE SANG » (1er oct. 2026, id "croissant") : le DERNIER
 ## coup du combo (le 2e : le combo n'en a que deux) projette son slash vers
 ## l'avant (animator.gd, `_croissant`) ; ses
@@ -1596,6 +1613,9 @@ func _try_double_jump() -> bool:
 	print("[DJ] double saut  depuis=", States.keys()[current_state])
 	_double_jump_used = true
 	_aile_battre()
+	# PLUMES ACÉRÉES : l'aile lâche ses plumes-lames vers le sol
+	if Player.talisman_equipe(TALISMAN_PLUMES):
+		_plumes_lancer()
 	if _wj_lock_timer > 0.0:
 		print("[WJ] verrou coupé par DOUBLE SAUT")
 	_wj_lock_timer = 0.0  # le double saut interrompt le verrou du saut mural
@@ -1641,6 +1661,36 @@ func _aile_battre() -> void:
 		return
 	_aile.position = AILE_ATTACHE
 	_aile.jouer()
+
+
+## PLUMES ACÉRÉES : au double saut, l'aile lâche ses plumes-lames, de son
+## attache dans le dos, vers le bas en éventail, à ses couleurs
+func _plumes_lancer() -> void:
+	var origine: Vector2 = point.to_global(AILE_ATTACHE)
+	var degats := maxi(roundi(animator.degats_du_coup() * plumes_part), 1)
+	var couleur = null
+	var contour = null
+	if _aile != null:
+		var rect := _aile.get_node_or_null("Aile") as CanvasItem
+		if rect != null and rect.material is ShaderMaterial:
+			couleur = (rect.material as ShaderMaterial).get_shader_parameter("couleur")
+			contour = (rect.material as ShaderMaterial).get_shader_parameter("couleur_contour")
+	var hote: Node = get_tree().current_scene
+	if hote == null:
+		hote = get_parent()
+	for i in plumes_nombre:
+		var t := 0.0 if plumes_nombre <= 1 else float(i) / float(plumes_nombre - 1) * 2.0 - 1.0
+		var ang := deg_to_rad(90.0 + t * plumes_eventail + randf_range(-4.0, 4.0))
+		var plume := PLUME_ACEREE.instantiate()
+		plume.demo_boucle = false
+		plume.joueur = self
+		plume.degats = degats
+		plume.vitesse = Vector2.from_angle(ang) * plumes_vitesse * randf_range(0.9, 1.1)
+		hote.add_child(plume)
+		plume.global_position = origine + Vector2(randf_range(-6.0, 6.0), randf_range(-4.0, 4.0))
+		plume.teindre(couleur, contour)
+	print("[PLUMES] f=", Engine.get_physics_frames(), " double saut : ", plumes_nombre,
+		" plumes de ", degats, " dégâts")
 
 
 # --- PLANER (1er oct. 2026) ---

@@ -43,16 +43,16 @@ extends RefCounted
 ## Nombre d'emplacements RONDS de la collection dans le menu. Ceux qui n'ont pas
 ## encore de talisman dans LISTE restent des emplacements vides « à découvrir ».
 ## S'il y a plus de talismans que d'emplacements, la grille s'agrandit seule.
-## VINGT-SEPT pour le moment (5 le 30 sept. 2026 ; le sillage de sang, les
+## VINGT-NEUF pour le moment (5 le 30 sept. 2026 ; le sillage de sang, les
 ## épines, la frénésie, la marque, le second souffle, le canon de verre,
 ## l'allonge, la vengeance, le croissant de sang, l'essaim, l'offrande, le
 ## sang bouillant, l'ombre de sang, le sang corrompu, le coup dans le dos, le
 ## crescendo, la parade, la lame corrompue, la prise ferme, le venin, le coup
-## de grâce et le sang cristallisé le 1er oct.) : monte ce nombre quand il y en
-## aura d'autres à découvrir.
-const NB_EMPLACEMENTS := 27
+## de grâce, le sang cristallisé, les plumes acérées et le sang plein le 1er
+## oct.) : monte ce nombre quand il y en aura d'autres à découvrir.
+const NB_EMPLACEMENTS := 29
 
-## Les VINGT-SEPT talismans du jeu (1er oct. 2026), tous branchés :
+## Les VINGT-NEUF talismans du jeu (1er oct. 2026), tous branchés :
 ##   tornade  → SCRIPT/CHARACHTER/player.gd, région BLOODBALL
 ##   foudre   → SCRIPT/CHARACHTER/animator.gd (le slash, l'arc qui bondit, le +10 %)
 ##   bouclier → player.gd (`apply_damage` / `apply_environment_damage`)
@@ -108,6 +108,10 @@ const NB_EMPLACEMENTS := 27
 ##   cristal  → SCRIPT/SPELL/bloodball.gd (la chance de figer) + BASE_IA.gd
 ##              (`cristalliser`, `briser_cristal`) + hit_flash.gdshader (la statue) +
 ##              animator.gd (le coup d'épée qui le brise)
+##   plumes   → player.gd (`_try_double_jump` → `_plumes_lancer`) +
+##              SCRIPT/SHADER/plume_aceree.gd (la plume-lame) — il faut le double saut
+##   sang_plein → SCRIPT/AUTOLOAD/player.gd (`bonus_degats_pourcent`,
+##              `sang_plein_actif`) — des stats seules, comme la Frénésie
 ## Les clés chiffrées (`degats_pourcent`, `esquive_pourcent`, `blood_pourcent`,
 ## `degats_pourcent_dernier_coeur`)
 ## sont lues par `Player.bonus_talismans(cle)` : deux talismans qui portent la
@@ -140,11 +144,13 @@ const LISTE := [
 	{"id": "venin", "nom": "Venin", "description": "Les ennemis empoisonnés prennent 30 % de dégâts en plus de toutes vos attaques.", "couleur": Color(0.58, 0.14, 0.84), "dessin": "res://SCRIPT/TALISMAN/dessin_venin.gdshader"},
 	{"id": "grace", "nom": "Coup de grâce", "description": "Un ennemi à moins d'un quart de sa vie se fissure de rouge : votre prochain coup d'épée l'achève net et vous rend du sang. Les boss y échappent.", "couleur": Color(0.78, 0.04, 0.12), "dessin": "res://SCRIPT/TALISMAN/dessin_grace.gdshader"},
 	{"id": "cristal", "nom": "Sang cristallisé", "description": "Une boule de sang sur cinq fige l'ennemi dans le cristal pendant un instant ; votre coup d'épée suivant le brise avec 50 % de dégâts en plus.", "couleur": Color(0.86, 0.12, 0.2), "dessin": "res://SCRIPT/TALISMAN/dessin_cristal.gdshader"},
+	{"id": "plumes", "nom": "Plumes acérées", "description": "Nécessite le double saut. À chaque double saut, l'aile lâche des plumes acérées qui fondent vers le sol et blessent les ennemis en dessous.", "couleur": Color(0.65, 0.16, 0.24), "dessin": "res://SCRIPT/TALISMAN/dessin_plumes.gdshader"},
+	{"id": "sang_plein", "nom": "Sang plein", "description": "Tant que votre jauge de sang est pleine, vos coups d'épée font 40 % de dégâts en plus. Vous soigner la vide…", "couleur": Color(0.78, 0.04, 0.12), "dessin": "res://SCRIPT/TALISMAN/dessin_sang_plein.gdshader", "degats_pourcent_jauge_pleine": 40},
 ]
 
 ## POUR TESTER LE MENU : les talismans déjà découverts au début d'une partie.
 ## À vider ([]) quand ils se trouveront dans les niveaux.
-const DECOUVERTS_AU_DEPART := ["tornade_bloodball", "foudre", "bouclier", "esquive", "soif", "sillage", "epines", "frenesie", "marque", "souffle", "canon", "allonge", "vengeance", "croissant", "essaim", "offrande", "bouillant", "ombre", "corrompu", "dos", "crescendo", "parade", "lame_corrompue", "prise", "venin", "grace", "cristal"]
+const DECOUVERTS_AU_DEPART := ["tornade_bloodball", "foudre", "bouclier", "esquive", "soif", "sillage", "epines", "frenesie", "marque", "souffle", "canon", "allonge", "vengeance", "croissant", "essaim", "offrande", "bouillant", "ombre", "corrompu", "dos", "crescendo", "parade", "lame_corrompue", "prise", "venin", "grace", "cristal", "plumes", "sang_plein"]
 
 
 ## la ligne du catalogue qui porte cet id ({} si aucune)

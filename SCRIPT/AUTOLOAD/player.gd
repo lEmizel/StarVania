@@ -245,7 +245,17 @@ func bonus_degats_pourcent() -> float:
 	var total := bonus_talismans("degats_pourcent")
 	if frenesie_active():
 		total += bonus_talismans("degats_pourcent_dernier_coeur")
+	if sang_plein_actif():
+		total += bonus_talismans("degats_pourcent_jauge_pleine")
 	return total
+
+
+## SANG PLEIN (talisman « Sang plein », 1er oct. 2026) : vrai quand un bonus
+## « jauge pleine » est porté ET que la jauge de sang (bloodheal) est pleine —
+## se soigner la vide et coupe le bonus : le dilemme est voulu. Des STATS
+## seulement, comme la Frénésie (pas d'effet à l'écran).
+func sang_plein_actif() -> bool:
+	return bloodheal >= MAX_BLOODHEAL and bonus_talismans("degats_pourcent_jauge_pleine") > 0.0
 
 
 ## Vrai quand un bonus « dernier cœur » est porté ET qu'il ne reste qu'un cœur.
