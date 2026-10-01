@@ -53,6 +53,20 @@ const SHADERS: Array[String] = [
 	"res://SCRIPT/SHADER/bouillon_sang.gdshader",     # les bulles du talisman sang bouillant (1er oct. 2026)
 	"res://SCRIPT/SHADER/explosion_sang.gdshader",    # son explosion
 	"res://SCRIPT/TALISMAN/dessin_bouillant.gdshader", # son dessin dans le menu START
+	"res://SCRIPT/SHADER/ombre_sang.gdshader",        # la teinte du double du talisman ombre de sang (1er oct. 2026)
+	"res://SCRIPT/TALISMAN/dessin_ombre.gdshader",    # son dessin dans le menu START
+	"res://SCRIPT/SHADER/poison_sang.gdshader",       # les volutes du talisman sang corrompu (1er oct. 2026)
+	"res://SCRIPT/TALISMAN/dessin_corrompu.gdshader", # son dessin dans le menu START
+	"res://SCRIPT/TALISMAN/dessin_dos.gdshader",      # talisman coup dans le dos (menu START, 1er oct. 2026)
+	"res://SCRIPT/TALISMAN/dessin_crescendo.gdshader", # talisman crescendo (menu START, 1er oct. 2026)
+	"res://SCRIPT/SHADER/parade_choc.gdshader",       # le choc du talisman parade (1er oct. 2026)
+	"res://SCRIPT/SHADER/etourdi.gdshader",           # les étoiles d'un monstre sonné (parade)
+	"res://SCRIPT/TALISMAN/dessin_parade.gdshader",   # son dessin dans le menu START
+	"res://SCRIPT/TALISMAN/dessin_lame_corrompue.gdshader", # talisman lame corrompue (menu START, 1er oct. 2026)
+	"res://SCRIPT/SHADER/grace_eclats.gdshader",      # les éclats du talisman coup de grâce (1er oct. 2026)
+	"res://SCRIPT/TALISMAN/dessin_grace.gdshader",    # son dessin dans le menu START
+	"res://SCRIPT/TALISMAN/dessin_prise.gdshader",    # talisman prise ferme (menu START, 1er oct. 2026)
+	"res://SCRIPT/TALISMAN/dessin_venin.gdshader",    # talisman venin (menu START, 1er oct. 2026)
 	"res://SCRIPT/SHADER/explosion_violette.gdshader", # explosion du kamikaze (sept. 2026)
 	"res://SCRIPT/SHADER/cable_de_sang.gdshader",    # câble du grappin (sept. 2026)
 	"res://SCRIPT/SHADER/impact_blanc.gdshader",     # éclat d'un coup d'épée qui porte (sept. 2026)

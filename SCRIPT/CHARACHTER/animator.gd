@@ -113,6 +113,41 @@ var _coup_id := 0
 ## avant (plus de slash à l'écran, ou un autre coup a commencé), il ne part
 ## pas.
 const TALISMAN_CROISSANT := "croissant"
+## TALISMAN « OMBRE DE SANG » : quand le coup porte, un double surgit derrière
+## l'ennemi et le refait (player.gd, `ombre_surgir`) — un double par coup
+const TALISMAN_OMBRE := "ombre"
+## TALISMAN « SANG BOUILLANT » : chaque coup qui porte charge l'ennemi
+## (player.gd, `bouillant_charger`)
+const TALISMAN_BOUILLANT := "bouillant"
+## TALISMAN « COUP DANS LE DOS » : un coup qui frappe un ennemi de dos fait
+## `player.dos_multiplicateur` fois ses dégâts (`_de_dos`) ; son éclat est plus
+## grand et cerné de sang (`_eclat_impact`)
+const TALISMAN_DOS := "dos"
+const DOS_ECLAT_TAILLE := 1.3
+const DOS_ECLAT_CONTOUR := Color(0.78, 0.04, 0.12)
+## où regardaient les ennemis proches quand le coup a COMMENCÉ (instance → ±1)
+var _dos_regards := {}
+## TALISMAN « CRESCENDO » : chaque coup qui porte fait monter la série
+## (player.gd, `crescendo_pourcent` / `crescendo_porte`) ; le slash rougit et
+## s'épaissit avec elle (`_crescendo_habiller`)
+const TALISMAN_CRESCENDO := "crescendo"
+## TALISMAN « LAME CORROMPUE » : chaque coup qui porte empoisonne (player.gd,
+## `empoisonner`), le slash vire au violet, la foudre aussi (`_habiller_slash`,
+## `_foudre_bondir`)
+const TALISMAN_LAME_CORROMPUE := "lame_corrompue"
+## TALISMAN « VENIN » : l'éclat d'un coup sur un ennemi empoisonné se cerne de
+## violet (les dégâts en plus : BASE_IA `_venin`)
+const TALISMAN_VENIN := "venin"
+const VENIN_ECLAT_CONTOUR := Color(0.6, 0.18, 0.9)
+## les couleurs du slash en shader telles que réglées (lues une fois) : sa
+## lame, sa foudre, le halo de sa foudre
+var _slash_couleur_base := Color.WHITE
+var _slash_foudre_base := Color(0.45, 0.72, 1.0)
+var _slash_halo_base := Color(0.30, 0.42, 1.0)
+var _slash_couleur_lue := false
+var _ombre_coup := -1            # le coup d'épée qui a déjà fait surgir son double
+## le dernier slash lancé (l'ombre de sang le refait)
+var dernier_slash := "new_slash_1"
 const CROISSANT := preload("res://SCRIPT/SHADER/croissant_sang.tscn")
 ## le slash dont il se détache (celui des coups au sol)
 const SLASH_DU_CROISSANT := "new_slash_1"
@@ -176,6 +211,19 @@ func _on_body_entered(body):
 		var venge: bool = player.vengeance_active()
 		if venge:
 			coup = roundi(coup * player.vengeance_multiplicateur)
+		# COUP DANS LE DOS : regardé AVANT le coup (touché, il se retourne
+		# vers nous)
+		var dos := Player.talisman_equipe(TALISMAN_DOS) and _de_dos(body)
+		if dos:
+			coup = roundi(coup * player.dos_multiplicateur)
+		# CRESCENDO : ce coup vaut son rang dans la série (5, 10, 20, 40, 50 %)
+		var serie: float = player.crescendo_pourcent(_coup_id)
+		if serie > 0.0:
+			coup = roundi(coup * (1.0 + serie / 100.0))
+		# COUP DE GRÂCE : fissuré (à portée d'exécution), ce coup l'achève
+		var grace: bool = body is BaseAI and body.executable()
+		if grace:
+			coup = maxi(coup, body.hp)
 		# (le joueur se déclare comme attaquant : ses victimes sont les siennes)
 		var porte = body.apply_damage(coup, player.global_position.x, "epee", true, player)
 		# coup au corps à corps qui PORTE (pas sur un mort ni un blindé) :
@@ -189,8 +237,28 @@ func _on_body_entered(body):
 				player.vengeance_frapper()
 				print("[VENGEANCE] coup vengeur : ", coup, " dégâts (encore ",
 					snappedf(player.vengeance_reste, 0.01), " s)")
+			if dos:
+				print("[DOS] coup dans le dos : ", coup, " dégâts")
+			if serie > 0.0:
+				player.crescendo_porte(_coup_id)
+				print("[CRESCENDO] coup n°", player.crescendo_serie, " de la série : +",
+					serie, " % → ", coup, " dégâts")
 			Player.changement_de_bloodheal(Player.BLOODHEAL_PAR_COUP)
-			_eclat_impact(body)
+			_eclat_impact(body, dos)
+			# l'ombre de sang surgit derrière le premier ennemi que ce coup touche
+			if Player.talisman_equipe(TALISMAN_OMBRE) and _ombre_coup != _coup_id \
+					and body is BaseAI and body.hp > 0:
+				_ombre_coup = _coup_id
+				player.ombre_surgir(body)
+			# SANG BOUILLANT : son sang bout un peu plus (boum à la 3e charge)
+			if Player.talisman_equipe(TALISMAN_BOUILLANT) and body is BaseAI and body.hp > 0:
+				player.bouillant_charger(body)
+			# LAME CORROMPUE : le coup empoisonne (ou prolonge le poison)
+			if Player.talisman_equipe(TALISMAN_LAME_CORROMPUE) and body is BaseAI and body.hp > 0:
+				player.empoisonner(body)
+			# COUP DE GRÂCE : il vole en éclats, la jauge se remplit
+			if grace:
+				player.grace_executer(body)
 			_foudre_touches.append(body)
 			if Player.talisman_equipe(TALISMAN_FOUDRE):
 				_foudre_bondir(body, coup)
@@ -219,12 +287,23 @@ func _foudre_bondir(depuis: Node, coup: int) -> void:
 		if hote == null:
 			hote = player.get_parent()
 		hote.add_child(arc)
+		# LAME CORROMPUE : l'éclair vire au violet (sur son propre matériau)
+		var corrompue := Player.talisman_equipe(TALISMAN_LAME_CORROMPUE)
+		if corrompue:
+			var trait_arc := arc.get_node_or_null("Trait") as CanvasItem
+			if trait_arc != null and trait_arc.material is ShaderMaterial:
+				var m := trait_arc.material as ShaderMaterial
+				m.set_shader_parameter("couleur", player.lame_corrompue_coeur_foudre)
+				m.set_shader_parameter("couleur_foudre", player.lame_corrompue_foudre)
 		arc.tendre(_centre_du_corps(source), _centre_du_corps(cible))
 		# la foudre se retourne contre le joueur, pas contre l'ennemi d'où elle
 		# a sauté : c'est lui l'attaquant (pas de recul : l'éclair pique)
 		var porte = cible.apply_damage(degats, player.global_position.x, "foudre", false, player)
 		if porte == false:
 			return
+		# … et l'ennemi que l'éclair touche est empoisonné à son tour
+		if corrompue and cible is BaseAI and cible.hp > 0:
+			player.empoisonner(cible)
 		source = cible
 		degats = maxi(roundi(degats * 0.5), 1)
 
@@ -278,7 +357,7 @@ func _centre_du_corps(n: Node) -> Vector2:
 ## c'est la confirmation visuelle que l'épée a mordu. Hébergé par la scène, pas
 ## par le monstre — il doit finir de jouer même si le monstre meurt du coup, et
 ## il reste où le coup est tombé pendant que le monstre recule.
-func _eclat_impact(body: Node) -> void:
+func _eclat_impact(body: Node, dans_le_dos := false) -> void:
 	if not (body is Node2D):
 		return
 	var centre: Vector2 = body.global_position
@@ -303,6 +382,100 @@ func _eclat_impact(body: Node) -> void:
 	fx.global_position = centre + Vector2(-sens * 8.0, randf_range(-16.0, 16.0))
 	fx.scale = Vector2(sens, 1.0)
 	fx.rotation = randf_range(-0.3, 0.3)
+	# COUP DANS LE DOS : l'étoile blanche (« tu as frappé ») grandit un peu et
+	# se cerne de sang. (Un 2e éclat, rouge, posé dessous et agrandi ×2,2
+	# couvrait le héros ET l'ennemi : beaucoup trop ; et une étoile rouge, c'est
+	# déjà « le héros encaisse ».)
+	# VENIN : un ennemi empoisonné prend plus — l'étoile se cerne de violet
+	var venin := not dans_le_dos and Player.talisman_equipe(TALISMAN_VENIN) \
+			and body.has_meta("poison") and is_instance_valid(body.get_meta("poison"))
+	if dans_le_dos:
+		fx.scale *= DOS_ECLAT_TAILLE
+	if dans_le_dos or venin:
+		# le matériau est sur l'enfant « Eclat » (propre à chaque éclat)
+		var eclat := fx.get_node_or_null("Eclat") as CanvasItem
+		if eclat != null and eclat.material is ShaderMaterial:
+			var mat := eclat.material as ShaderMaterial
+			mat.set_shader_parameter("couleur_contour", DOS_ECLAT_CONTOUR if dans_le_dos else VENIN_ECLAT_CONTOUR)
+			mat.set_shader_parameter("contour", 0.85)
+
+
+## l'ennemi nous tourne-t-il le dos ? Nous sommes du côté opposé à son regard
+## (`last_direction`), à plus de quelques pixels de son milieu — son regard
+## d'AU DÉPART du coup compte aussi : la lame met ~0,2 s à arriver, et un
+## squelette qui nous voit passer derrière lui a le temps de se retourner (en
+## test, une fois sur deux le bonus sautait alors qu'on avait frappé son dos)
+func _de_dos(body: Node) -> bool:
+	if not (body is BaseAI):
+		return false
+	var centre: Vector2 = body.global_position
+	if body.collision != null:
+		centre = body.collision.global_position
+	var dx: float = player.global_position.x - centre.x
+	if absf(dx) <= 4.0:
+		return false
+	var cote := signf(dx)
+	var au_depart: int = _dos_regards.get(body.get_instance_id(), body.last_direction)
+	return cote != float(body.last_direction) or cote != float(au_depart)
+
+
+## au départ d'un coup : où regardent les ennemis à moins de 400 px
+func _dos_noter_regards() -> void:
+	_dos_regards.clear()
+	if not Player.talisman_equipe(TALISMAN_DOS):
+		return
+	var cercle := CircleShape2D.new()
+	cercle.radius = 400.0
+	var q := PhysicsShapeQueryParameters2D.new()
+	q.shape = cercle
+	q.transform = Transform2D(0.0, player.global_position)
+	q.collision_mask = 8                     # la couche des monstres
+	q.collide_with_areas = false
+	for r in get_world_2d().direct_space_state.intersect_shape(q, 32):
+		var c: Object = r["collider"]
+		if c is BaseAI:
+			_dos_regards[c.get_instance_id()] = c.last_direction
+
+
+## LE SLASH DU COUP QUI PART, habillé par les talismans :
+## - LAME CORROMPUE : sa lame vire au violet (`player.lame_corrompue_couleur`),
+##   et, avec la Lame de foudre, sa foudre et son halo aussi ;
+## - CRESCENDO : il rougit (vers `player.crescendo_couleur`) et s'épaissit
+##   (jusqu'à `player.crescendo_epaisseur` fois) selon le rang de ce coup dans la
+##   série (+5 % : à peine teinté ; +50 % : rouge).
+## Sans ces talismans : tel quel (les couleurs réglées, lues une fois).
+func _habiller_slash() -> void:
+	var corrompue := Player.talisman_equipe(TALISMAN_LAME_CORROMPUE)
+	var t := 0.0
+	if Player.talisman_equipe(TALISMAN_CRESCENDO):
+		t = player.crescendo_pourcent(_coup_id) / float(player.CRESCENDO_PALIERS[-1])
+	var lame: ColorRect = null
+	if _slash_shader != null:
+		lame = _slash_shader.get_node_or_null("Lame") as ColorRect
+	if lame != null and lame.material is ShaderMaterial:
+		var mat := lame.material as ShaderMaterial
+		if not _slash_couleur_lue:
+			_slash_couleur_base = _parametre(mat, "couleur", _slash_couleur_base)
+			_slash_foudre_base = _parametre(mat, "couleur_foudre", _slash_foudre_base)
+			_slash_halo_base = _parametre(mat, "couleur_halo", _slash_halo_base)
+			_slash_couleur_lue = true
+		var base: Color = player.lame_corrompue_couleur if corrompue else _slash_couleur_base
+		mat.set_shader_parameter("couleur", base.lerp(player.crescendo_couleur, t))
+		mat.set_shader_parameter("couleur_foudre", player.lame_corrompue_foudre if corrompue else _slash_foudre_base)
+		mat.set_shader_parameter("couleur_halo", player.lame_corrompue_halo if corrompue else _slash_halo_base)
+		_slash_shader.epaisseur_facteur = lerpf(1.0, player.crescendo_epaisseur, t)
+	# le slash dessiné (si le shader est décoché) : teinté de même
+	var dessin: Color = player.lame_corrompue_couleur if corrompue else Color.WHITE
+	slash_attack.self_modulate = dessin.lerp(player.crescendo_couleur, t)
+
+
+## un paramètre d'un matériau, ou la valeur par défaut de son shader s'il ne
+## le règle pas, ou `sinon`
+func _parametre(mat: ShaderMaterial, nom: String, sinon: Color) -> Color:
+	var v = mat.get_shader_parameter(nom)
+	if v == null and mat.shader != null:
+		v = RenderingServer.shader_get_parameter_default(mat.shader.get_rid(), nom)
+	return v if v is Color else sinon
 
 
 ## Le rectangle (en coordonnées du monde) que couvrent les hitbox d'attaque
@@ -338,6 +511,8 @@ func _play_slash(anim_name: String) -> void:
 	slash_attack.scale = Vector2(f, f)
 	if _slash_shader != null:
 		_slash_shader.scale = Vector2(f, f)
+	dernier_slash = anim_name
+	_habiller_slash()
 	# en shader si on sait le refaire : à la place exacte du dessin (player.gd
 	# la pose sur slash_attack à chaque attaque)
 	if player.slash_en_shader and _slash_shader.is_inside_tree() and _slash_shader.connait(anim_name):
@@ -357,6 +532,30 @@ func couper_slash() -> void:
 	if _slash_shader != null:
 		_slash_shader.couper()
 
+## TALISMAN « PARADE » : la lame est-elle EN GARDE — sortie (une zone de touche
+## active pendant un coup) ou sur le point de sortir (l'image juste avant le
+## slash) ? Un coup d'ennemi qui arrive à ce moment-là est paré (player.gd,
+## `_parade_tente`). Pas pendant les retours (« _r »).
+const PARADE_IMAGE_AVANT := {"attack": 1, "attack_02": 0, "attack_air": 2, "attack_03": 0, "attack_lourde": 2}
+func lame_en_garde() -> bool:
+	var nom := String(animation)
+	if not nom.begins_with("attack") or nom.ends_with("_r"):
+		return false
+	for hb in [hitbox_1, hitbox_2, hitbox_3, hitbox_4]:
+		if not (hb as CollisionPolygon2D).disabled:
+			return true
+	return PARADE_IMAGE_AVANT.has(nom) and frame == PARADE_IMAGE_AVANT[nom]
+
+
+## la zone de touche de l'épée active en ce moment (0 à 3), 0 si aucune
+func zone_active() -> int:
+	var hbs := [hitbox_1, hitbox_2, hitbox_3, hitbox_4]
+	for i in hbs.size():
+		if not (hbs[i] as CollisionPolygon2D).disabled:
+			return i
+	return 0
+
+
 func _disable_all_hitboxes() -> void:
 	hitbox_1.set_deferred("disabled", true)
 	hitbox_2.set_deferred("disabled", true)
@@ -370,6 +569,10 @@ func _on_animation_changed() -> void:
 	# interrompu : son FX de slash disparaît avec lui (un éventuel coup
 	# suivant relancera le sien via _play_slash)
 	couper_slash()
+	# COUP DANS LE DOS : un coup commence → on note où regardent les ennemis
+	var nom_anim := String(animation)
+	if nom_anim.begins_with("attack") and not nom_anim.ends_with("_r"):
+		_dos_noter_regards()
 	# frame_changed n'est pas émis quand on passe d'une anim en frame 0
 	# à une nouvelle anim en frame 0 (la valeur ne change pas) —
 	# on rattrape donc la frame 0 ici, au changement d'animation

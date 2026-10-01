@@ -1,0 +1,20 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://SCRIPT/SHADER/poison_sang.gd" id="1_po"]
+[ext_resource type="Shader" path="res://SCRIPT/SHADER/poison_sang.gdshader" id="2_po"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_po"]
+resource_local_to_scene = true
+shader = ExtResource("2_po")
+
+[node name="PoisonSang" type="Node2D"]
+z_index = 1
+script = ExtResource("1_po")
+
+[node name="Volutes" type="ColorRect" parent="."]
+material = SubResource("ShaderMaterial_po")
+offset_left = -80.0
+offset_top = -190.0
+offset_right = 80.0
+offset_bottom = 90.0
+mouse_filter = 2

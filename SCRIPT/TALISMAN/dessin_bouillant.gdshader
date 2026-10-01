@@ -7,8 +7,8 @@ render_mode unshaded;
 // TOUT LE ROND est au dessin : un disque de nuit cerné d'un trait d'encre ; au
 // fond, des rayons sombres qui partent de la grande explosion ; au milieu, une
 // GERBE DE SANG en étoile (des bras à bout rond, un cœur vif), et, plus loin
-// et plus sombres, deux gerbes plus petites qu'elle a fait sauter — la
-// cascade ; en bas, une flaque de sang qui BOUT (des bulles qui montent et
+// et plus sombres, deux gerbes plus petites qu'elle a fait sauter — les
+// voisins qu'elle blesse ; en bas, une flaque de sang qui BOUT (des bulles qui montent et
 // crèvent). Aplats et dégradés, reflets rouge clair (pas de blanc). Pointé ou
 // porté (`eveil`) : les gerbes respirent, les bulles montent et crèvent.
 // À dessiner dans un CARRÉ : le disque le remplit.

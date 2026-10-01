@@ -1,0 +1,20 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://SCRIPT/SHADER/parade_choc.gd" id="1_pc"]
+[ext_resource type="Shader" path="res://SCRIPT/SHADER/parade_choc.gdshader" id="2_pc"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_pc"]
+resource_local_to_scene = true
+shader = ExtResource("2_pc")
+
+[node name="ParadeChoc" type="Node2D"]
+z_index = 5
+script = ExtResource("1_pc")
+
+[node name="Choc" type="ColorRect" parent="."]
+material = SubResource("ShaderMaterial_pc")
+offset_left = -120.0
+offset_top = -120.0
+offset_right = 120.0
+offset_bottom = 120.0
+mouse_filter = 2

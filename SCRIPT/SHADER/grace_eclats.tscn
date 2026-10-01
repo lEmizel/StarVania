@@ -1,0 +1,20 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://SCRIPT/SHADER/grace_eclats.gd" id="1_ge"]
+[ext_resource type="Shader" path="res://SCRIPT/SHADER/grace_eclats.gdshader" id="2_ge"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_ge"]
+resource_local_to_scene = true
+shader = ExtResource("2_ge")
+
+[node name="GraceEclats" type="Node2D"]
+z_index = 5
+script = ExtResource("1_ge")
+
+[node name="Eclats" type="ColorRect" parent="."]
+material = SubResource("ShaderMaterial_ge")
+offset_left = -160.0
+offset_top = -160.0
+offset_right = 160.0
+offset_bottom = 160.0
+mouse_filter = 2

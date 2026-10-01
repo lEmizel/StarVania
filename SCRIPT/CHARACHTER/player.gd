@@ -146,6 +146,92 @@ const COURONNE_SCENE := preload("res://SCRIPT/SHADER/couronne_vengeance.tscn")
 var vengeance_reste := 0.0
 var _couronne: Node2D
 
+## TALISMAN « COUP DANS LE DOS » (1er oct. 2026, id "dos") : un coup d'épée qui
+## frappe un ennemi DE DOS (nous sommes du côté opposé à son regard, au moment
+## du coup) fait `dos_multiplicateur` fois ses dégâts — +50 %, le chiffre de
+## Kaoru (j'avais proposé +75 %) ; un grand éclat rouge et blanc le signale.
+## Voir animator.gd (`_on_body_entered`, `_de_dos`). Le héros traverse les
+## ennemis : passer de l'autre côté et frapper avant qu'il se retourne.
+const TALISMAN_DOS := "dos"
+@export var dos_multiplicateur := 1.5
+
+## TALISMAN « CRESCENDO » (1er oct. 2026, id "crescendo") : chaque coup d'épée
+## qui porte sans qu'on soit touché fait monter la série ; le n-ième coup de la
+## série fait `CRESCENDO_PALIERS[n]` % de dégâts en plus — 5, 10, 20, 40 puis
+## 50 % pour tous les suivants (les paliers de Kaoru ; j'avais proposé +5 % par
+## coup jusqu'à 50). Un coup ENCAISSÉ remet la série à zéro ; elle s'éteint
+## aussi après `crescendo_delai` s sans coup qui porte (0 = jamais). Un coup qui
+## touche plusieurs ennemis ne compte qu'une fois. Le slash rougit et
+## s'épaissit avec la série (animator.gd, `_crescendo_habiller`).
+const TALISMAN_CRESCENDO := "crescendo"
+const CRESCENDO_PALIERS := [5.0, 10.0, 20.0, 40.0, 50.0]
+@export var crescendo_delai := 4.0
+## le slash au plus fort de la série : sa couleur, son épaisseur (× celle des
+## dessins)
+@export var crescendo_couleur := Color(0.86, 0.06, 0.14)
+@export var crescendo_epaisseur := 1.3
+var crescendo_serie := 0          # coups d'épée qui ont porté d'affilée
+var _crescendo_coup := -1         # le dernier coup compté (animator `_coup_id`)
+var _crescendo_reste := 0.0       # avant que la série s'éteigne (s)
+
+## TALISMAN « PARADE » (1er oct. 2026, id "parade", « on bloque un coup quand on
+## le frappe ») : un coup d'ennemi au corps à corps (l'étiquette "attaque:" de
+## BASE_IA.infliger) qui nous arrive DE FACE pendant que notre lame est sortie
+## — ou sur le point de sortir, l'image d'avant — est PARÉ : aucun dégât, et
+## l'ennemi reste sonné `parade_etourdi` s (BASE_IA.etourdir : son coup s'arrête
+## net, des étoiles tournent au-dessus de sa tête — idée de Kaoru aussi). Un
+## ennemi inébranlable (le boss) n'est sonné que `parade_part_inebranlable` de
+## ce temps. Passe avant le Bouclier et le Pas de côté ; le coup n'est pas
+## encaissé (la Vengeance ne se charge pas, le Crescendo ne casse pas). Voir
+## `_parade_tente` ; la lame en garde : animator.gd `lame_en_garde` ; le choc :
+## SCRIPT/SHADER/parade_choc.tscn.
+const TALISMAN_PARADE := "parade"
+const PARADE_CHOC_SCENE := preload("res://SCRIPT/SHADER/parade_choc.tscn")
+@export var parade_etourdi := 1.0
+@export var parade_part_inebranlable := 0.5
+## la caméra tremble au choc (0 = pas du tout)
+@export var parade_secousse := 3.0
+
+## TALISMAN « LAME CORROMPUE » (1er oct. 2026, id "lame_corrompue", idée de
+## Kaoru) : chaque coup d'épée qui porte EMPOISONNE l'ennemi — le même poison
+## que le Sang corrompu (`empoisonner`, `poison_degats`…, prolongé à chaque
+## coup, sans cumul) — et le slash vire au violet ; avec la Lame de foudre, sa
+## foudre et l'éclair qui bondit virent au violet aussi, et l'ennemi que
+## l'éclair touche est empoisonné à son tour. Voir animator.gd
+## (`_on_body_entered`, `_foudre_bondir`, `_habiller_slash`).
+const TALISMAN_LAME_CORROMPUE := "lame_corrompue"
+## le slash corrompu (la couleur de sa lame) ; sa foudre avec la Lame de
+## foudre : le trait, le halo ; le cœur de l'éclair qui bondit
+@export var lame_corrompue_couleur := Color(0.7, 0.38, 1.0)
+@export var lame_corrompue_foudre := Color(0.78, 0.5, 1.0)
+@export var lame_corrompue_halo := Color(0.52, 0.12, 0.9)
+@export var lame_corrompue_coeur_foudre := Color(0.95, 0.86, 1.0)
+
+## TALISMAN « PRISE FERME » (1er oct. 2026, id "prise", idée de Kaoru) :
+## accroché à un mur (état WALL_JUMP), on ne glisse plus — on reste où on s'est
+## accroché ; bas maintenu, on glisse comme avant pour descendre. Voir
+## `wall_jump_execute`.
+const TALISMAN_PRISE := "prise"
+
+## TALISMAN « VENIN » (1er oct. 2026, id "venin") : un ennemi EMPOISONNÉ (Sang
+## corrompu, Lame corrompue) prend `venin_multiplicateur` fois TOUS nos coups,
+## le poison compris — appliqué dans BASE_IA.apply_damage (`_venin`) ; l'éclat
+## d'un coup d'épée renforcé se cerne de violet (animator.gd `_eclat_impact`).
+const TALISMAN_VENIN := "venin"
+@export var venin_multiplicateur := 1.3
+
+## TALISMAN « COUP DE GRÂCE » (1er oct. 2026, id "grace") : un ennemi à moins
+## d'un quart de sa vie (BASE_IA.SEUIL_GRACE ; pas les vrais boss, `vrai_boss` —
+## le skeleton_boss est un élite, il y passe)
+## se fissure de rouge, et notre prochain coup d'épée l'ACHÈVE : il vole en
+## éclats (SCRIPT/SHADER/grace_eclats.tscn), la jauge reprend
+## `grace_bloodheal` (50 = une demi-barre), la caméra tremble. Voir
+## animator.gd (`_on_body_entered`) et `grace_executer`.
+const TALISMAN_GRACE := "grace"
+const GRACE_SCENE := preload("res://SCRIPT/SHADER/grace_eclats.tscn")
+@export var grace_bloodheal := 50
+@export var grace_secousse := 5.0
+
 ## TALISMAN « CROISSANT DE SANG » (1er oct. 2026, id "croissant") : le DERNIER
 ## coup du combo (le 2e : le combo n'en a que deux) projette son slash vers
 ## l'avant (animator.gd, `_croissant`) ; ses
@@ -188,21 +274,53 @@ const SCEAU_SCENE := preload("res://SCRIPT/SHADER/sceau_sang.tscn")
 @export var offrande_part := 1.0
 var _sceau: Node2D
 
-## TALISMAN « SANG BOUILLANT » (1er oct. 2026, id "bouillant") : chaque ennemi
-## que NOUS tuons se met à bouillir, puis EXPLOSE au bout de `bouillant_delai`
-## s : ses voisins à moins de `bouillant_rayon` px (sans mur entre eux) prennent
-## `bouillant_part` d'un coup d'épée (bonus compris) et sont repoussés ; ceux
-## qui en meurent bouillent et explosent à leur tour — la cascade est voulue
-## (et l'Essaim lâche ses chauves-souris sur chaque mort). Voir
-## `_on_monstre_tue`. L'allure (les bulles, l'explosion) :
-## SCRIPT/SHADER/bouillon_sang.tscn.
+## TALISMAN « SANG BOUILLANT » — ÉBULLITION (1er oct. 2026, id "bouillant") :
+## chaque coup d'épée ou de boule de sang qui touche un ennemi fait bouillir son
+## sang (une charge, des bulles) ; à la troisième charge il EXPLOSE : lui et ses
+## voisins à moins de `bouillant_rayon` px (sans mur entre eux) prennent
+## `bouillant_part` d'un coup d'épée (bonus compris), sans recul. Sans coup
+## pendant `bouillant_duree_charge` s, les charges retombent. Voir
+## `bouillant_charger` (appelé par animator.gd, bloodball.gd et ombre_sang.gd :
+## le coup du double de l'Ombre de sang charge aussi) ; l'allure (les bulles,
+## l'explosion) :
+## SCRIPT/SHADER/bouillon_sang.tscn. (v1 : les ennemis TUÉS explosaient en
+## cascade — inutile sans groupes, et la Lame de foudre faisait mieux.)
 const TALISMAN_BOUILLANT := "bouillant"
 const BOUILLON_SCENE := preload("res://SCRIPT/SHADER/bouillon_sang.tscn")
 @export var bouillant_rayon := 180.0
 @export var bouillant_part := 1.0
-@export var bouillant_delai := 0.2
+@export var bouillant_duree_charge := 3.0
 ## la caméra tremble à chaque explosion (0 = pas du tout)
 @export var bouillant_secousse := 6.0
+
+## TALISMAN « OMBRE DE SANG » (1er oct. 2026, id "ombre") : quand notre épée
+## touche, un double de sang surgit DERRIÈRE l'ennemi, refait notre coup en
+## miroir et le frappe à son tour pour `ombre_part` des dégâts d'un coup
+## (bonus compris), sans recul (il nous renverrait l'ennemi dessus) —
+## `ombre_surgir`, appelé par
+## animator.gd ; le double : SCRIPT/SHADER/ombre_sang.gd. (v1 : un double qui
+## nous suivait avec du retard ; il ne touchait jamais, le recul de notre coup
+## avait déjà emporté l'ennemi.)
+const OMBRE_SCENE := preload("res://SCRIPT/SHADER/ombre_sang.tscn")
+@export var ombre_part := 0.5
+
+## TALISMAN « SANG CORROMPU » (1er oct. 2026, id "corrompu", idée de Kaoru) :
+## la boule de sang — et la Tornade si elle est portée — vire au violet et
+## EMPOISONNE l'ennemi qu'elle touche : il perd `poison_degats` PV toutes les
+## `poison_intervalle` s pendant `poison_duree` s (Canon de verre compris, sans
+## recul) ; une nouvelle boule relance le compte, sans cumul. Voir
+## `bloodball_enter` (les couleurs) et `empoisonner` ; le poison :
+## SCRIPT/SHADER/poison_sang.gd.
+const TALISMAN_CORROMPU := "corrompu"
+const POISON_SCENE := preload("res://SCRIPT/SHADER/poison_sang.tscn")
+@export var poison_degats := 15
+@export var poison_intervalle := 0.5
+@export var poison_duree := 3.0
+## les couleurs de la boule corrompue (de la tornade et de leur impact aussi) :
+## son cœur, sa couleur, son ombre
+@export var corrompu_coeur := Color(0.93, 0.72, 1.0)
+@export var corrompu_couleur := Color(0.58, 0.14, 0.84)
+@export var corrompu_ombre := Color(0.19, 0.02, 0.31)
 
 # AMÉLIORATION: combo_count remplace le bool "combo" — plus clair et extensible
 var combo_buffered := false   # true si le joueur a appuyé pendant l'anim en cours
@@ -300,6 +418,11 @@ func _physics_process(delta: float) -> void:
 		vengeance_reste = maxf(vengeance_reste - delta, 0.0)
 		if vengeance_reste == 0.0 and _couronne != null:
 			_couronne.effacer()      # le temps a passé : la vengeance retombe
+	# la série du crescendo s'éteint sans coup qui porte
+	if crescendo_serie > 0 and crescendo_delai > 0.0:
+		_crescendo_reste -= delta
+		if _crescendo_reste <= 0.0:
+			crescendo_casser()
 	_souffle_grace_reste = maxf(_souffle_grace_reste - delta, 0.0)
 	Player.second_souffle_attente = maxf(Player.second_souffle_attente - delta, 0.0)
 	_grappin_scanner()
@@ -384,7 +507,7 @@ func _handle_landing() -> void:
 ## la barre en une seconde ; un souffle, lui, ne part qu'un coup par bombe, et
 ## sans ça quatre kamikazes qui explosent ensemble ne coûtent qu'un seul cœur
 ## (vécu le 18 sept. 2026). La roulade et le dash restent des parades absolues.
-func apply_damage(amount: int, source_x, source_tag := "?", perce_stun := false) -> void:
+func apply_damage(amount: int, source_x, source_tag := "?", perce_stun := false, attaquant: Node = null) -> void:
 	if current_state in [States.ROLL, States.DASH, States.DEAD]:
 		return
 	if current_state == States.HIT and not perce_stun:
@@ -399,6 +522,9 @@ func apply_damage(amount: int, source_x, source_tag := "?", perce_stun := false)
 		return
 	# le répit qui suit un second souffle : aucun coup ne passe
 	if _souffle_grace_reste > 0.0:
+		return
+	# la parade d'abord : un coup paré n'est pas encaissé, rien d'autre ne part
+	if _parade_tente(source_x, source_tag, attaquant):
 		return
 	if _bouclier_pare(source_x, source_tag):
 		return
@@ -435,6 +561,7 @@ func apply_damage(amount: int, source_x, source_tag := "?", perce_stun := false)
 	_bouclier_lever(-sens_coup)
 	_epines_jaillir()
 	_vengeance_charger()
+	crescendo_casser()          # un coup encaissé : la série retombe
 
 
 ## --- le canon de verre et le second souffle ---
@@ -585,38 +712,182 @@ func _epines_jaillir() -> void:
 		" ennemi(s) touché(s), ", degats, " dégâts chacun")
 
 
+## --- le coup de grâce ---
+
+## notre épée vient d'ACHEVER `cible`, fissuré : il vole en éclats, la jauge se
+## remplit de `grace_bloodheal`, la caméra tremble
+func grace_executer(cible: Node2D) -> void:
+	var fx := GRACE_SCENE.instantiate()
+	fx.demo_boucle = false
+	var hote: Node = get_tree().current_scene
+	if hote == null:
+		hote = get_parent()
+	hote.add_child(fx)
+	var c := cible.global_position
+	if cible is BaseAI and cible.collision != null:
+		c = cible.collision.global_position
+	fx.global_position = c
+	Player.changement_de_bloodheal(grace_bloodheal)
+	var cam := get_tree().get_first_node_in_group("Camera")
+	if grace_secousse > 0.0 and cam != null and cam.has_method("shake"):
+		cam.shake(grace_secousse, 10.0)
+	print("[GRÂCE] f=", Engine.get_physics_frames(), " exécuté : +", grace_bloodheal, " de jauge")
+
+
+## --- la parade ---
+
+## Un coup d'ennemi arrive : est-il PARÉ ? (le talisman porté, un coup au corps
+## à corps, notre lame en garde, et il vient de devant)
+func _parade_tente(source_x, source_tag: String, attaquant: Node) -> bool:
+	if not Player.talisman_equipe(TALISMAN_PARADE) or not source_tag.begins_with("attaque:"):
+		return false
+	if not animator.lame_en_garde():
+		return false
+	var x_attaquant = source_x
+	if attaquant is Node2D:
+		x_attaquant = (attaquant as Node2D).global_position.x
+	if x_attaquant == null:
+		return false
+	# il frappe DEVANT nous : du côté où part la lame
+	var cote := signf(float(x_attaquant) - global_position.x)
+	if cote != 0.0 and cote != signf(point.scale.x):
+		return false
+	var duree := parade_etourdi
+	if attaquant is BaseAI and attaquant.inebranlable:
+		duree *= parade_part_inebranlable
+	print("[PARADE] f=", Engine.get_physics_frames(), " coup paré (", source_tag,
+		") : sonné ", duree, " s")
+	if attaquant != null and attaquant.has_method("etourdir"):
+		attaquant.etourdir(duree)
+	_parade_choc(float(x_attaquant))
+	return true
+
+
+## le « clang » : entre nous et l'attaquant (au bout de la lame au plus), à
+## hauteur de poitrine ; la caméra tremble un peu
+func _parade_choc(x_attaquant: float) -> void:
+	var fx := PARADE_CHOC_SCENE.instantiate()
+	fx.demo_boucle = false
+	var hote: Node = get_tree().current_scene
+	if hote == null:
+		hote = get_parent()
+	hote.add_child(fx)
+	var c := centre_corps()
+	fx.global_position = Vector2(c.x + clampf(x_attaquant - c.x, -180.0, 180.0) * 0.5, c.y - 12.0)
+	var cam := get_tree().get_first_node_in_group("Camera")
+	if parade_secousse > 0.0 and cam != null and cam.has_method("shake"):
+		cam.shake(parade_secousse, 12.0)
+
+
+## --- le crescendo ---
+
+## le bonus (en %) que fera le coup d'épée `coup_id` s'il porte, 0 sans le
+## talisman : son rang dans la série (un coup déjà compté — il touche un
+## deuxième ennemi — garde le sien)
+func crescendo_pourcent(coup_id: int) -> float:
+	if not Player.talisman_equipe(TALISMAN_CRESCENDO):
+		return 0.0
+	var rang := crescendo_serie + (0 if coup_id == _crescendo_coup else 1)
+	return CRESCENDO_PALIERS[clampi(rang, 1, CRESCENDO_PALIERS.size()) - 1]
+
+
+## le coup d'épée `coup_id` a porté : la série monte (une fois par coup) et
+## repart pour `crescendo_delai` s
+func crescendo_porte(coup_id: int) -> void:
+	if not Player.talisman_equipe(TALISMAN_CRESCENDO):
+		return
+	if coup_id != _crescendo_coup:
+		_crescendo_coup = coup_id
+		crescendo_serie += 1
+	_crescendo_reste = crescendo_delai
+
+
+## un coup encaissé, ou le temps sans frapper : la série retombe à zéro
+func crescendo_casser() -> void:
+	if crescendo_serie > 0:
+		print("[CRESCENDO] série cassée après ", crescendo_serie, " coup(s)")
+	crescendo_serie = 0
+	_crescendo_coup = -1
+
+
 ## --- l'essaim ---
 
-## Un monstre vient de mourir : si c'est NOUS qui l'avons tué, son cadavre
-## lâche l'essaim (talisman « Essaim ») et/ou se met à bouillir (« Sang
-## bouillant »).
+## Un monstre vient de mourir : si c'est NOUS qui l'avons tué et que le
+## talisman « Essaim » est porté, son cadavre lâche l'essaim.
 func _on_monstre_tue(monstre: Node, attaquant: Node) -> void:
-	if attaquant != self or not (monstre is Node2D):
+	if attaquant != self or not (monstre is Node2D) or not Player.talisman_equipe(TALISMAN_ESSAIM):
 		return
 	var centre: Vector2 = (monstre as Node2D).global_position
 	if monstre is BaseAI and monstre.collision != null:
 		centre = monstre.collision.global_position       # le milieu du corps
 	# on peut être en plein rappel de physique (le coup d'épée tue dans son
-	# `body_entered`) : tout sort juste après
-	if Player.talisman_equipe(TALISMAN_ESSAIM):
-		_essaim_lacher.call_deferred(centre)
-	if Player.talisman_equipe(TALISMAN_BOUILLANT):
-		_bouillant_poser.call_deferred(monstre, centre)
+	# `body_entered`) : l'essaim sort juste après
+	_essaim_lacher.call_deferred(centre)
 
 
-## le cadavre se met à bouillir (bouillon_sang.gd : il explose au bout de
-## `bouillant_delai` s)
-func _bouillant_poser(monstre: Node, centre: Vector2) -> void:
+## --- l'ombre de sang ---
+
+## notre épée vient de toucher `cible` (vivant) : le double surgit derrière lui
+## et refait ce coup-là
+func ombre_surgir(cible: Node2D) -> void:
+	var o := OMBRE_SCENE.instantiate()
+	o.joueur = self
+	o.cible = cible
+	o.cote = 1.0 if cible.global_position.x >= global_position.x else -1.0
+	o.part = ombre_part
+	o.animation = String(animator.animation)
+	o.image_coup = animator.frame
+	o.slash_nom = animator.dernier_slash
+	o.slash_position = animator.slash_attack.position
+	o.echelle = animator.slash_attack.scale.x
+	o.zone = animator.zone_active()
+	o.xf_attaque = animator.collision.transform
+	# on est dans le rappel de physique du coup d'épée : posé juste après
+	_essaim_hote().add_child.call_deferred(o)
+
+
+## --- le sang bouillant (ébullition) ---
+
+## notre épée ou notre boule de sang vient de toucher `cible` (vivant) : son
+## sang bout un peu plus ; à la troisième charge il explose (bouillon_sang.gd)
+func bouillant_charger(cible: Node2D) -> void:
+	# (non typé : une méta peut garder un nœud déjà libéré)
+	var deja = cible.get_meta("bouillon") if cible.has_meta("bouillon") else null
+	if is_instance_valid(deja) and not deja.is_queued_for_deletion():
+		deja.ajouter_charge()
+		return
 	var b := BOUILLON_SCENE.instantiate()
 	b.demo_boucle = false
 	b.joueur = self
-	b.cadavre = monstre if is_instance_valid(monstre) else null
+	b.cible = cible
 	b.rayon = bouillant_rayon
-	b.delai = bouillant_delai
-	b.degats = maxi(roundi(animator.degats_du_coup() * bouillant_part), 1)
+	b.part = bouillant_part
+	b.duree_charge = bouillant_duree_charge
 	b.secousse = bouillant_secousse
+	b.charges = 1
+	# rien de physique dedans : on peut l'ajouter pendant le rappel du coup
 	_essaim_hote().add_child(b)
-	b.global_position = centre
+
+
+## --- le sang corrompu (poison) ---
+
+## une boule corrompue vient de toucher `cible` (vivant) : il est empoisonné ;
+## déjà empoisonné, son poison repart pour `poison_duree` s (poison_sang.gd)
+func empoisonner(cible: Node2D) -> void:
+	# (non typé : une méta peut garder un nœud déjà libéré)
+	var deja = cible.get_meta("poison") if cible.has_meta("poison") else null
+	if is_instance_valid(deja) and not deja.is_queued_for_deletion():
+		deja.relancer()
+		return
+	var p := POISON_SCENE.instantiate()
+	p.demo_boucle = false
+	p.joueur = self
+	p.cible = cible
+	p.degats = poison_degats
+	p.intervalle = poison_intervalle
+	p.duree = poison_duree
+	# rien de physique dedans : on peut l'ajouter pendant le rappel du coup
+	_essaim_hote().add_child(p)
 
 
 func _essaim_lacher(centre: Vector2) -> void:
@@ -958,6 +1229,7 @@ func apply_environment_damage(amount: int, direction: Vector2 = Vector2.UP) -> b
 	_bouclier_lever(-d)
 	_epines_jaillir()
 	_vengeance_charger()
+	crescendo_casser()          # un coup encaissé : la série retombe
 	return true
 
 
@@ -1899,8 +2171,12 @@ func wall_jump_execute(_delta: float) -> void:
 	velocity.x = -last_direction * 150.0
 	# Appui légitime : la glissade murale remet la chute à zéro
 	FALL_POINT = global_position.y
-	# Glissement
-	velocity.y = lerp(velocity.y, WALL_GLIDE_SPEED, 0.05)
+	# Glissement — TALISMAN « PRISE FERME » : on reste où on s'est accroché
+	# (bas maintenu : on glisse quand même, pour descendre)
+	if Player.talisman_equipe(TALISMAN_PRISE) and not Input.is_action_pressed("down_move"):
+		velocity.y = 0.0
+	else:
+		velocity.y = lerp(velocity.y, WALL_GLIDE_SPEED, 0.05)
 	if is_on_floor():
 		change_state(States.IDLE)
 
@@ -2882,6 +3158,9 @@ func bloodball_enter() -> void:
 	var scene := TORNADE_SCENE if Player.talisman_equipe(TALISMAN_TORNADE) else BLOODBALL_SCENE
 	var ball := scene.instantiate()
 	ball.dir = int(signf(point.scale.x))
+	# SANG CORROMPU : violette, elle empoisonne (la Tornade aussi)
+	if Player.talisman_equipe(TALISMAN_CORROMPU):
+		ball.corrompre(corrompu_coeur, corrompu_couleur, corrompu_ombre)
 	get_tree().current_scene.add_child(ball)
 	ball.global_position = spellcast.global_position
 

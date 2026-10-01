@@ -16,6 +16,11 @@ var _changing_now := false
 ## l'état « DEAD » de l'enum du monstre (-1 s'il n'en a pas) : voir
 ## `_etats_de_mort()` et la garde de `change_state`
 var _etat_dead := -1
+## SONNÉ (talisman « Parade ») : l'état de repos de son enum, et le temps qui
+## reste avant qu'il reprenne ses esprits (voir `etourdir`)
+var _etat_idle := -1
+var _etourdi_reste := 0.0
+const ETOURDI_SCENE := preload("res://SCRIPT/SHADER/etourdi.tscn")
 
 var last_direction := 1
 var target: Node2D = null
@@ -80,6 +85,10 @@ var _knock := Vector2.ZERO
 ## subit un contrecoup ×1.56 (voir animator.gd du player). Permanent
 ## (boss, via l'export) ou fenêtré par code (larve en boule de piques).
 @export var inebranlable := false
+## UN VRAI BOSS : échappe au Coup de grâce (talisman du joueur). Le skeleton_boss
+## n'en est PAS un — c'est un élite (Kaoru, 1er oct. 2026) : on peut l'achever.
+## À cocher sur les vrais boss quand ils viendront.
+@export var vrai_boss := false
 ## INVULNÉRABLE : les dégâts sont ignorés — aucun flash, aucune barre de
 ## vie, aucun feedback : l'absence de réaction EST le message
 var invulnerable := false
@@ -118,6 +127,9 @@ func _ready() -> void:
 	_flash_material = ShaderMaterial.new()
 	_flash_material.shader = HIT_FLASH_SHADER
 	animator.material = _flash_material
+	# COUP DE GRÂCE : porter ou retirer le talisman fissure (ou non) ceux qui
+	# sont déjà bas en vie
+	Player.talismans_changes.connect(_maj_fissures)
 	_setup_contact_area()
 	# Les zones ne regardaient que la couche du joueur (masque 1). Les monstres
 	# sont sur la couche 8 : on l'ajoute par code, aucune scène à retoucher.
@@ -146,6 +158,17 @@ func _physics_process(delta: float) -> void:
 	if current_state < 0:
 		return
 	_tick_oubli_hors_vue(delta)
+	# sonné : il reste au repos (change_state refuse le reste) ; à la fin, il
+	# reprend ses esprits et décide de nouveau
+	if _etourdi_reste > 0.0:
+		_etourdi_reste -= delta
+		if _etourdi_reste <= 0.0:
+			_etourdi_reste = 0.0
+			call_deferred("decide")
+	# à portée d'exécution (talisman « Coup de grâce ») : ses fissures battent
+	if _fissuree:
+		_fissure_t += delta
+		_flash_material.set_shader_parameter("fissure", 0.72 + 0.28 * sin(_fissure_t * 6.0))
 	state_functions[current_state]["execute"].call(delta)
 	# Knockback absolu : tant qu'il est actif, il REMPLACE le déplacement
 	# horizontal de l'état (l'ennemi ne peut pas compenser en marchant contre).
@@ -353,7 +376,9 @@ func infliger(cible: Node, source_x: float, tag: String) -> void:
 	if not est_ennemi(cible) or not cible.has_method("apply_damage"):
 		return
 	if cible.is_in_group("Player"):
-		cible.apply_damage(attack_power, source_x, tag)
+		# le joueur sait qui le frappe : sa parade (talisman « Parade ») sonne
+		# l'attaquant
+		cible.apply_damage(attack_power, source_x, tag, false, self)
 	else:
 		cible.apply_damage(degats_monstres, source_x, tag, true, self)
 
@@ -371,8 +396,21 @@ func _flash_white() -> void:
 		"shader_parameter/flash_amount", 0.0, FLASH_DURATION)
 
 
+## Une TEINTE d'état sur le dessin du monstre, MULTIPLIÉE (l'encre reste
+## noire, le clair prend la couleur) ; 0 = aucune. Indépendante de l'éclair de
+## coup. Le poison du talisman « Sang corrompu » le fait virer au violet
+## (SCRIPT/SHADER/poison_sang.gd).
+func teinter(couleur: Color, force: float) -> void:
+	if _flash_material == null:
+		return
+	_flash_material.set_shader_parameter("teinte_couleur", couleur)
+	_flash_material.set_shader_parameter("teinte_force", clampf(force, 0.0, 1.0))
+
+
 ## _source_tag : étiquette de provenance optionnelle (parité avec le player,
-## utilisée par les logs de debug — sans effet sur la logique)
+## utilisée par les logs de debug — sans effet sur la logique, sauf "poison" :
+## le poison du talisman « Sang corrompu » a son propre clignotement violet
+## (SCRIPT/SHADER/poison_sang.gd), pas d'éclair blanc à chaque morsure)
 ## `knockback` : false pour les dégâts qui piquent sans déplacer
 ## (ex. bloodball) — la réaction d'aggro/volte-face reste, seul le recul saute
 ## Retourne true si le coup a PORTÉ (false : déjà mort, ou invulnérable) — le
@@ -384,10 +422,15 @@ func apply_damage(amount: int, source_x, _source_tag := "?", knockback := true, 
 		return false
 	if invulnerable:
 		return false
+	# VENIN (talisman du joueur) : empoisonné, il prend plus de NOS coups
+	amount = _venin(amount, attaquant)
 	hp -= amount
 	vie.emit_signal("health_request", -amount)
 	vie.apparition_temp()
-	_flash_white()
+	if _source_tag != "poison":
+		_flash_white()
+	# COUP DE GRÂCE (talisman du joueur) : à portée d'exécution, il se fissure
+	_maj_fissures()
 	if hp <= 0:
 		_knock = Vector2.ZERO
 		# Cadavre inerte : plus détectable ni bloquant (layer 0), mais il garde
@@ -438,6 +481,71 @@ func apply_damage(amount: int, source_x, _source_tag := "?", knockback := true, 
 func _is_dead() -> bool:
 	return false
 
+
+## SONNÉ (1er oct. 2026, talisman « Parade ») : pendant `duree` s le monstre ne
+## fait plus rien. Son coup en cours s'arrête net — il repasse au repos (IDLE :
+## l'animation change, ses zones de coup s'éteignent) — et il n'en sort pas
+## avant la fin (change_state refuse) ; la gravité et le recul jouent encore.
+## Trois étoiles tournent au-dessus de sa tête (SCRIPT/SHADER/etourdi.tscn).
+## Sans effet sur un mort, sur un monstre dans sa séquence de mort (le
+## kamikaze qui gonfle) ou sans état IDLE. Sonné de nouveau : le plus long des
+## deux temps.
+func etourdir(duree: float) -> void:
+	if duree <= 0.0 or _is_dead() or _etat_idle < 0 or current_state in _etats_de_mort():
+		return
+	var deja := _etourdi_reste > 0.0
+	_etourdi_reste = maxf(_etourdi_reste, duree)
+	if current_state != _etat_idle:
+		change_state(_etat_idle)
+	if not deja:
+		var e := ETOURDI_SCENE.instantiate()
+		e.demo_boucle = false
+		e.monstre = self
+		var hote: Node = get_tree().current_scene
+		if hote == null:
+			hote = get_parent()
+		hote.add_child(e)
+
+
+func est_etourdi() -> bool:
+	return _etourdi_reste > 0.0
+
+
+## VENIN (1er oct. 2026, talisman du joueur « Venin ») : un monstre EMPOISONNÉ
+## (méta "poison", posée par poison_sang.gd) prend `venin_multiplicateur` fois
+## les coups du joueur (player.gd) — tous : épée, boule, poison compris.
+func _venin(amount: int, attaquant: Node) -> int:
+	if attaquant == null or not attaquant.is_in_group("Player") or not Player.talisman_equipe("venin"):
+		return amount
+	var poison = get_meta("poison") if has_meta("poison") else null
+	if not is_instance_valid(poison):
+		return amount
+	return roundi(amount * float(attaquant.get("venin_multiplicateur")))
+
+
+## COUP DE GRÂCE (1er oct. 2026, talisman du joueur « Coup de grâce ») : à moins
+## de `SEUIL_GRACE` de sa vie, un monstre est À PORTÉE D'EXÉCUTION — sauf un
+## `vrai_boss` (d'abord : sauf un inébranlable, ce qui épargnait le
+## skeleton_boss — un élite, pas un vrai boss, et la larve en boule de piques).
+## Il se fissure de rouge (hit_flash.gdshader, `fissure`, qui bat dans
+## `_physics_process`) et le prochain coup d'épée l'achève (animator.gd ;
+## player.gd `grace_executer`) — celui du double de l'Ombre de sang aussi
+## (ombre_sang.gd).
+const SEUIL_GRACE := 0.25
+var _fissuree := false
+var _fissure_t := 0.0
+
+
+func executable() -> bool:
+	return Player.talisman_equipe("grace") and not vrai_boss and hp > 0 \
+			and float(hp) <= float(max_hp) * SEUIL_GRACE
+
+
+func _maj_fissures() -> void:
+	_fissuree = executable()
+	if not _fissuree and _flash_material != null:
+		_flash_material.set_shader_parameter("fissure", 0.0)
+
 func _on_dead() -> void:
 	pass
 
@@ -462,6 +570,7 @@ func decide() -> void:
 
 func _register_states(states_enum: Dictionary) -> void:
 	_etat_dead = int(states_enum.get("DEAD", -1))
+	_etat_idle = int(states_enum.get("IDLE", -1))
 	for state_name in states_enum:
 		var key: int = states_enum[state_name]
 		var name_lower: String = state_name.to_lower()
@@ -506,6 +615,9 @@ func change_state(new_state: int) -> void:
 	# la « larve immortelle » de Kaoru. Reproduit sur larve, squelette et
 	# kamikaze avant ce garde-fou.
 	if _is_dead() and not (new_state in _etats_de_mort()):
+		return
+	# SONNÉ (talisman « Parade ») : il reste au repos jusqu'à la fin
+	if _etourdi_reste > 0.0 and new_state != _etat_idle and not (new_state in _etats_de_mort()):
 		return
 	# Garde-fou : refuse un état inconnu ou incomplet au lieu de crasher
 	if not state_functions.has(new_state) or not state_functions[new_state].has("enter"):

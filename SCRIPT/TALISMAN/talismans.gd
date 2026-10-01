@@ -43,14 +43,16 @@ extends RefCounted
 ## Nombre d'emplacements RONDS de la collection dans le menu. Ceux qui n'ont pas
 ## encore de talisman dans LISTE restent des emplacements vides « à découvrir ».
 ## S'il y a plus de talismans que d'emplacements, la grille s'agrandit seule.
-## DIX-SEPT pour le moment (5 le 30 sept. 2026 ; le sillage de sang, les
+## VINGT-SIX pour le moment (5 le 30 sept. 2026 ; le sillage de sang, les
 ## épines, la frénésie, la marque, le second souffle, le canon de verre,
-## l'allonge, la vengeance, le croissant de sang, l'essaim, l'offrande et le
-## sang bouillant le 1er oct.) : monte ce nombre quand il y en aura d'autres à
+## l'allonge, la vengeance, le croissant de sang, l'essaim, l'offrande, le
+## sang bouillant, l'ombre de sang, le sang corrompu, le coup dans le dos, le
+## crescendo, la parade, la lame corrompue, la prise ferme, le venin et le coup
+## de grâce le 1er oct.) : monte ce nombre quand il y en aura d'autres à
 ## découvrir.
-const NB_EMPLACEMENTS := 17
+const NB_EMPLACEMENTS := 26
 
-## Les DIX-SEPT talismans du jeu (1er oct. 2026), tous branchés :
+## Les VINGT-SIX talismans du jeu (1er oct. 2026), tous branchés :
 ##   tornade  → SCRIPT/CHARACHTER/player.gd, région BLOODBALL
 ##   foudre   → SCRIPT/CHARACHTER/animator.gd (le slash, l'arc qui bondit, le +10 %)
 ##   bouclier → player.gd (`apply_damage` / `apply_environment_damage`)
@@ -78,8 +80,31 @@ const NB_EMPLACEMENTS := 17
 ##              SCRIPT/SHADER/chauve_souris_sang.gd (les chauves-souris)
 ##   offrande → player.gd (`_offrande_lancer`, au début du soin) +
 ##              SCRIPT/SHADER/sceau_sang.gd (le sceau et son onde)
-##   bouillant → player.gd (`_on_monstre_tue`, `_bouillant_poser`) +
-##              SCRIPT/SHADER/bouillon_sang.gd (les bulles, l'explosion)
+##   bouillant → animator.gd (`_on_body_entered`, quand le coup porte) +
+##              SCRIPT/SPELL/bloodball.gd (quand la boule touche) +
+##              SCRIPT/SHADER/ombre_sang.gd (le coup du double, synergie) +
+##              player.gd (`bouillant_charger`) +
+##              SCRIPT/SHADER/bouillon_sang.gd (les charges, les bulles, l'explosion)
+##   ombre    → animator.gd (`_on_body_entered`, quand le coup porte) +
+##              player.gd (`ombre_surgir`) + SCRIPT/SHADER/ombre_sang.gd (le double)
+##   corrompu → player.gd (`bloodball_enter` : les couleurs ; `empoisonner`) +
+##              SCRIPT/SPELL/bloodball.gd (`corrompre`, le poison à l'impact) +
+##              SCRIPT/SHADER/poison_sang.gd (le poison) + BASE_IA.gd (`teinter`)
+##   dos      → animator.gd (`_on_body_entered`, `_de_dos` ; l'éclat : `_eclat_impact`)
+##   crescendo → player.gd (`crescendo_pourcent` / `_porte` / `_casser` : la série) +
+##              animator.gd (`_on_body_entered` : les dégâts ; `_crescendo_habiller` : le slash)
+##   parade   → player.gd (`apply_damage` → `_parade_tente`, `_parade_choc`) +
+##              animator.gd (`lame_en_garde`) + BASE_IA.gd (`etourdir`, `infliger`) +
+##              SCRIPT/SHADER/parade_choc.gd (le choc), etourdi.gd (les étoiles)
+##   lame_corrompue → animator.gd (`_on_body_entered` : le poison ; `_foudre_bondir` :
+##              l'éclair violet qui empoisonne ; `_habiller_slash` : le slash violet) +
+##              player.gd (`empoisonner`) + SCRIPT/SHADER/poison_sang.gd
+##   prise    → player.gd (`wall_jump_execute` : plus de glissade)
+##   venin    → BASE_IA.gd (`_venin`, dans `apply_damage`) + animator.gd
+##              (`_eclat_impact` : l'étoile cernée de violet)
+##   grace    → BASE_IA.gd (`executable`, `_maj_fissures`) + hit_flash.gdshader
+##              (les fissures) + animator.gd (`_on_body_entered`) + player.gd
+##              (`grace_executer`) + SCRIPT/SHADER/grace_eclats.gd (les éclats)
 ## Les clés chiffrées (`degats_pourcent`, `esquive_pourcent`, `blood_pourcent`,
 ## `degats_pourcent_dernier_coeur`)
 ## sont lues par `Player.bonus_talismans(cle)` : deux talismans qui portent la
@@ -101,12 +126,21 @@ const LISTE := [
 	{"id": "vengeance", "nom": "Vengeance", "description": "Après un coup encaissé, tous vos coups d'épée font 50 % de dégâts en plus pendant 5 secondes. Une couronne de sang le rappelle au-dessus de vous.", "couleur": Color(0.78, 0.04, 0.12), "dessin": "res://SCRIPT/TALISMAN/dessin_vengeance.gdshader"},
 	{"id": "essaim", "nom": "Essaim", "description": "Chaque ennemi que vous tuez lâche deux chauves-souris de sang qui fondent sur les ennemis proches et les mordent.", "couleur": Color(0.78, 0.04, 0.12), "dessin": "res://SCRIPT/TALISMAN/dessin_essaim.gdshader"},
 	{"id": "offrande", "nom": "Offrande", "description": "Se soigner dessine un sceau de sang sous vos pieds : son onde repousse et blesse les ennemis autour de vous.", "couleur": Color(0.78, 0.04, 0.12), "dessin": "res://SCRIPT/TALISMAN/dessin_offrande.gdshader"},
-	{"id": "bouillant", "nom": "Sang bouillant", "description": "Les ennemis que vous tuez explosent et blessent leurs voisins ; ceux qui en meurent explosent à leur tour.", "couleur": Color(0.78, 0.04, 0.12), "dessin": "res://SCRIPT/TALISMAN/dessin_bouillant.gdshader"},
+	{"id": "bouillant", "nom": "Sang bouillant", "description": "Chaque coup d'épée ou de boule de sang fait bouillir le sang de l'ennemi ; au troisième, il explose et blesse aussi ses voisins.", "couleur": Color(0.78, 0.04, 0.12), "dessin": "res://SCRIPT/TALISMAN/dessin_bouillant.gdshader"},
+	{"id": "ombre", "nom": "Ombre de sang", "description": "Quand votre épée touche, un double de sang surgit derrière l'ennemi et le frappe à son tour, à moitié des dégâts.", "couleur": Color(0.78, 0.04, 0.12), "dessin": "res://SCRIPT/TALISMAN/dessin_ombre.gdshader"},
+	{"id": "corrompu", "nom": "Sang corrompu", "description": "La boule de sang se corrompt et vire au violet : l'ennemi qu'elle touche est empoisonné et perd de la vie pendant trois secondes.", "couleur": Color(0.58, 0.14, 0.84), "dessin": "res://SCRIPT/TALISMAN/dessin_corrompu.gdshader"},
+	{"id": "dos", "nom": "Coup dans le dos", "description": "Un coup d'épée porté dans le dos d'un ennemi fait 50 % de dégâts en plus.", "couleur": Color(0.78, 0.04, 0.12), "dessin": "res://SCRIPT/TALISMAN/dessin_dos.gdshader"},
+	{"id": "crescendo", "nom": "Crescendo", "description": "Tant que vous n'êtes pas touché, chaque coup d'épée qui porte frappe plus fort : +5 %, +10 %, +20 %, +40 %, puis +50 %. Un coup encaissé, ou quelques secondes sans frapper, remet tout à zéro.", "couleur": Color(0.78, 0.04, 0.12), "dessin": "res://SCRIPT/TALISMAN/dessin_crescendo.gdshader"},
+	{"id": "parade", "nom": "Parade", "description": "Frappez au moment où un ennemi frappe : votre lame pare son coup, vous ne prenez rien et il reste sonné une seconde.", "couleur": Color(0.78, 0.04, 0.12), "dessin": "res://SCRIPT/TALISMAN/dessin_parade.gdshader"},
+	{"id": "lame_corrompue", "nom": "Lame corrompue", "description": "Le coup d'épée se corrompt et vire au violet : il empoisonne l'ennemi qu'il touche. Avec la Lame de foudre, la foudre devient violette et empoisonne aussi.", "couleur": Color(0.58, 0.14, 0.84), "dessin": "res://SCRIPT/TALISMAN/dessin_lame_corrompue.gdshader"},
+	{"id": "prise", "nom": "Prise ferme", "description": "Accroché à un mur, vous ne glissez plus : vous restez où vous êtes. Maintenez bas pour descendre.", "couleur": Color(0.78, 0.04, 0.12), "dessin": "res://SCRIPT/TALISMAN/dessin_prise.gdshader"},
+	{"id": "venin", "nom": "Venin", "description": "Les ennemis empoisonnés prennent 30 % de dégâts en plus de toutes vos attaques.", "couleur": Color(0.58, 0.14, 0.84), "dessin": "res://SCRIPT/TALISMAN/dessin_venin.gdshader"},
+	{"id": "grace", "nom": "Coup de grâce", "description": "Un ennemi à moins d'un quart de sa vie se fissure de rouge : votre prochain coup d'épée l'achève net et vous rend du sang. Les boss y échappent.", "couleur": Color(0.78, 0.04, 0.12), "dessin": "res://SCRIPT/TALISMAN/dessin_grace.gdshader"},
 ]
 
 ## POUR TESTER LE MENU : les talismans déjà découverts au début d'une partie.
 ## À vider ([]) quand ils se trouveront dans les niveaux.
-const DECOUVERTS_AU_DEPART := ["tornade_bloodball", "foudre", "bouclier", "esquive", "soif", "sillage", "epines", "frenesie", "marque", "souffle", "canon", "allonge", "vengeance", "croissant", "essaim", "offrande", "bouillant"]
+const DECOUVERTS_AU_DEPART := ["tornade_bloodball", "foudre", "bouclier", "esquive", "soif", "sillage", "epines", "frenesie", "marque", "souffle", "canon", "allonge", "vengeance", "croissant", "essaim", "offrande", "bouillant", "ombre", "corrompu", "dos", "crescendo", "parade", "lame_corrompue", "prise", "venin", "grace"]
 
 
 ## la ligne du catalogue qui porte cet id ({} si aucune)

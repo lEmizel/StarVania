@@ -1,0 +1,12 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://SCRIPT/SHADER/ombre_sang.gd" id="1_om"]
+
+[node name="OmbreSang" type="Node2D"]
+z_as_relative = false
+z_index = 1
+script = ExtResource("1_om")
+
+[node name="POINT" type="Node2D" parent="."]
+
+[node name="Corps" type="AnimatedSprite2D" parent="POINT"]

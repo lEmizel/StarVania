@@ -1,7 +1,9 @@
 shader_type canvas_item;
 render_mode unshaded;
 // EXPLOSION DE SANG BOUILLANT (1er oct. 2026, v4) — talisman « Sang bouillant » :
-// le cadavre d'un ennemi que le joueur a tué explose et blesse ses voisins.
+// au troisième coup (épée ou boule de sang), le sang de l'ennemi qui bout
+// explose, et blesse ses voisins (ébullition ; avant, c'était le cadavre d'un
+// ennemi tué).
 //   v1 : l'éclaboussure de la boule de sang → « manque de punch » ;
 //   v2 : jets de sang, gouttes, flaque → « trop goutte de sang, plus explosion
 //        tout court » ;
@@ -10,7 +12,7 @@ render_mode unshaded;
 // v4 : LÉGÈRE ET IMPACTANTE — tout se joue en un quart de seconde, et presque
 // rien n'est plein :
 //   0. L'INSPIRATION (`gonfle`, avant le boum) : une petite boule qui enfle en
-//      tremblant sur le cadavre ;
+//      tremblant sur l'ennemi ;
 //   1. L'ÉCLAIR : un disque chaud, déjà là à la première image, parti en
 //      quatre images ;
 //   2. LES TRAITS DE FORCE : c'est eux le coup — des rayons inégaux, épais au

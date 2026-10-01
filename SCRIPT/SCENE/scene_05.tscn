@@ -13,7 +13,8 @@
 [ext_resource type="PackedScene" uid="uid://cxca5jid2onov" path="res://SCRIPT/INTERACTIBLE/SAWBLADE.tscn" id="10_gugmh"]
 [ext_resource type="PackedScene" path="res://SCRIPT/INTERACTIBLE/corde.tscn" id="12_g5h7o"]
 [ext_resource type="PackedScene" uid="uid://jkojvyshl67j" path="res://SCRIPT/INTERACTIBLE/accroche_grappin.tscn" id="13_786sa"]
-[ext_resource type="PackedScene" uid="uid://bpeorkg8vsrcb" path="res://SCRIPT/MONSTER/SKELETON_blue.tscn" id="14_36kjk"]
+[ext_resource type="PackedScene" uid="uid://duvx7j61qskv3" path="res://SCRIPT/INTERACTIBLE/piege_de_flamme.tscn" id="14_36kjk"]
+[ext_resource type="PackedScene" uid="uid://bpeorkg8vsrcb" path="res://SCRIPT/MONSTER/SKELETON_blue.tscn" id="15_xybtl"]
 
 [node name="scene_05" type="Node2D" unique_id=1083121648]
 
@@ -108,7 +109,7 @@ position = Vector2(269.49805, -1398)
 
 [node name="SAWBLADE" parent="." unique_id=388117046 instance=ExtResource("10_gugmh")]
 position = Vector2(-280, -1177)
-frame_progress = 0.71314317
+frame_progress = 0.40779114
 position_a = Vector2(-280, -1177)
 position_b = Vector2(-280, -425)
 
@@ -123,5 +124,8 @@ epaisseur_cable = 4.0
 position = Vector2(-922, -1226)
 epaisseur_cable = 4.0
 
-[node name="enemi2" parent="." unique_id=627255339 instance=ExtResource("14_36kjk")]
-position = Vector2(-1282, -6)
+[node name="piege_de_flamme" parent="." unique_id=1517354040 instance=ExtResource("14_36kjk")]
+position = Vector2(-1971, 30)
+
+[node name="enemi2" parent="." unique_id=627255339 instance=ExtResource("15_xybtl")]
+position = Vector2(-1228, -5)

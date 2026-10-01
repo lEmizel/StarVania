@@ -11,6 +11,15 @@ const EXPLOSION_SCENE := preload("res://SCRIPT/SPELL/bloodball_explosion.tscn")
 ## le prochain coup d'épée sur lui compte double (voir animator.gd)
 const MARQUE_SANG := preload("res://SCRIPT/SHADER/marque_sang.gd")
 const TALISMAN_MARQUE := "marque"
+## TALISMAN « SANG BOUILLANT » : l'ennemi touché (et resté en vie) bout un peu
+## plus, comme sous l'épée ; à la 3e charge il explose (player.gd,
+## `bouillant_charger`)
+const TALISMAN_BOUILLANT := "bouillant"
+## TALISMAN « SANG CORROMPU » : posé par le joueur au lancer (`corrompre`) — la
+## boule (ou la tornade) vire au violet, son impact aussi, et l'ennemi touché
+## est empoisonné (player.gd, `empoisonner` ; SCRIPT/SHADER/poison_sang.gd)
+var corrompu := false
+var _palette: Array[Color] = []          # son cœur, sa couleur, son ombre
 
 @export var speed := 800.0
 @export var damage := 60  # sept. 2026 : un peu sous le coup léger au corps à corps (animator.gd : damage = 70)
@@ -31,6 +40,22 @@ var _eclate := false     # a déjà explosé : un 2e contact dans la même frame
 func _ready() -> void:
 	body_entered.connect(_on_body_entered)
 	scale.x = dir  # oriente la boule, la traînée part derrière
+
+
+## TALISMAN « SANG CORROMPU » : la boule (ou la tornade) prend ces couleurs —
+## son cœur, sa couleur, son ombre — et empoisonnera l'ennemi qu'elle touche.
+## Appelé par le joueur au lancer, avant que la boule n'entre en scène.
+func corrompre(coeur: Color, couleur: Color, ombre: Color) -> void:
+	corrompu = true
+	_palette = [coeur, couleur, ombre]
+	var visuel := get_node_or_null("Visual") as CanvasItem
+	if visuel != null and visuel.material is ShaderMaterial:
+		# le matériau de la boule est PARTAGÉ par toutes les boules : on le copie
+		var mat := (visuel.material as ShaderMaterial).duplicate() as ShaderMaterial
+		mat.set_shader_parameter("core_color", coeur)
+		mat.set_shader_parameter("blood_color", couleur)
+		mat.set_shader_parameter("outer_color", ombre)
+		visuel.material = mat
 
 
 func _physics_process(delta: float) -> void:
@@ -61,6 +86,11 @@ func _on_body_entered(body: Node) -> void:
 			porte = body.apply_damage(degats, global_position.x, "bloodball", false, lanceur)
 		if porte != false and body is BaseAI and Player.talisman_equipe(TALISMAN_MARQUE):
 			MARQUE_SANG.poser(body)
+		if porte != false and body is BaseAI and body.hp > 0 and lanceur != null \
+				and Player.talisman_equipe(TALISMAN_BOUILLANT):
+			lanceur.bouillant_charger(body)
+		if corrompu and porte != false and body is BaseAI and body.hp > 0 and lanceur != null:
+			lanceur.empoisonner(body)
 	_explode()
 
 
@@ -79,6 +109,16 @@ func _explode(puissance := 1.0) -> void:
 	explosion.demo_boucle = false
 	explosion.direction = Vector2(float(dir), 0.0)
 	explosion.puissance = puissance
+	if corrompu:
+		# l'impact prend les couleurs de la boule corrompue (sur une copie :
+		# les réglages de la scène d'impact ne bougent pas)
+		var mat := explosion.material as ShaderMaterial
+		if mat != null:
+			mat = mat.duplicate() as ShaderMaterial
+			mat.set_shader_parameter("core_color", _palette[0])
+			mat.set_shader_parameter("blood_color", _palette[1])
+			mat.set_shader_parameter("dark_color", _palette[2])
+			explosion.material = mat
 	get_tree().current_scene.add_child(explosion)
 	# ColorRect : global_position = coin haut-gauche → on recentre le rect
 	# sur le point d'impact en retirant la moitié de sa taille
