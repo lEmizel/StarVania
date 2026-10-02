@@ -1,0 +1,19 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://SCRIPT/INTERACTIBLE/lanceur_feu.gd" id="1_lf"]
+[ext_resource type="Shader" path="res://SCRIPT/SHADER/lanceur_feu.gdshader" id="2_lf"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_lf"]
+resource_local_to_scene = true
+shader = ExtResource("2_lf")
+
+[node name="LanceurFeu" type="Node2D"]
+script = ExtResource("1_lf")
+
+[node name="Lanceur" type="ColorRect" parent="."]
+material = SubResource("ShaderMaterial_lf")
+offset_left = -10.0
+offset_top = -56.0
+offset_right = 150.0
+offset_bottom = 56.0
+mouse_filter = 2

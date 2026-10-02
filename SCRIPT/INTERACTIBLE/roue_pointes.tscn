@@ -1,7 +1,7 @@
-[gd_scene format=3]
+[gd_scene format=3 uid="uid://cvykyqaa2ik7i"]
 
-[ext_resource type="Script" path="res://SCRIPT/INTERACTIBLE/roue_pointes.gd" id="1_rp"]
-[ext_resource type="Shader" path="res://SCRIPT/SHADER/roue_pointes.gdshader" id="2_rp"]
+[ext_resource type="Script" uid="uid://glnooul1g5y5" path="res://SCRIPT/INTERACTIBLE/roue_pointes.gd" id="1_rp"]
+[ext_resource type="Shader" uid="uid://bmtca80fxdhtp" path="res://SCRIPT/SHADER/roue_pointes.gdshader" id="2_rp"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_corps"]
 radius = 38.0
@@ -12,26 +12,47 @@ radius = 42.0
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_rp"]
 resource_local_to_scene = true
 shader = ExtResource("2_rp")
+shader_parameter/taille = Vector2(400, 156)
+shader_parameter/centre = Vector2(200, 110)
+shader_parameter/rayon = 32.0
+shader_parameter/longueur_pointes = 12.0
+shader_parameter/angle = 0.0
+shader_parameter/flou = 0.0
+shader_parameter/vitesse = 0.0
+shader_parameter/sens = 1.0
+shader_parameter/appui = Vector2(0, 1)
+shader_parameter/tremble = 0.0
+shader_parameter/eclat = -1.0
+shader_parameter/temps = 0.0
+shader_parameter/pierre = Color(0.46, 0.52, 0.63, 1)
+shader_parameter/pierre_ombre = Color(0.29, 0.34, 0.44, 1)
+shader_parameter/pierre_lumiere = Color(0.61, 0.66, 0.76, 1)
+shader_parameter/fer = Color(0.26, 0.28, 0.33, 1)
+shader_parameter/fer_lumiere = Color(0.52, 0.55, 0.61, 1)
+shader_parameter/couleur_etincelle = Color(1, 0.82, 0.45, 1)
+shader_parameter/couleur_poussiere = Color(0.78, 0.8, 0.84, 1)
 
-[node name="RoueAPointes" type="CharacterBody2D"]
+[node name="RoueAPointes" type="CharacterBody2D" unique_id=1617467562]
+scale = Vector2(2.1023138, 2.1023138)
 collision_layer = 0
 collision_mask = 6
 script = ExtResource("1_rp")
+vitesse_max = 800.0
 
-[node name="Forme" type="CollisionShape2D" parent="."]
+[node name="Forme" type="CollisionShape2D" parent="." unique_id=250132106]
 position = Vector2(0, -38)
 shape = SubResource("CircleShape2D_corps")
 
-[node name="Zone" type="Area2D" parent="."]
+[node name="Zone" type="Area2D" parent="." unique_id=1638961965]
 position = Vector2(0, -38)
 collision_layer = 0
 collision_mask = 9
 monitorable = false
 
-[node name="Forme" type="CollisionShape2D" parent="Zone"]
+[node name="Forme" type="CollisionShape2D" parent="Zone" unique_id=372616858]
 shape = SubResource("CircleShape2D_zone")
 
-[node name="Visuel" type="ColorRect" parent="."]
+[node name="Visuel" type="ColorRect" parent="." unique_id=1086910652]
 material = SubResource("ShaderMaterial_rp")
 offset_left = -200.0
 offset_top = -148.0
