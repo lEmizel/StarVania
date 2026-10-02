@@ -57,6 +57,10 @@ const RAYON_VISUEL_BASE := 144.0
 ## cœurs enlevés au joueur par le souffle (le contact du corps, lui,
 ## se règle avec `contact_damage`, plus haut dans l'inspecteur)
 @export var degats_explosion := 1
+## le souffle blesse AUSSI les monstres de son camp (en points de vie,
+## `degats_monstres`) : coché, on peut l'attirer dans un groupe pour qu'il
+## saute au milieu — un kamikaze voisin que le souffle achève saute à son tour
+@export var blesse_les_monstres := false
 ## image de l'anim "explosion" à partir de laquelle le souffle porte
 @export var frame_souffle := 1
 ## tremblement pendant le gonflement, en pixels (0 = aucun)
@@ -248,7 +252,10 @@ func _souffler() -> void:
 	params.collide_with_bodies = true
 	for hit in get_world_2d().direct_space_state.intersect_shape(params, 8):
 		var corps = hit.get("collider")
-		if corps == null or not est_ennemi(corps) or not corps.has_method("apply_damage"):
+		if corps == null or corps == self or not corps.has_method("apply_damage"):
+			continue
+		# son camp n'est touché que si on l'a coché
+		if not est_ennemi(corps) and not (blesse_les_monstres and corps is BaseAI):
 			continue
 		if corps.is_in_group("Player"):
 			# dernier argument : le souffle passe outre le stun de 0,25 s. Il ne
