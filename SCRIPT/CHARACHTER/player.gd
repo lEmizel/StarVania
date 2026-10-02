@@ -115,9 +115,12 @@ var _souffle_grace_reste := 0.0
 @export var marque_multiplicateur := 1.5     # +50 % (Kaoru, 1er oct. 2026 : ×2 était trop fort)
 
 ## TALISMAN « CANON DE VERRE » (1er oct. 2026, id "canon", idée de Kaoru) :
-## tous les dégâts infligés ×2 et tous les dégâts reçus ×2 (clés du catalogue
-## lues par `Player.multiplicateur_infliges()` / `Player.multiplicateur_recus()`,
-## appliquées dans `_degats_recus`). Tant qu'il est porté, un petit ŒIL DE FEU
+## les coups d'épée (avec l'éclair de la Lame de foudre) et ceux de l'Ombre de
+## sang ×2 — SEULEMENT eux depuis le 2 oct. (Kaoru : plus la boule, pour ne pas
+## cumuler avec le Pacte de sang ; la description ne parle que de l'épée) —
+## et tous les dégâts reçus ×2 (clés du catalogue lues par
+## `Player.multiplicateur_infliges()` / `Player.multiplicateur_recus()`, cette
+## dernière appliquée dans `_degats_recus`). Tant qu'il est porté, un petit ŒIL DE FEU
 ## (l'œil de Sauron, idée de Kaoru) flotte au-dessus de la tête — au-dessus de
 ## la couronne de la Vengeance quand elle est levée : SCRIPT/SHADER/oeil_canon.tscn,
 ## posé une fois par `_oeil_preparer`.

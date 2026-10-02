@@ -244,6 +244,9 @@ func _on_body_entered(body):
 		var grace: bool = body is BaseAI and body.executable()
 		if grace:
 			coup = maxi(coup, body.hp)
+		# CANON DE VERRE : il double le coup d'épée lui-même (et donc l'éclair
+		# qui en bondit, qui part du coup) — pas le reste de ce qui en découle
+		coup = roundi(coup * Player.multiplicateur_infliges())
 		# (le joueur se déclare comme attaquant : ses victimes sont les siennes)
 		var porte = body.apply_damage(coup, player.global_position.x, "epee", true, player)
 		# coup au corps à corps qui PORTE (pas sur un mort ni un blindé) :

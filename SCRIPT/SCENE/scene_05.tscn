@@ -109,23 +109,21 @@ position = Vector2(269.49805, -1398)
 
 [node name="SAWBLADE" parent="." unique_id=388117046 instance=ExtResource("10_gugmh")]
 position = Vector2(-280, -1177)
-frame_progress = 0.40779114
+frame_progress = 0.42720878
 position_a = Vector2(-280, -1177)
 position_b = Vector2(-280, -425)
 
 [node name="Corde" parent="." unique_id=1876946880 instance=ExtResource("12_g5h7o")]
 position = Vector2(947, -621)
 
-[node name="AccrocheGrappin" parent="." unique_id=185721196 instance=ExtResource("13_786sa")]
-position = Vector2(-1111, -469)
-epaisseur_cable = 4.0
-
-[node name="AccrocheGrappin3" parent="." unique_id=1586620410 instance=ExtResource("13_786sa")]
-position = Vector2(-922, -1226)
-epaisseur_cable = 4.0
-
 [node name="piege_de_flamme" parent="." unique_id=1517354040 instance=ExtResource("14_36kjk")]
 position = Vector2(-1971, 30)
 
 [node name="enemi2" parent="." unique_id=627255339 instance=ExtResource("15_xybtl")]
 position = Vector2(-1228, -5)
+
+[node name="AccrocheGrappin" parent="." unique_id=1635525328 instance=ExtResource("13_786sa")]
+position = Vector2(-1072, -432)
+
+[node name="AccrocheGrappin2" parent="." unique_id=2073166034 instance=ExtResource("13_786sa")]
+position = Vector2(-848, -1184)

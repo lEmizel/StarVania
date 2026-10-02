@@ -185,9 +185,8 @@ func _ronger() -> void:
 		for g in _points_du_corps(c):
 			if dans_la_brume(to_local(g), limite):
 				touches.append(c)
-				# (canon de verre : tous les dégâts infligés sont multipliés)
-				c.apply_damage(roundi(degats * Player.multiplicateur_infliges()),
-						joueur.global_position.x, "sillage", false, joueur)
+				# (le Canon de verre ne double que l'épée et l'Ombre)
+				c.apply_damage(degats, joueur.global_position.x, "sillage", false, joueur)
 				break
 
 

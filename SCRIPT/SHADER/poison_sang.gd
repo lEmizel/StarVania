@@ -115,7 +115,7 @@ func _physics_process(delta: float) -> void:
 func _mordre() -> void:
 	_pulse = 0.0
 	var qui: Node = joueur if is_instance_valid(joueur) else null
-	var d := maxi(roundi(degats * Player.multiplicateur_infliges()), 1)
+	var d := maxi(degats, 1)          # (le Canon de verre ne double que l'épée et l'Ombre)
 	cible.apply_damage(d, cible.global_position.x, "poison", false, qui)
 	print("[POISON] f=", Engine.get_physics_frames(), " morsure : ", d, " dégâts (",
 		snappedf(_t, 0.01), " s)")

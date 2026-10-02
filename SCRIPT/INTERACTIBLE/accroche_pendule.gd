@@ -26,6 +26,11 @@ extends "res://SCRIPT/INTERACTIBLE/accroche_grappin.gd"
 ## l'arc que décrira la main à la longueur de confort.
 ## ============================================================================
 
+## la cousine bleue garde son anneau et son petit pendule (pas de pince)
+func _init() -> void:
+	pince_visible = false
+
+
 @export_group("Balancier")
 ## mêmes valeurs par défaut que corde.gd : le maniement est celui de la corde
 @export var gravite := 1400.0

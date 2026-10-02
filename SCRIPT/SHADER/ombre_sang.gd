@@ -147,7 +147,8 @@ func _frapper() -> void:
 	var hbs := [anim.hitbox_1, anim.hitbox_2, anim.hitbox_3, anim.hitbox_4]
 	var hb: CollisionPolygon2D = hbs[clampi(zone, 0, 3)]
 	var xf := Transform2D(0.0, Vector2(-cote, 1.0), 0.0, global_position) * xf_attaque * hb.transform
-	var degats := maxi(roundi(anim.degats_du_coup() * part), 1)
+	# (Canon de verre : son coup est doublé, comme celui de l'épée)
+	var degats := maxi(roundi(anim.degats_du_coup() * part * Player.multiplicateur_infliges()), 1)
 	var espace := get_world_2d().direct_space_state
 	var touches: Array[Node] = []
 	for poly in Geometry2D.decompose_polygon_in_convex(hb.polygon):

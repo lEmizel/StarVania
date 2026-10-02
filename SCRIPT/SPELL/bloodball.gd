@@ -205,8 +205,9 @@ func _on_body_entered(body: Node) -> void:
 	if _eclate or body.is_in_group("Player"):
 		return
 	if body.has_method("apply_damage"):
-		# CANON DE VERRE : tous les dégâts infligés sont multipliés
-		var degats := roundi(damage * Player.multiplicateur_infliges())
+		# (le Canon de verre ne la double pas : Kaoru, 2 oct. 2026, pour qu'il ne
+		# se cumule pas avec le Pacte de sang)
+		var degats := damage
 		# le joueur est l'attaquant : ses victimes sont les siennes (Essaim)
 		var lanceur := get_tree().get_first_node_in_group("Player")
 		var porte

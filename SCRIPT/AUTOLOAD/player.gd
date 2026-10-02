@@ -346,11 +346,13 @@ func frenesie_active() -> bool:
 	return hp == 1 and bonus_talismans("degats_pourcent_dernier_coeur") > 0.0
 
 
-## Ce par quoi multiplier les dégâts de base d'un coup d'épée (1.1 = +10 %),
-## multiplicateur de TOUS les dégâts infligés compris (Canon de verre).
+## Ce par quoi multiplier les dégâts de base d'un coup d'épée (1.1 = +10 %).
 ## À appliquer au moment du coup : `roundi(base * Player.multiplicateur_degats())`.
+## Le Canon de verre n'y est PAS (depuis le 2 oct. 2026) : tout ce qui part d'un
+## « coup d'épée, bonus compris » (épines, gardiennes, croissant, onde du cœur
+## noir…) l'aurait doublé aussi — voir `multiplicateur_infliges`.
 func multiplicateur_degats() -> float:
-	return (1.0 + bonus_degats_pourcent() / 100.0) * multiplicateur_infliges()
+	return 1.0 + bonus_degats_pourcent() / 100.0
 
 
 ## Le PRODUIT, sur les talismans portés, d'une clé multiplicative du catalogue
@@ -366,9 +368,14 @@ func produit_talismans(cle: String) -> float:
 	return total
 
 
-## Ce par quoi multiplier TOUS les dégâts que le joueur INFLIGE — épée (via
-## `multiplicateur_degats`, donc aussi les épines et l'éclair qui en découlent),
-## boule et tornade de sang, brume du sillage (talisman « Canon de verre » : ×2)
+## Ce par quoi multiplier le COUP D'ÉPÉE LUI-MÊME (avec l'éclair qui en bondit,
+## Lame de foudre) et celui de l'OMBRE DE SANG, et rien d'autre (talisman
+## « Canon de verre » : ×2). Kaoru, 2 oct. 2026 : plus la boule ni la Tornade,
+## pour qu'il ne se cumule pas avec le Pacte de sang ; ni le reste de ce qui
+## découle d'un coup d'épée (épines, gardiennes, croissant, essaim — « oublie les
+## chauves-souris » —, plumes, offrande, sang bouillant, onde du cœur noir), ni
+## le poison, ni le sillage. Appliqué dans animator.gd (`_on_body_entered`) et
+## ombre_sang.gd.
 func multiplicateur_infliges() -> float:
 	return produit_talismans("degats_infliges_multiplicateur")
 

@@ -31,7 +31,9 @@ extends RefCounted
 ##                 qu'un cœur (Player.frenesie_active()) ; s'ajoute aux
 ##                 `degats_pourcent`
 ##   "degats_infliges_multiplicateur" / "degats_recus_multiplicateur"
-##                 (facultatifs) multiplient TOUS les dégâts infligés / reçus
+##                 (facultatifs) multiplient les dégâts des COUPS D'ÉPÉE (avec
+##                 l'éclair qui en bondit) et de l'OMBRE DE SANG — rien d'autre :
+##                 ni la boule, ni les autres talismans / TOUS les dégâts reçus
 ##                 (2 = ×2) ; plusieurs talismans se MULTIPLIENT entre eux
 ##                 (Player.produit_talismans)
 ##   "allonge_pourcent" (facultatif) portée de l'épée en plus, en pour cent
@@ -72,7 +74,10 @@ const NB_EMPLACEMENTS := 42
 ##   souffle  → player.gd (`_second_souffle`, `Player.second_souffle_attente`),
 ##              checkpoint.gd (recharge), gestion_interface.gd (`souffle_fx`)
 ##   canon    → SCRIPT/AUTOLOAD/player.gd (`multiplicateur_infliges` /
-##              `multiplicateur_recus`) + l'œil de feu au-dessus de la tête
+##              `multiplicateur_recus`), appliqué au coup d'épée (animator.gd
+##              `_on_body_entered`, l'éclair de la foudre en part) et à celui de
+##              l'Ombre (ombre_sang.gd) +
+##              l'œil de feu au-dessus de la tête
 ##              (SCRIPT/SHADER/oeil_canon.gd, posé par player.gd `_oeil_preparer`)
 ##   allonge  → SCRIPT/CHARACHTER/animator.gd (`_play_slash`)
 ##   vengeance → player.gd (`_vengeance_charger`, `vengeance_active`) +
@@ -164,7 +169,7 @@ const LISTE := [
 	{"id": "frenesie", "nom": "Frénésie", "description": "Au dernier cœur, les coups d'épée font 50 % de dégâts en plus.", "couleur": Color(0.85, 0.05, 0.12), "dessin": "res://SCRIPT/TALISMAN/dessin_frenesie.gdshader", "degats_pourcent_dernier_coeur": 50},
 	{"id": "marque", "nom": "Marque de sang", "description": "La boule de sang marque l'ennemi qu'elle touche : votre prochain coup d'épée sur lui fait 50 % de dégâts en plus.", "couleur": Color(0.76, 0.03, 0.11), "dessin": "res://SCRIPT/TALISMAN/dessin_marque.gdshader"},
 	{"id": "souffle", "nom": "Second souffle", "description": "Un coup qui devrait vous tuer vous laisse à un cœur. Se recharge en 120 secondes, et à chaque checkpoint.", "couleur": Color(0.76, 0.03, 0.11), "dessin": "res://SCRIPT/TALISMAN/dessin_souffle.gdshader"},
-	{"id": "canon", "nom": "Canon de verre", "description": "Tous les dégâts que vous infligez sont doublés… et tous ceux que vous recevez aussi.", "couleur": Color(0.76, 0.03, 0.11), "dessin": "res://SCRIPT/TALISMAN/dessin_canon.gdshader", "degats_infliges_multiplicateur": 2, "degats_recus_multiplicateur": 2},
+	{"id": "canon", "nom": "Canon de verre", "description": "Vos coups d'épée font deux fois plus de dégâts… et tous ceux que vous recevez sont doublés aussi.", "couleur": Color(0.76, 0.03, 0.11), "dessin": "res://SCRIPT/TALISMAN/dessin_canon.gdshader", "degats_infliges_multiplicateur": 2, "degats_recus_multiplicateur": 2},
 	{"id": "allonge", "nom": "Allonge", "description": "La portée de l'épée augmente de 20 %.", "couleur": Color(0.78, 0.04, 0.12), "dessin": "res://SCRIPT/TALISMAN/dessin_allonge.gdshader", "allonge_pourcent": 20},
 	{"id": "croissant", "nom": "Croissant de sang", "description": "Le dernier coup du combo projette son slash vers l'avant : il traverse les ennemis sur une courte distance.", "couleur": Color(0.78, 0.04, 0.12), "dessin": "res://SCRIPT/TALISMAN/dessin_croissant.gdshader"},
 	{"id": "vengeance", "nom": "Vengeance", "description": "Après un coup encaissé, tous vos coups d'épée font 50 % de dégâts en plus pendant 5 secondes. Une couronne de sang le rappelle au-dessus de vous.", "couleur": Color(0.78, 0.04, 0.12), "dessin": "res://SCRIPT/TALISMAN/dessin_vengeance.gdshader"},

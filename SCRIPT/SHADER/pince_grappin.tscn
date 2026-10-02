@@ -1,0 +1,53 @@
+[gd_scene format=3 uid="uid://dajd7fnsns28d"]
+
+[ext_resource type="Script" uid="uid://b4ps4bafpw4bd" path="res://SCRIPT/SHADER/pince_grappin.gd" id="1_pg"]
+[ext_resource type="Shader" uid="uid://bhaecpxs08ht3" path="res://SCRIPT/SHADER/pince_grappin.gdshader" id="2_pg"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_pg"]
+resource_local_to_scene = true
+shader = ExtResource("2_pg")
+shader_parameter/taille = Vector2(96, 96)
+shader_parameter/ouverture = 0.0
+shader_parameter/lumiere = 0.0
+shader_parameter/temps = 120.2264928888901
+shader_parameter/rayon_moyeu = 10.0
+shader_parameter/branche_r_pied = 3.6
+shader_parameter/branche_r_bout = 5.4
+shader_parameter/branche_longueur_fermee = 8.0
+shader_parameter/branche_longueur_ouverte = 15.0
+shader_parameter/branche_depart_fermee = 6.0
+shader_parameter/branche_depart_ouverte = 12.5
+shader_parameter/torsion = 0.05
+shader_parameter/encre = 0.0
+shader_parameter/rayon_oeil = 5.805
+shader_parameter/halo = 19.945
+shader_parameter/couleur = Color(0.8392157, 0, 0.09803922, 1)
+shader_parameter/sombre = Color(0.99510235, 0.5084266, 0.49207425, 1)
+shader_parameter/clair = Color(1, 0.45, 0.45, 1)
+shader_parameter/couleur_encre = Color(0.1, 0.01, 0.03, 1)
+shader_parameter/oeil_eteint = Color(0.07, 0.06, 0.14, 1)
+shader_parameter/bleu_coeur = Color(0.9897693, 0.9384313, 0.75073516, 1)
+shader_parameter/bleu = Color(0.9027826, 0.6256848, 0.20970789, 1)
+shader_parameter/corps_sombre = 0.5
+shader_parameter/couleur_magie = Color(1, 1, 1, 1)
+shader_parameter/couleur_magie_fin = Color(0.8587783, 0.6453948, 0.24320862, 1)
+shader_parameter/bord = 1.1
+shader_parameter/veines = 0.9
+shader_parameter/flux = 30.0
+shader_parameter/etincelles = 0.8
+shader_parameter/vie_etincelles = 0.55
+shader_parameter/vitesse_etincelles = 30.0
+shader_parameter/taille_etincelles = 1.0
+shader_parameter/aura = 0.35
+
+[node name="PinceGrappin" type="Node2D" unique_id=1485179122]
+z_index = 3
+script = ExtResource("1_pg")
+
+[node name="Pince" type="ColorRect" parent="." unique_id=2143323994]
+material = SubResource("ShaderMaterial_pg")
+offset_left = -48.0
+offset_top = -48.0
+offset_right = 48.0
+offset_bottom = 48.0
+mouse_filter = 2

@@ -9,7 +9,13 @@ extends Node2D
 ##
 ## Ce nœud ne fait que : se déclarer dans le groupe "GRAPPIN", donner son
 ## point, s'allumer, et dessiner le câble pendant la traction.
-## Dans l'éditeur : l'anneau plus un cercle de portée indicatif pour placer.
+## Son visuel : la PINCE (2 oct. 2026, d'après le croquis de Kaoru), posée au
+## démarrage — fermée, OUVERTE avec une lumière bleue quand on peut s'y
+## accrocher, refermée sur le câble pendant la traction
+## (SCRIPT/SHADER/pince_grappin.tscn). Sans pince (l'accroche pendulaire),
+## l'anneau d'avant.
+## Dans l'éditeur : la pince (fermée, ou ouverte avec `apercu_pince_ouverte`)
+## plus un cercle de portée indicatif pour placer.
 ## ============================================================================
 
 @export var couleur_anneau := Color(1.0, 0.9, 0.3)
@@ -31,9 +37,20 @@ extends Node2D
 const CABLE_MARGE := 40.0
 
 const CABLE_SHADER := preload("res://SCRIPT/SHADER/cable_de_sang.gdshader")
+const PINCE_SCENE := preload("res://SCRIPT/SHADER/pince_grappin.tscn")
+
+## la pince dessine le point (sinon : l'anneau) — l'accroche pendulaire la coupe
+@export var pince_visible := true
+## sa taille (1 = celle du dessin : ~42 px fermée, ~66 px ouverte) ; 1,82 :
+## « 40 % plus grande », puis « encore 30 % » (Kaoru, 2 oct. 2026) → ~76 et
+## ~120 px
+@export var echelle_pince := 1.82
+## dans l'éditeur seulement : voir la pince ouverte
+@export var apercu_pince_ouverte := false
 
 @onready var _cable: Line2D = $Cable
 var _actif := false
+var _pince: Node2D = null
 
 
 func _ready() -> void:
@@ -67,7 +84,39 @@ func _ready() -> void:
 		# une graine par accroche : deux câbles ne grumellent pas pareil
 		mat.set_shader_parameter("graine", randf_range(1.0, 100.0))
 	_cable.visible = false
+	if pince_visible:
+		_poser_pince()
 	queue_redraw()
+
+
+## la pince : posée une fois (dans l'éditeur aussi, sans être enregistrée).
+## `_process` la rattrape aussi : une accroche déjà chargée dans l'éditeur quand
+## ce script a changé ne refait pas son `_ready` — elle gardait l'ancien anneau
+## jusqu'à ce qu'on rouvre la scène (Kaoru, 2 oct. 2026)
+func _poser_pince() -> void:
+	_pince = get_node_or_null("PinceGrappin") as Node2D
+	if _pince == null:
+		_pince = PINCE_SCENE.instantiate()
+		_pince.name = "PinceGrappin"
+		_pince.demo_boucle = false
+		add_child(_pince)
+	queue_redraw()
+
+
+## la pince suit l'état de l'accroche : ouverte quand on peut s'y accrocher,
+## refermée (et allumée) tant que le câble y tient
+func _process(_delta: float) -> void:
+	if pince_visible and _pince == null:
+		_poser_pince()
+	if _pince == null:
+		return
+	_pince.scale = Vector2(echelle_pince, echelle_pince)
+	if Engine.is_editor_hint():
+		_pince.ouvert = apercu_pince_ouverte
+		_pince.tenue = false
+		return
+	_pince.ouvert = _actif
+	_pince.tenue = _cable.visible
 
 
 # ---------------------------------------------------------------------------
@@ -117,8 +166,10 @@ func cable_cacher() -> void:
 # ---------------------------------------------------------------------------
 
 func _draw() -> void:
-	var c := couleur_active if _actif else couleur_anneau
-	draw_arc(Vector2.ZERO, 14.0, 0.0, TAU, 28, c, 4.0 if _actif else 3.0)
-	draw_arc(Vector2.ZERO, 6.0, 0.0, TAU, 16, c, 2.0)
+	# sans pince (l'accroche pendulaire) : l'anneau, vif quand on peut s'y accrocher
+	if _pince == null:
+		var c := couleur_active if _actif else couleur_anneau
+		draw_arc(Vector2.ZERO, 14.0, 0.0, TAU, 28, c, 4.0 if _actif else 3.0)
+		draw_arc(Vector2.ZERO, 6.0, 0.0, TAU, 16, c, 2.0)
 	if Engine.is_editor_hint():
 		draw_arc(Vector2.ZERO, portee_indicative, 0.0, TAU, 64, Color(couleur_anneau, 0.25), 1.5)
