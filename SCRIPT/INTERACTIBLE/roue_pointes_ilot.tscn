@@ -1,0 +1,6 @@
+[gd_scene format=3]
+
+[ext_resource type="PackedScene" path="res://SCRIPT/INTERACTIBLE/roue_pointes.tscn" id="1_ri"]
+
+[node name="RoueIlot" instance=ExtResource("1_ri")]
+comportement = 1

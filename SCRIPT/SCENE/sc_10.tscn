@@ -21,8 +21,8 @@
 [ext_resource type="Shader" uid="uid://jblop3f3vfan" path="res://SCRIPT/SHADER/flou_fond.gdshader" id="17_vw2kw"]
 [ext_resource type="Texture2D" uid="uid://x774gue4he8e" path="res://MEDIA/scene 6/background/background.png" id="18_v7ylp"]
 [ext_resource type="Texture2D" uid="uid://bnx8i3kgl6iic" path="res://MEDIA/scene 6/background/colonne.png" id="19_6t8y0"]
-[ext_resource type="PackedScene" path="res://SCRIPT/INTERACTIBLE/sceau_runes.tscn" id="22_6t8y0"]
 [ext_resource type="PackedScene" path="res://SCRIPT/INTERACTIBLE/pilier_foudre.tscn" id="23_ubcjy"]
+[ext_resource type="PackedScene" path="res://SCRIPT/INTERACTIBLE/roue_pointes.tscn" id="25_xjew0"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_ubcjy"]
 shader = ExtResource("17_vw2kw")
@@ -91,7 +91,7 @@ position = Vector2(2395.5, -3663)
 
 [node name="SAWBLADE" parent="interactible" unique_id=388117046 instance=ExtResource("6_5ylk2")]
 position = Vector2(1466, -999)
-frame_progress = 0.8588401
+frame_progress = 0.42966586
 position_a = Vector2(1466, -999)
 position_b = Vector2(1466, -2128)
 
@@ -437,7 +437,7 @@ scroll_scale = Vector2(0.25, 0.25)
 
 [node name="Sprite2D3" type="Sprite2D" parent="VISUAL/Parallax2D2" unique_id=263257212]
 z_index = -200
-position = Vector2(1143.887, -201.27637)
+position = Vector2(1118, -116.00002)
 scale = Vector2(0.5043707, 0.50128)
 texture = ExtResource("18_v7ylp")
 
@@ -458,16 +458,6 @@ export_path = "res://sc_10.png"
 bg_color = Color(0.101960786, 0.101960786, 0.101960786, 0)
 margin = 50
 
-[node name="SceauRunes" parent="." unique_id=741593412 instance=ExtResource("22_6t8y0")]
-z_index = 1
-position = Vector2(450, 6)
-
-[node name="SceauRunes2" parent="." unique_id=802614743 instance=ExtResource("22_6t8y0")]
-position = Vector2(589, 4)
-
-[node name="PilierFoudre" parent="." unique_id=1542801124 instance=ExtResource("23_ubcjy")]
-position = Vector2(761, 1)
-
 [node name="PilierFoudre2" parent="." unique_id=1055213777 instance=ExtResource("23_ubcjy")]
 position = Vector2(2306, -27)
 
@@ -476,3 +466,13 @@ position = Vector2(4062, -717)
 
 [node name="PilierFoudre4" parent="." unique_id=955657252 instance=ExtResource("23_ubcjy")]
 position = Vector2(2529, -1500)
+
+[node name="RoueAPointes" parent="." unique_id=1149424284 instance=ExtResource("25_xjew0")]
+position = Vector2(-1242, -403)
+scale = Vector2(1.9456055, 1.9456055)
+vitesse_max = 800.0
+
+[node name="RoueAPointes2" parent="." unique_id=2036540166 instance=ExtResource("25_xjew0")]
+position = Vector2(372, -1506)
+scale = Vector2(1.9456044, 1.9456044)
+vitesse_max = 800.0

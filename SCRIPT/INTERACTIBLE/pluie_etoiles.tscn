@@ -1,0 +1,22 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://SCRIPT/INTERACTIBLE/pluie_etoiles.gd" id="1_pe"]
+[ext_resource type="Shader" path="res://SCRIPT/SHADER/faille_etoilee.gdshader" id="2_pe"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_pe"]
+resource_local_to_scene = true
+shader = ExtResource("2_pe")
+
+[node name="PluieEtoiles" type="Node2D"]
+script = ExtResource("1_pe")
+
+[node name="Faille" type="ColorRect" parent="."]
+material = SubResource("ShaderMaterial_pe")
+offset_left = -550.0
+offset_top = -610.0
+offset_right = 550.0
+offset_bottom = -430.0
+mouse_filter = 2
+
+[node name="Ecran" type="VisibleOnScreenNotifier2D" parent="."]
+rect = Rect2(-450, -520, 900, 560)

@@ -1,0 +1,40 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://SCRIPT/INTERACTIBLE/roue_pointes.gd" id="1_rp"]
+[ext_resource type="Shader" path="res://SCRIPT/SHADER/roue_pointes.gdshader" id="2_rp"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_corps"]
+radius = 38.0
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_zone"]
+radius = 42.0
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_rp"]
+resource_local_to_scene = true
+shader = ExtResource("2_rp")
+
+[node name="RoueAPointes" type="CharacterBody2D"]
+collision_layer = 0
+collision_mask = 6
+script = ExtResource("1_rp")
+
+[node name="Forme" type="CollisionShape2D" parent="."]
+position = Vector2(0, -38)
+shape = SubResource("CircleShape2D_corps")
+
+[node name="Zone" type="Area2D" parent="."]
+position = Vector2(0, -38)
+collision_layer = 0
+collision_mask = 9
+monitorable = false
+
+[node name="Forme" type="CollisionShape2D" parent="Zone"]
+shape = SubResource("CircleShape2D_zone")
+
+[node name="Visuel" type="ColorRect" parent="."]
+material = SubResource("ShaderMaterial_rp")
+offset_left = -200.0
+offset_top = -148.0
+offset_right = 200.0
+offset_bottom = 8.0
+mouse_filter = 2

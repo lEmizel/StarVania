@@ -99,6 +99,10 @@ const SHADERS: Array[String] = [
 	"res://SCRIPT/SHADER/foudre_ciel.gdshader",      # l'éclair qu'il appelle du ciel, averti au sol
 	"res://SCRIPT/SHADER/trou_noir.gdshader",        # piège trou noir : il aspire, lentille sur le décor
 	"res://SCRIPT/SHADER/vent.gdshader",             # piège de vent : filets et anneaux d'air
+	"res://SCRIPT/SHADER/faille_etoilee.gdshader",   # pluie d'étoiles : la faille dans le ciel
+	"res://SCRIPT/SHADER/comete.gdshader",           # pluie d'étoiles : une comète avertie et son impact
+	"res://SCRIPT/SHADER/pilon.gdshader",            # le pilon : le concasseur (décor, sans contour)
+	"res://SCRIPT/SHADER/roue_pointes.gdshader",     # roue à pointes : la roue seule, ses étincelles, son éclatement
 	"res://SCRIPT/SHADER/impact_blanc.gdshader",     # éclat d'un coup d'épée qui porte (sept. 2026)
 	"res://SCRIPT/SHADER/souffle_dash.gdshader",     # souffle d'air au départ du dash (sept. 2026)
 	"res://SCRIPT/SHADER/onde_de_choc.gdshader",     # onde de choc du coup de pied du boss (sept. 2026)

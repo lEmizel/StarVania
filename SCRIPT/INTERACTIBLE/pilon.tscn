@@ -1,0 +1,19 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://SCRIPT/INTERACTIBLE/pilon.gd" id="1_pl"]
+[ext_resource type="Shader" path="res://SCRIPT/SHADER/pilon.gdshader" id="2_pl"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_pl"]
+resource_local_to_scene = true
+shader = ExtResource("2_pl")
+
+[node name="Pilon" type="Node2D"]
+script = ExtResource("1_pl")
+
+[node name="Machine" type="ColorRect" parent="."]
+material = SubResource("ShaderMaterial_pl")
+offset_left = -110.0
+offset_top = -380.0
+offset_right = 110.0
+offset_bottom = 20.0
+mouse_filter = 2

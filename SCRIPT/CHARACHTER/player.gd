@@ -1813,7 +1813,19 @@ func _renvoi_environnement(d: Vector2) -> void:
 func goto_state(s: States) -> void:
 	if current_state == s:
 		return
-	call_deferred("change_state", s)
+	call_deferred("_goto_differe", s, current_state)
+
+
+## La transition DIFFÉRÉE est abandonnée si, entre la demande et la fin de
+## l'image, un coup a IMPOSÉ HIT ou DEAD (2 oct. 2026, roue à pointes : un
+## atterrissage demandait IDLE pour la fin de l'image, la roue piquait dans la
+## même image, et l'IDLE différé effaçait le HIT — plus de stun ni de répit,
+## piqué de nouveau à l'image suivante ; après un coup mortel, il aurait même
+## relevé le mort). Même famille que le garde-fou des monstres (BASE_IA).
+func _goto_differe(s: States, depuis: States) -> void:
+	if current_state != depuis and current_state in [States.HIT, States.DEAD]:
+		return
+	change_state(s)
 
 ## Détection de mur pour le wall jump : uniquement les StaticBody2D
 ## explicitement marqués (groupe "wall_jump") — l'opt-in permet au level
@@ -3134,8 +3146,9 @@ func roll_enter() -> void:
 		collision_normale.set_deferred("disabled", true)
 		collision_roulade.set_deferred("disabled", false)
 	else:
-		# Pas de direction → on ne roll pas, retour IDLE
-		call_deferred("change_state", States.IDLE)
+		# Pas de direction → on ne roll pas, retour IDLE (différé, avec le garde-fou
+		# de goto_state : un coup encaissé entre-temps garde son HIT)
+		call_deferred("_goto_differe", States.IDLE, States.ROLL)
 
 func roll_execute(delta: float) -> void:
 	velocity.y += gravity * delta
@@ -3869,6 +3882,7 @@ func dead_input(event: InputEvent) -> void:
 		Player.coeur_noir_attente = 0.0         # … et le cœur noir revient
 		Player.essaim_en_vol = 0                # … et l'essaim est dispersé
 		Player.vient_de_mourir = true           # … et le Sang neuf remplira la jauge
+		Player.roues_brisees.clear()            # … et les roues à pointes brisées reviennent
 		# au respawn, la jauge de sang offre EXACTEMENT un soin : le joker
 		# du joueur, à dépenser au bon moment
 		Player.bloodheal = HEAL_COST

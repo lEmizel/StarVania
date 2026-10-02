@@ -26,6 +26,10 @@ var hearts_initialized := false
 # chaque respawn (cœurs infinis). Vit le temps de la session ; à brancher
 # sur la vraie sauvegarde disque quand elle existera.
 var coeurs_ramasses := {}
+# Registre des ROUES À POINTES brisées (même clé que les cœurs) : une roue
+# brisée ne revient QUE SI ON MEURT (Kaoru) — vidé à la réapparition après la
+# mort (player.gd, dead_input), pas en changeant de tableau.
+var roues_brisees := {}
 # --- Réserve de soin BLOODHEAL : N barres côte à côte, chacune = un soin ---
 ## capacité d'UNE barre = le coût d'un soin (HEAL_COST côté player : les deux doivent rester égaux)
 const BARRE_BLOODHEAL := 100
@@ -103,6 +107,7 @@ func _ready() -> void:
 func reset_partie() -> void:
 	hearts_initialized = false  # le prochain spawn relira l'export du player
 	coeurs_ramasses.clear()
+	roues_brisees.clear()
 	_talismans_page_blanche()
 	hp = 999999  # clampé au max par le _enter_tree du player
 	blood = 0

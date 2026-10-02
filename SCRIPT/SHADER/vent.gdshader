@@ -82,7 +82,7 @@ float volute(vec2 q, float r0, float sens, float demi) {
 		return -1.0;
 	}
 	// effilée au départ, pointue au bout de l'enroulement
-	return demi * smoothstep(0.0, 0.14, s_m) * pow(1.0 - s_m, 0.6) - meilleur;
+	return demi * smoothstep(0.0, 0.14, s_m) * pow(abs(1.0 - s_m), 0.6) - meilleur;
 }
 
 void fragment() {
@@ -92,7 +92,7 @@ void fragment() {
 	float h = -p.y;                                  // hauteur au-dessus de la bouche
 	float hn = clamp(h / max(portee, 1.0), 0.0, 1.0);
 	float demi_l = largeur * 0.5;
-	float w = demi_l * (1.0 + evasement * pow(hn, 1.5));
+	float w = demi_l * (1.0 + evasement * pow(abs(hn), 1.5));
 	float sd = -1.0;
 
 	// ===================== LES RUBANS =====================
@@ -167,7 +167,7 @@ void fragment() {
 		float phase = fract(defilement * 0.00042 + (fi + 0.37 * hv) / float(nb_volutes));
 		float hc = mix(0.4, 0.9, phase) * portee;
 		float sens = mod(fi, 2.0) < 1.0 ? 1.0 : -1.0;
-		float wc = demi_l * (1.0 + evasement * pow(hc / max(portee, 1.0), 1.5));
+		float wc = demi_l * (1.0 + evasement * pow(abs(hc / max(portee, 1.0)), 1.5));
 		float xc = sens * wc * (0.45 + 0.2 * hv);
 		float r0 = mix(22.0, 52.0, phase) * mix(0.6, 1.0, puissance);
 		float demi = 3.4 * smoothstep(0.0, 0.15, phase) * (1.0 - phase * phase) * smoothstep(0.3, 0.8, puissance);
@@ -182,7 +182,7 @@ void fragment() {
 		if (t <= 0.0 || t >= 1.0) {
 			continue;
 		}
-		float pk = 1.0 - pow(1.0 - t, 3.0);          // il part vite, puis il freine
+		float pk = 1.0 - pow(abs(1.0 - t), 3.0);          // il part vite, puis il freine
 		float cy = mix(8.0, portee * 0.42, pk) * (1.0 - 0.25 * fk);
 		float rx = demi_l * mix(0.55, 1.3, pk) * (1.0 - 0.2 * fk);
 		float ry = rx * 0.22;                         // une ellipse plate : vue de profil
@@ -193,7 +193,7 @@ void fragment() {
 		float pente = length(vec2(q.x, q.y * ki)) / max(d, 0.0001);
 		float angle = atan(q.y, q.x);
 		float pinceau = 0.62 + 0.38 * sin(angle * 2.0 + fk * 1.7 + graine);
-		float demi_r = 3.4 * anneaux * (1.0 - pow(t, 1.6)) * pinceau * (1.0 - 0.3 * fk);
+		float demi_r = 3.4 * anneaux * (1.0 - pow(abs(t), 1.6)) * pinceau * (1.0 - 0.3 * fk);
 		sd = max(sd, demi_r - abs(d - rx) / pente);
 	}
 

@@ -88,10 +88,10 @@ vec3 disque(float rho, float phi, float ri, float ro) {
 	}
 	float x = clamp((rho - ri) / max(ro - ri, 0.001), 0.0, 1.0);
 	// très clair au bord intérieur, s'éteint vers l'extérieur
-	float profil = smoothstep(-0.03, 0.05, x) * pow(1.0 - x, 1.25) * (0.5 + 0.5 * exp(-x * 3.0));
+	float profil = smoothstep(-0.03, 0.05, x) * pow(abs(1.0 - x), 1.25) * (0.5 + 0.5 * exp(-x * 3.0));
 	// le gaz tourne, plus vite près du centre ; deux phases fondues l'une dans
 	// l'autre pour que l'étirement ne devienne jamais des fils infinis
-	float omega = vitesse_disque * TAU * pow(ri / max(rho, 1.0), 1.5);
+	float omega = vitesse_disque * TAU * pow(abs(ri / max(rho, 1.0)), 1.5);
 	float periode = 4.0;
 	float t1 = mod(temps, periode);
 	float t2 = mod(temps + periode * 0.5, periode);
@@ -175,7 +175,7 @@ void fragment() {
 	float ri = disque_interieur * R;
 	float ro = disque_exterieur * R * mix(0.55, 1.0, vie);
 	// l'éveil : l'anneau flambe à mi-chemin
-	float eclat = pow(sin(3.14159 * vie), 2.0) * (1.0 - step(0.999, vie));
+	float eclat = pow(abs(sin(3.14159 * vie)), 2.0) * (1.0 - step(0.999, vie));
 	float age = 1.0 - festin;
 
 	// ===================== LA LENTILLE =====================
@@ -187,10 +187,10 @@ void fragment() {
 	float devie = theta_e * theta_e / max(r, R * 0.6);
 	devie *= 1.0 - smoothstep(r_max * 0.45, r_max * 0.95, r);
 	// quand il mange : une onde file dans le décor
-	float onde = exp(-pow((r - (R + age * 620.0)) / 24.0, 2.0)) * festin * festin;
+	float onde = exp(-pow(abs((r - (R + age * 620.0)) / 24.0), 2.0)) * festin * festin;
 	devie += onde * 16.0;
 	// et l'espace tourne avec lui : le décor s'enroule autour de l'ombre
-	float vrille = vrille_decor * pow(R / max(r, R), 1.5) * (1.0 - smoothstep(r_max * 0.45, r_max * 0.95, r));
+	float vrille = vrille_decor * pow(abs(R / max(r, R)), 1.5) * (1.0 - smoothstep(r_max * 0.45, r_max * 0.95, r));
 	vec2 source = p - dir_r * devie;
 	source = vec2(source.x * cos(vrille) - source.y * sin(vrille), source.x * sin(vrille) + source.y * cos(vrille));
 	vec2 uv = SCREEN_UV + (source - p) / px * SCREEN_PIXEL_SIZE;
@@ -220,19 +220,19 @@ void fragment() {
 	float alpha = atan(p.y, p.x);
 	float haut = max(-sin(alpha), 0.0);
 	float r0 = R * 1.04;
-	float r1 = R * (1.05 + 1.15 * pow(haut, 0.55));
+	float r1 = R * (1.05 + 1.15 * pow(abs(haut), 0.55));
 	if (haut > 0.0 && r > r0 && r < r1) {
-		lum += disque(mix(ri, ro, pow((r - r0) / (r1 - r0), 1.5)), alpha, ri, ro) * 1.5;
+		lum += disque(mix(ri, ro, pow(abs((r - r0) / (r1 - r0)), 1.5)), alpha, ri, ro) * 1.5;
 	}
 	// … et par-dessous : l'arc mince du bas
 	float bas = max(sin(alpha), 0.0);
-	float r2 = R * (1.03 + 0.42 * pow(bas, 0.8));
+	float r2 = R * (1.03 + 0.42 * pow(abs(bas), 0.8));
 	if (bas > 0.0 && r > R * 1.03 && r < r2) {
-		lum += disque(mix(ri, ro, pow((r - R * 1.03) / (r2 - R * 1.03), 1.5)), -alpha, ri, ro) * 0.9;
+		lum += disque(mix(ri, ro, pow(abs((r - R * 1.03) / (r2 - R * 1.03)), 1.5)), -alpha, ri, ro) * 0.9;
 	}
 
 	// ===================== L'ANNEAU DE PHOTONS =====================
-	float anneau = exp(-pow((r - R * 1.02) / (0.016 * R + 0.9 * px), 2.0));
+	float anneau = exp(-pow(abs((r - R * 1.02) / (0.016 * R + 0.9 * px)), 2.0));
 	lum += couleur_blanche.rgb * anneau * (1.0 - 0.45 * cos(alpha)) * (1.0 + 2.5 * festin + 2.0 * eclat);
 
 	// ===================== LA LUEUR =====================
@@ -249,11 +249,11 @@ void fragment() {
 		float ay = abs(p.y);
 		float longueur = R + 400.0 * smoothstep(0.0, 0.3, age);
 		float w = 2.5 + 0.05 * ay;
-		float coeur = exp(-pow(p.x / w, 2.0));
-		float halo_j = exp(-pow(p.x / (w * 4.0), 2.0)) * 0.35;
+		float coeur = exp(-pow(abs(p.x / w), 2.0));
+		float halo_j = exp(-pow(abs(p.x / (w * 4.0)), 2.0)) * 0.35;
 		float le_long = smoothstep(longueur, longueur * 0.75, ay) * smoothstep(R * 0.8, R * 1.2, ay);
 		float vibre = 0.75 + 0.25 * bruit(vec3(ay * 0.04 - temps * 25.0, p.x * 0.1, 3.0));
-		lum += (couleur_blanche.rgb * coeur + couleur_jets.rgb * halo_j) * le_long * vibre * pow(festin, 0.6) * 1.6 * dehors;
+		lum += (couleur_blanche.rgb * coeur + couleur_jets.rgb * halo_j) * le_long * vibre * pow(abs(festin), 0.6) * 1.6 * dehors;
 	}
 	// l'onde : un liseré de lumière
 	lum += couleur_blanche.rgb * onde * 0.12 * dehors;
