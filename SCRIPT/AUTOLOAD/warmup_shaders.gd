@@ -97,6 +97,8 @@ const SHADERS: Array[String] = [
 	"res://SCRIPT/SHADER/sceau_runes.gdshader",      # le piège sceau de runes (2 oct. 2026)
 	"res://SCRIPT/SHADER/pilier_foudre.gdshader",    # le piège pilier de foudre (2 oct. 2026)
 	"res://SCRIPT/SHADER/foudre_ciel.gdshader",      # l'éclair qu'il appelle du ciel, averti au sol
+	"res://SCRIPT/SHADER/trou_noir.gdshader",        # piège trou noir : il aspire, lentille sur le décor
+	"res://SCRIPT/SHADER/vent.gdshader",             # piège de vent : filets et anneaux d'air
 	"res://SCRIPT/SHADER/impact_blanc.gdshader",     # éclat d'un coup d'épée qui porte (sept. 2026)
 	"res://SCRIPT/SHADER/souffle_dash.gdshader",     # souffle d'air au départ du dash (sept. 2026)
 	"res://SCRIPT/SHADER/onde_de_choc.gdshader",     # onde de choc du coup de pied du boss (sept. 2026)

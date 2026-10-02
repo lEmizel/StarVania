@@ -81,6 +81,7 @@ func _setup_states() -> void:
 
 
 func _start() -> void:
+	volant = true               # le trou noir l'emporte aussi en hauteur
 	# fragile : deux coups d'épée (70 de dégâts) et il saute
 	max_hp = 140
 	hp = 140

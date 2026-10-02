@@ -202,7 +202,9 @@ func _physics_process(delta: float) -> void:
 		velocity.y *= lent
 		if freine_x:
 			velocity.x *= lent
+	var v_etat := _poussees_appliquer(delta)
 	move_and_slide()
+	_poussees_rendre(v_etat)      # trou noir, vent : sa vitesse lui revient
 	if lent < 1.0:
 		velocity.y /= lent
 		if freine_x:
@@ -275,6 +277,97 @@ func _tick_contacts(delta: float) -> void:
 		_contact_recents[body] -= delta
 		if _contact_recents[body] <= 0.0:
 			_contact_recents.erase(body)
+
+
+# LES FORCES DES PIÈGES (2 oct. 2026) : le TROU NOIR aspire (`aspirer`), le
+# VENT pousse (`souffler`). Chacun redonne À CHAQUE IMAGE la vitesse qu'il
+# impose là où est le monstre (px/s). Le trou noir : en largeur, sa vitesse
+# s'AJOUTE à celle de l'état le temps du pas, puis elle est retirée ; en
+# hauteur, pour un marcheur, c'est une ACCÉLÉRATION comme la gravité (il ne
+# décolle que s'il tire plus fort qu'elle). Le vent donne de l'ÉLAN, qui
+# continue après le courant (en l'air il file loin, au sol il glisse un peu).
+# Un VOLANT (`volant` : orbe, kamikaze — ils posent leur vitesse eux-mêmes à
+# chaque image) est emporté de la même façon dans les deux sens.
+const POUSSEE_RAIDEUR := 4.0
+const VENT_RAIDEUR := 6.0
+const ELAN_AMORTI_AIR := 1.2
+const ELAN_AMORTI_SOL := 6.0
+var volant := false
+var _aspiration := Vector2.ZERO
+var _vent := Vector2.ZERO
+var _elan := Vector2.ZERO           # l'élan du vent (un marcheur n'en garde que la largeur)
+var _pousse_ce_pas := false
+
+func aspirer(v: Vector2) -> void:
+	_aspiration += v
+
+
+func souffler(v: Vector2) -> void:
+	_vent += v
+
+
+## avant move_and_slide : les poussées s'ajoutent ; rend la vitesse d'avant elles
+func _poussees_appliquer(delta: float) -> Vector2:
+	var a := _aspiration
+	var w := _vent
+	_aspiration = Vector2.ZERO
+	_vent = Vector2.ZERO
+	_pousse_ce_pas = false
+	if w != Vector2.ZERO:
+		_elan.x = _vers_le_vent(_elan.x, w.x, delta)
+		if volant:
+			_elan.y = _vers_le_vent(_elan.y, w.y, delta)
+	elif _elan != Vector2.ZERO:
+		var au_sol := is_on_floor() and not volant
+		_elan.x = _elan_amortir(_elan.x, au_sol, delta)
+		_elan.y = _elan_amortir(_elan.y, au_sol, delta)
+	if a == Vector2.ZERO and w == Vector2.ZERO and _elan == Vector2.ZERO:
+		return velocity
+	var en_plus := a + _elan
+	if not volant:
+		velocity.y += a.y * POUSSEE_RAIDEUR * delta    # le trou noir : une accélération, elle reste
+		velocity.y = _vers_le_vent(velocity.y, w.y, delta)
+		en_plus.y = 0.0
+	var v_etat := velocity
+	velocity += en_plus
+	_pousse_ce_pas = true
+	return v_etat
+
+
+## vers la vitesse du vent `vent` (sur un axe) : on y est entraîné d'autant
+## plus vite qu'il est fort (un souffle faible ne vainc pas la gravité), mais il
+## ne freine jamais ce qui file déjà plus vite que lui dans son sens
+func _vers_le_vent(v: float, vent: float, delta: float) -> float:
+	if absf(vent) < 1.0:
+		return v
+	var n := v + vent * VENT_RAIDEUR * delta
+	if vent < 0.0:
+		return maxf(n, minf(v, vent))
+	return minf(n, maxf(v, vent))
+
+
+## l'élan du vent, hors du courant : il retombe vite au sol, lentement en l'air
+func _elan_amortir(e: float, au_sol: bool, delta: float) -> float:
+	var amorti := ELAN_AMORTI_SOL if au_sol else ELAN_AMORTI_AIR
+	e = move_toward(e, 0.0, (absf(e) * amorti + 20.0) * delta)
+	return e if absf(e) > 5.0 else 0.0
+
+
+## après move_and_slide : la vitesse d'avant les poussées revient, moins ce que
+## le sol, un mur ou le plafond a arrêté pendant le pas
+func _poussees_rendre(v_etat: Vector2) -> void:
+	if not _pousse_ce_pas:
+		return
+	for i in get_slide_collision_count():
+		var n := get_slide_collision(i).get_normal()
+		var d := v_etat.dot(n)
+		if d < 0.0:
+			v_etat -= n * d
+		# l'élan du vent s'écrase sur ce qu'il percute de face (pas sur le sol
+		# qu'il longe : sa normale garde une poussière de largeur, ~1e-8)
+		if n.dot(_elan) < -0.5 * _elan.length():
+			_elan -= n * n.dot(_elan)
+	velocity = v_etat
 
 
 ## Décroissance du knockback ; à la fin, on purge la vitesse résiduelle

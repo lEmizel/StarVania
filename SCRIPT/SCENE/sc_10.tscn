@@ -41,25 +41,16 @@ script = ExtResource("1_b1u0x")
 z_index = 1
 position = Vector2(3964, -1360)
 portee_indicative = 700.0
-pince_visible = null
-echelle_pince = null
-apercu_pince_ouverte = null
 
 [node name="AccrocheGrappin2" parent="interactible" unique_id=736104020 instance=ExtResource("8_xj2qt")]
 z_index = 1
 position = Vector2(125, -2128)
 portee_indicative = 700.0
-pince_visible = null
-echelle_pince = null
-apercu_pince_ouverte = null
 
 [node name="AccrocheGrappin3" parent="interactible" unique_id=2136515137 instance=ExtResource("8_xj2qt")]
 z_index = 1
 position = Vector2(-615, -3053)
 portee_indicative = 700.0
-pince_visible = null
-echelle_pince = null
-apercu_pince_ouverte = null
 
 [node name="piques 400x200" parent="interactible" unique_id=1466333129 instance=ExtResource("3_xsdbu")]
 position = Vector2(1299, 25)
@@ -100,7 +91,7 @@ position = Vector2(2395.5, -3663)
 
 [node name="SAWBLADE" parent="interactible" unique_id=388117046 instance=ExtResource("6_5ylk2")]
 position = Vector2(1466, -999)
-frame_progress = 0.76990294
+frame_progress = 0.8588401
 position_a = Vector2(1466, -999)
 position_b = Vector2(1466, -2128)
 

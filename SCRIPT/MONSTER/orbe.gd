@@ -23,6 +23,7 @@ func _setup_states() -> void:
 	_register_states(States)
 
 func _start() -> void:
+	volant = true               # le trou noir l'emporte aussi en hauteur
 	max_hp = 230
 	hp = 230
 	max_tracking_distance = tracking_distance

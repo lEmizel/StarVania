@@ -1,0 +1,26 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://SCRIPT/INTERACTIBLE/trou_noir.gd" id="1_tn"]
+[ext_resource type="Shader" path="res://SCRIPT/SHADER/trou_noir.gdshader" id="2_tn"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_tn"]
+resource_local_to_scene = true
+shader = ExtResource("2_tn")
+
+[node name="TrouNoir" type="Node2D"]
+z_index = -1
+script = ExtResource("1_tn")
+
+[node name="Copie" type="BackBufferCopy" parent="."]
+copy_mode = 2
+
+[node name="Trou" type="ColorRect" parent="."]
+material = SubResource("ShaderMaterial_tn")
+offset_left = -550.0
+offset_top = -550.0
+offset_right = 550.0
+offset_bottom = 550.0
+mouse_filter = 2
+
+[node name="Ecran" type="VisibleOnScreenNotifier2D" parent="."]
+rect = Rect2(-110, -110, 220, 220)

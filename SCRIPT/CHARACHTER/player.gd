@@ -606,7 +606,9 @@ func _physics_process(delta: float) -> void:
 	_trainee_tick()          # la traînée du dash / de la roulade (avant de bouger)
 	_sillage_tick()          # le talisman « sillage de sang » (même moment)
 	_coeur_noir_tick(delta)  # le talisman « cœur noir » : il revient
+	var v_etat := _poussees_appliquer(delta)
 	move_and_slide()
+	_poussees_rendre(v_etat)      # trou noir, vent : notre vitesse nous revient
 	# le câble du grappin se trace APRÈS le déplacement (sinon il part de la
 	# main du pas précédent et dépasse du bras, voir _grappin_tracer_cable)
 	if current_state == States.GRAPPIN:
@@ -640,6 +642,97 @@ func _physics_process(delta: float) -> void:
 	# INÉBRANLABLE : la grâce qui suit un coup encaissé sans vaciller
 	_inebranlable_reste = maxf(_inebranlable_reste - delta, 0.0)
 	_grappin_scanner()
+
+
+# ---------------------------------------------------------------------------
+# LES FORCES DES PIÈGES (2 oct. 2026) : le TROU NOIR nous aspire (`aspirer`),
+# le VENT nous pousse (`souffler`). Chacun redonne À CHAQUE IMAGE la vitesse
+# qu'il nous impose là où on est (px/s) :
+#   • le trou noir : en largeur, sa vitesse s'AJOUTE à la nôtre le temps du
+#     pas, puis elle est retirée (notre course la combat : le héros court à
+#     700 px/s) ; en hauteur, c'est une ACCÉLÉRATION comme la gravité (×4) :
+#     debout dessous, on ne décolle que s'il tire plus fort qu'elle ;
+#   • le vent nous donne de l'ÉLAN : il nous entraîne vers sa vitesse (×6, en
+#     un rien de temps), et cet élan CONTINUE après le courant — en l'air on
+#     file loin (Kaoru : « faut que ça nous envoie bien plus loin, et plus
+#     fort »), au sol on glisse un peu ; un mur l'arrête net.
+# Agrippé (échelle, corde, rebord, mur, grappin), on tient bon ; mort, plus rien.
+const POUSSEE_RAIDEUR := 4.0        # le trou noir en hauteur : sa vitesse ×4, en px/s²
+const VENT_RAIDEUR := 6.0           # le vent : sa vitesse ×6, en px/s²
+const ELAN_AMORTI_AIR := 1.2        # l'élan du vent retombe de tant par seconde, en l'air…
+const ELAN_AMORTI_SOL := 6.0        # … et au sol
+var _aspiration := Vector2.ZERO
+var _vent := Vector2.ZERO
+var _elan_x := 0.0                  # l'élan du vent en largeur (en hauteur, il vit dans velocity)
+var _pousse_ce_pas := false
+
+func aspirer(v: Vector2) -> void:
+	_aspiration += v
+
+
+func souffler(v: Vector2) -> void:
+	_vent += v
+
+
+## avant move_and_slide : les poussées s'ajoutent ; rend la vitesse d'avant elles
+func _poussees_appliquer(delta: float) -> Vector2:
+	var a := _aspiration
+	var w := _vent
+	_aspiration = Vector2.ZERO
+	_vent = Vector2.ZERO
+	_pousse_ce_pas = false
+	if current_state in [States.DEAD, States.ECHELLE, States.CORDE, States.GRAB, States.CLIMB,
+			States.GRAPPIN, States.WALL_GRIFFE]:
+		_elan_x = 0.0
+		return velocity
+	if absf(w.x) > 1.0:
+		_elan_x = _vers_le_vent(_elan_x, w.x, delta)
+	elif _elan_x != 0.0:
+		_elan_x = _elan_amortir(_elan_x, is_on_floor(), delta)
+	if a == Vector2.ZERO and w == Vector2.ZERO and _elan_x == 0.0:
+		return velocity
+	velocity.y += a.y * POUSSEE_RAIDEUR * delta       # le trou noir : une accélération, elle reste
+	velocity.y = _vers_le_vent(velocity.y, w.y, delta)
+	var v_etat := velocity
+	velocity.x += a.x + _elan_x
+	_pousse_ce_pas = true
+	return v_etat
+
+
+## vers la vitesse du vent `vent` (sur un axe) : on y est entraîné d'autant
+## plus vite qu'il est fort (un souffle faible ne vainc pas la gravité), mais il
+## ne freine jamais ce qui file déjà plus vite que lui dans son sens
+func _vers_le_vent(v: float, vent: float, delta: float) -> float:
+	if absf(vent) < 1.0:
+		return v
+	var n := v + vent * VENT_RAIDEUR * delta
+	if vent < 0.0:
+		return maxf(n, minf(v, vent))
+	return minf(n, maxf(v, vent))
+
+
+## l'élan du vent, hors du courant : il retombe vite au sol, lentement en l'air
+func _elan_amortir(e: float, au_sol: bool, delta: float) -> float:
+	var amorti := ELAN_AMORTI_SOL if au_sol else ELAN_AMORTI_AIR
+	e = move_toward(e, 0.0, (absf(e) * amorti + 20.0) * delta)
+	return e if absf(e) > 5.0 else 0.0
+
+
+## après move_and_slide : la vitesse d'avant les poussées revient, moins ce que
+## le sol, un mur ou le plafond a arrêté pendant le pas
+func _poussees_rendre(v_etat: Vector2) -> void:
+	if not _pousse_ce_pas:
+		return
+	for i in get_slide_collision_count():
+		var n := get_slide_collision(i).get_normal()
+		var d := v_etat.dot(n)
+		if d < 0.0:
+			v_etat -= n * d
+		# l'élan du vent s'écrase sur un MUR (pas sur le sol : sa normale garde
+		# une poussière de largeur, ~1e-8, qui le remettait à zéro à chaque image)
+		if n.x * signf(_elan_x) < -0.5:
+			_elan_x = 0.0
+	velocity = v_etat
 
 
 var _knock := Vector2.ZERO

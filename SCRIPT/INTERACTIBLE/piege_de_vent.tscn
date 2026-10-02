@@ -1,0 +1,53 @@
+[gd_scene format=3 uid="uid://cgw2ktpsnqwe2"]
+
+[ext_resource type="PackedScene" uid="uid://c1t2vi32cjp0d" path="res://SCRIPT/grayboxing/200x50.tscn" id="1_75nol"]
+[ext_resource type="Script" uid="uid://b75ml6cet5mm6" path="res://SCRIPT/INTERACTIBLE/piege_de_vent.gd" id="2_vent"]
+[ext_resource type="Shader" uid="uid://o4oo7yagw2pl" path="res://SCRIPT/SHADER/vent.gdshader" id="3_vent"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_vent"]
+resource_local_to_scene = true
+shader = ExtResource("3_vent")
+shader_parameter/taille = Vector2(430, 1080)
+shader_parameter/bouche = Vector2(215, 1060)
+shader_parameter/largeur = 200.0
+shader_parameter/portee = 1000.0
+shader_parameter/puissance = 0.6137422222302386
+shader_parameter/defilement = 48160.46487862433
+shader_parameter/rafale = 10.0
+shader_parameter/temps = 68.11587733333093
+shader_parameter/graine = 27.60404348373413
+shader_parameter/evasement = 0.55
+shader_parameter/nb_filets = 20
+shader_parameter/longueur_filets = 200.0
+shader_parameter/epaisseur = 3.0
+shader_parameter/ondulation = 9.0
+shader_parameter/anneaux = 1.0
+shader_parameter/nb_rubans = 3
+shader_parameter/opacite_rubans = 0.45
+shader_parameter/nb_volutes = 0
+shader_parameter/couleur = Color(1, 1, 1, 0.9)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_zone"]
+resource_local_to_scene = true
+size = Vector2(346, 1060)
+
+[node name="piege de vent" unique_id=436297158 instance=ExtResource("1_75nol")]
+script = ExtResource("2_vent")
+portee = 1000.0
+monstres_l_evitent = true
+
+[node name="Vent" type="ColorRect" parent="." index="1" unique_id=1713240048]
+material = SubResource("ShaderMaterial_vent")
+offset_left = -215.0
+offset_top = -1085.0
+offset_right = 215.0
+offset_bottom = -5.0
+mouse_filter = 2
+
+[node name="Zone" type="Area2D" parent="." index="2" unique_id=2003739379]
+collision_layer = 0
+collision_mask = 11
+
+[node name="Forme" type="CollisionShape2D" parent="Zone" index="0" unique_id=853287248]
+position = Vector2(0, -525)
+shape = SubResource("RectangleShape2D_zone")
