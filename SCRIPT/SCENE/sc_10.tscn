@@ -21,6 +21,8 @@
 [ext_resource type="Shader" uid="uid://jblop3f3vfan" path="res://SCRIPT/SHADER/flou_fond.gdshader" id="17_vw2kw"]
 [ext_resource type="Texture2D" uid="uid://x774gue4he8e" path="res://MEDIA/scene 6/background/background.png" id="18_v7ylp"]
 [ext_resource type="Texture2D" uid="uid://bnx8i3kgl6iic" path="res://MEDIA/scene 6/background/colonne.png" id="19_6t8y0"]
+[ext_resource type="PackedScene" path="res://SCRIPT/INTERACTIBLE/sceau_runes.tscn" id="22_6t8y0"]
+[ext_resource type="PackedScene" path="res://SCRIPT/INTERACTIBLE/pilier_foudre.tscn" id="23_ubcjy"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_ubcjy"]
 shader = ExtResource("17_vw2kw")
@@ -39,16 +41,25 @@ script = ExtResource("1_b1u0x")
 z_index = 1
 position = Vector2(3964, -1360)
 portee_indicative = 700.0
+pince_visible = null
+echelle_pince = null
+apercu_pince_ouverte = null
 
 [node name="AccrocheGrappin2" parent="interactible" unique_id=736104020 instance=ExtResource("8_xj2qt")]
 z_index = 1
 position = Vector2(125, -2128)
 portee_indicative = 700.0
+pince_visible = null
+echelle_pince = null
+apercu_pince_ouverte = null
 
 [node name="AccrocheGrappin3" parent="interactible" unique_id=2136515137 instance=ExtResource("8_xj2qt")]
 z_index = 1
 position = Vector2(-615, -3053)
 portee_indicative = 700.0
+pince_visible = null
+echelle_pince = null
+apercu_pince_ouverte = null
 
 [node name="piques 400x200" parent="interactible" unique_id=1466333129 instance=ExtResource("3_xsdbu")]
 position = Vector2(1299, 25)
@@ -89,7 +100,7 @@ position = Vector2(2395.5, -3663)
 
 [node name="SAWBLADE" parent="interactible" unique_id=388117046 instance=ExtResource("6_5ylk2")]
 position = Vector2(1466, -999)
-frame_progress = 0.3028997
+frame_progress = 0.76990294
 position_a = Vector2(1466, -999)
 position_b = Vector2(1466, -2128)
 
@@ -455,3 +466,22 @@ script = ExtResource("16_1q33d")
 export_path = "res://sc_10.png"
 bg_color = Color(0.101960786, 0.101960786, 0.101960786, 0)
 margin = 50
+
+[node name="SceauRunes" parent="." unique_id=741593412 instance=ExtResource("22_6t8y0")]
+z_index = 1
+position = Vector2(450, 6)
+
+[node name="SceauRunes2" parent="." unique_id=802614743 instance=ExtResource("22_6t8y0")]
+position = Vector2(589, 4)
+
+[node name="PilierFoudre" parent="." unique_id=1542801124 instance=ExtResource("23_ubcjy")]
+position = Vector2(761, 1)
+
+[node name="PilierFoudre2" parent="." unique_id=1055213777 instance=ExtResource("23_ubcjy")]
+position = Vector2(2306, -27)
+
+[node name="PilierFoudre3" parent="." unique_id=1594706487 instance=ExtResource("23_ubcjy")]
+position = Vector2(4062, -717)
+
+[node name="PilierFoudre4" parent="." unique_id=955657252 instance=ExtResource("23_ubcjy")]
+position = Vector2(2529, -1500)

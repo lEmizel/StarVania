@@ -1,0 +1,20 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://SCRIPT/SHADER/foudre_ciel.gd" id="1_fc"]
+[ext_resource type="Shader" path="res://SCRIPT/SHADER/foudre_ciel.gdshader" id="2_fc"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_fc"]
+resource_local_to_scene = true
+shader = ExtResource("2_fc")
+
+[node name="FoudreCiel" type="Node2D"]
+z_index = 3
+script = ExtResource("1_fc")
+
+[node name="Foudre" type="ColorRect" parent="."]
+material = SubResource("ShaderMaterial_fc")
+offset_left = -195.0
+offset_top = -720.0
+offset_right = 195.0
+offset_bottom = 40.0
+mouse_filter = 2
