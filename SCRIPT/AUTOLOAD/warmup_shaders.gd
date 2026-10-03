@@ -118,6 +118,8 @@ const SHADERS: Array[String] = [
 	"res://SCRIPT/SHADER/plumes_envolees.gdshader",  # souffle et plumes que le coup d'aile laisse sur place
 	"res://SCRIPT/SHADER/plume_planee.gdshader",     # plume que l'aile de plané perd en route (1er oct. 2026)
 	"res://SCRIPT/SHADER/griffure_xeno.gdshader",    # coups de griffes du xeno (sept. 2026)
+	"res://SCRIPT/SHADER/cri_rond_traits.gdshader",  # cri du loup-garou : les ronds tracés au pinceau (3 oct. 2026)
+	"res://SCRIPT/SHADER/cri_rond_lentille.gdshader", # cri du loup-garou : le décor qui ondule au passage des ondes
 	"res://SCRIPT/SHADER/slash_heros.gdshader",      # le slash des attaques du héros, refait d'après ses dessins (sept. 2026)
 	"res://SCRIPT/SHADER/arc_foudre.gdshader",       # l'éclair qui bondit d'un ennemi à l'autre (talisman lame de foudre, sept. 2026)
 	"res://SCRIPT/TALISMAN/dessin_foudre.gdshader",  # le médaillon du talisman lame de foudre (menu START)

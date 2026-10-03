@@ -1,12 +1,11 @@
 @tool
 extends Node2D
 ## ============================================================================
-## LANCEUR DE BOULES DE FEU (2 oct. 2026, demande de Kaoru : « autant faire un
-## lanceur de boules de feu, en plus on en a déjà une ») — un canon de fer scellé
-## dans le mur, qui tire LA boule de feu du squelette bleu
-## (SCRIPT/SPELL/projectile_feu.tscn) à intervalle régulier, droit devant lui.
+## LANCEUR DE BOULES DE FEU — un canon scellé dans le mur, qui tire LA boule de
+## feu du squelette bleu (SCRIPT/SPELL/projectile_feu.tscn) à intervalle
+## régulier, droit devant lui.
 ##   • AVERTI : `duree_charge` avant le tir, la boule enfle dans sa bouche et le
-##     fer rougit (le même geste que la main du squelette bleu) ;
+##     bout du canon rougit (le même geste que la main du squelette bleu) ;
 ##   • la boule file droit, explose sur le premier mur, blesse le joueur
 ##     (`damage`, comme un coup de monstre : esquive, bouclier… comptent ; les
 ##     Gardiennes l'arrêtent) et tue les monstres (`degats_monstres`) : elle n'a
@@ -19,7 +18,10 @@ extends Node2D
 ## Il tire vers sa DROITE : le TOURNER (rotation) pour tirer vers le haut, le bas
 ## ou en biais, `scale.x = -1` pour tirer vers la gauche. Son ORIGINE se pose SUR
 ## LA SURFACE DU MUR ; la boule naît devant sa bouche, à 70 px du mur.
-## Dessin : SCRIPT/SHADER/lanceur_feu.gdshader (nœud Lanceur).
+## Dessin : deux pièces, pour que le canon recule dans son socle au tir :
+## MEDIA/INTERACTIBLE/base canon.png et
+## canon.png, posés et animés par SCRIPT/SHADER/lanceur_feu.gdshader (nœud
+## Lanceur ; la scène lui donne les deux images). Sa bouche est à 62 px du mur.
 ## @tool : dans l'éditeur, des pointillés montrent où il tire.
 ## POUR LA JUGER : ouvrir la scène et faire F6 (il tire sur un mur de démo).
 ## ============================================================================

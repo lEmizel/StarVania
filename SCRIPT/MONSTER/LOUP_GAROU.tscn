@@ -1,0 +1,224 @@
+[gd_scene format=3 uid="uid://dokxn6rjr6sc6"]
+
+[ext_resource type="Script" uid="uid://duhq25qmjhg05" path="res://SCRIPT/MONSTER/loup_garou.gd" id="1_snpt3"]
+[ext_resource type="PackedScene" uid="uid://c8y35es6jse5x" path="res://SCRIPT/MENU/heatle_bare_monster.tscn" id="2_tdk20"]
+[ext_resource type="Texture2D" uid="uid://dk3lpmubjt5oy" path="res://MEDIA/MONSTER/LOUP_GAROU/Death/Werewolf_death-1.png" id="9_41a8h"]
+[ext_resource type="Texture2D" uid="uid://vvx788jvuuc5" path="res://MEDIA/MONSTER/LOUP_GAROU/Cri/Werewolf_cri-1.png" id="9_gi154"]
+[ext_resource type="Texture2D" uid="uid://d2wayj7le4rsd" path="res://MEDIA/MONSTER/LOUP_GAROU/Cri/Werewolf_cri-2.png" id="10_4mioj"]
+[ext_resource type="Texture2D" uid="uid://dxrwhdb3g7qc4" path="res://MEDIA/MONSTER/LOUP_GAROU/Death/Werewolf_death-2.png" id="10_hj6aa"]
+[ext_resource type="Texture2D" uid="uid://b3nba1yllaov2" path="res://MEDIA/MONSTER/LOUP_GAROU/Cri/Werewolf_cri-3.png" id="11_fggpq"]
+[ext_resource type="Texture2D" uid="uid://dpxvgru50pjkw" path="res://MEDIA/MONSTER/LOUP_GAROU/Death/Werewolf_death-3.png" id="11_xcj31"]
+[ext_resource type="Texture2D" uid="uid://dmjklxqxj7vac" path="res://MEDIA/MONSTER/LOUP_GAROU/Cri/Werewolf_cri-4.png" id="12_jqdx4"]
+[ext_resource type="Texture2D" uid="uid://bx5vxulnffep1" path="res://MEDIA/MONSTER/LOUP_GAROU/Death/Werewolf_death-4.png" id="12_pf32r"]
+[ext_resource type="Texture2D" uid="uid://csfxetqt0roj8" path="res://MEDIA/MONSTER/LOUP_GAROU/Cri/Werewolf_cri-5.png" id="13_tdk20"]
+[ext_resource type="Texture2D" uid="uid://d16lh1x1wuk4n" path="res://MEDIA/MONSTER/LOUP_GAROU/Death/Werewolf_death-5.png" id="13_wbu5p"]
+[ext_resource type="Texture2D" uid="uid://gn1gxp23gfo5" path="res://MEDIA/MONSTER/LOUP_GAROU/Death/Werewolf_death-6.png" id="14_ghp1k"]
+[ext_resource type="Texture2D" uid="uid://bxxfr3knlwiox" path="res://MEDIA/MONSTER/LOUP_GAROU/Cri/Werewolf_cri-6.png" id="14_rd6d5"]
+[ext_resource type="Texture2D" uid="uid://buc85gsf1v7vc" path="res://MEDIA/MONSTER/LOUP_GAROU/Death/Werewolf_death-7.png" id="15_1v61l"]
+[ext_resource type="Texture2D" uid="uid://droyhaolnhow1" path="res://MEDIA/MONSTER/LOUP_GAROU/Cri/Werewolf_cri-7.png" id="15_f447c"]
+[ext_resource type="Texture2D" uid="uid://dm76n2fd1wf2b" path="res://MEDIA/MONSTER/LOUP_GAROU/Death/Werewolf_death-8.png" id="16_tou4a"]
+[ext_resource type="Texture2D" uid="uid://dj45vqr5gddhr" path="res://MEDIA/MONSTER/LOUP_GAROU/Death/Werewolf_death-9.png" id="17_snpt3"]
+[ext_resource type="Texture2D" uid="uid://ctc1qspb0eij1" path="res://MEDIA/MONSTER/LOUP_GAROU/Death/Werewolf_death-10.png" id="18_at8j8"]
+[ext_resource type="Texture2D" uid="uid://trrqgs07eord" path="res://MEDIA/MONSTER/LOUP_GAROU/Idle/Werewolf_idle-1.png" id="19_qrjce"]
+[ext_resource type="Texture2D" uid="uid://d18pb5t13boyc" path="res://MEDIA/MONSTER/LOUP_GAROU/Idle/Werewolf_idle-2.png" id="20_f2my2"]
+[ext_resource type="Texture2D" uid="uid://cabv2e8ockfw7" path="res://MEDIA/MONSTER/LOUP_GAROU/Idle/Werewolf_idle-3.png" id="21_gd6d2"]
+[ext_resource type="Texture2D" uid="uid://dl4ityxnx33lb" path="res://MEDIA/MONSTER/LOUP_GAROU/Idle/Werewolf_idle-4.png" id="22_smpha"]
+[ext_resource type="Texture2D" uid="uid://cnoh2d5w7apid" path="res://MEDIA/MONSTER/LOUP_GAROU/Idle/Werewolf_idle-5.png" id="23_my21s"]
+[ext_resource type="Texture2D" uid="uid://03d8v55n6jnb" path="res://MEDIA/MONSTER/LOUP_GAROU/Walk/Werewolf_walk-1.png" id="31_ss2c0"]
+[ext_resource type="Texture2D" uid="uid://bij64fiyxda54" path="res://MEDIA/MONSTER/LOUP_GAROU/Walk/Werewolf_walk-2.png" id="32_i6nf5"]
+[ext_resource type="Texture2D" uid="uid://c47hvg15532m7" path="res://MEDIA/MONSTER/LOUP_GAROU/Walk/Werewolf_walk-3.png" id="33_kvb3f"]
+[ext_resource type="Texture2D" uid="uid://bhqxmgrgsvya6" path="res://MEDIA/MONSTER/LOUP_GAROU/Walk/Werewolf_walk-4.png" id="34_yvpw4"]
+[ext_resource type="Texture2D" uid="uid://cwfwaa7e6t5hf" path="res://MEDIA/MONSTER/LOUP_GAROU/Walk/Werewolf_walk-5.png" id="35_kbegs"]
+[ext_resource type="Texture2D" uid="uid://cjm80bb7yb4mx" path="res://MEDIA/MONSTER/LOUP_GAROU/Walk/Werewolf_walk-6.png" id="36_04u87"]
+[ext_resource type="Texture2D" uid="uid://cccqde1kuaac4" path="res://MEDIA/MONSTER/LOUP_GAROU/Walk/Werewolf_walk-7.png" id="37_a1k5v"]
+[ext_resource type="Texture2D" uid="uid://cfxt040xk1aef" path="res://MEDIA/MONSTER/LOUP_GAROU/Walk/Werewolf_walk-8.png" id="38_2a4gh"]
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_7joub"]
+radius = 59.0
+height = 346.0
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_dnpf1"]
+animations = [{
+"frames": [],
+"loop": 0,
+"name": &"attack",
+"speed": 12.0
+}, {
+"frames": [{
+"duration": 1.4,
+"texture": ExtResource("9_gi154")
+}, {
+"duration": 1.5,
+"texture": ExtResource("10_4mioj")
+}, {
+"duration": 1.5,
+"texture": ExtResource("11_fggpq")
+}, {
+"duration": 1.0,
+"texture": ExtResource("12_jqdx4")
+}, {
+"duration": 1.0,
+"texture": ExtResource("13_tdk20")
+}, {
+"duration": 1.0,
+"texture": ExtResource("13_tdk20")
+}, {
+"duration": 1.0,
+"texture": ExtResource("14_rd6d5")
+}, {
+"duration": 1.0,
+"texture": ExtResource("14_rd6d5")
+}, {
+"duration": 1.0,
+"texture": ExtResource("14_rd6d5")
+}, {
+"duration": 1.0,
+"texture": ExtResource("13_tdk20")
+}, {
+"duration": 1.0,
+"texture": ExtResource("14_rd6d5")
+}, {
+"duration": 1.0,
+"texture": ExtResource("13_tdk20")
+}, {
+"duration": 1.0,
+"texture": ExtResource("15_f447c")
+}],
+"loop": 0,
+"name": &"attack_cri",
+"speed": 8.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("9_41a8h")
+}, {
+"duration": 1.0,
+"texture": ExtResource("10_hj6aa")
+}, {
+"duration": 1.0,
+"texture": ExtResource("11_xcj31")
+}, {
+"duration": 1.0,
+"texture": ExtResource("12_pf32r")
+}, {
+"duration": 1.0,
+"texture": ExtResource("13_wbu5p")
+}, {
+"duration": 1.0,
+"texture": ExtResource("14_ghp1k")
+}, {
+"duration": 1.0,
+"texture": ExtResource("15_1v61l")
+}, {
+"duration": 1.0,
+"texture": ExtResource("16_tou4a")
+}, {
+"duration": 1.0,
+"texture": ExtResource("17_snpt3")
+}, {
+"duration": 1.0,
+"texture": ExtResource("18_at8j8")
+}],
+"loop": 0,
+"name": &"dead",
+"speed": 10.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("19_qrjce")
+}, {
+"duration": 1.0,
+"texture": ExtResource("20_f2my2")
+}, {
+"duration": 1.0,
+"texture": ExtResource("21_gd6d2")
+}, {
+"duration": 1.0,
+"texture": ExtResource("22_smpha")
+}, {
+"duration": 1.0,
+"texture": ExtResource("23_my21s")
+}],
+"loop": 1,
+"name": &"idle",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("31_ss2c0")
+}, {
+"duration": 1.0,
+"texture": ExtResource("32_i6nf5")
+}, {
+"duration": 1.0,
+"texture": ExtResource("33_kvb3f")
+}, {
+"duration": 1.0,
+"texture": ExtResource("34_yvpw4")
+}, {
+"duration": 1.0,
+"texture": ExtResource("35_kbegs")
+}, {
+"duration": 1.0,
+"texture": ExtResource("36_04u87")
+}, {
+"duration": 1.0,
+"texture": ExtResource("37_a1k5v")
+}, {
+"duration": 1.0,
+"texture": ExtResource("38_2a4gh")
+}],
+"loop": 1,
+"name": &"walk",
+"speed": 7.0
+}]
+
+[node name="loup_garou_elite" type="CharacterBody2D" unique_id=627255339]
+light_mask = 0
+collision_layer = 8
+collision_mask = 6
+script = ExtResource("1_snpt3")
+
+[node name="detection_vide" type="RayCast2D" parent="." unique_id=1615218782]
+position = Vector2(89, -12)
+target_position = Vector2(1, 98)
+
+[node name="bare_de_vie" parent="." unique_id=1882929594 instance=ExtResource("2_tdk20")]
+light_mask = 0
+position = Vector2(-116, -319)
+scale = Vector2(0.525, 0.525)
+
+[node name="Collision" type="CollisionShape2D" parent="." unique_id=287775973]
+visible = false
+position = Vector2(-1, -172)
+shape = SubResource("CapsuleShape2D_7joub")
+
+[node name="POINT" type="Node2D" parent="." unique_id=1327697225]
+
+[node name="ancreFX_" type="Node2D" parent="POINT" unique_id=801358600]
+position = Vector2(118, -22)
+rotation = 3.1415927
+scale = Vector2(1, -1)
+
+[node name="animator" type="AnimatedSprite2D" parent="POINT" unique_id=1673337624]
+light_mask = 0
+texture_filter = 1
+position = Vector2(-25, -109)
+sprite_frames = SubResource("SpriteFrames_dnpf1")
+animation = &"attack_cri"
+
+[node name="vision" type="Area2D" parent="POINT" unique_id=1946126189]
+visible = false
+position = Vector2(-27, -93)
+
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="POINT/vision" unique_id=1685665169]
+position = Vector2(80, -2)
+polygon = PackedVector2Array(-44, -244, 443, -299, 449, 96, -47, 25)
+
+[node name="collision_attack" type="Area2D" parent="POINT" unique_id=371815366]
+visible = false
+
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="POINT/collision_attack" unique_id=74740681]
+position = Vector2(159, -289)
+polygon = PackedVector2Array(43, -181, 159, -167, 224, 14, 227, 268, 124, 283, -103, 279, -107, 2, -18, -57, -20, -89, -43, -106, -83, -100, -135, -148, -74, -178)
+disabled = true
