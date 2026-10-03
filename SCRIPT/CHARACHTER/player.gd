@@ -1839,6 +1839,30 @@ func _raycast_hits_wall(rc: RayCast2D) -> bool:
 	return col is StaticBody2D
 
 
+## Y a-t-il du mur à hauteur de la MAIN et du PIED, du côté `cote` (+1 droite,
+## −1 gauche) ? L'accroche murale l'exige (3 oct. 2026, Kaoru, photo à l'appui :
+## « que les wall jumps ne permettent plus de voler comme ça dans le vide sur le
+## haut des murs, ou simplement sur les plateformes trop petites pour un wall
+## jump »). Le rayon de mur (`wall_right`) ne regarde qu'à MI-CORPS : on
+## s'accrochait la tête et la main au-dessus du haut d'un mur, ou sur le flanc
+## d'une plateforme plus petite que le héros. Dans la pose d'accroche, la main
+## est posée au mur vers `WALL_HAUTEUR_MAIN` et le pied vers `WALL_HAUTEUR_PIED` :
+## s'il manque du mur à l'une des deux, pas d'accroche.
+func _mur_couvre_le_corps(cote: float) -> bool:
+	if cote == 0.0:
+		return false
+	var espace := get_world_2d().direct_space_state
+	for hauteur in [WALL_HAUTEUR_MAIN, WALL_HAUTEUR_PIED]:
+		var depart := global_position + Vector2(0.0, -hauteur)
+		var rayon := PhysicsRayQueryParameters2D.create(
+			depart, depart + Vector2(signf(cote) * WALL_PORTEE_CORPS, 0.0), wall_right.collision_mask)
+		rayon.exclude = [get_rid()]
+		var touche := espace.intersect_ray(rayon)
+		if touche.is_empty() or not (touche["collider"] is StaticBody2D):
+			return false
+	return true
+
+
 func _raycast_hits_group(rc: RayCast2D, group_name: String, body_only := false) -> bool:
 	# AMÉLIORATION: note — cette fonction peut faire plusieurs force_raycast_update
 	# par appel si des colliders sont empilés. Surveiller les perfs si besoin.
@@ -2508,7 +2532,7 @@ func chute_execute(delta: float) -> void:
 		change_state(States.GRAB)
 		return
 
-	if _raycast_hits_wall(wall_right):
+	if _raycast_hits_wall(wall_right) and _mur_couvre_le_corps(point.scale.x):
 		change_state(States.WALL_JUMP)
 		return
 
@@ -2723,6 +2747,17 @@ func _griffe_lacher() -> void:
 ## consommer le double saut) : évite que le spam du bouton transforme chaque
 ## saut mural en double saut vertical collé au mur
 @export var WALL_JUMP_DJ_GRACE: float = 0.15
+## Hauteur de la MAIN posée au mur dans la pose d'accroche (px au-dessus des
+## pieds, mesurée sur l'image wall_jump). Le mur doit monter au moins
+## jusque-là : pas d'accroche la main au-dessus du haut d'un mur.
+@export var WALL_HAUTEUR_MAIN: float = 142.0
+## Hauteur du PIED posé au mur (px au-dessus des pieds). Le mur doit descendre
+## au moins jusque-là. Avec la main, ça fait 134 px de mur au minimum : le
+## flanc d'une plateforme plus petite n'accroche pas.
+@export var WALL_HAUTEUR_PIED: float = 8.0
+## Jusqu'où on cherche le mur depuis l'axe du corps (px ; le corps fait 23 px
+## de demi-largeur)
+@export var WALL_PORTEE_CORPS: float = 46.0
 
 
 ## De quel côté est le mur ? +1 droite, -1 gauche, 0 aucun.
@@ -2765,7 +2800,9 @@ func wall_jump_execute(_delta: float) -> void:
 	# l'un peut rater là où l'autre touche → clignotement CHUTE↔WALL_JUMP.
 	# Le test symétrique est insensible au flip et à leurs différences.
 	var on_wall := _raycast_hits_wall(wall_left) or _raycast_hits_wall(wall_right)
-	if not on_wall:
+	# … et il faut du mur sous la main et sous le pied (le mur est dans son dos) :
+	# arrivé au bas d'un mur, il le lâche au lieu de pendre dans le vide
+	if not on_wall or not _mur_couvre_le_corps(-last_direction):
 		change_state(States.CHUTE)
 		return
 	# Plaque le perso contre le mur (même technique que wall_griffe) :
@@ -3252,7 +3289,7 @@ func dash_execute(delta: float) -> void:
 
 	# percuter un mur interrompt le dash : accroche immédiate en glissade
 	# (raycast avant uniquement — l'arrière raccrocherait le mur qu'on quitte)
-	if _raycast_hits_wall(wall_right):
+	if _raycast_hits_wall(wall_right) and _mur_couvre_le_corps(last_direction):
 		change_state(States.WALL_JUMP)
 		return
 	if is_on_floor():
