@@ -592,7 +592,7 @@ func _physics_process(delta: float) -> void:
 	# Recharge du double saut + référence des dégâts de chute : au sol elle
 	# suit le perso ; en l'air elle garde le point le PLUS HAUT du vol —
 	# un double saut ne peut donc jamais effacer une chute accumulée
-	if is_on_floor():
+	if _au_sol():
 		_double_jump_used = false
 		_air_dash_used = false
 		FALL_POINT = global_position.y
@@ -608,6 +608,7 @@ func _physics_process(delta: float) -> void:
 	_coeur_noir_tick(delta)  # le talisman « cœur noir » : il revient
 	var v_etat := _poussees_appliquer(delta)
 	move_and_slide()
+	_faux_sol_tick()              # le moteur a-t-il pris un mur pour sol ?
 	_poussees_rendre(v_etat)      # trou noir, vent : notre vitesse nous revient
 	# le câble du grappin se trace APRÈS le déplacement (sinon il part de la
 	# main du pas précédent et dépasse du bras, voir _grappin_tracer_cable)
@@ -618,7 +619,7 @@ func _physics_process(delta: float) -> void:
 		_griffe_tracer()
 	_decay_knockback(delta)
 	# le dernier sol sûr : nos âmes y attendront si on meurt
-	if is_on_floor() and current_state != States.DEAD and current_state != States.HIT:
+	if _au_sol() and current_state != States.DEAD and current_state != States.HIT:
 		_au_sol_depuis += 1
 		if _au_sol_depuis >= SOL_SUR_IMAGES:
 			_dernier_sol_sur = global_position
@@ -1839,6 +1840,39 @@ func _raycast_hits_wall(rc: RayCast2D) -> bool:
 	return col is StaticBody2D
 
 
+## FAUX SOL (3 oct. 2026, Kaoru : « avec un bon timing je peux courir contre les
+## murs… ça commence toujours sur un coin de plateforme, puis je descends contre
+## la paroi en gardant l'état course »). Arrivé PILE sur le coin d'une
+## plateforme en allant vers elle (le bas arrondi du corps posé sur l'arête, les
+## pieds une douzaine de pixels sous le dessus), Godot le dit « au sol » une
+## image (l'arête fait une pente de moins de 60°), puis le contact devient celui
+## d'un mur… et le moteur le GARDE au sol : quand un corps qui était au sol
+## bute contre un mur (`floor_block_on_wall`), il le recolle au sol en acceptant
+## le MUR comme sol, vitesse remise à zéro, un peu plus bas à chaque image. Le
+## héros restait en COURSE en descendant tout le flanc (mesuré : 51 images).
+## On reconnaît ce faux sol à sa normale, qui est celle d'un mur (au-delà de
+## `floor_max_angle`), sans vrai sol sous les pieds (contre un mur, debout sur
+## un vrai sol, le moteur peut aussi rendre la normale du mur : ce n'est pas un
+## faux sol). Le temps qu'il dure, on coupe `floor_block_on_wall` : à l'image
+## suivante le moteur le lâche, et il tombe normalement.
+var _faux_sol := false
+
+func _faux_sol_tick() -> void:
+	var faux := false
+	var limite := floor_max_angle + 0.02
+	if is_on_floor() and absf(get_floor_normal().angle_to(Vector2.UP)) > limite:
+		var dessous := move_and_collide(Vector2.DOWN * (floor_snap_length + 2.0), true)
+		faux = dessous == null or absf(dessous.get_normal().angle_to(Vector2.UP)) > limite
+	if faux != _faux_sol:
+		floor_block_on_wall = not faux
+	_faux_sol = faux
+
+
+## au sol POUR DE BON : pas sur le faux sol d'un mur (voir _faux_sol_tick)
+func _au_sol() -> bool:
+	return is_on_floor() and not _faux_sol
+
+
 ## Y a-t-il du mur à hauteur de la MAIN et du PIED, du côté `cote` (+1 droite,
 ## −1 gauche) ? L'accroche murale l'exige (3 oct. 2026, Kaoru, photo à l'appui :
 ## « que les wall jumps ne permettent plus de voler comme ça dans le vide sur le
@@ -2032,7 +2066,7 @@ func idle_enter() -> void:
 
 func idle_execute(delta: float) -> void:
 	velocity.y += gravity * delta
-	if not is_on_floor():
+	if not _au_sol():
 		change_state(States.CHUTE)
 
 
@@ -2079,7 +2113,7 @@ func run_execute(delta: float) -> void:
 
 	velocity.y += gravity * delta
 
-	if not is_on_floor():
+	if not _au_sol():
 		goto_state(States.CHUTE)
 		return
 
@@ -2536,7 +2570,7 @@ func chute_execute(delta: float) -> void:
 		change_state(States.WALL_JUMP)
 		return
 
-	if is_on_floor():
+	if _au_sol():
 		_handle_landing()
 
 
