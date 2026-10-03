@@ -2,6 +2,29 @@
 
 [ext_resource type="Shader" uid="uid://b2jj2vbtrgfq6" path="res://SCRIPT/SHADER/flamme_cartoon.gdshader" id="1_vwnqj"]
 [ext_resource type="Texture2D" uid="uid://t17cpogdibvu" path="res://MEDIA/UTILITAIRE/light.png" id="2_mmocj"]
+[ext_resource type="Script" uid="uid://dq0ygtq3wxfpg" path="res://SCRIPT/INTERACTIBLE/flamme.gd" id="3_fl"]
+[ext_resource type="Shader" uid="uid://dp7og3gn8t1b8" path="res://SCRIPT/SHADER/halo_torche.gdshader" id="4_fl"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_halo"]
+resource_local_to_scene = true
+shader = ExtResource("4_fl")
+shader_parameter/taille = Vector2(120, 156)
+shader_parameter/centre = Vector2(60, 96)
+shader_parameter/rayon = 46.0
+shader_parameter/vacille = 0.5
+shader_parameter/force_disque = 0.2
+shader_parameter/force_lisere = 0.55
+shader_parameter/force_lueur = 0.12
+shader_parameter/images_trace = 12.0
+shader_parameter/tremble = 0.035
+shader_parameter/teinte = 0.7
+shader_parameter/epaisseur_lisere = 2.0
+shader_parameter/nb_braises = 5
+shader_parameter/source_braises = Vector2(60, 78)
+shader_parameter/montee_braises = 55.0
+shader_parameter/couleur = Color(1, 0.55, 0.16, 1)
+shader_parameter/couleur_lisere = Color(1, 0.68, 0.28, 1)
+shader_parameter/couleur_braise = Color(1, 0.74, 0.28, 1)
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_35hhg"]
 shader = ExtResource("1_vwnqj")
@@ -19,14 +42,24 @@ shader_parameter/middle_color = Color(1, 0.32, 0.01, 1)
 shader_parameter/inner_color = Color(1, 0.85, 0.15, 1)
 shader_parameter/core_color = Color(1, 1, 0.75, 1)
 
-[node name="Node2D" type="Node2D" unique_id=1766281021]
+[node name="flamme" type="Node2D" unique_id=1766281021]
+script = ExtResource("3_fl")
+
+[node name="Halo" type="ColorRect" parent="." unique_id=304457019]
+material = SubResource("ShaderMaterial_halo")
+offset_left = -73.0
+offset_top = -122.00001
+offset_right = 47.0
+offset_bottom = 33.999992
+scale = Vector2(1.2309151, 1.2309151)
+mouse_filter = 2
 
 [node name="ColorRect" type="ColorRect" parent="." unique_id=1564988201]
 material = SubResource("ShaderMaterial_35hhg")
-offset_left = -20.0
-offset_top = -19.0
-offset_right = 20.0
-offset_bottom = 21.0
+offset_left = -40.0
+offset_top = -49.0
+offset_bottom = -9.0
+scale = Vector2(1.9831648, 1.9831648)
 
 [node name="PointLight2D" type="PointLight2D" parent="." unique_id=948758515]
 energy = 0.35

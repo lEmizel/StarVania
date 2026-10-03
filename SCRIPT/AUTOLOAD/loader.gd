@@ -32,8 +32,29 @@ var _prechargement_en_cours: Array[String] = []  # au plus UN élément : les ch
 var _file_prechargement: Array[String] = []      # scènes restant à précharger, dans l'ordre
 var _chargement_niveau_en_cours := false         # un load_scene_with_loading est en vol
 
+# ------------------------------------------------------------------
+# GARDE-FOUS (3 oct. 2026) : chez un ami de Kaoru, le préchargement de scene_08
+# n'a jamais rendu la main ; il a choisi DEMO 3, et le chargeur ATTENDAIT SANS
+# LIMITE la fin de ce préchargement avant de charger la démo demandée :
+# « LOADING » pour toujours, le journal s'arrêtant sur « démarrage du loading ».
+# Un confort d'arrière-plan ne doit jamais bloquer le niveau demandé :
+#   • un niveau demandé n'attend pas plus de ATTENTE_PRECHARGE_MAX la fin du
+#     préchargement d'une AUTRE scène, puis il se charge sans lui ;
+#   • un préchargement qui n'avance plus depuis PRECHARGE_BLOQUE est abandonné
+#     (il ne retient plus la file) ;
+#   • tout chargement qui dure écrit où il en est toutes les SUIVI secondes : le
+#     journal dit si ça avance lentement ou si c'est bloqué, et sur quelle scène.
+# ------------------------------------------------------------------
+const ATTENTE_PRECHARGE_MAX := 1.5
+const PRECHARGE_BLOQUE := 15.0
+const SUIVI := 2.0
+var _suivi: Dictionary = {}                      # chemin → {progres, avance, debut, dit} (ms)
+
 
 func _ready() -> void:
+	# le chargeur ne se fige jamais : un préchargement qui finit pendant une pause
+	# doit être relevé (sinon un niveau demandé derrière lui attendrait la reprise)
+	process_mode = Node.PROCESS_MODE_ALWAYS
 	set_process(false)
 	precharger_scenes.call_deferred()
 
@@ -74,19 +95,56 @@ func _lancer_prochain_prechargement() -> void:
 
 func _process(_delta: float) -> void:
 	for chemin in _prechargement_en_cours.duplicate():
-		var statut := ResourceLoader.load_threaded_get_status(chemin)
+		var statut := _suivre(chemin, "préchargement")
 		if statut == ResourceLoader.THREAD_LOAD_LOADED:
 			var res := ResourceLoader.load_threaded_get(chemin)
 			_prechargement_en_cours.erase(chemin)
+			_suivi.erase(chemin)
 			if res is PackedScene:
 				_prechargees[chemin] = res
 				print("[LOAD] préchargé et gardé en mémoire : ", chemin)
 		elif statut != ResourceLoader.THREAD_LOAD_IN_PROGRESS:
 			_prechargement_en_cours.erase(chemin)
+			_suivi.erase(chemin)
 			push_error("[LOAD] échec du préchargement : " + chemin)
+		elif _sans_progres_depuis(chemin) >= PRECHARGE_BLOQUE:
+			# il n'avance plus : on ne l'attend plus, la file continue sans lui
+			push_warning("[LOAD] préchargement BLOQUÉ, abandonné : %s (arrêté à %d %% depuis %.0f s)" % [
+				chemin, roundi(float(_suivi[chemin]["progres"]) * 100.0), _sans_progres_depuis(chemin)])
+			_prechargement_en_cours.erase(chemin)
+			_suivi.erase(chemin)
 	if _prechargement_en_cours.is_empty():
 		set_process(false)
 		_lancer_prochain_prechargement()   # au suivant
+
+
+## où en est un chargement threadé : rend son statut, note quand il a avancé
+## pour la dernière fois, et écrit sa progression toutes les SUIVI secondes
+## tant qu'il dure (un chargement normal finit avant et n'écrit rien)
+func _suivre(chemin: String, etiquette: String) -> int:
+	var progression: Array = []
+	var statut := ResourceLoader.load_threaded_get_status(chemin, progression)
+	var p: float = progression[0] if progression.size() > 0 else 0.0
+	var maintenant := Time.get_ticks_msec()
+	if not _suivi.has(chemin):
+		_suivi[chemin] = {"progres": p, "avance": maintenant, "debut": maintenant, "dit": maintenant}
+	var s: Dictionary = _suivi[chemin]
+	if p > float(s["progres"]) + 0.0001:
+		s["progres"] = p
+		s["avance"] = maintenant
+	if statut == ResourceLoader.THREAD_LOAD_IN_PROGRESS and maintenant - int(s["dit"]) >= int(SUIVI * 1000.0):
+		s["dit"] = maintenant
+		print("[LOAD] %s toujours en cours : %s — %d %% après %.1f s, sans avancer depuis %.1f s" % [
+			etiquette, chemin, roundi(p * 100.0), (maintenant - int(s["debut"])) / 1000.0,
+			(maintenant - int(s["avance"])) / 1000.0])
+	return statut
+
+
+## depuis combien de secondes ce chargement n'a pas avancé
+func _sans_progres_depuis(chemin: String) -> float:
+	if not _suivi.has(chemin):
+		return 0.0
+	return (Time.get_ticks_msec() - int(_suivi[chemin]["avance"])) / 1000.0
 
 
 ## DEBUG PERF (F7) : lâche les scènes préchargées → leurs textures sont libérées
@@ -151,11 +209,20 @@ func load_scene_with_loading(final_scene_path: String) -> void:
 # Appelé une frame plus tard pour éviter de bloquer le rendu
 # ------------------------------------------------------------------
 func _do_async_load() -> void:
-	# une seule charge threadée à la fois (voir precharger_scenes) : on attend
-	# la fin d'un préchargement en cours, et la file est suspendue pendant nous
+	# une seule charge threadée à la fois (voir precharger_scenes) : on laisse au
+	# préchargement en vol le temps de finir, et la file est suspendue pendant
+	# nous. Mais si c'est une AUTRE scène que la nôtre et qu'elle traîne, on ne
+	# l'attend pas plus de ATTENTE_PRECHARGE_MAX (voir GARDE-FOUS)
 	_chargement_niveau_en_cours = true
+	var cible := _chemin_res(_target_scene_path)
+	var debut_attente := Time.get_ticks_msec()
 	while not _prechargement_en_cours.is_empty():
-		await get_tree().create_timer(0.01).timeout
+		var attendu := (Time.get_ticks_msec() - debut_attente) / 1000.0
+		if not (cible in _prechargement_en_cours) and attendu >= ATTENTE_PRECHARGE_MAX:
+			print("[LOAD] le préchargement de ", _noms(_prechargement_en_cours),
+				" traîne : on charge ", cible.get_file(), " sans l'attendre")
+			break
+		await get_tree().process_frame
 	var prete := scene_prechargee(_target_scene_path)
 	if prete != null:
 		# c'était justement la scène qui finissait de se précharger
@@ -177,12 +244,14 @@ func _do_async_load() -> void:
 # Boucle de vérification asynchrone
 # ------------------------------------------------------------------
 func _continue_preloading() -> void:
-	var status = ResourceLoader.load_threaded_get_status(_target_scene_path)
-	if status == ResourceLoader.ThreadLoadStatus.THREAD_LOAD_IN_PROGRESS:
-		# on attend 10ms puis on recommence
-		await get_tree().create_timer(0.01).timeout
-		_continue_preloading()
-	elif status == ResourceLoader.ThreadLoadStatus.THREAD_LOAD_LOADED:
+	# une vérification par image, sans minuterie (elle tourne aussi en pause) ;
+	# si le chargement dure, _suivre écrit où il en est
+	var status := _suivre(_target_scene_path, "chargement")
+	while status == ResourceLoader.ThreadLoadStatus.THREAD_LOAD_IN_PROGRESS:
+		await get_tree().process_frame
+		status = _suivre(_target_scene_path, "chargement")
+	_suivi.erase(_target_scene_path)
+	if status == ResourceLoader.ThreadLoadStatus.THREAD_LOAD_LOADED:
 		# 4) Récupère et instancie la scène finale
 		var res = ResourceLoader.load_threaded_get(_target_scene_path)
 		if res is PackedScene:

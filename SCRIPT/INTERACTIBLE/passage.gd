@@ -42,6 +42,40 @@ enum Role { AUTO, HAUT_DU_TABLEAU, BAS_DU_TABLEAU }
 ## de diriger sa retombée)
 @export var propulsion_laterale := 0.0
 
+## RAI DE LUMIÈRE (3 oct. 2026, d'après une image de référence de Kaoru) : la
+## lumière qui entre par ce passage — l'ouverture blanche, la nappe de lumière,
+## ses poussières, sa brume. Dessiné par l'enfant RaiDeLumiere (rai_lumiere.gd,
+## visible dans l'éditeur), qui lit ces réglages.
+##   • DE CÔTÉ (passage horizontal) : la nappe tombe en biais de l'ouverture
+##     jusqu'au sol, vers la salle (le côté du Marker2D) ;
+##   • TOMBE DU HAUT (trou au plafond) : une colonne de lumière droite qui
+##     descend du trou ;
+##   • MONTE DU BAS (trou dans le sol) : une colonne droite qui monte du trou.
+##     En vertical, elle s'éteint en dégradé : nette au trou, plus rien au bout
+##     de `rai_longueur` (elle se voit surtout sur la première moitié).
+@export_group("Rai de lumière")
+@export var rai_de_lumiere := true
+enum ModeRai { AUTO, DE_COTE, TOMBE_DU_HAUT, MONTE_DU_BAS }
+## AUTO : de côté pour un passage horizontal ; pour un passage vertical, tombe
+## du haut s'il est en haut du tableau, monte du bas s'il est en bas (comme son
+## rôle). Les autres : pour forcer.
+@export var rai_mode: ModeRai = ModeRai.AUTO
+## d'où part la lumière, décalée le long de son trajet (px ; + = vers la salle) :
+## de côté, le bout du couloir ; en vertical, le bord du trou
+@export var rai_depart := 0.0
+## taille de l'ouverture (px) : sa HAUTEUR de côté, sa LARGEUR en vertical
+@export var rai_hauteur := 300.0
+## jusqu'où va la lumière (px) : de côté, là où elle touche le sol ; en
+## vertical, là où la colonne s'est éteinte (dégradé)
+@export var rai_longueur := 420.0
+@export_range(0.0, 2.0, 0.01) var rai_intensite := 1.0
+@export var rai_couleur := Color(1.0, 0.96, 0.88)
+## l'ouverture elle-même, blanche de lumière (0 = invisible)
+@export_range(0.0, 1.0, 0.01) var rai_ouverture := 0.8
+## vitesse à laquelle l'ondulation des bords se transforme (0 = figée ;
+## 0,6 = une forme nouvelle en 2 secondes environ)
+@export_range(0.0, 2.0, 0.01) var rai_vitesse_ondulation := 0.6
+
 # fenêtre (frames physique) après le chargement pendant laquelle une entrée
 # est considérée comme une ARRIVÉE par ce passage, pas une traversée
 const FENETRE_ARRIVEE := 30

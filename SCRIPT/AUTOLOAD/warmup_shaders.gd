@@ -105,6 +105,10 @@ const SHADERS: Array[String] = [
 	"res://SCRIPT/SHADER/roue_pointes.gdshader",     # roue à pointes : la roue seule, ses étincelles, son éclatement
 	"res://SCRIPT/SHADER/barre_feu_socle.gdshader",  # barre de feu : le bloc de pierre au centre (décor, sans contour)
 	"res://SCRIPT/SHADER/lanceur_feu.gdshader",      # lanceur de boules de feu : le canon (décor, sans contour)
+	"res://SCRIPT/SHADER/halo_torche.gdshader",      # torches : le halo de la flamme et ses braises (3 oct. 2026)
+	"res://SCRIPT/SHADER/rai_lumiere.gdshader",      # passages : le rai de lumière, ses poussières, sa brume (3 oct. 2026)
+	"res://SCRIPT/SHADER/lame_croissant.gdshader",   # lame à chaîne : la lame en croissant (décor, sans contour, 3 oct. 2026)
+	"res://SCRIPT/SHADER/maillon_chaine.gdshader",   # lame à chaîne : les maillons et le capuchon de l'axe
 	"res://SCRIPT/SHADER/impact_blanc.gdshader",     # éclat d'un coup d'épée qui porte (sept. 2026)
 	"res://SCRIPT/SHADER/souffle_dash.gdshader",     # souffle d'air au départ du dash (sept. 2026)
 	"res://SCRIPT/SHADER/onde_de_choc.gdshader",     # onde de choc du coup de pied du boss (sept. 2026)

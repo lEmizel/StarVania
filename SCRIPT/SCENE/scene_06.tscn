@@ -155,8 +155,15 @@ scale = Vector2(0.6736213, 0.67362136)
 
 [node name="passage" parent="interactible" unique_id=1292859230 instance=ExtResource("35_kv4j8")]
 position = Vector2(-1281, 4)
+scale = Vector2(1.2554007, 1.2554007)
 id = 1
 target_scene = "uid://gq88m0garham"
+
+[node name="flamme" parent="interactible" unique_id=1766281021 instance=ExtResource("29_sebwa")]
+position = Vector2(1428, -326)
+
+[node name="flamme2" parent="interactible" unique_id=1793907052 instance=ExtResource("29_sebwa")]
+position = Vector2(458, -2335)
 
 [node name="grayboxing" type="Node2D" parent="." unique_id=724057271]
 visible = false
@@ -799,14 +806,6 @@ margin = 50
 
 [node name="enemi2" parent="." unique_id=819348583 instance=ExtResource("34_xccp3")]
 position = Vector2(2494, -404)
-
-[node name="Node2D" parent="." unique_id=1766281021 instance=ExtResource("29_sebwa")]
-position = Vector2(1426.0001, -351)
-scale = Vector2(2.77, 2.77)
-
-[node name="Node2D2" parent="." unique_id=15702722 instance=ExtResource("29_sebwa")]
-position = Vector2(459, -2360)
-scale = Vector2(2.77, 2.77)
 
 [node name="findeniveau" type="Area2D" parent="." unique_id=272344894]
 position = Vector2(-3496, -3333)

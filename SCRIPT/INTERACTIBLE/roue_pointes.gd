@@ -38,7 +38,11 @@ extends CharacterBody2D
 ## Son ÉCHELLE (`scale` du nœud, Kaoru l'agrandit) est prise en compte partout.
 ## L'origine du nœud est le SOL sous la roue (on la pose comme le pilon) ; posée
 ## un peu haut, elle tombe d'elle-même sur le sol.
-## Dessin : SCRIPT/SHADER/roue_pointes.gdshader (nœud Visuel).
+## Dessin : LE DESSIN DE KAORU (MEDIA/INTERACTIBLE/roue.png, 3 oct. 2026),
+## tourné, flouté et fendu en quatre par SCRIPT/SHADER/roue_pointes.gdshader
+## (nœud Visuel). En jeu, il reçoit une copie à mipmaps du dessin (faite une
+## fois pour toutes les roues) : réduit 8 fois et plus, le dessin brut
+## scintillerait en tournant.
 ##
 ## POUR LA JUGER : ouvrir la scène et faire F6 (elle fonce en boucle sur un
 ## sol et contre un mur de démonstration) ; roue_pointes_ilot.tscn (réglée sur
@@ -48,10 +52,11 @@ extends CharacterBody2D
 enum Etat { GUETTE, ELAN, ROULE, BRISEE }
 enum Comportement { FONCER, TOURNER_AUTOUR, AUTO }
 
-const RAYON := 32.0               # le disque (px), comme le shader
+const DESSIN := preload("res://MEDIA/INTERACTIBLE/roue.png")
+const RAYON := 32.0               # le disque de son dessin (px, à l'échelle 1 ; ses pointes vont jusqu'à 43)
 const ENFONCE := 6.0              # le corps roule sur un cercle de RAYON + ENFONCE : les pointes mordent le sol
 const CENTRE := Vector2(0.0, -(RAYON + ENFONCE))   # le centre de la roue, au-dessus de l'origine (le sol), à l'échelle 1
-const PORTEE_POINTES := RAYON + 12.0               # la roue, pointes comprises
+const PORTEE_POINTES := RAYON * 1.345              # la roue, pointes comprises (comme BOUT_POINTES du shader)
 const DUREE_ECLAT := 0.9          # elle vole en éclats pendant… (s), comme DUREE du shader
 const PAS_SONDE := 16.0           # le sol est sondé tous les… (px) entre elle et nous
 const ECART_SONDE := 14.0         # … et peut monter ou descendre d'autant d'une sonde à l'autre (pente douce)
@@ -91,6 +96,9 @@ const PIECES_MAX := 24            # … ou au-delà de tant de pièces de collis
 @export var sens_horaire := true
 
 var gravity: float = ProjectSettings.get_setting("physics/2d/default_gravity")
+
+# son dessin prêt pour le jeu, commun à toutes les roues (voir _dessin_jeu)
+static var _dessin_filtre: Texture2D = null
 
 @onready var _visuel: ColorRect = $Visuel
 @onready var _zone: Area2D = $Zone
@@ -146,7 +154,38 @@ func _ready() -> void:
 	_depart = global_position
 	if _demo:
 		_poser_decor_de_demo.call_deferred()
+	var mat := _visuel.material as ShaderMaterial
+	if mat != null:
+		mat.set_shader_parameter("rayon_disque", RAYON)
+		mat.set_shader_parameter("sol", RAYON + ENFONCE)
+		var dessin := _dessin_jeu()
+		if dessin != null:
+			mat.set_shader_parameter("dessin", dessin)
+			mat.set_shader_parameter("dessin_premultiplie", true)
 	_appliquer()
+
+
+## SON DESSIN prêt pour le jeu : une copie réduite (1024 px au plus, par
+## moitiés : chaque pixel = la moyenne de quatre), aux couleurs prémultipliées
+## (pas de liseré sombre au bord des pointes), avec ses mipmaps (sans elles,
+## affiché 8 fois plus petit et plus, ses fines volutes scintilleraient quand
+## la roue tourne). Faite UNE fois pour toutes les roues de la partie, depuis
+## l'image importée : un nouveau dessin est pris tel quel. Null si l'image
+## n'est pas lisible (serveur de rendu factice) : la scène garde le dessin brut.
+static func _dessin_jeu() -> Texture2D:
+	if _dessin_filtre == null:
+		var img := DESSIN.get_image()
+		if img == null or img.is_empty():
+			return null
+		if img.is_compressed():
+			img.decompress()
+		img.convert(Image.FORMAT_RGBA8)
+		while img.get_width() > 1024 or img.get_height() > 1024:
+			img.resize(maxi(img.get_width() / 2, 1), maxi(img.get_height() / 2, 1), Image.INTERPOLATE_BILINEAR)
+		img.premultiply_alpha()
+		img.generate_mipmaps()
+		_dessin_filtre = ImageTexture.create_from_image(img)
+	return _dessin_filtre
 
 
 ## identité stable (comme les cœurs) : scène du niveau + position de départ arrondie

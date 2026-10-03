@@ -26,6 +26,8 @@
 [ext_resource type="PackedScene" path="res://SCRIPT/INTERACTIBLE/lanceur_feu.tscn" id="25_utlbw"]
 [ext_resource type="PackedScene" uid="uid://cvykyqaa2ik7i" path="res://SCRIPT/INTERACTIBLE/roue_pointes.tscn" id="25_xjew0"]
 [ext_resource type="PackedScene" path="res://SCRIPT/INTERACTIBLE/barre_feu.tscn" id="26_rgcqs"]
+[ext_resource type="PackedScene" uid="uid://bobswn5tah03s" path="res://SCRIPT/INTERACTIBLE/passage.tscn" id="27_rgcqs"]
+[ext_resource type="PackedScene" path="res://SCRIPT/INTERACTIBLE/lame_chaine.tscn" id="28_5gsh0"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_ubcjy"]
 shader = ExtResource("17_vw2kw")
@@ -94,15 +96,9 @@ position = Vector2(2395.5, -3663)
 
 [node name="SAWBLADE" parent="interactible" unique_id=388117046 instance=ExtResource("6_5ylk2")]
 position = Vector2(1466, -999)
-frame_progress = 0.44417533
+frame_progress = 0.40361783
 position_a = Vector2(1466, -999)
 position_b = Vector2(1466, -2128)
-
-[node name="Node2D2" parent="interactible" unique_id=1223787924 instance=ExtResource("8_v7ylp")]
-position = Vector2(-473, -2676)
-
-[node name="Node2D3" parent="interactible" unique_id=1750518316 instance=ExtResource("8_v7ylp")]
-position = Vector2(4396, -925)
 
 [node name="grayboxing" type="Node2D" parent="." unique_id=1166067719]
 visible = false
@@ -488,3 +484,24 @@ position = Vector2(234, -287)
 nb_boules = 10
 taille_boule = 0.73
 angle_depart = -155.0
+
+[node name="flamme" parent="." unique_id=1766281021 instance=ExtResource("8_v7ylp")]
+position = Vector2(-469, -337)
+
+[node name="flamme2" parent="." unique_id=626846116 instance=ExtResource("8_v7ylp")]
+position = Vector2(4401, -929)
+
+[node name="flamme3" parent="." unique_id=1422150520 instance=ExtResource("8_v7ylp")]
+position = Vector2(-469, -2680)
+
+[node name="passage" parent="." unique_id=1292859230 instance=ExtResource("27_rgcqs")]
+position = Vector2(-1891.9999, -397)
+scale = Vector2(1.3246565, 1.3246565)
+
+[node name="LameChaine" parent="." unique_id=606413238 instance=ExtResource("28_5gsh0")]
+position = Vector2(-588, -508)
+longueur = 291.0
+taille_lame = 2.07
+vitesse = 174.0
+angle_depart = -55.0
+monstres_l_evitent = true

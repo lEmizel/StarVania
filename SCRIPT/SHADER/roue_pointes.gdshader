@@ -1,10 +1,19 @@
 shader_type canvas_item;
 render_mode unshaded;
-// ROUE À POINTES (2 oct. 2026, piège choisi par Kaoru) — la roue seule, dans le
-// style du pilon : SANS contour, le volume vient des tons (lumière d'en haut à
-// gauche, qui NE tourne PAS avec la roue). Un disque de pierre cerclé de fer,
-// un moyeu et quatre rayons de fer qui montrent la rotation, huit pointes de
-// fer à deux faces (une claire, une sombre) tout autour.
+// ROUE À POINTES (2 oct. 2026, piège choisi par Kaoru) — la roue seule, AU
+// DESSIN DE KAORU (3 oct. 2026 : MEDIA/INTERACTIBLE/roue.png, un disque bleu à
+// volutes et 24 pointes groupées par trois) : le shader le fait tourner,
+// l'étale en flou de bougé quand elle file, et le FEND EN QUATRE QUARTIERS
+// quand elle se brise.
+//   • `dessin` : son dessin. En jeu, le script passe une copie réduite, à
+//     mipmaps et aux couleurs prémultipliées (`dessin_premultiplie`) : son
+//     image fait 1492 px et la roue ~180 à l'écran ; sans mipmaps, ses fines
+//     volutes scintilleraient quand elle tourne. Dans l'éditeur, c'est le
+//     dessin tel quel (la scène le référence) ;
+//   • `centre_dessin`, `rayon_dessin` : le disque DANS le dessin, en fractions
+//     de la largeur de l'image (mesurés sur son dessin : centre (886, 883) et
+//     rayon 671 px sur 1770 ; ses pointes vont jusqu'à 1,34 fois ce rayon) ;
+//     `rayon_disque` : le rayon du disque en jeu (px, à l'échelle 1) ;
 //   • `angle` : elle tourne ; `flou` = l'angle sur lequel étaler la roue (flou
 //     de bougé, le script passe la moitié de ce qu'elle a tourné pendant
 //     l'image, comme l'obturateur d'une caméra — sans lui, à pleine vitesse,
@@ -14,44 +23,47 @@ render_mode unshaded;
 //     poussière au point de contact, vers l'arrière ;
 //   • `appui` : d'où vient le sol, depuis son centre (vers le bas d'ordinaire ;
 //     quand elle fait le tour d'un îlot : sur le flanc, au-dessus d'elle…) ;
-//     elle avance dans le sens `sens` le long de ce sol (+1 : vers la droite
-//     sur un sol, dans le sens des aiguilles d'une montre autour d'un îlot) ;
+//     `sol` : à quelle distance de son centre (elle roule sur ce rayon) ; elle
+//     avance dans le sens `sens` le long de ce sol (+1 : vers la droite sur un
+//     sol, dans le sens des aiguilles d'une montre autour d'un îlot) ;
 //   • `tremble` : elle tremble pendant qu'elle patine sur place ;
 //   • `eclat` (0 → 1, −1 = rien) : elle se BRISE contre le mur devant elle — elle
-//     se FEND EN QUATRE QUARTIERS (chacun garde ses deux pointes, son bout de
-//     cercle et un rayon) qui rebondissent en arrière en tournoyant, retombent
-//     et s'arrêtent au sol, des éclats de pierre, une gerbe de poussière plaquée
-//     contre le mur et des bouffées translucides (pas une boule opaque : le 1er
-//     essai en était une, il cachait tout ; le 2e, en miettes, était chétif).
+//     se FEND EN QUATRE QUARTIERS par ses quatre fenêtres (les coupes passent à
+//     0°, 90°, 180° et 270° du dessin, dans les trous entre ses groupes de
+//     pointes : chaque quartier garde un groupe de volutes et six pointes), qui
+//     rebondissent en arrière en tournoyant, retombent et s'arrêtent au sol ;
+//     des éclats de SA couleur (pris dans le dessin), une gerbe de poussière
+//     plaquée contre le mur et des bouffées translucides (pas une boule opaque :
+//     le 1er essai en était une, il cachait tout ; le 2e, en miettes, était
+//     chétif).
 // Repère : `centre` = le centre de la roue dans le rectangle (px). Pilotée par
 // SCRIPT/INTERACTIBLE/roue_pointes.gd.
 
 uniform vec2 taille = vec2(400.0, 156.0);
 uniform vec2 centre = vec2(200.0, 110.0);
-uniform float rayon = 32.0;                     // le disque, sans les pointes (px)
-uniform float longueur_pointes = 12.0;          // elles dépassent du disque de… (px)
+uniform sampler2D dessin : filter_linear_mipmap, repeat_disable;
+uniform bool dessin_premultiplie = false;
+uniform vec2 centre_dessin = vec2(0.50038, 0.49891);
+uniform float rayon_dessin = 0.37919;
+uniform float rayon_disque = 32.0;               // le disque, sans les pointes (px)
+uniform float sol = 38.0;                        // du centre au sol (px)
 uniform float angle = 0.0;
 uniform float flou = 0.0;
 uniform float vitesse : hint_range(0.0, 1.0) = 0.0;
-uniform float sens = 1.0;                       // elle roule vers… (+1 droite)
-uniform vec2 appui = vec2(0.0, 1.0);            // la direction du sol, depuis son centre
+uniform float sens = 1.0;                        // elle roule vers… (+1 droite)
+uniform vec2 appui = vec2(0.0, 1.0);             // la direction du sol, depuis son centre
 uniform float tremble : hint_range(0.0, 1.0) = 0.0;
 uniform float eclat = -1.0;
 uniform float temps = 0.0;
 
-uniform vec4 pierre : source_color = vec4(0.46, 0.52, 0.63, 1.0);
-uniform vec4 pierre_ombre : source_color = vec4(0.29, 0.34, 0.44, 1.0);
-uniform vec4 pierre_lumiere : source_color = vec4(0.61, 0.66, 0.76, 1.0);
-uniform vec4 fer : source_color = vec4(0.26, 0.28, 0.33, 1.0);
-uniform vec4 fer_lumiere : source_color = vec4(0.52, 0.55, 0.61, 1.0);
 uniform vec4 couleur_etincelle : source_color = vec4(1.0, 0.82, 0.45, 1.0);
 uniform vec4 couleur_poussiere : source_color = vec4(0.78, 0.8, 0.84, 1.0);
 
-const int NB_POINTES = 8;
-const int ECHANTILLONS = 8;                     // pour le flou de bougé
+const int ECHANTILLONS = 8;                      // pour le flou de bougé
 const vec2 VERS_LUMIERE = vec2(-0.6247, -0.7809);   // en haut à gauche
-const float GRAVITE = 2200.0;                   // des morceaux qui retombent (px/s²)
-const float DUREE = 0.9;                        // `eclat` 0 → 1 dure… (s), comme DUREE_ECLAT du script
+const float GRAVITE = 2200.0;                    // des morceaux qui retombent (px/s²)
+const float DUREE = 0.9;                         // `eclat` 0 → 1 dure… (s), comme DUREE_ECLAT du script
+const float BOUT_POINTES = 1.345;                // ses pointes vont jusqu'à 1,34 rayon du disque (903 px pour 671)
 
 
 float alea(float n) {
@@ -75,73 +87,36 @@ vec2 tourner(vec2 v, float a) {
 	return vec2(v.x * cos(a) - v.y * sin(a), v.x * sin(a) + v.y * cos(a));
 }
 
-// l'éclairage du monde (ne tourne pas) : clair en haut à gauche, sombre en bas à droite
-float lumiere(vec2 q, float r) {
-	vec2 n = q / max(r, 0.001);
-	return clamp(0.5 + 0.5 * dot(n, VERS_LUMIERE), 0.0, 1.0);
+// SON DESSIN au point `qr` du repère de la roue (px depuis le centre du disque,
+// à l'échelle 1) : couleur (non prémultipliée) et couverture. `lod` = le
+// niveau de mipmap, calculé une fois pour tout le pixel (pas de dérivées
+// implicites dans les boucles et les branches)
+vec4 dessin_en(vec2 qr, float lod) {
+	vec2 sz = vec2(textureSize(dessin, 0));
+	vec2 uv = centre_dessin + qr * (rayon_dessin / rayon_disque) * vec2(1.0, sz.x / max(sz.y, 1.0));
+	if (uv.x <= 0.0 || uv.y <= 0.0 || uv.x >= 1.0 || uv.y >= 1.0) {
+		return vec4(0.0);
+	}
+	vec4 t = textureLod(dessin, uv, lod);
+	if (dessin_premultiplie) {
+		t.rgb /= max(t.a, 0.0001);
+	}
+	return t;
 }
 
-// LA ROUE, pointes et disque, pour UN angle : couleur et couverture.
-// `q` = le point depuis le centre, dans le repère du monde (pour la lumière) ;
-// `a` = l'angle de la roue.
-vec4 roue(vec2 q, float a, float px) {
-	float R = rayon;
-	float lp = longueur_pointes + 3.0;          // les pointes partent de R − 3
-	float r = length(q);
-	float l = lumiere(q, r);
-	float pas = TAU / float(NB_POINTES);
-	vec2 qr = tourner(q, -a);                   // le repère de la roue (il tourne)
-	float ang = atan(qr.y, qr.x + 0.000001);
-
-	// ---- la pointe la plus proche ----
-	float k = floor(ang / pas + 0.5);
-	vec2 dir_k = vec2(cos(k * pas), sin(k * pas));
-	vec2 lat_k = vec2(-dir_k.y, dir_k.x);
-	float le_long = dot(qr, dir_k) - (R - 3.0);
-	float cote = dot(qr, lat_k);
-	float d_pointe = max(abs(cote) - 7.0 * (1.0 - clamp(le_long / lp, 0.0, 1.0)), max(-le_long, le_long - lp));
-	// deux faces, éclairées par le monde : celle qui regarde la lumière est
-	// claire, l'autre sombre ; le bout un peu plus clair
-	vec2 lat_monde = tourner(lat_k, a);
-	float eclaire = 0.5 + 0.5 * dot(cote > 0.0 ? lat_monde : -lat_monde, VERS_LUMIERE);
-	vec3 cp = mix(fer.rgb * 0.75, fer_lumiere.rgb * 1.08, eclaire);
-	cp = mix(cp, fer_lumiere.rgb * 1.15, smoothstep(lp * 0.6, lp, le_long) * 0.35);
-	float cv_p = couvre(d_pointe, px);
-
-	// ---- le disque de pierre, cerclé de fer ----
-	vec3 cd = mix(pierre_ombre.rgb, pierre_lumiere.rgb, l);
-	cd = mix(cd, pierre.rgb, 0.35);
-	// des taches de pierre (elles tournent avec la roue)
-	cd *= 0.94 + 0.08 * alea(floor(qr.x / 6.0) * 7.1 + floor(qr.y / 6.0) * 13.3);
-	// le cercle de fer, ses rivets (entre les pointes)
-	cd = mix(cd, mix(fer.rgb, fer_lumiere.rgb, l * 0.9), smoothstep(R - 7.0, R - 6.0, r));
-	float kr = floor((ang + pas * 0.5) / pas + 0.5);
-	vec2 riv = vec2(cos(kr * pas - pas * 0.5), sin(kr * pas - pas * 0.5)) * (R - 3.4);
-	cd = mix(cd, fer_lumiere.rgb * 1.15, couvre(length(qr - riv) - 1.8, px));
-	// quatre rayons de fer : on voit qu'elle tourne
-	for (int b = 0; b < 4; b++) {
-		float ab = float(b) * TAU / 4.0;
-		vec2 db = vec2(cos(ab), sin(ab));
-		float d_rayon = max(abs(dot(qr, vec2(-db.y, db.x))) - 2.6, max(-dot(qr, db), dot(qr, db) - (R - 6.5)));
-		cd = mix(cd, mix(fer.rgb, fer_lumiere.rgb, l * 0.8), couvre(d_rayon, px));
-	}
-	// le moyeu
-	cd = mix(cd, mix(fer.rgb, fer_lumiere.rgb * 1.1, l), couvre(r - 8.5, px));
-	cd = mix(cd, fer.rgb * 0.7, couvre(r - 3.0, px));
-	// une ombre de contact : le côté du sol un peu plus sombre
-	cd *= 1.0 - 0.18 * smoothstep(0.0, R, dot(q, appui));
-	float cv_d = couvre(r - R, px);
-
-	// le disque par-dessus la base des pointes
-	float cov = cv_d + cv_p * (1.0 - cv_d);
-	vec3 col = (cd * cv_d + cp * cv_p * (1.0 - cv_d)) / max(cov, 0.0001);
-	return vec4(col, cov);
+// LA ROUE pour UN angle : son dessin tourné, le côté du sol un peu plus sombre
+// (une ombre de contact, qui ne tourne pas avec elle)
+vec4 roue(vec2 q, float a, float lod) {
+	vec4 e = dessin_en(tourner(q, -a), lod);
+	e.rgb *= 1.0 - 0.14 * smoothstep(0.0, rayon_disque, dot(q, appui));
+	return e;
 }
 
 // la fente entre deux quartiers (b = 0…3) : un léger zigzag le long du rayon,
-// dans la pierre seulement (au-delà, il n'y a que le vide entre deux pointes)
+// dans le disque seulement (au-delà, il n'y a que le vide entre deux pointes) ;
+// il s'éteint doucement avant le bord, sinon la coupe y faisait une marche
 float fente(float r, float b) {
-	return 0.07 * sin(r * 0.55 + b * 2.3) * step(r, rayon);
+	return 0.07 * sin(r * 0.55 + b * 2.3) * (1.0 - smoothstep(rayon_disque - 5.0, rayon_disque, r));
 }
 
 void fragment() {
@@ -149,10 +124,11 @@ void fragment() {
 	float px = max(fwidth(pix.x), 0.001);
 	vec2 q = pix - centre;
 	q.x -= sin(temps * 70.0) * 1.6 * tremble;
-	vec4 c = vec4(pierre.rgb, 0.0);
-	float R = rayon;
-	float lp = longueur_pointes + 3.0;
-	float portee = R + lp + 3.0;                // la roue, pointes comprises
+	vec4 c = vec4(couleur_poussiere.rgb, 0.0);
+	float R = rayon_disque;
+	float portee = R * BOUT_POINTES + 3.0;       // la roue, pointes comprises
+	// combien de pixels du dessin tombent dans un pixel de l'écran
+	float lod = log2(max(px * float(textureSize(dessin, 0).x) * rayon_dessin / R, 0.0001)) - 0.3;
 
 	if (eclat < 0.0) {
 		if (length(q) < portee) {
@@ -160,7 +136,7 @@ void fragment() {
 			vec3 somme = vec3(0.0);
 			float cov = 0.0;
 			for (int s = 0; s < ECHANTILLONS; s++) {
-				vec4 e = roue(q, angle - flou * float(s) / float(ECHANTILLONS - 1), px);
+				vec4 e = roue(q, angle - flou * float(s) / float(ECHANTILLONS - 1), lod);
 				somme += e.rgb * e.a;
 				cov += e.a;
 			}
@@ -171,7 +147,7 @@ void fragment() {
 		if (vitesse > 0.15) {
 			// le sens de la marche, le long du sol
 			vec2 tang = sens * vec2(appui.y, -appui.x);
-			vec2 contact = appui * (R + 6.0);
+			vec2 contact = appui * sol;
 			for (int e = 0; e < 9; e++) {
 				float fe = float(e);
 				float periode = 0.16 + 0.1 * alea(fe * 3.7);
@@ -195,7 +171,7 @@ void fragment() {
 			for (int b = 0; b < 4; b++) {
 				float fb = float(b);
 				float t = fract(temps * 2.4 + fb * 0.25);
-				vec2 cn = appui * (R + 4.0 - t * 16.0) - tang * (R * 0.6 + t * 50.0);
+				vec2 cn = appui * (sol - 2.0 - t * 16.0) - tang * (R * 0.6 + t * 50.0);
 				float rn = 8.0 + 12.0 * t;
 				float k = clamp(1.0 - length(q - cn) / rn, 0.0, 1.0);
 				nuage = max(nuage, k * k * (1.0 - t));
@@ -212,7 +188,7 @@ void fragment() {
 		// devant elle, qui s'étale le long du mur, et des bouffées qui gonflent
 		// vers l'arrière et le haut ----
 		float pouss = 0.0;
-		vec2 cm = vec2(sens * (R + 4.0), 0.0);
+		vec2 cm = vec2(sens * (R * BOUT_POINTES - 2.0), 0.0);
 		vec2 em = vec2(10.0 + 14.0 * (1.0 - exp(-t * 6.0)), 20.0 + 50.0 * (1.0 - exp(-t * 6.0)));
 		pouss = max(pouss, smoothstep(0.0, 0.7, 1.0 - length((q - cm) / em)) * (1.0 - smoothstep(0.05, 0.5, t)));
 		for (int b = 0; b < 6; b++) {
@@ -228,20 +204,20 @@ void fragment() {
 		vec3 col_pouss = mix(couleur_poussiere.rgb, couleur_poussiere.rgb * 0.8, smoothstep(-R, R, q.y));
 		c = sur(c, vec4(col_pouss, pouss * 0.5));
 
-		// ---- 2. les quatre quartiers : elle se fend entre ses pointes ----
+		// ---- 2. les quatre quartiers : elle se fend par ses fenêtres ----
 		float pas_q = TAU / 4.0;
 		for (int j = 0; j < 4; j++) {
 			float fj = float(j);
-			// son axe : entre deux pointes (67,5° + j × 90°, dans le repère de la
-			// roue), il garde deux pointes et un rayon ; puis dans le monde
-			float phi = 1.1781 + fj * pas_q;
+			// son axe : 45° + j × 90° du dessin (un groupe de volutes, six
+			// pointes ; les coupes passent par les fenêtres), puis dans le monde
+			float phi = 0.7854 + fj * pas_q;
 			vec2 axe = vec2(cos(phi + angle), sin(phi + angle));
 			vec2 c0 = axe * R * 0.45;               // son centre, au départ
 			// sa course : il part le long de son axe, surtout vers l'arrière et le haut
 			vec2 v0 = axe * (110.0 + 70.0 * alea(fj * 3.1 + 2.0))
 					+ vec2(-sens * (120.0 + 80.0 * alea(fj * 6.7)), -(230.0 + 90.0 * alea(fj * 4.9)));
-			// il retombe ; son centre s'arrête à ~16 px du sol, après une courte glissade
-			float descente = (R + 6.0 - 16.0) - c0.y;
+			// il retombe ; son centre s'arrête un peu au-dessus du sol, après une courte glissade
+			float descente = (sol - R * 0.5) - c0.y;
 			float t_sol = (-v0.y + sqrt(max(v0.y * v0.y + 2.0 * GRAVITE * descente, 0.0))) / GRAVITE;
 			float t_vol = min(tt, t_sol);
 			float glisse = tt > t_sol ? 0.1 * (1.0 - exp(-(tt - t_sol) * 9.0)) : 0.0;
@@ -256,31 +232,38 @@ void fragment() {
 				float s_a = mod(atan(q0r.y, q0r.x + 0.000001) - phi + PI, TAU) - PI;
 				float de = s_a - (-pas_q * 0.5 + fente(r0, fj));
 				float a_droite = (pas_q * 0.5 + fente(r0, mod(fj + 1.0, 4.0))) - s_a;
-				float dans = clamp(min(de, a_droite) * max(r0, 1.0) / px + 0.5, 0.0, 1.0);
+				float marge = min(de, a_droite) * max(r0, 1.0);     // px jusqu'à la cassure
+				float dans = clamp(marge / px + 0.5, 0.0, 1.0);
 				if (dans > 0.0) {
-					vec4 e = roue(q0, angle, px);
+					vec4 e = dessin_en(q0r, lod);
+					// la tranche fraîche le long de la cassure, à peine plus claire
+					float tranche = (1.0 - smoothstep(0.0, 1.6, marge)) * step(r0, R) * 0.3;
+					e.rgb = mix(e.rgb, vec3(0.85, 0.92, 1.0), tranche);
 					c = sur(c, vec4(e.rgb, e.a * dans * vivant));
 				}
 			}
 		}
 
-		// ---- 3. des éclats de pierre, plus vifs et plus loin ----
+		// ---- 3. des éclats de SA couleur, plus vifs et plus loin ----
 		for (int k = 0; k < 8; k++) {
 			float fk = float(k);
 			float ang = alea(fk * 3.3) * TAU;
 			float v = 200.0 + 260.0 * alea(fk * 5.7);
 			vec2 v0 = vec2(-sens * (abs(cos(ang)) - 0.2) * v, -abs(sin(ang)) * v - 160.0);
-			float t_sol = (-v0.y + sqrt(v0.y * v0.y + 2.0 * GRAVITE * (R + 6.0))) / GRAVITE;
+			float t_sol = (-v0.y + sqrt(v0.y * v0.y + 2.0 * GRAVITE * sol)) / GRAVITE;
 			float t_vol = min(tt, t_sol);
 			float glisse = tt > t_sol ? 0.12 * (1.0 - exp(-(tt - t_sol) * 9.0)) : 0.0;
 			vec2 pos = vec2(v0.x * (t_vol + glisse), v0.y * t_vol + 0.5 * GRAVITE * t_vol * t_vol);
 			float rot = (t_vol + glisse) * (8.0 + 8.0 * alea(fk * 2.1)) * (alea(fk) < 0.5 ? -1.0 : 1.0);
 			vec2 dq = tourner(q - pos, rot);
-			// un caillou anguleux, modelé par la lumière du monde
+			// un éclat anguleux, de la couleur d'un point de son disque, modelé
+			// par la lumière du monde
 			vec2 e = vec2(4.0 + 4.0 * alea(fk * 4.4), 3.0 + 3.0 * alea(fk * 8.2));
 			float d_m = (abs(dq.x) / e.x + abs(dq.y) / e.y - 1.0) * min(e.x, e.y) * 0.8;
+			float a_src = alea(fk * 9.1) * TAU;
+			vec4 src = dessin_en(vec2(cos(a_src), sin(a_src)) * R * (0.3 + 0.6 * alea(fk * 6.3)), lod + 2.0);
 			float lum_m = clamp(0.5 + 0.5 * dot((q - pos) / max(e.x, 1.0), VERS_LUMIERE), 0.0, 1.0);
-			vec3 col_m = mix(pierre_ombre.rgb * 0.9, pierre_lumiere.rgb, lum_m);
+			vec3 col_m = src.rgb * (0.8 + 0.4 * lum_m);
 			c = sur(c, vec4(col_m, couvre(d_m, px) * vivant));
 		}
 	}

@@ -2,21 +2,25 @@
 
 [ext_resource type="Script" path="res://SCRIPT/INTERACTIBLE/pilier_foudre.gd" id="1_pf"]
 [ext_resource type="Shader" path="res://SCRIPT/SHADER/pilier_foudre.gdshader" id="2_pf"]
+[ext_resource type="Texture2D" uid="uid://clvcmpd0mf15d" path="res://MEDIA/INTERACTIBLE/pillier_de_foudre.png" id="3_pf"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_pf"]
 resource_local_to_scene = true
 shader = ExtResource("2_pf")
+shader_parameter/taille = Vector2(260, 510)
+shader_parameter/base = Vector2(130, 500)
+shader_parameter/dessin = ExtResource("3_pf")
 
 [node name="PilierFoudre" type="Node2D"]
 script = ExtResource("1_pf")
 
 [node name="Pilier" type="ColorRect" parent="."]
 material = SubResource("ShaderMaterial_pf")
-offset_left = -85.0
-offset_top = -305.0
-offset_right = 85.0
+offset_left = -130.0
+offset_top = -500.0
+offset_right = 130.0
 offset_bottom = 10.0
 mouse_filter = 2
 
 [node name="Ecran" type="VisibleOnScreenNotifier2D" parent="."]
-rect = Rect2(-40, -250, 80, 250)
+rect = Rect2(-86, -400, 172, 400)

@@ -15,9 +15,13 @@ extends Node2D
 ##      puis l'éclair tombe : la bande blesse joueur ET monstres.
 ## Le premier appel vient `premier_appel` s après l'entrée à l'écran.
 ##
-## Le visuel du pilier : SCRIPT/SHADER/pilier_foudre.gdshader (nœud Pilier),
-## PROVISOIRE (obélisque + cristal) — Kaoru pourra le remplacer par son dessin,
-## les effets restent. L'origine du nœud est le PIED DU PILIER, au ras du sol.
+## Le visuel du pilier : LE DESSIN DE KAORU (MEDIA/INTERACTIBLE/
+## pillier_de_foudre.png, 3 oct. 2026), posé par SCRIPT/SHADER/
+## pilier_foudre.gdshader (nœud Pilier), qui y ajoute le JOYAU dans sa coupe
+## (« j'ai pas mis le joyau au-dessus, je te laisse le mettre ») et la lumière :
+## elle monte le long de son axe pendant la charge, de petits arcs crépitent
+## des cornes de la coupe au joyau, tout flashe à l'appel. L'origine du nœud
+## est le PIED DU PILIER, au ras du sol.
 ##
 ## POUR LE JUGER : ouvrir la scène et faire F6 (il se charge et appelle en
 ## boucle) ; la foudre du ciel se juge seule avec F6 sur foudre_ciel.tscn.
@@ -25,6 +29,7 @@ extends Node2D
 
 const FOUDRE_CIEL := preload("res://SCRIPT/SHADER/foudre_ciel.tscn")
 const ARC_FOUDRE := preload("res://SCRIPT/SHADER/arc_foudre.tscn")
+const HAUTEUR_JOYAU := 372.0     # le milieu du joyau, au-dessus du pied (px) : l'arc d'appel part de là
 
 ## Cœurs perdus par le joueur
 @export var damage: int = 1
@@ -67,6 +72,9 @@ func _ready() -> void:
 	if _demo:
 		position = get_viewport_rect().size * Vector2(0.5, 0.85)
 	_attente = premier_appel
+	var mat := _pilier.material as ShaderMaterial
+	if mat != null:
+		mat.set_shader_parameter("hauteur_cristal", HAUTEUR_JOYAU)
 	_appliquer(0.0)
 
 
@@ -109,7 +117,7 @@ func _appeler() -> void:
 	var hote: Node = get_tree().current_scene
 	if hote == null:
 		hote = get_parent()
-	var haut_pilier := global_position + Vector2(0.0, -222.0)
+	var haut_pilier := to_global(Vector2(0.0, -HAUTEUR_JOYAU))       # son joyau (à l'échelle du nœud)
 	var arc := ARC_FOUDRE.instantiate()
 	arc.demo_boucle = false
 	hote.add_child(arc)

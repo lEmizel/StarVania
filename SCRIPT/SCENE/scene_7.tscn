@@ -51,7 +51,7 @@ script = ExtResource("1_morp5")
 
 [node name="passage" parent="interactible" unique_id=1292859230 instance=ExtResource("3_pkrte")]
 position = Vector2(6594, -2243)
-scale = Vector2(-1, 1)
+scale = Vector2(-1.2417594, 1.2417594)
 id = 1
 target_scene = "uid://dsq0ieef7wjgl"
 
@@ -76,6 +76,22 @@ scale = Vector2(0.5331485, 0.5331485)
 [node name="CadreMurGriffe" parent="interactible" unique_id=138821927 instance=ExtResource("8_6j52v")]
 z_index = -1
 position = Vector2(1426, -2197)
+
+[node name="flamme" parent="interactible" unique_id=1766281021 instance=ExtResource("26_le5k3")]
+position = Vector2(1195.0001, -355.00003)
+scale = Vector2(1.2660927, 1.2660927)
+
+[node name="flamme2" parent="interactible" unique_id=525306952 instance=ExtResource("26_le5k3")]
+position = Vector2(3432, -1657)
+scale = Vector2(1.6546073, 1.6546073)
+
+[node name="flamme3" parent="interactible" unique_id=2056678749 instance=ExtResource("26_le5k3")]
+position = Vector2(4340, -1652)
+scale = Vector2(1.5155711, 1.5155711)
+
+[node name="flamme4" parent="interactible" unique_id=822200502 instance=ExtResource("26_le5k3")]
+position = Vector2(-176.00002, -2329)
+scale = Vector2(1.3270118, 1.3270118)
 
 [node name="grayboxing" type="Node2D" parent="." unique_id=2076599395]
 visible = false
@@ -719,22 +735,6 @@ script = ExtResource("25_miuck")
 export_path = "res://scene_7.png"
 bg_color = Color(0.101960786, 0.101960786, 0.101960786, 0)
 margin = 50
-
-[node name="Node2D2" parent="." unique_id=1766281021 instance=ExtResource("26_le5k3")]
-position = Vector2(1193, -365.00003)
-scale = Vector2(2.77, 2.77)
-
-[node name="Node2D3" parent="." unique_id=680211072 instance=ExtResource("26_le5k3")]
-position = Vector2(3433.0002, -1654.0001)
-scale = Vector2(2.77, 2.77)
-
-[node name="Node2D4" parent="." unique_id=1148624728 instance=ExtResource("26_le5k3")]
-position = Vector2(4338, -1653)
-scale = Vector2(2.77, 2.77)
-
-[node name="Node2D5" parent="." unique_id=1242236200 instance=ExtResource("26_le5k3")]
-position = Vector2(-176, -2337.0002)
-scale = Vector2(2.77, 2.77)
 
 [node name="Attack" type="Sprite2D" parent="." unique_id=830162738]
 z_index = -1

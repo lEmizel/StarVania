@@ -2,6 +2,7 @@
 
 [ext_resource type="Script" uid="uid://glnooul1g5y5" path="res://SCRIPT/INTERACTIBLE/roue_pointes.gd" id="1_rp"]
 [ext_resource type="Shader" uid="uid://bmtca80fxdhtp" path="res://SCRIPT/SHADER/roue_pointes.gdshader" id="2_rp"]
+[ext_resource type="Texture2D" uid="uid://cidr0wew0rmuy" path="res://MEDIA/INTERACTIBLE/roue.png" id="3_rp"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_corps"]
 radius = 38.0
@@ -14,8 +15,7 @@ resource_local_to_scene = true
 shader = ExtResource("2_rp")
 shader_parameter/taille = Vector2(400, 156)
 shader_parameter/centre = Vector2(200, 110)
-shader_parameter/rayon = 32.0
-shader_parameter/longueur_pointes = 12.0
+shader_parameter/dessin = ExtResource("3_rp")
 shader_parameter/angle = 0.0
 shader_parameter/flou = 0.0
 shader_parameter/vitesse = 0.0
@@ -24,11 +24,6 @@ shader_parameter/appui = Vector2(0, 1)
 shader_parameter/tremble = 0.0
 shader_parameter/eclat = -1.0
 shader_parameter/temps = 0.0
-shader_parameter/pierre = Color(0.46, 0.52, 0.63, 1)
-shader_parameter/pierre_ombre = Color(0.29, 0.34, 0.44, 1)
-shader_parameter/pierre_lumiere = Color(0.61, 0.66, 0.76, 1)
-shader_parameter/fer = Color(0.26, 0.28, 0.33, 1)
-shader_parameter/fer_lumiere = Color(0.52, 0.55, 0.61, 1)
 shader_parameter/couleur_etincelle = Color(1, 0.82, 0.45, 1)
 shader_parameter/couleur_poussiere = Color(0.78, 0.8, 0.84, 1)
 
