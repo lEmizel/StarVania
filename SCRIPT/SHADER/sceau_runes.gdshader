@@ -1,11 +1,10 @@
 shader_type canvas_item;
 render_mode unshaded, blend_premul_alpha;
-// SCEAU DE RUNES (2 oct. 2026, piège proposé à Kaoru), dans les couleurs DORÉES
-// de Kaoru (celles qu'il a mises sur la pince du grappin). Piloté par
-// sceau_runes.gd.
+// SCEAU DE RUNES (2 oct. 2026), dans les couleurs DORÉES de la pince du
+// grappin. Piloté par sceau_runes.gd.
 //
-// V2 EN VUE DE CÔTÉ (Kaoru : « la perspective n'est pas heureuse avec le
-// décor ») : le décor est en pure vue de côté — le sol n'est qu'une ARÊTE, avec
+// V2 EN VUE DE CÔTÉ (la perspective de la v1 jurait avec le décor) : le
+// décor est en pure vue de côté — le sol n'est qu'une ARÊTE, avec
 // un mur dessous — donc l'ellipse posée au sol (v1) débordait sur le mur. Ici,
 // rien n'est dessiné SOUS l'arête (seule une lueur douce y déborde, comme une
 // vraie lumière qui éclaire le mur) :

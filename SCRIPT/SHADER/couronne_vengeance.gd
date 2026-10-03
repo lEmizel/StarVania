@@ -6,7 +6,7 @@ extends Node2D
 ## Depuis la v2 du même jour elle est EN VOLUME : un anneau vu de trois quarts
 ## qui tourne lentement, des pointes devant et derrière, un dégradé, des
 ## gouttes (tout est dans couronne_vengeance.gdshader)
-## (idée de Kaoru : on ne voit pas l'épée hors des coups). Visuel seul : le
+## (l'épée ne se voit pas hors des coups). Visuel seul : le
 ## joueur la charge (player.gd, `_vengeance_charger`), elle ne fait que le
 ## montrer. Depuis que la vengeance renforce TOUS les coups d'épée pendant sa
 ## durée (elle ne s'use plus au premier), la couronne tient tout ce temps : ses

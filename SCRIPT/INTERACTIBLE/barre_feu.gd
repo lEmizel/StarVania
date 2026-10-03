@@ -1,16 +1,15 @@
 @tool
 extends Node2D
 ## ============================================================================
-## BARRE DE FEU (2 oct. 2026, demande de Kaoru : « autant faire des barres de feu
-## comme dans Mario directement ») — une chaîne de boules de feu qui tourne sans
+## BARRE DE FEU (2 oct. 2026, comme dans Mario) — une chaîne de boules de feu
+## qui tourne sans
 ## fin autour de son axe. Une pièce à poser n'importe où, en autant
 ## d'exemplaires qu'on veut : dans le vide (avec son bloc de pierre, SOLIDE, comme
 ## le bloc des barres de Mario : on peut se tenir dessus), dans un mur ou au
 ## plafond (`socle` décoché).
 ##   • les boules sont LE visuel de la boule de feu du squelette bleu
-##     (SCRIPT/SHADER/boule_de_feu.tscn), rondes, SANS traînée (Kaoru : « pas
-##     nécessaire » — la v1 en avait une, d'autant plus longue que la boule
-##     allait vite) ;
+##     (SCRIPT/SHADER/boule_de_feu.tscn), rondes, SANS traînée (la v1 en avait
+##     une, d'autant plus longue que la boule allait vite : inutile) ;
 ##   • elle blesse le joueur au contact (`damage`, repoussé loin de l'axe, un peu
 ##     vers le haut), pas plus d'une fois par `delai_entre_coups` ; roulade et
 ##     dash passent au travers. Elle tue les monstres qui s'y prennent

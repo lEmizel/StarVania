@@ -1,7 +1,7 @@
 @tool
 extends Node2D
 ## ============================================================================
-## PINCE DE GRAPPIN (2 oct. 2026, d'après le croquis de Kaoru) — le visuel du
+## PINCE DE GRAPPIN (2 oct. 2026, d'après un croquis) — le visuel du
 ## point d'accroche du grappin : une pince vue de face, un moyeu et trois
 ## branches (pince_grappin.gdshader).
 ##   • FERMÉE : on ne peut pas s'y accrocher (trop loin, pas au-dessus, un mur…).

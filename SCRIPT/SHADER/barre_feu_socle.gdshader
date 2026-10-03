@@ -1,8 +1,7 @@
 shader_type canvas_item;
 render_mode unshaded;
-// BARRE DE FEU — LE SOCLE (2 oct. 2026, demande de Kaoru : « des barres de feu
-// comme dans Mario ») : le bloc de pierre au centre de la barre, comme le bloc
-// des barres de Mario, dans le style décor du pilon (SANS contour : le volume
+// BARRE DE FEU — LE SOCLE (2 oct. 2026) : le bloc de pierre au centre de la
+// barre, comme le bloc des barres de feu de Mario, dans le style décor du pilon (SANS contour : le volume
 // vient des tons). Un bloc chanfreiné, quatre rivets aux coins et, au milieu,
 // l'emboîture de fer où tourne l'axe (la première boule de feu est posée
 // dessus). La lumière reste en haut à gauche DANS LE MONDE même si on tourne

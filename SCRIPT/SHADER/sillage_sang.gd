@@ -20,7 +20,7 @@ extends Node2D
 ## avec l'âge, mêmes `epaisseur` et `montee` que le matériau), à `marge` px
 ## près. Avant (1er oct. 2026), c'était le seul milieu du corps à moins de
 ## 56 px du trajet : la brume, qui monte jusqu'à ~200 px, mordait bien moins
-## loin qu'elle ne se voyait (« la zone de dégâts semble plus petite »).
+## loin qu'elle ne se voyait (la zone de dégâts semblait plus petite).
 ## Pendant son dernier cinquième la brume se déchire : elle ne mord plus. Sans
 ## recul ; l'ennemi se retourne contre le joueur. Ne recharge pas le bloodheal
 ## (seul le coup d'épée le fait).
@@ -42,8 +42,8 @@ const MAX_POINTS := 24
 ## tolérance (px) au-delà de la brume visible : un corps qui l'effleure
 ## compte comme dedans
 @export var marge := 16.0
-## EFFILÉE AUX DEUX BOUTS (1er oct. 2026, Kaoru : « pour éviter le côté
-## rectangulaire, qu'en début et en fin elle soit plus petite ») : sur cette
+## EFFILÉE AUX DEUX BOUTS (1er oct. 2026, pour éviter le côté
+## rectangulaire) : sur cette
 ## longueur (px) depuis chaque bout du trajet, la brume rapetisse — épaisseur ET
 ## montée — jusqu'à `bout_min` de sa taille ; un sillage plus court que deux
 ## fois cette longueur devient une lentille. Réglé ici et pas sur le matériau :

@@ -2,14 +2,14 @@ extends Node2D
 ## ============================================================================
 ## ŒIL DU CANON DE VERRE (1er oct. 2026) — talisman « Canon de verre » (des
 ## stats jusque-là, sans rien à l'écran) : tant qu'il est porté, un petit ŒIL
-## DE FEU — l'œil de Sauron, idée de Kaoru — flotte au-dessus de la tête du
+## DE FEU — l'œil de Sauron — flotte au-dessus de la tête du
 ## héros (nœud Oeil, oeil_canon.gdshader) : tout fait double, ses coups comme
 ## ceux qu'il encaisse. Il s'ouvre quand on le porte, se ferme quand on l'ôte,
 ## et regarde du côté où regarde le héros.
-## v2 (le même jour, « plus fidèle à Sauron, moins gros, plus vaporeux » —
-## Kaoru) : plus petit, sans trait d'encre, une fente noire dans un cœur jaune
+## v2 (le même jour, plus fidèle à Sauron) : plus petit, plus vaporeux, sans
+## trait d'encre, une fente noire dans un cœur jaune
 ## brûlant, des volutes de feu qui montent (voir le shader).
-## Il CLIGNE de temps en temps (Kaoru) : une fois toutes les `clignement_min` à
+## Il CLIGNE de temps en temps : une fois toutes les `clignement_min` à
 ## `clignement_max` s, parfois deux fois de suite — TOUT se referme, l'œil et son
 ## feu, comme une flamme qui se ferme sur elle-même, jusqu'à un fil de feu, et se
 ## rouvre en `duree_clignement` s (`paupiere` du shader).

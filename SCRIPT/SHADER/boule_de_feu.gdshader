@@ -154,7 +154,7 @@ void fragment() {
 		// `centre` passe par le MÊME masque que la queue. Sans lui, la chaleur de la
 		// queue s'appliquait aussi DEVANT la boule : elle y réchauffait une bande
 		// centrée sur l'axe, qui ressortait en pointe jaune traversant les anneaux
-		// orange et rouge du bord avant (vu par Kaoru le 18 sept. 2026).
+		// orange et rouge du bord avant (constaté le 18 sept. 2026).
 		float centre = (1.0 - clamp(bord, 0.0, 1.0)) * masque_queue;
 		float chaleur = centre * (1.0 - tc * 0.8) * 0.62 * (0.6 + 0.4 * p) + (fin - 0.5) * 0.2;
 		chaleur *= 0.55 + 0.45 * smoothstep(seuil, seuil + 0.35, matiere);

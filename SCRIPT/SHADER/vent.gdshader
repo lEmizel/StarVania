@@ -1,6 +1,6 @@
 shader_type canvas_item;
 render_mode unshaded;
-// VENT (2 oct. 2026, piège de Kaoru) — le courant d'air qui sort d'une bouche
+// VENT (2 oct. 2026) — le courant d'air qui sort d'une bouche
 // et file le long de son axe (vers −y dans le rectangle ; le nœud tourné, le
 // vent tourne avec). Même famille que le souffle du dash : des aplats blancs
 // nets, des formes qui MAIGRISSENT au lieu de s'estomper.

@@ -1,6 +1,6 @@
 shader_type canvas_item;
 render_mode unshaded, blend_premul_alpha;
-// FOUDRE DU CIEL (2 oct. 2026, piège « pilier de foudre », idée de Kaoru) —
+// FOUDRE DU CIEL (2 oct. 2026, piège « pilier de foudre ») —
 // l'éclair que le pilier appelle sur le joueur, de la même famille que l'arc de
 // la Lame de foudre (cœur blanc, lueur bleue, brins brisés). Dessiné dans un
 // rectangle debout : le POINT D'IMPACT au sol est `sol`, le ciel en haut.

@@ -396,8 +396,8 @@ func heart_pickup_fx() -> void:
 	var big := Vector2(220.0, 220.0)
 	var fx := TextureRect.new()
 	fx.texture = _heart_template_full.texture
-	# TODO (asset) : la texture du cœur est à l'envers pour le moment —
-	# Kaoru corrigera le PNG plus tard ; RETIRER ce flip_v à ce moment-là
+	# TODO (asset) : la texture du cœur est à l'envers pour le moment ;
+	# RETIRER ce flip_v quand le PNG sera corrigé
 	fx.flip_v = true
 	fx.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	fx.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
@@ -493,7 +493,7 @@ func souffle_fx() -> void:
 
 
 # ==================================================
-#  CŒUR NOIR (talisman, 1er oct. 2026, idée de Kaoru) : un cœur de plus, NOIR,
+#  CŒUR NOIR (talisman, 1er oct. 2026) : un cœur de plus, NOIR,
 #  après les cœurs rouges — le cœur rouge du HUD assombri (COULEUR_COEUR_NOIR),
 #  posé sur une copie un peu plus grande, rouge vif, qui BAT : un liseré rouge
 #  vivant (sinon on le prenait pour un cœur vide).

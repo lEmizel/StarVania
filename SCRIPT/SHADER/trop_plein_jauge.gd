@@ -1,8 +1,8 @@
 extends Node2D
 ## ============================================================================
 ## ROUE DU TROP-PLEIN (2 oct. 2026) — le signal du talisman « Trop-plein » (id
-## "trop_plein", choisi par Kaoru), faite comme la JAUGE D'ENDURANCE de Zelda
-## (sa demande) : un anneau de sang flotte au-dessus de l'épaule, côté dos, et se
+## "trop_plein"), faite comme la JAUGE D'ENDURANCE de Zelda :
+## un anneau de sang flotte au-dessus de l'épaule, côté dos, et se
 ## REMPLIT EN TOURNANT d'un tiers à chaque coup d'épée qui porte (« plop », le
 ## tiers gagné s'éclaire) ; PLEINE, son cœur se remplit d'une boule de sang qui
 ## bat : la prochaine boule de sang sortira grosse et forte. Au lancer de cette

@@ -4,8 +4,8 @@ render_mode unshaded;
 // dernier coup du combo PROJETTE son slash vers l'avant ; il file, traverse les
 // ennemis sur une courte distance et s'éteint.
 //
-// IL NAÎT SUR LE SLASH (Kaoru : « qu'il commence pile sur le slash FX du
-// joueur ») : il est dessiné sur le MÊME trajet que le slash du héros
+// IL NAÎT PILE SUR LE SLASH : il est dessiné sur le MÊME trajet que le slash
+// du héros
 // (`forme`, la courbe mesurée de slash_heros : r(θ) = a0 + a1·cos θ + b1·sin θ
 // + a2·cos 2θ + b2·sin 2θ) et, à sa naissance, de la même `queue` à la même
 // `tete` que la lame blanche à cet instant — même bord d'attaque, au pixel.
@@ -13,11 +13,11 @@ render_mode unshaded;
 // ses pointes prennent du retard (`fleche`), et son bord de fuite pousse des
 // LANGUES — des flammèches effilées, inégales, couchées vers l'arrière.
 //
-// MOINS PLAT (Kaoru : « moins plat, plus stylisé, avec un dégradé ») : un
+// MOINS PLAT, PLUS STYLISÉ : un
 // DÉGRADÉ du bord d'attaque (rouge vif) au bout des langues (rouge sombre),
 // un FIL rouge clair le long du bord d'attaque, une nervure sombre dans son
 // épaisseur, des filets de vitesse derrière lui. Toujours aucun blanc. Le
-// liseré d'encre est à 0 par défaut (réglage de Kaoru sur la première
+// liseré d'encre est à 0 par défaut (comme sur la première
 // version) : le dégradé suffit à le détacher du fond.
 //
 // Comme le reste de la famille : rien ne s'estompe, tout MAIGRIT (il finit en

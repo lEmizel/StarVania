@@ -1,6 +1,6 @@
 extends Node2D
 ## ============================================================================
-## FOUDRE DU CIEL (2 oct. 2026, piège « pilier de foudre », idée de Kaoru) — un
+## FOUDRE DU CIEL (2 oct. 2026, piège « pilier de foudre ») — un
 ## éclair qui tombe du ciel sur un point du sol, AVERTI à l'avance
 ## (foudre_ciel.gdshader). Posé par le pilier (SCRIPT/INTERACTIBLE/pilier_foudre.gd)
 ## là où se tenait le joueur ; il vit sa vie et se supprime :

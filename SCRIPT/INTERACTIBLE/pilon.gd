@@ -1,7 +1,7 @@
 @tool
 extends Node2D
 ## ============================================================================
-## PILON (2 oct. 2026, idée de Kaoru) — un petit concasseur qui frappe le sol
+## PILON (2 oct. 2026) — un petit concasseur qui frappe le sol
 ## QUAND ON APPROCHE ; chaque coup lâche l'ONDE DE CHOC de l'attaque 2 du
 ## skeleton_boss (SCRIPT/PARTICLE/fx_shake.tscn : la même zone basse et large,
 ## le même déroulé, le même visuel) — on SAUTE au bon moment. Il apprend au
@@ -18,12 +18,12 @@ extends Node2D
 ## Les monstres pris dans l'onde (ou dessous) prennent `degats_monstres`.
 ##
 ## Le dessin : SCRIPT/SHADER/pilon.gdshader (nœud Machine), SANS contour — il
-## fait partie du décor (Kaoru) ; s'il ne va pas, Kaoru le redessinera. Le pilon
+## fait partie du décor. Le pilon
 ## n'a pas de collision : seuls le coup et l'onde comptent.
 ## L'origine du nœud est le SOL sous le pilon.
 ## @tool : dans l'ÉDITEUR, il se montre à sa VRAIE taille (`echelle`, `levee`),
-## au repos, et suit les réglages en direct (Kaoru : « je ne peux pas voir sa
-## vraie taille en éditeur ») ; tout le jeu (joueur, coups, onde) reste au jeu.
+## au repos, et suit les réglages en direct ;
+## tout le jeu (joueur, coups, onde) reste au jeu.
 ##
 ## POUR LE JUGER : ouvrir la scène et faire F6 (il frappe en boucle).
 ## ============================================================================
@@ -60,8 +60,8 @@ const ONDE := preload("res://SCRIPT/PARTICLE/fx_shake.tscn")
 @export var secousse := 9.0
 
 @export_group("Taille")
-## la machine est dessinée à l'échelle 1 ; 0,5 = deux fois plus petite (Kaoru :
-## « divise par 2 la taille de la machine »). L'onde garde la largeur du boss
+## la machine est dessinée à l'échelle 1 ; 0,5 = deux fois plus petite.
+## L'onde garde la largeur du boss
 @export var echelle := 0.5
 ## il se soulève de… (px du dessin : à l'écran, × `echelle`)
 @export var levee := 120.0

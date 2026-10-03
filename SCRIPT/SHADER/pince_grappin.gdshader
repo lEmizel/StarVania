@@ -1,12 +1,12 @@
 shader_type canvas_item;
 render_mode unshaded, blend_premul_alpha;
-// PINCE DE GRAPPIN (2 oct. 2026, d'après le croquis de Kaoru « fermé / ouvert »)
+// PINCE DE GRAPPIN (2 oct. 2026, d'après un croquis « fermé / ouvert »)
 // — le point d'accroche du grappin, vu de face : un MOYEU rond et TROIS
 // BRANCHES (une en haut, deux en bas) qui s'écartent quand on peut s'y
 // accrocher. Piloté par pince_grappin.gd (`ouverture`, `lumiere`, `temps`).
 //
-// V3 « MAGIQUE » (Kaoru : « moins plastique, plus magique, comme le wall griffe,
-// avec un effet sympa ») : plus de reflets en plastique. Le corps est d'un rouge
+// V3 « MAGIQUE » (moins plastique, dans l'esprit de la trace de griffe) :
+// plus de reflets en plastique. Le corps est d'un rouge
 // SOMBRE, et c'est la LUMIÈRE qui le dessine, dans la famille de la trace de
 // griffe (traits nets, blanc chaud → lilas, des étincelles en fuseau qui
 // MAIGRISSENT au lieu de s'estomper, une lentille qui vacille) :

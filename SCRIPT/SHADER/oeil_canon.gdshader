@@ -1,17 +1,16 @@
 shader_type canvas_item;
 render_mode unshaded, blend_premul_alpha;
 // ŒIL DU CANON DE VERRE (v2, 1er oct. 2026) — talisman « Canon de verre » : un
-// petit ŒIL DE FEU, l'œil de Sauron (idée de Kaoru), qui flotte au-dessus de la
+// petit ŒIL DE FEU, l'œil de Sauron, qui flotte au-dessus de la
 // tête du héros tant que le talisman est porté.
 // v1 : une amande cernée d'encre, un iris en bandes, une couronne de flammes
-// pleines → « plus fidèle à Sauron, moins gros, plus vaporeux » (Kaoru).
+// pleines → trop gros, pas assez vaporeux, trop loin de l'œil de Sauron.
 // v2 : PLUS PETIT, SANS TRAIT D'ENCRE, tout en feu et en vapeur :
 //   - une FENTE noire, haute et étroite, effilée aux deux bouts, qui regarde du
 //     côté du héros — et tout le feu se RETOURNE avec elle : regardant à
 //     droite, l'œil est le miroir exact de l'œil qui regarde à gauche (avec le
 //     même feu des deux côtés, son bord rongé et ses flammes penchaient un peu
-//     plus à droite en moyenne : le regard à droite paraissait moins marqué,
-//     Kaoru) ;
+//     plus à droite en moyenne : le regard à droite paraissait moins marqué) ;
 //   - autour d'elle un cœur JAUNE BRÛLANT, qui passe à l'orange puis à la braise
 //     vers les coins de l'amande, strié de fibres qui rayonnent de la fente ;
 //   - un bord flou, et des VOLUTES de feu translucides qui s'en détachent et
@@ -19,12 +18,12 @@ render_mode unshaded, blend_premul_alpha;
 //     sillage de sang) ;
 //   - une lueur autour, AJOUTÉE à ce qu'il y a derrière (d'où le mode de fusion
 //     prémultiplié : l'œil couvre, sa lueur éclaire) ;
-//   - il CLIGNE de temps en temps (Kaoru) : TOUT se referme, l'œil et son feu,
+//   - il CLIGNE de temps en temps : TOUT se referme, l'œil et son feu,
 //     comme une flamme qui se ferme sur elle-même — le dessin entier s'écrase
 //     vers la ligne de l'œil (et se resserre un peu sur les côtés) jusqu'à
 //     n'être qu'un fil de feu, puis se rouvre (`paupiere`). Une 1re version
 //     fermait des paupières de braise sur l'œil en laissant brûler le feu
-//     autour : Kaoru voulait « tout fermer ».
+//     autour : écartée, tout doit se fermer.
 // Les réglages de la v1 que la scène a gardés (`amande`, `encre_px`, `flammes`,
 // `coeur`, `orange`…) ne servent plus : ceux de la v2 portent d'AUTRES NOMS
 // exprès, pour que la scène ne leur impose pas les valeurs de la v1.

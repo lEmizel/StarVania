@@ -1,17 +1,17 @@
 shader_type canvas_item;
 render_mode unshaded;
-// ROUE À POINTES (2 oct. 2026, piège choisi par Kaoru) — la roue seule, AU
-// DESSIN DE KAORU (3 oct. 2026 : MEDIA/INTERACTIBLE/roue.png, un disque bleu à
-// volutes et 24 pointes groupées par trois) : le shader le fait tourner,
+// ROUE À POINTES (2 oct. 2026) — la roue seule, UN DESSIN
+// (MEDIA/INTERACTIBLE/roue.png : un disque bleu à volutes et 24 pointes
+// groupées par trois) : le shader le fait tourner,
 // l'étale en flou de bougé quand elle file, et le FEND EN QUATRE QUARTIERS
 // quand elle se brise.
-//   • `dessin` : son dessin. En jeu, le script passe une copie réduite, à
-//     mipmaps et aux couleurs prémultipliées (`dessin_premultiplie`) : son
-//     image fait 1492 px et la roue ~180 à l'écran ; sans mipmaps, ses fines
+//   • `dessin` : l'image. En jeu, le script passe une copie réduite, à
+//     mipmaps et aux couleurs prémultipliées (`dessin_premultiplie`) : elle
+//     fait 1492 px et la roue ~180 à l'écran ; sans mipmaps, ses fines
 //     volutes scintilleraient quand elle tourne. Dans l'éditeur, c'est le
 //     dessin tel quel (la scène le référence) ;
 //   • `centre_dessin`, `rayon_dessin` : le disque DANS le dessin, en fractions
-//     de la largeur de l'image (mesurés sur son dessin : centre (886, 883) et
+//     de la largeur de l'image (mesurés sur le dessin : centre (886, 883) et
 //     rayon 671 px sur 1770 ; ses pointes vont jusqu'à 1,34 fois ce rayon) ;
 //     `rayon_disque` : le rayon du disque en jeu (px, à l'échelle 1) ;
 //   • `angle` : elle tourne ; `flou` = l'angle sur lequel étaler la roue (flou

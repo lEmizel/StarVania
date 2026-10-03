@@ -1,7 +1,7 @@
 shader_type canvas_item;
 render_mode unshaded;
 // DESSIN DU TALISMAN « CRESCENDO » (menu START, 1er oct. 2026) — provisoire,
-// en attendant le dessin de Kaoru.
+// en attendant le dessin définitif.
 // emplacement_talisman.gd le pose dans le rond et lui fournit `opacite`,
 // `eveil` et `temps`.
 // TOUT LE ROND est au dessin : un disque de nuit cerné d'un trait d'encre ;

@@ -3,7 +3,7 @@ render_mode unshaded;
 // DESSIN DU TALISMAN « TORNADE DE SANG » (menu START, 30 sept. 2026).
 // emplacement_talisman.gd le pose dans le rond et lui fournit `opacite`,
 // `eveil` et `temps`.
-// TOUT LE ROND est au dessin (Kaoru, 30 sept. 2026 : ni anneau ni grenats
+// TOUT LE ROND est au dessin (ni anneau ni grenats
 // autour) : un disque sombre cerné d'un simple trait d'encre ; dedans, la
 // boule de sang vue de face et ses bras enroulés autour d'elle, qui TOURNENT :
 // lentement au repos, plus vite quand le talisman est pointé ou porté (c'est

@@ -1,35 +1,32 @@
 shader_type canvas_item;
 render_mode unshaded, blend_premul_alpha;
-// HALO DE TORCHE (3 oct. 2026, d'après une image de référence de Kaoru) — la
-// lueur ronde autour de la flamme de ses torches (SCRIPT/INTERACTIBLE/
-// flamme.tscn, la flamme qu'il pose sur les torches peintes de ses décors) :
+// HALO DE TORCHE (3 oct. 2026, d'après une image de référence) — la lueur
+// ronde autour de la flamme des torches (SCRIPT/INTERACTIBLE/flamme.tscn, la
+// flamme posée sur les torches peintes des décors) :
 //   • un disque orange translucide, un peu plus fort près de la flamme, cerné
 //     d'un fin LISERÉ plus clair et d'une lueur douce juste dehors ;
 //   • un TREMBLÉ DESSINÉ À LA MAIN : le cercle est presque rond sur chaque
 //     image, mais il est REDESSINÉ `images_trace` fois par seconde, un peu
 //     différent à chaque fois (bord légèrement bosselé, centre qui bouge d'un
 //     rien, liseré plus ou moins épais) — le « trait qui bout » des dessins
-//     animés. Kaoru, sur sa référence : « dans les images c'est un rond quasi
-//     parfait, en fait ça bouge, le rond n'est pas toujours super rond, ça donne
-//     un côté dessiné à la main ». (1er essai : un bord qui ondulait en continu,
-//     des plaques de chaleur et un liseré effacé par endroits — trop.)
+//     animés : un rond quasi parfait sur chaque image, mais jamais tout à fait
+//     le même, ce qui donne un côté dessiné à la main. (1er essai : un bord qui
+//     ondulait en continu, des plaques de chaleur et un liseré effacé par
+//     endroits — trop.)
 //   • le LISERÉ, ce sont TROIS COUPS DE PINCEAU NETS répartis autour du
 //     cercle, avec des vides entre eux : chacun part épais et franc, s'amincit
 //     et s'efface. Un trait à bord FRANC (anticrénelé), pas une lueur floue.
-//     Les retours de Kaoru, dans l'ordre : « plus déstructuré, comme si parfois
-//     il s'effaçait — regarde mieux la référence » ; « ça clignote trop, il
-//     bouge trop » (tout était retiré au hasard 12 fois par seconde : leurs
-//     places et leurs longueurs dérivent maintenant LENTEMENT, au pas des
-//     tracés) ; « on y est presque, faudrait mieux répartir les traits et les
-//     rendre plus nets » (un seul long trait laissait un côté vide, et il
-//     était flou).
+//     Essais écartés : tout retirer au hasard 12 fois par seconde (ça
+//     clignotait, ça bougeait trop : leurs places et leurs longueurs dérivent
+//     maintenant LENTEMENT, au pas des tracés) ; un seul long trait (il
+//     laissait un côté vide, et il était flou).
 //   • il respire avec le vacillement de la flamme (`vacille`, posé à chaque
 //     image par flamme.gd — la même valeur fait vaciller sa lumière ; dans
 //     l'éditeur il reste à mi-souffle) ;
 //   • quelques BRAISES montent de la pointe, dérivent et s'éteignent.
 // Elle TEINTE le décor en orange plus qu'elle ne s'y ajoute (`teinte`, alpha
 // prémultiplié) : en lumière seulement ajoutée, elle virait au pêche pâle sur
-// ses décors clairs (gris-bleu de sc_10, scene_7). Les braises, elles, sont
+// les décors clairs (gris-bleu de sc_10, scene_7). Les braises, elles, sont
 // des points de couleur pleine, et le liseré a une épaisseur FIXE à l'écran
 // (un trait de crayon : il grossissait avec les grandes torches).
 // Le halo reste ROND même si la flamme est étirée (échelle non uniforme) et

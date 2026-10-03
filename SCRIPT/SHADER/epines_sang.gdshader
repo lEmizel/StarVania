@@ -6,9 +6,8 @@ render_mode unshaded;
 // le corps. Même famille que les autres effets : aplats nets, liseré d'encre,
 // tout piloté par `progress`.
 //
-// SOBRES (Kaoru, 1er oct. 2026 : « on les rend plus sobres, on retire
-// l'ombrage sur la pique, ça rend pas bien, on retire l'éclat de lumière blanc
-// aussi et on les rend plus fines ») : un pic = UN aplat de rouge sang cerné
+// SOBRES (1er oct. 2026 : sans ombrage sur la pique, sans éclat de lumière
+// blanc, et plus fines) : un pic = UN aplat de rouge sang cerné
 // d'encre, fin comme une aiguille ; plus de face à l'ombre, d'arête claire, de
 // reflet, d'étincelle ni de flash blanc (la v3 les avait : sauvegardée hors du
 // projet si on veut y revenir).

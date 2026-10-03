@@ -1,6 +1,6 @@
 extends Node2D
 ## ============================================================================
-## COMÈTE (2 oct. 2026, piège « pluie d'étoiles », choisi par Kaoru) — une
+## COMÈTE (2 oct. 2026, piège « pluie d'étoiles ») — une
 ## étoile filante qui tombe sur un point du sol, AVERTIE (comete.gdshader).
 ## Posée par la pluie d'étoiles (SCRIPT/INTERACTIBLE/pluie_etoiles.gd) ; elle
 ## vit sa vie et se supprime :

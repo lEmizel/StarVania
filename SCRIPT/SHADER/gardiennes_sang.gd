@@ -1,8 +1,7 @@
 extends Node2D
 ## ============================================================================
 ## GARDIENNES DE SANG (1er oct. 2026) — talisman « Gardiennes » (id
-## "gardiennes", choisi par Kaoru dans mes idées : « je suis curieux de voir ce
-## que tu peux faire »). Tant qu'il est porté, `nombre` gouttes de sang tournent
+## "gardiennes"). Tant qu'il est porté, `nombre` gouttes de sang tournent
 ## autour du héros, sur une RONDE vue en perspective : elles passent DERRIÈRE
 ## lui (plus petites, plus sombres) puis DEVANT.
 ##   • elles BLESSENT l'ennemi qu'elles touchent — une part d'un coup d'épée,

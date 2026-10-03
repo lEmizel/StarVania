@@ -5,15 +5,15 @@ extends Node2D
 ## LUI (de l'autre côté), tourné vers le héros, refait le même coup en miroir
 ## et le frappe à son tour pour `part` des dégâts d'un coup (bonus compris),
 ## SANS RECUL : un recul renvoyait l'ennemi sur le héros, qui prenait alors un
-## coup de contact (Kaoru) — l'ennemi garde le recul du coup du héros, il
+## coup de contact — l'ennemi garde le recul du coup du héros, il
 ## s'éloigne. Puis le double se dissout. Un double par
 ## coup d'épée (derrière le premier ennemi touché ; son slash prend tout ce
 ## qu'il couvre).
 ##
 ## v1 : le double suivait le héros avec 0,25 s de retard et rejouait ses coups
 ## au même endroit — en jeu il ne touchait jamais : le coup du héros avait déjà
-## repoussé l'ennemi hors de portée (Kaoru : « il touche jamais personne » ; mon
-## test figeait les monstres, sans recul). Ici il frappe là où l'ennemi EST :
+## repoussé l'ennemi hors de portée (le test figeait les monstres,
+## sans recul : il ne l'avait pas montré). Ici il frappe là où l'ennemi EST :
 ## jusqu'à son coup, le double reste collé derrière lui (à `ecart` px du bord
 ## de son corps) pendant qu'il recule, et s'arrête avant un mur.
 ##
@@ -26,8 +26,8 @@ extends Node2D
 
 const TEINTE := preload("res://SCRIPT/SHADER/ombre_sang.gdshader")
 const SLASH_SCENE := preload("res://SCRIPT/SHADER/slash_heros.tscn")
-## SYNERGIE avec le SANG BOUILLANT (Kaoru, 1er oct. 2026 : « qu'Ombre de sang
-## fasse aussi proc Sang bouillant ») : le coup du double fait bouillir l'ennemi
+## SYNERGIE avec le SANG BOUILLANT (1er oct. 2026) : le coup du double fait
+## bouillir l'ennemi
 ## comme un coup d'épée — une charge de plus (player.gd, `bouillant_charger`)
 const TALISMAN_BOUILLANT := "bouillant"
 
@@ -167,7 +167,7 @@ func _frapper() -> void:
 				continue
 			touches.append(c)
 			# COUP DE GRÂCE : fissuré (à portée d'exécution), le coup du double
-			# l'achève aussi (Kaoru, 1er oct. 2026)
+			# l'achève aussi
 			var grace: bool = c is BaseAI and c.executable()
 			var d: int = maxi(degats, c.hp) if grace else degats
 			# sans recul : il le renverrait sur le héros (coup de contact)

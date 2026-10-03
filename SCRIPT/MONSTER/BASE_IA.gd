@@ -32,7 +32,7 @@ var max_hp: int = 100
 ## Dégâts des attaques, EN CŒURS (lu par l'animator au moment du coup)
 @export var attack_power: int = 1
 
-# CAMPS (23 sept. 2026, demande de Kaoru) : des groupes de monstres capables
+# CAMPS (23 sept. 2026) : des groupes de monstres capables
 # de se taper dessus. Même valeur = alliés, valeurs différentes = ennemis à vue,
 # traités exactement comme le joueur. Le joueur a son propre camp (1 par
 # défaut, `faction` dans player.gd) : un monstre du camp 1 ne l'attaque pas.
@@ -49,7 +49,7 @@ var max_hp: int = 100
 @export var contact_temps_mort := 0.6
 @export_group("")
 
-# VOL LIBRE (23 sept. 2026, demande de Kaoru) : un monstre VOLANT qui n'a pas de
+# VOL LIBRE (23 sept. 2026) : un monstre VOLANT qui n'a pas de
 # cible virevolte de point en point, au hasard, dans un rayon autour de son
 # poste. Éteint par défaut ; les volants (orbe, kamikaze) appellent
 # `virevolter()` dans leur idle quand la case est cochée. Les terrestres n'y
@@ -86,7 +86,7 @@ var _knock := Vector2.ZERO
 ## (boss, via l'export) ou fenêtré par code (larve en boule de piques).
 @export var inebranlable := false
 ## UN VRAI BOSS : échappe au Coup de grâce (talisman du joueur). Le skeleton_boss
-## n'en est PAS un — c'est un élite (Kaoru, 1er oct. 2026) : on peut l'achever.
+## n'en est PAS un — c'est un élite : on peut l'achever.
 ## À cocher sur les vrais boss quand ils viendront.
 @export var vrai_boss := false
 ## INVULNÉRABLE : les dégâts sont ignorés — aucun flash, aucune barre de
@@ -643,8 +643,8 @@ func est_etourdi() -> bool:
 
 ## ENTRAVES (1er oct. 2026, talisman du joueur « Entraves ») : ENTRAVÉ pendant
 ## `duree` s, il vit à `facteur` de sa vitesse — son état (marche, vol, chute,
-## coups) et son animation tournent au ralenti, AU SOL COMME EN VOL (Kaoru :
-## « faut que ça marche aussi sur les volants ») ; le recul de nos coups, lui,
+## coups) et son animation tournent au ralenti, AU SOL COMME EN VOL (les
+## volants aussi) ; le recul de nos coups, lui,
 ## n'est pas freiné. Un anneau de sang l'enserre à mi-hauteur — la couronne de
 ## la Vengeance passée autour de lui, ses pointes qui rentrent avec le temps qui
 ## reste (SCRIPT/SHADER/entrave_sang.gd). Entravé de nouveau : le temps repart,
@@ -706,7 +706,7 @@ func cristalliser(duree: float) -> bool:
 			or _is_dead() or current_state in _etats_de_mort():
 		return false
 	# FIGÉ DANS LA POSE DU MOMENT (en pleine marche, en plein coup…) : d'abord
-	# je le repassais au repos, il prenait la 1re image de son idle avant de se
+	# il repassait au repos et prenait la 1re image de son idle avant de se
 	# figer. Son état ne change pas (change_state refuse tout, voir plus haut) ;
 	# son animation s'arrête là où elle en est ; son coup en cours est coupé —
 	# ses zones de coup éteintes, son slash effacé — sans changer d'animation.
@@ -725,8 +725,8 @@ func est_cristallise() -> bool:
 	return _cristal
 
 
-## le cristal se brise : les éclats du Coup de grâce, plus petits, TELS QUE
-## KAORU LES A RÉGLÉS (grace_eclats.tscn : un seul ton, sans encre — ne pas les
+## le cristal se brise : les éclats du Coup de grâce, plus petits, AVEC LES
+## RÉGLAGES DE LEUR SCÈNE (grace_eclats.tscn : un seul ton, sans encre — ne pas les
 ## recolorer ici) ; il reprend son animation et ses esprits (`reprendre` : faux
 ## quand il meurt — sa mort décide de la suite)
 func briser_cristal(reprendre := true) -> void:
@@ -855,13 +855,12 @@ func change_state(new_state: int) -> void:
 	# physique, juste après celui des monstres), le changement en attente
 	# sortait le monstre de DEAD : PV à 0, plus de barre de vie, intouchable
 	# (couche 0 depuis sa mort), mais son IA et ses attaques tournaient encore —
-	# la « larve immortelle » de Kaoru. Reproduit sur larve, squelette et
+	# la « larve immortelle ». Reproduit sur larve, squelette et
 	# kamikaze avant ce garde-fou.
 	if _is_dead() and not (new_state in _etats_de_mort()):
 		return
 	# GELÉ (talisman « Sang cristallisé ») : il ne change plus d'état du tout —
-	# pas même pour le repos, qui relançait son idle (Kaoru : « il arrive
-	# toujours à jouer son idle ») — sauf pour mourir
+	# pas même pour le repos, qui relançait son idle — sauf pour mourir
 	if _cristal and not (new_state in _etats_de_mort()):
 		return
 	# SONNÉ (talisman « Parade ») : il reste au repos jusqu'à la fin

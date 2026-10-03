@@ -15,9 +15,9 @@ extends Node2D
 ## resté « héros », mais c'est LE slash en shader du jeu, tous les slashs
 ## mesurés sont dans MESURES.
 ##
-## D'OÙ VIENNENT LES CHIFFRES : de tes dessins, mesurés un par un (MESURES, plus
-## bas). Le trajet de la lame est le bord extérieur de tous les croissants mis
-## ensemble ; pour chaque dessin j'ai relevé de quel angle à quel angle va le
+## D'OÙ VIENNENT LES CHIFFRES : des dessins d'origine, mesurés un par un
+## (MESURES, plus bas). Le trajet de la lame est le bord extérieur de tous les croissants mis
+## ensemble ; pour chaque dessin sont relevés de quel angle à quel angle va le
 ## croissant sur ce trajet, puis, en douze points de sa queue à sa tête, de
 ## combien son bord sort du trajet, son épaisseur et son opacité. Le dessin n°k
 ## sert de repère au MILIEU de son temps d'affichage ; entre deux repères, tout
@@ -127,7 +127,7 @@ const MESURES := {
 	},
 	"slash_squelette": {
 		# le slash des SQUELETTES (classique et bleu : les mêmes dessins), mesuré
-		# sur ses dessins retournés en miroir (il tourne dans l'autre sens)
+		# sur des dessins retournés en miroir (il tourne dans l'autre sens)
 		"images_par_seconde": 35.0,
 		"miroir": true,
 		"rectangle": Vector2(340, 340),

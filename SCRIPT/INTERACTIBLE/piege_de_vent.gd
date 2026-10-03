@@ -1,7 +1,7 @@
 @tool
 extends Node2D
 ## ============================================================================
-## PIÈGE DE VENT (2 oct. 2026, idée de Kaoru) — une bouche d'aération qui
+## PIÈGE DE VENT (2 oct. 2026) — une bouche d'aération qui
 ## SOUFFLE à intervalles réguliers et pousse TRÈS FORT le joueur et les
 ## monstres. Il souffle le long de son axe « haut » : posé au sol, un courant
 ## qui projette en l'air ; tourné de 90° contre un mur, un vent de côté qui
@@ -19,8 +19,8 @@ extends Node2D
 ## LA POUSSÉE : `force` px/s à la bouche, `force_au_bout` de ça au bout de la
 ## `portee`, sur la largeur de la plateforme (`souffler` du joueur et des
 ## monstres). Le vent nous empoigne (sa vitesse en ~0,15 s) et nous donne de
-## l'ÉLAN qui continue APRÈS le courant (Kaoru : « faut que ça nous envoie bien
-## plus loin, et plus fort ») : en l'air on file loin, au sol on glisse un peu,
+## l'ÉLAN qui continue APRÈS le courant (pour envoyer loin et
+## fort) : en l'air on file loin, au sol on glisse un peu,
 ## un mur l'arrête. À 1800 px/s, on recule même en courant (le héros court à
 ## 700). Un mur ou un plafond dans le courant l'arrête : la portée est
 ## raccourcie au lancement. Agrippé (échelle, corde, rebord, mur, grappin), on
@@ -28,7 +28,7 @@ extends Node2D
 ##
 ## Le visuel : SCRIPT/SHADER/vent.gdshader (nœud Vent), la famille du souffle du
 ## dash (filets blancs en fuseau, anneaux d'air au pinceau). La plateforme est
-## celle de Kaoru (le grayboxing 200×50 pour l'instant) : la largeur du courant
+## celle de la scène (le grayboxing 200×50 pour l'instant) : la largeur du courant
 ## suit sa forme de collision.
 ## Visible dans l'éditeur, le cycle y tourne : on y règle portée et décalage.
 ## POUR LE JUGER : F6 (il souffle en boucle).
@@ -173,7 +173,7 @@ func _portee_effective() -> float:
 	return _portee_reelle if _portee_reelle >= 0.0 else portee
 
 
-## la plateforme (la forme de collision rectangulaire du décor de Kaoru) donne
+## la plateforme (la forme de collision rectangulaire du décor) donne
 ## la bouche (le milieu de son dessus) et la largeur du courant
 func _lire_plateforme() -> void:
 	_exclus.clear()

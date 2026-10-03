@@ -1,6 +1,6 @@
 extends Node2D
 ## ============================================================================
-## SCEAU DE RUNES (2 oct. 2026, piège proposé à Kaoru) — un cercle magique gravé
+## SCEAU DE RUNES (2 oct. 2026) — un cercle magique gravé
 ## au sol. Quelqu'un marche dessus (joueur ou monstre) : le sceau s'ARME — le
 ## cercle se trace, les runes s'allument une à une pendant `delai_armement` (le
 ## temps de fuir) — puis une COLONNE DE LUMIÈRE jaillit vers le ciel : ce qui est

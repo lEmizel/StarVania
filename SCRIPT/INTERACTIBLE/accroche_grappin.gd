@@ -9,7 +9,7 @@ extends Node2D
 ##
 ## Ce nœud ne fait que : se déclarer dans le groupe "GRAPPIN", donner son
 ## point, s'allumer, et dessiner le câble pendant la traction.
-## Son visuel : la PINCE (2 oct. 2026, d'après le croquis de Kaoru), posée au
+## Son visuel : la PINCE (2 oct. 2026, d'après un croquis), posée au
 ## démarrage — fermée, OUVERTE avec une lumière bleue quand on peut s'y
 ## accrocher, refermée sur le câble pendant la traction
 ## (SCRIPT/SHADER/pince_grappin.tscn). Sans pince (l'accroche pendulaire),
@@ -42,8 +42,7 @@ const PINCE_SCENE := preload("res://SCRIPT/SHADER/pince_grappin.tscn")
 ## la pince dessine le point (sinon : l'anneau) — l'accroche pendulaire la coupe
 @export var pince_visible := true
 ## sa taille (1 = celle du dessin : ~42 px fermée, ~66 px ouverte) ; 1,82 :
-## « 40 % plus grande », puis « encore 30 % » (Kaoru, 2 oct. 2026) → ~76 et
-## ~120 px
+## agrandie de 40 % puis de 30 % → ~76 et ~120 px
 @export var echelle_pince := 1.82
 ## dans l'éditeur seulement : voir la pince ouverte
 @export var apercu_pince_ouverte := false
@@ -92,7 +91,7 @@ func _ready() -> void:
 ## la pince : posée une fois (dans l'éditeur aussi, sans être enregistrée).
 ## `_process` la rattrape aussi : une accroche déjà chargée dans l'éditeur quand
 ## ce script a changé ne refait pas son `_ready` — elle gardait l'ancien anneau
-## jusqu'à ce qu'on rouvre la scène (Kaoru, 2 oct. 2026)
+## jusqu'à ce qu'on rouvre la scène
 func _poser_pince() -> void:
 	_pince = get_node_or_null("PinceGrappin") as Node2D
 	if _pince == null:

@@ -98,7 +98,7 @@ const TALISMAN_EPINES := "epines"
 ## qui devrait nous tuer nous laisse à UN cœur, puis plus aucun coup ne passe
 ## pendant `second_souffle_grace` s (le temps de fuir ou de se soigner). Il se
 ## recharge en `second_souffle_recharge` s, au respawn, et à chaque checkpoint
-## touché (Kaoru : « disons plutôt tous les 120 secondes et par checkpoint »).
+## touché.
 ## Le cœur qui reste se fêle dans le HUD (gestion_interface.gd, `souffle_fx`).
 ## L'attente vit dans l'autoload (`Player.second_souffle_attente`) : le joueur
 ## est recréé à chaque respawn.
@@ -112,16 +112,16 @@ var _souffle_grace_reste := 0.0
 ## le prochain coup d'épée qui PORTE sur lui fait `marque_multiplicateur` fois
 ## ses dégâts et efface la marque (animator.gd). La rune et sa durée :
 ## SCRIPT/SHADER/marque_sang.tscn.
-@export var marque_multiplicateur := 1.5     # +50 % (Kaoru, 1er oct. 2026 : ×2 était trop fort)
+@export var marque_multiplicateur := 1.5     # +50 % (×2 était trop fort)
 
-## TALISMAN « CANON DE VERRE » (1er oct. 2026, id "canon", idée de Kaoru) :
+## TALISMAN « CANON DE VERRE » (1er oct. 2026, id "canon") :
 ## les coups d'épée (avec l'éclair de la Lame de foudre) et ceux de l'Ombre de
-## sang ×2 — SEULEMENT eux depuis le 2 oct. (Kaoru : plus la boule, pour ne pas
+## sang ×2 — SEULEMENT eux depuis le 2 oct. (plus la boule, pour ne pas
 ## cumuler avec le Pacte de sang ; la description ne parle que de l'épée) —
 ## et tous les dégâts reçus ×2 (clés du catalogue lues par
 ## `Player.multiplicateur_infliges()` / `Player.multiplicateur_recus()`, cette
 ## dernière appliquée dans `_degats_recus`). Tant qu'il est porté, un petit ŒIL DE FEU
-## (l'œil de Sauron, idée de Kaoru) flotte au-dessus de la tête — au-dessus de
+## (l'œil de Sauron) flotte au-dessus de la tête — au-dessus de
 ## la couronne de la Vengeance quand elle est levée : SCRIPT/SHADER/oeil_canon.tscn,
 ## posé une fois par `_oeil_preparer`.
 const OEIL_CANON := preload("res://SCRIPT/SHADER/oeil_canon.tscn")
@@ -135,12 +135,11 @@ var _oeil: Node2D
 ## TALISMAN « VENGEANCE » (1er oct. 2026, id "vengeance") : porté, ENCAISSER un
 ## coup la charge pour `vengeance_duree` s ; tant qu'elle dure, TOUS les coups
 ## d'épée qui portent font `vengeance_multiplicateur` fois leurs dégâts
-## (animator.gd) — elle ne s'use pas au premier coup (Kaoru, 1er oct. 2026 :
-## « tous les coups d'épée, pas un, et pendant 5 secondes » ; la première
+## (animator.gd) — elle ne s'use pas au premier coup (la première
 ## version ne donnait que le prochain coup, dans les 3 s). Un nouveau coup
 ## encaissé la relance pour toute sa durée. Tant qu'elle est chargée, une
-## COURONNE de sang flotte au-dessus du perso (idée de Kaoru : « on ne voit
-## pas l'épée hors des coups ») : SCRIPT/SHADER/couronne_vengeance.tscn ; ses
+## COURONNE de sang flotte au-dessus du perso (l'épée ne se voit pas hors
+## des coups) : SCRIPT/SHADER/couronne_vengeance.tscn ; ses
 ## pointes rentrent avec le temps qui reste, elle bat à chaque coup vengeur,
 ## s'efface quand le temps est écoulé.
 const TALISMAN_VENGEANCE := "vengeance"
@@ -156,8 +155,8 @@ var _couronne: Node2D
 
 ## TALISMAN « COUP DANS LE DOS » (1er oct. 2026, id "dos") : un coup d'épée qui
 ## frappe un ennemi DE DOS (nous sommes du côté opposé à son regard, au moment
-## du coup) fait `dos_multiplicateur` fois ses dégâts — +50 %, le chiffre de
-## Kaoru (j'avais proposé +75 %) ; un grand éclat rouge et blanc le signale.
+## du coup) fait `dos_multiplicateur` fois ses dégâts — +50 %
+## (plutôt que +75 %) ; un grand éclat rouge et blanc le signale.
 ## Voir animator.gd (`_on_body_entered`, `_de_dos`). Le héros traverse les
 ## ennemis : passer de l'autre côté et frapper avant qu'il se retourne.
 const TALISMAN_DOS := "dos"
@@ -166,7 +165,7 @@ const TALISMAN_DOS := "dos"
 ## TALISMAN « CRESCENDO » (1er oct. 2026, id "crescendo") : chaque coup d'épée
 ## qui porte sans qu'on soit touché fait monter la série ; le n-ième coup de la
 ## série fait `CRESCENDO_PALIERS[n]` % de dégâts en plus — 5, 10, 20, 40 puis
-## 50 % pour tous les suivants (les paliers de Kaoru ; j'avais proposé +5 % par
+## 50 % pour tous les suivants (plutôt que +5 % par
 ## coup jusqu'à 50). Un coup ENCAISSÉ remet la série à zéro ; elle s'éteint
 ## aussi après `crescendo_delai` s sans coup qui porte (0 = jamais). Un coup qui
 ## touche plusieurs ennemis ne compte qu'une fois. Le slash rougit et
@@ -182,14 +181,13 @@ var crescendo_serie := 0          # coups d'épée qui ont porté d'affilée
 var _crescendo_coup := -1         # le dernier coup compté (animator `_coup_id`)
 var _crescendo_reste := 0.0       # avant que la série s'éteigne (s)
 
-## TALISMAN « PARADE » (1er oct. 2026, id "parade", « on bloque un coup quand on
-## le frappe ») : un coup d'ennemi au corps à corps (l'étiquette "attaque:" de
+## TALISMAN « PARADE » (1er oct. 2026, id "parade") : un coup d'ennemi au corps à corps (l'étiquette "attaque:" de
 ## BASE_IA.infliger) qui nous arrive DE FACE pendant que notre lame est sortie
 ## — ou sur le point de sortir, l'image d'avant — est PARÉ : aucun dégât, et
 ## l'ennemi reste sonné `parade_etourdi` s (BASE_IA.etourdir : son coup s'arrête
-## net, des étoiles tournent au-dessus de sa tête — idée de Kaoru aussi), le
+## net, des étoiles tournent au-dessus de sa tête), le
 ## skeleton_boss autant que les autres (une version le sonnait deux fois moins
-## longtemps : « pas nécessaire », Kaoru). Passe avant le Bouclier et le Pas de
+## longtemps : inutile). Passe avant le Bouclier et le Pas de
 ## côté ; le coup n'est pas
 ## encaissé (la Vengeance ne se charge pas, le Crescendo ne casse pas). Voir
 ## `_parade_tente` ; la lame en garde : animator.gd `lame_en_garde` ; le choc :
@@ -200,8 +198,8 @@ const PARADE_CHOC_SCENE := preload("res://SCRIPT/SHADER/parade_choc.tscn")
 ## la caméra tremble au choc (0 = pas du tout)
 @export var parade_secousse := 3.0
 
-## TALISMAN « LAME CORROMPUE » (1er oct. 2026, id "lame_corrompue", idée de
-## Kaoru) : chaque coup d'épée qui porte EMPOISONNE l'ennemi — le même poison
+## TALISMAN « LAME CORROMPUE » (1er oct. 2026, id "lame_corrompue") :
+## chaque coup d'épée qui porte EMPOISONNE l'ennemi — le même poison
 ## que le Sang corrompu (`empoisonner`, `poison_degats`…, prolongé à chaque
 ## coup, sans cumul) — et le slash vire au violet ; avec la Lame de foudre, sa
 ## foudre et l'éclair qui bondit virent au violet aussi, et l'ennemi que
@@ -215,7 +213,7 @@ const TALISMAN_LAME_CORROMPUE := "lame_corrompue"
 @export var lame_corrompue_halo := Color(0.52, 0.12, 0.9)
 @export var lame_corrompue_coeur_foudre := Color(0.95, 0.86, 1.0)
 
-## TALISMAN « PRISE FERME » (1er oct. 2026, id "prise", idée de Kaoru) :
+## TALISMAN « PRISE FERME » (1er oct. 2026, id "prise") :
 ## accroché à un mur (état WALL_JUMP), on ne glisse plus — on reste où on s'est
 ## accroché ; bas maintenu, on glisse comme avant pour descendre. Voir
 ## `wall_jump_execute`.
@@ -241,8 +239,8 @@ const GRACE_SCENE := preload("res://SCRIPT/SHADER/grace_eclats.tscn")
 @export var grace_secousse := 5.0
 
 ## TALISMAN « SANG CRISTALLISÉ » (1er oct. 2026, id "cristal") : une boule de
-## sang (ou la Tornade) qui touche a `cristal_chance` (une sur cinq, le choix de
-## Kaoru : à chaque boule c'était trop fort) de FIGER l'ennemi `cristal_duree` s
+## sang (ou la Tornade) qui touche a `cristal_chance` (une sur cinq :
+## à chaque boule c'était trop fort) de FIGER l'ennemi `cristal_duree` s
 ## dans le cristal (BASE_IA.cristalliser : une statue rouge, sobre — pas de
 ## bulle comme le Bouclier, trop gros) ; notre coup d'épée suivant le BRISE pour
 ## `cristal_bonus` fois ses dégâts. Voir bloodball.gd et animator.gd.
@@ -252,7 +250,7 @@ const TALISMAN_CRISTAL := "cristal"
 @export var cristal_bonus := 1.5
 
 ## TALISMAN « PLUMES ACÉRÉES » (1er oct. 2026, id "plumes") — IL FAUT LE
-## DOUBLE SAUT (sans lui, rien : précisé dans la description, voulu par Kaoru) :
+## DOUBLE SAUT (sans lui, rien : précisé dans la description) :
 ## à chaque double saut, l'aile lâche `plumes_nombre` plumes acérées qui fondent
 ## vers le sol en éventail (`plumes_eventail` degrés de part et d'autre de la
 ## verticale) ; chacune blesse le premier ennemi qu'elle touche pour
@@ -263,12 +261,12 @@ const TALISMAN_PLUMES := "plumes"
 const PLUME_ACEREE := preload("res://SCRIPT/SHADER/plume_aceree.tscn")
 @export var plumes_nombre := 5
 ## chaque plume vaut un coup d'épée entier (70 sans bonus) — à 0,35 (25) c'était
-## « trop faible » (Kaoru)
+## trop faible
 @export var plumes_part := 1.0
 @export var plumes_vitesse := 950.0
 @export var plumes_eventail := 36.0
 
-## TALISMAN « SANG VERSÉ » (1er oct. 2026, id "sang_verse", idée de Kaoru) :
+## TALISMAN « SANG VERSÉ » (1er oct. 2026, id "sang_verse") :
 ## chaque cœur perdu remplit la jauge de soin de `sang_verse_par_coeur` (50 = une
 ## demi-barre ; un soin coûte `HEAL_COST`, 100) — voir `_sang_verse`, appelé
 ## quand un coup est VRAIMENT encaissé (`apply_damage`, `apply_environment_damage` :
@@ -279,10 +277,10 @@ const TALISMAN_SANG_VERSE := "sang_verse"
 ## LE SANG PERDU À LA MORT (1er oct. 2026) : en mourant, on perd
 ## `blood_perdu_a_la_mort` du sang récolté (le compteur `Player.blood`, les
 ## « âmes ») — 1 = tout, 0 = rien. JUSQUE-LÀ ON NE PERDAIT RIEN : ajouté avec le
-## talisman « RELIQUAIRE » (id "reliquaire", idée de Kaoru), qui en GARDE
+## talisman « RELIQUAIRE » (id "reliquaire"), qui en GARDE
 ## `reliquaire_part` (50 %) sur nous. Voir `_perdre_blood`, dans `dead_enter`.
-## CE QU'ON PERD N'EST PAS PERDU TOUT DE SUITE (1er oct. 2026, Kaoru : « comme
-## dans les Souls ») : il attend en ESPRIT DE SANG (SCRIPT/SHADER/esprit_sang.tscn)
+## CE QU'ON PERD N'EST PAS PERDU TOUT DE SUITE (1er oct. 2026, comme
+## dans les Souls) : il attend en ESPRIT DE SANG (SCRIPT/SHADER/esprit_sang.tscn)
 ## à `ames_hauteur` px au-dessus du dernier sol sûr (`_dernier_sol_sur` : au
 ## sol, ni mort ni sonné, depuis `SOL_SUR_IMAGES` images — jamais au fond d'un
 ## trou ni dans des piques) ; le toucher le rend. Mourir de nouveau avant : il
@@ -370,7 +368,7 @@ const BOUILLON_SCENE := preload("res://SCRIPT/SHADER/bouillon_sang.tscn")
 const OMBRE_SCENE := preload("res://SCRIPT/SHADER/ombre_sang.tscn")
 @export var ombre_part := 0.5
 
-## TALISMAN « SANG CORROMPU » (1er oct. 2026, id "corrompu", idée de Kaoru) :
+## TALISMAN « SANG CORROMPU » (1er oct. 2026, id "corrompu") :
 ## la boule de sang — et la Tornade si elle est portée — vire au violet et
 ## EMPOISONNE l'ennemi qu'elle touche : il perd `poison_degats` PV toutes les
 ## `poison_intervalle` s pendant `poison_duree` s (Canon de verre compris, sans
@@ -388,8 +386,7 @@ const POISON_SCENE := preload("res://SCRIPT/SHADER/poison_sang.tscn")
 @export var corrompu_couleur := Color(0.58, 0.14, 0.84)
 @export var corrompu_ombre := Color(0.19, 0.02, 0.31)
 
-## TALISMAN « GARDIENNES » (1er oct. 2026, id "gardiennes", choisi par Kaoru :
-## « je suis curieux de voir ce que tu peux faire ») : tant qu'il est porté,
+## TALISMAN « GARDIENNES » (1er oct. 2026, id "gardiennes") : tant qu'il est porté,
 ## deux gouttes de sang tournent autour de nous — elles blessent les ennemis
 ## qu'elles touchent pour `gardiennes_part` d'un coup d'épée (bonus compris),
 ## sans recul, et fondent sur les tirs ennemis qui nous visent pour éclater avec
@@ -399,27 +396,26 @@ const GARDIENNES_SCENE := preload("res://SCRIPT/SHADER/gardiennes_sang.tscn")
 @export var gardiennes_part := 0.5
 var _gardiennes: Node2D
 
-## TALISMAN « SOIN ÉCLAIR » (1er oct. 2026, id "soin_eclair", choisi par Kaoru) :
+## TALISMAN « SOIN ÉCLAIR » (1er oct. 2026, id "soin_eclair") :
 ## l'animation de soin — le temps où l'on reste planté, à la merci d'un coup qui
 ## l'interrompt — joue `soin_eclair_vitesse` fois plus vite (0,73 s → 0,37 s).
 ## Même coût, mêmes cœurs. Voir `heal_enter`.
 const TALISMAN_SOIN_ECLAIR := "soin_eclair"
 @export var soin_eclair_vitesse := 2.0
 
-## TALISMAN « CŒUR NOIR » (1er oct. 2026, id "coeur_noir", IDÉE DE KAORU) : un
+## TALISMAN « CŒUR NOIR » (1er oct. 2026, id "coeur_noir") : un
 ## cœur NOIR s'ajoute aux nôtres — un seul, jamais plus — `coeur_noir_recharge` s
 ## après l'avoir perdu, et à chaque checkpoint touché (et au respawn, qui se fait
 ## à un checkpoint). Il prend le PREMIER point de dégât d'un coup (Canon de
 ## verre : un coup de 2 brise le cœur noir puis un rouge) ; le coup est encaissé
 ## quand même (recul, Vengeance, Épines…). En se BRISANT, il frappe tous les
-## monstres VISIBLES À L'ÉCRAN (Kaoru : « autour de nous ou visibles à l'écran,
-## c'est le mieux ») pour `coeur_noir_part` d'un coup d'épée (bonus compris),
+## monstres VISIBLES À L'ÉCRAN pour `coeur_noir_part` d'un coup d'épée (bonus compris),
 ## avec recul : une onde noire part de nous et les frappe quand elle les atteint
 ## (SCRIPT/SHADER/coeur_noir_onde.tscn). Il vit dans l'autoload
 ## (`Player.coeur_noir`, `coeur_noir_attente`) ; le HUD le montre après les
 ## cœurs rouges (gestion_interface.gd, `coeur_noir_fx`). Voir `_coeur_noir_tick`,
 ## `_coeur_noir_absorbe`, `_coeur_noir_eclater`.
-## TALISMAN « COURONNE DU DÉFI » (1er oct. 2026, id "defi", idée de Kaoru) :
+## TALISMAN « COURONNE DU DÉFI » (1er oct. 2026, id "defi") :
 ## un seul cœur, tous les autres talismans retirés et verrouillés (tout cela vit
 ## dans l'autoload : `equiper_talisman`, `retirer_talisman`, `add_max_hp`) — et
 ## une magnifique couronne d'or qui tourne au-dessus de la tête :
@@ -434,7 +430,7 @@ const COEUR_NOIR_ONDE := preload("res://SCRIPT/SHADER/coeur_noir_onde.tscn")
 ## la caméra tremble quand il éclate (0 = pas du tout)
 @export var coeur_noir_secousse := 7.0
 
-## TALISMAN « ENTRAVES » (1er oct. 2026, id "entraves", choisi par Kaoru) : chaque
+## TALISMAN « ENTRAVES » (1er oct. 2026, id "entraves") : chaque
 ## coup d'épée qui porte ENTRAVE l'ennemi — il vit à `entraves_facteur` de sa
 ## vitesse pendant `entraves_duree` s (marche, vol, chute, coups, animation), au
 ## sol comme en vol ; un nouveau coup relance le temps, sans cumul. Un anneau de
@@ -443,13 +439,13 @@ const COEUR_NOIR_ONDE := preload("res://SCRIPT/SHADER/coeur_noir_onde.tscn")
 @export var entraves_duree := 2.0
 @export var entraves_facteur := 0.6
 
-## TALISMAN « TROP-PLEIN » (2 oct. 2026, id "trop_plein", choisi par Kaoru) : le
+## TALISMAN « TROP-PLEIN » (2 oct. 2026, id "trop_plein") : le
 ## miroir de la Marque — `trop_plein_coups_requis` coups d'épée qui portent (un
 ## par coup, même s'il touche plusieurs ennemis) remplissent la boule : la
 ## suivante sort `trop_plein_taille` fois plus grosse et fait
 ## `trop_plein_degats` fois ses dégâts (la Tornade aussi). Pour le voir venir :
-## une ROUE de sang au-dessus de l'épaule, comme la jauge d'endurance de Zelda
-## (Kaoru), qui se remplit en tournant d'un tiers à chaque coup ; pleine, son
+## une ROUE de sang au-dessus de l'épaule, comme la jauge d'endurance de Zelda,
+## qui se remplit en tournant d'un tiers à chaque coup ; pleine, son
 ## cœur se remplit et bat ; elle crève au lancer
 ## (SCRIPT/SHADER/trop_plein_jauge.tscn). Voir animator.gd (`_on_body_entered`)
 ## et `bloodball_enter`.
@@ -461,12 +457,12 @@ const TROP_PLEIN_JAUGE := preload("res://SCRIPT/SHADER/trop_plein_jauge.tscn")
 var trop_plein_coups := 0
 var _trop_plein: Node2D
 
-## TALISMAN « INÉBRANLABLE » (2 oct. 2026, id "inebranlable", choisi par Kaoru) :
+## TALISMAN « INÉBRANLABLE » (2 oct. 2026, id "inebranlable") :
 ## un coup d'ENNEMI encaissé ne fait plus reculer ni vaciller — pas d'état HIT,
 ## pas de recul : on garde la main (un coup d'épée en cours continue). Le cœur
 ## est perdu quand même, et tout ce qu'un coup encaissé déclenche part
 ## (Vengeance, Épines, Bouclier…). À la place du vacillement, l'effet du PAS
-## DE CÔTÉ (Kaoru, plutôt qu'un clignotement) : un fantôme reste sur place et
+## DE CÔTÉ (plutôt qu'un clignotement) : un fantôme reste sur place et
 ## glisse vers le coup, le corps blêmit un instant (`_fantome_esquive`) ; et
 ## pendant `inebranlable_repit` s — la grâce du pas de côté — le même coup ne
 ## repasse pas (sauf ceux qui percent le vacillement, comme les explosions).
@@ -476,7 +472,7 @@ const TALISMAN_INEBRANLABLE := "inebranlable"
 @export var inebranlable_repit := 0.35
 var _inebranlable_reste := 0.0
 
-## TALISMAN « SIXIÈME COUP » (2 oct. 2026, id "sixieme", choisi par Kaoru) : un
+## TALISMAN « SIXIÈME COUP » (2 oct. 2026, id "sixieme") : un
 ## coup d'épée qui porte sur `sixieme_tous_les` est CRITIQUE — il fait
 ## `sixieme_multiplicateur` fois ses dégâts ; son étoile d'impact grandit et se
 ## cerne de sang, la caméra tremble un peu. Compté une fois par coup d'épée,
@@ -494,12 +490,12 @@ var sixieme_compte := 0
 var _sixieme_coup_compte := -1      # le coup d'épée déjà compté
 var _sixieme_coup_critique := -1    # le coup d'épée critique
 
-## TALISMAN « PACTE DE SANG » (2 oct. 2026, id "pacte", choisi par Kaoru) :
+## TALISMAN « PACTE DE SANG » (2 oct. 2026, id "pacte") :
 ## chaque boule de sang boit `pacte_cout` de la jauge de soin (un tiers de soin)
 ## et fait `pacte_multiplicateur` fois ses dégâts, dans le sang sombre du pacte
 ## (corrompue, elle reste violette) ; jauge trop basse : elle part normale,
-## gratuite. ×3 : Kaoru l'a d'abord voulu ×2 (« pas plus »), puis remis à ×3 le
-## même jour (« finalement le coût en vaut la peine »). Voir `bloodball_enter`
+## gratuite. ×3 (essayé à ×2 le même jour : le coût n'en valait plus la
+## peine). Voir `bloodball_enter`
 ## et bloodball.gd (`pacte`).
 const TALISMAN_PACTE := "pacte"
 @export var pacte_cout := 34
@@ -508,8 +504,7 @@ const TALISMAN_PACTE := "pacte"
 @export var pacte_couleur := Color(0.52, 0.0, 0.07)
 @export var pacte_ombre := Color(0.15, 0.0, 0.03)
 
-## TALISMAN « SANG NEUF » (2 oct. 2026, id "sang_neuf", IDÉE DE KAORU : « quand on
-## meurt, remplit la jauge de soin à la réapparition ») : au respawn, la jauge
+## TALISMAN « SANG NEUF » (2 oct. 2026, id "sang_neuf") : au respawn, la jauge
 ## de soin se remplit jusqu'en haut (au lieu d'un seul soin) — le HUD la montre
 ## monter `sang_neuf_delai` s après la réapparition. `dead_input` note la mort
 ## dans l'autoload (`Player.vient_de_mourir`) ; voir `_sang_neuf`.
@@ -655,8 +650,7 @@ func _physics_process(delta: float) -> void:
 #     debout dessous, on ne décolle que s'il tire plus fort qu'elle ;
 #   • le vent nous donne de l'ÉLAN : il nous entraîne vers sa vitesse (×6, en
 #     un rien de temps), et cet élan CONTINUE après le courant — en l'air on
-#     file loin (Kaoru : « faut que ça nous envoie bien plus loin, et plus
-#     fort »), au sol on glisse un peu ; un mur l'arrête net.
+#     file loin, au sol on glisse un peu ; un mur l'arrête net.
 # Agrippé (échelle, corde, rebord, mur, grappin), on tient bon ; mort, plus rien.
 const POUSSEE_RAIDEUR := 4.0        # le trou noir en hauteur : sa vitesse ×4, en px/s²
 const VENT_RAIDEUR := 6.0           # le vent : sa vitesse ×6, en px/s²
@@ -823,8 +817,7 @@ func apply_damage(amount: int, source_x, source_tag := "?", perce_stun := false,
 		# (AVANT le bouclier et le pas de côté : un coup déjà encaissé ne doit
 		#  plus rien déclencher. Le contact d'une larve rappelle apply_damage à
 		#  chaque image pendant le stun ; le dé du pas de côté tombait alors
-		#  APRÈS le dégât et on voyait le fantôme d'un coup pourtant pris —
-		#  Kaoru, 30 sept. 2026.)
+		#  APRÈS le dégât et on voyait le fantôme d'un coup pourtant pris.)
 		print("[DMG bloqué/stun] f=", Engine.get_physics_frames(),
 			" src=", source_tag, " amount=", amount)
 		return
@@ -1522,7 +1515,7 @@ func _essaim_hote() -> Node:
 ## un FANTÔME à sa pose exacte, qui encaisse à sa place et s'efface. Sans ce
 ## déplacement (première version), on restait DANS la source — les piques
 ## d'une larve, un monstre au contact — et le coup revenait à la fin de la
-## grâce : « je vois le fantôme mais je prends quand même le dégât » (Kaoru).
+## grâce : on voyait le fantôme et on prenait quand même le dégât.
 ## part du recul d'un coup encaissé (HIT_KNOCK_X / HIT_KNOCK_Y) que fait le
 ## pas de côté (1 = autant qu'un coup pris)
 @export var esquive_recul := 0.6
@@ -1533,8 +1526,8 @@ func _essaim_hote() -> Node:
 ## GRÂCE après un pas de côté (s) : le temps pendant lequel le même coup ne
 ## peut pas revenir. Sans elle, une source CONTINUE (le contact d'un monstre
 ## est relu à CHAQUE image de physique, un jet de flammes aussi) retirait un
-## nouveau dé l'image d'après et touchait à 80 % — Kaoru voyait le fantôme et
-## prenait quand même le dégât (30 sept. 2026). Un coup encaissé, lui, a le
+## nouveau dé l'image d'après et touchait à 80 % — on voyait le fantôme et
+## on prenait quand même le dégât (30 sept. 2026). Un coup encaissé, lui, a le
 ## stun de l'état HIT (0,25 s) pour ça ; le pas de côté n'a pas de stun, il a
 ## cette grâce. Pas de recul non plus : si on reste dans le monstre, le coup
 ## suivant se rejoue normalement à la fin de la grâce.
@@ -1622,7 +1615,7 @@ func _z_absolu(ci: CanvasItem) -> int:
 
 ## --- la traînée fantomatique (dash aérien, roulade) ---
 
-## TRAÎNÉE (30 sept. 2026, demande de Kaoru) : pendant le dash aérien et la
+## TRAÎNÉE (30 sept. 2026) : pendant le dash aérien et la
 ## roulade, le perso sème derrière lui des fantômes de sa pose — la même famille
 ## que le pas de côté, en traînée. Une copie tous les `trainee_espacement` px
 ## parcourus (donc la même densité au dash, 1400 px/s, qu'à la roulade,
@@ -1652,7 +1645,7 @@ const TALISMAN_SILLAGE := "sillage"
 ## combien de temps la brume vit en chaque endroit (s)
 @export var sillage_duree := 3.0
 ## dégâts d'un tick de brume (le coup d'épée fait 70 ; 12 au départ, ×3 le
-## 1er oct. 2026 : « sinon c'est trop faible »), et temps entre deux ticks (s)
+## 1er oct. 2026 : trop faible sinon), et temps entre deux ticks (s)
 @export var sillage_degats := 36
 @export var sillage_intervalle := 0.5
 ## tolérance (px) au-delà de la brume visible : un ennemi dont le corps
@@ -1840,9 +1833,9 @@ func _raycast_hits_wall(rc: RayCast2D) -> bool:
 	return col is StaticBody2D
 
 
-## FAUX SOL (3 oct. 2026, Kaoru : « avec un bon timing je peux courir contre les
-## murs… ça commence toujours sur un coin de plateforme, puis je descends contre
-## la paroi en gardant l'état course »). Arrivé PILE sur le coin d'une
+## FAUX SOL (3 oct. 2026) : avec le bon timing on pouvait « courir contre les
+## murs » — depuis un coin de plateforme, on descendait le long de la paroi en
+## gardant l'état course. Arrivé PILE sur le coin d'une
 ## plateforme en allant vers elle (le bas arrondi du corps posé sur l'arête, les
 ## pieds une douzaine de pixels sous le dessus), Godot le dit « au sol » une
 ## image (l'arête fait une pente de moins de 60°), puis le contact devient celui
@@ -1874,10 +1867,9 @@ func _au_sol() -> bool:
 
 
 ## Y a-t-il du mur à hauteur de la MAIN et du PIED, du côté `cote` (+1 droite,
-## −1 gauche) ? L'accroche murale l'exige (3 oct. 2026, Kaoru, photo à l'appui :
-## « que les wall jumps ne permettent plus de voler comme ça dans le vide sur le
-## haut des murs, ou simplement sur les plateformes trop petites pour un wall
-## jump »). Le rayon de mur (`wall_right`) ne regarde qu'à MI-CORPS : on
+## −1 gauche) ? L'accroche murale l'exige (3 oct. 2026) : plus
+## d'accroche « dans le vide » en haut d'un mur, ni sur une plateforme trop
+## petite pour un wall jump. Le rayon de mur (`wall_right`) ne regarde qu'à MI-CORPS : on
 ## s'accrochait la tête et la main au-dessus du haut d'un mur, ou sur le flanc
 ## d'une plateforme plus petite que le héros. Dans la pose d'accroche, la main
 ## est posée au mur vers `WALL_HAUTEUR_MAIN` et le pied vers `WALL_HAUTEUR_PIED` :
@@ -2166,8 +2158,8 @@ func run_exit() -> void:
 
 ## Impulsion de saut (négatif = vers le haut). Plus la valeur est grande
 ## en absolu, plus le saut monte haut.
-## Réglage "nerveux" (sept. 2026, retour playtest "sauts et chutes mollassons",
-## validé par Kaoru contre un réglage intermédiaire) : montée 0,35 s et chute
+## Réglage "nerveux" (sept. 2026 : les sauts et les chutes étaient mollassons ;
+## préféré à un réglage intermédiaire) : montée 0,35 s et chute
 ## 0,38 s au lieu de 0,47 / 0,63, HAUTEURS INCHANGÉES (saut ≈ 232 px, petit
 ## saut ≈ 80 px, comme l'ancien −750 forcé par la scène) et portée conservée
 ## (≈ 445 px).
@@ -2309,7 +2301,7 @@ func _plumes_lancer() -> void:
 ## freinage quand l'aile s'ouvre sur une chute plus rapide (px/s², en plus de
 ## la gravité : 8000 ramène une chute à pleine vitesse au plané en ~0,2 s)
 @export var PLANER_FREIN: float = 8000.0
-## l'animation du perso en plané, si Kaoru la dessine (sinon, celle de chute)
+## l'animation du perso en plané, si elle existe (sinon, celle de chute)
 const ANIM_PLANE := "plane"
 var _plane := false
 var _plane_frame := -1   # dernière image de physique où un état a entretenu le plané
@@ -2651,7 +2643,7 @@ func wall_griffe_enter():
 
 	# On pousse le perso DANS le mur pour maintenir le contact raycast
 	# Le mur bloque le déplacement réel, mais la vélocité garde le contact
-	velocity.x = 700.0 * last_direction   # 500 → 700 (Kaoru, sept. 2026) : c'est la "vitesse du wall run"
+	velocity.x = 700.0 * last_direction   # 500 → 700 (sept. 2026) : c'est la "vitesse du wall run"
 
 ## Le wall run se cale sur le MILIEU du mur (30 sept. 2026) : où qu'on
 ## l'accroche, trop haut ou trop bas, le perso glisse vers la ligne médiane du
@@ -3465,7 +3457,7 @@ func grab_exit() -> void:
 ## chaque coup qui PORTE bondit sur l'ennemi le plus proche (animator.gd,
 ## `_foudre_bondir`).
 ## portée du bond, depuis le corps de l'ennemi touché (px) — 280 au départ,
-## +50 % demandé par Kaoru après essai en jeu (30 sept. 2026)
+## +50 % après essai en jeu (30 sept. 2026)
 @export var foudre_portee := 420.0
 ## dégâts du premier bond, en PART des dégâts du coup qui l'a lancé (0.5 = la
 ## moitié : 39 pour un coup de 77) ; chaque bond suivant en fait la moitié

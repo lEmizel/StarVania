@@ -1,15 +1,14 @@
 shader_type canvas_item;
 render_mode unshaded, blend_premul_alpha;
-// RAI DE LUMIÈRE (3 oct. 2026, d'après une image de référence de Kaoru) — la
+// RAI DE LUMIÈRE (3 oct. 2026, d'après une image de référence) — la
 // lumière qui entre par un PASSAGE (SCRIPT/INTERACTIBLE/passage.tscn, nœud
 // RaiDeLumiere) : l'ouverture blanche de lumière, et la nappe qui tombe en biais
 // jusqu'au sol, plus forte près de l'ouverture, avec :
 //   • un LISERÉ net sur son bord haut, au tracé un peu ondulé, DESSINÉ À LA
 //     MAIN, qui se transforme TRÈS LENTEMENT, en continu et sur place (sans
-//     glisser le long du trait) : `vitesse_ondulation`. Les retours de Kaoru :
-//     d'abord redessinée 12 fois par seconde comme le halo des torches, puis
-//     « elle doit être figée, pas bouger », puis « finalement refais-la bouger,
-//     mais très lentement » ;
+//     glisser le long du trait) : `vitesse_ondulation`. Essais écartés :
+//     redessinée 12 fois par seconde comme le halo des torches (trop agitée),
+//     puis figée (trop morte) ;
 //   • des POUSSIÈRES qui flottent dedans et scintillent ;
 //   • une BRUME qui traîne au pied de l'ouverture ;
 //   • des rayons à peine marqués qui partent du haut de l'ouverture.
@@ -19,17 +18,16 @@ render_mode unshaded, blend_premul_alpha;
 //   • 0 = DE CÔTÉ (passage horizontal) : la nappe tombe en biais de l'ouverture
 //     jusqu'au sol. Repère : `source` = le pied de l'ouverture, au sol ; la
 //     salle est vers +x ;
-//   • 1 = VERTICAL (Kaoru : « faudrait en faire un pour les passages en mode
-//     vertical ») : une colonne DROITE qui part d'un trou (`hauteur` = sa
-//     LARGEUR), un liseré net de chaque côté. RIEN ne déborde de sa largeur
-//     (« sinon il rentre dans les murs ») : les bords ne tremblent que vers
+//   • 1 = VERTICAL (pour les passages verticaux) : une colonne DROITE qui part
+//     d'un trou (`hauteur` = sa LARGEUR), un liseré net de chaque côté. RIEN ne
+//     déborde de sa largeur (sinon il rentre dans les murs) : les bords ne
+//     tremblent que vers
 //     l'intérieur, et la lueur du trou reste dedans. Repère :
 //     `source` = le milieu de l'ouverture, le trajet va vers +y (vers le bas).
 //     Qu'elle tombe ou qu'elle monte, elle DISPARAÎT EN DÉGRADÉ : nette au
-//     trou, plus rien au bout (Kaoru : « faudrait un dégradé où elle
-//     disparaît, et rendre le tout beaucoup plus court » — elle finissait sur
-//     une flaque et de la brume, qui passaient sous le sol quand elle était
-//     trop longue). Elle ne se voit vraiment que sur la 1re moitié de sa longueur.
+//     trou, plus rien au bout (avant, elle finissait sur une flaque et de la
+//     brume, qui passaient sous le sol quand elle était trop longue). Elle ne
+//     se voit vraiment que sur la 1re moitié de sa longueur.
 // rai_lumiere.gd retourne le rectangle (scale −1) pour l'autre côté, ou pour
 // une lumière qui MONTE d'un trou du sol.
 
@@ -47,8 +45,8 @@ uniform int nb_poussieres : hint_range(0, 32) = 16;
 uniform float brume : hint_range(0.0, 1.0) = 0.6;
 uniform float tremble : hint_range(0.0, 0.1) = 0.015;   // l'ondulation des bords, en part de la taille
 // l'ondulation se transforme à cette vitesse (unités de bruit par seconde) :
-// 0,6 = une forme nouvelle en 2 secondes environ ; 0 = figée. (0,05 : « trop
-// lent, je vois même pas le mouvement » ; 0,3 : « 2 fois plus rapide encore ».)
+// 0,6 = une forme nouvelle en 2 secondes environ ; 0 = figée. (0,05 : trop
+// lent, le mouvement ne se voit pas ; 0,3 : encore trop lent.)
 // Réglée sur le passage (rai_vitesse_ondulation)
 uniform float vitesse_ondulation = 0.6;
 uniform float graine = 0.0;

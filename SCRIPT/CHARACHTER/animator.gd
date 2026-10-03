@@ -103,8 +103,7 @@ var _coup_id := 0
 ## c'est donc le 2e (« attack_02 ») ; si le 3e revient, déplacer l'appel. Il vaut
 ## `player.croissant_part` d'un coup d'épée, bonus compris, et ignore les
 ## ennemis que ce coup vient de toucher au corps à corps.
-## Il NAÎT SUR LE SLASH (Kaoru : « qu'il commence pile sur le slash FX du
-## joueur ») : `_croissant()` l'ARME au départ du coup. `_process` le crée
+## Il NAÎT PILE SUR LE SLASH : `_croissant()` l'ARME au départ du coup. `_process` le crée
 ## `player.croissant_amorce` s avant le départ, ATTACHÉ à la lame : posé sur le
 ## centre du trajet du slash (le slash vit sous POINT : retourné avec le
 ## perso, agrandi par l'Allonge), il suit la lame image après image et

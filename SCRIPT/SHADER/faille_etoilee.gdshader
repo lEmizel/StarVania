@@ -1,6 +1,6 @@
 shader_type canvas_item;
 render_mode unshaded, blend_premul_alpha;
-// FAILLE ÉTOILÉE (2 oct. 2026, piège « pluie d'étoiles » choisi par Kaoru) —
+// FAILLE ÉTOILÉE (2 oct. 2026, piège « pluie d'étoiles ») —
 // une déchirure dans le ciel, au-dessus de la zone, d'où tombent les comètes.
 // Une fente en amande aux bords irréguliers, un ciel de nuit violet profond
 // dedans où scintillent des étoiles, un liseré or-blanc qui vibre, une lueur
@@ -31,7 +31,7 @@ float alea(vec2 c) {
 // valeur au bit près. Le hasard flottant « fract(sin(n) × 43758) » d'avant ne
 // tombait pas pareil au même nœud calculé depuis sa gauche ou sa droite une
 // fois compilé : l'épaisseur de la fente et sa nébuleuse SAUTAIENT d'un coup,
-// une coupure verticale nette dans la faille (vue par Kaoru), de plus en plus
+// une coupure verticale nette dans la faille (constatée en jeu), de plus en plus
 // probable avec le temps qui grandit. Même piège que le pilier de foudre.
 float alea_u(uint n) {
 	n = (n << 13u) ^ n;

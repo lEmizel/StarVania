@@ -4,9 +4,9 @@ render_mode unshaded;
 // « Sillage de sang », 1er oct. 2026). sillage_sang.gd lui passe les points du
 // trajet (dans le repère du rectangle) avec l'heure où le perso y est passé.
 //
-// 4e version (retour de Kaoru, image de référence à l'appui : « très
-// déstructuré, grâce à des bruits empilés ; là on est sur des bulles de savon
-// de sang ») : une FUMÉE, pas des bouffées. Le principe est le « domain
+// 4e version, d'après une image de référence (très déstructurée, faite de
+// bruits empilés ; la 3e ressemblait à des bulles de savon) : une FUMÉE, pas
+// des bouffées. Le principe est le « domain
 // warping » : un bruit déforme les coordonnées d'un autre bruit, qui déforme
 // celles d'un troisième — ce qui enroule la matière en volutes et en rubans.
 //   • L'ENVELOPPE suit le trajet : autour de chaque endroit, la fumée naît
@@ -19,14 +19,14 @@ render_mode unshaded;
 //     même espace déformé) — les voiles de fumée vus par la tranche.
 //   • Les PROFONDEURS : là où la fumée est la plus dense, elle s'assombrit vers
 //     le noir-rouge.
-//   • EFFILÉE AUX DEUX BOUTS (1er oct. 2026, Kaoru : « pour éviter le côté
-//     rectangulaire, qu'en début et en fin elle soit plus petite ») : à moins
+//   • EFFILÉE AUX DEUX BOUTS (1er oct. 2026, pour éviter le côté
+//     rectangulaire) : à moins
 //     d'`effilage` px d'un bout du trajet, l'épaisseur ET la montée
 //     rapetissent jusqu'à `bout_min` ; un sillage court devient une lentille.
 //     Le bout qui se trace suit le perso en continu (`longueur` compte le bout
 //     vivant), sinon il sauterait à chaque point posé.
-//   • TOON (`toon`, 1er oct. 2026 : « un peu trop réaliste, faudrait la rendre
-//     plus toon ») : la même forme, mais la densité en APLATS nets (bord
+//   • TOON (`toon`, 1er oct. 2026 : la fumée était trop réaliste) : la même
+//     forme, mais la densité en APLATS nets (bord
 //     sombre, corps, cœur clair), un fin LISERÉ d'encre autour, des filaments
 //     en traits clairs nets, et moins de micro-détails (formes plus
 //     graphiques). `toon` = 0 : le rendu fumée d'avant.
@@ -38,7 +38,7 @@ const int MAX_POINTS = 24;
 // tout est calculé dans ce repère fixe. Avant (1er oct. 2026), tout l'était
 // dans le repère du rectangle, qui s'agrandit vers la gauche quand on roule
 // vers la gauche : son coin bougeait à chaque point ajouté et toute la fumée
-// sautait (« elle tremble »)
+// sautait (elle tremblait)
 uniform vec2 taille = vec2(400.0, 200.0);
 uniform vec2 origine_rect = vec2(0.0, 0.0);
 // les points du trajet, dans le repère du nœud
@@ -183,9 +183,8 @@ void fragment() {
 			float crete = 1.0 - abs(2.0 * fbm(r * 1.7 + vec2(3.3, 7.1)) - 1.0);
 			float filament = pow(crete, 5.0);
 
-			// --- L'ENVELOPPE, ANCRÉE COMME UNE FLAMME (Kaoru : « elle devrait
-			// être bien ancrée là où elle est plutôt que s'envoler ; une flamme
-			// reste stable sur sa base même si elle monte ») : sa BASE reste
+			// --- L'ENVELOPPE, ANCRÉE COMME UNE FLAMME (stable sur sa base même
+			// si elle monte, au lieu de s'envoler) : sa BASE reste
 			// posée sur le trajet ; seul son HAUT grandit avec l'âge, d'une
 			// hauteur qui varie le long du trajet (des colonnes, pas une barre),
 			// et c'est la matière qui monte à travers elle. La torsion par les

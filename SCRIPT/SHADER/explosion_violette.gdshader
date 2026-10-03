@@ -120,8 +120,8 @@ void fragment() {
 		float bord = rayon * (1.0 + bosses * (n1 - 0.5) * 2.0);
 		float dans = 1.0 - smoothstep(bord * 0.80, bord, d);
 		// le seuil monte PLUS VITE AU CENTRE : la boule se creuse et devient une
-		// coquille déchiquetée qui continue de s'ouvrir. Rongée par le bord (ce que
-		// je faisais avant), elle semblait se rétracter alors qu'elle grandissait.
+		// coquille déchiquetée qui continue de s'ouvrir. Rongée par le bord (la
+		// version d'avant), elle semblait se rétracter alors qu'elle grandissait.
 		float seuil = finir * (1.55 - 1.0 * clamp(d / max(bord, 0.0001), 0.0, 1.0));
 		float boule = dans * smoothstep(seuil - 0.14, seuil + 0.02, matiere + 0.02);
 

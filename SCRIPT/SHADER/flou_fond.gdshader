@@ -13,7 +13,7 @@ uniform float blur_amount : hint_range(0.0, 10.0) = 3.0;
 
 void fragment() {
 	// niveau de mipmap lu : blur 1 → ~2 px, blur 2.25 → ~5 px, blur 3 → ~6 px
-	// (+1.1 : calé à l'œil par Kaoru, 30 % plus doux que le premier réglage)
+	// (+1.1 : calé à l'œil, 30 % plus doux que le premier réglage)
 	float lod = log2(max(blur_amount, 0.35)) + 1.1;
 	// centre + 4 lectures décalées d'un demi-texel du niveau lu : gomme les
 	// marches d'escalier des mipmaps sans coûter plus

@@ -43,8 +43,8 @@ signal pointe(emplacement: Control)     # vient de prendre le focus
 @export var ecart_focus := 7.0
 
 @export_group("Le talisman")
-## part du diamètre occupée par le talisman (1 = tout le rond : Kaoru ne veut
-## pas d'anneau gris autour des icônes, 30 sept. 2026)
+## part du diamètre occupée par le talisman (1 = tout le rond : pas d'anneau
+## gris autour des icônes)
 @export_range(0.4, 1.0, 0.01) var taille_talisman := 1.0
 ## opacité d'un talisman de la collection pendant qu'il est porté : il reste
 ## visible à sa place, éteint

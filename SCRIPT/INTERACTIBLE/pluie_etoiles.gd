@@ -1,7 +1,6 @@
 extends Node2D
 ## ============================================================================
-## PLUIE D'ÉTOILES (2 oct. 2026, piège choisi par Kaoru : « je te laisse
-## tester ») — une FAILLE ÉTOILÉE s'ouvre au-dessus d'une zone et y fait
+## PLUIE D'ÉTOILES (2 oct. 2026) — une FAILLE ÉTOILÉE s'ouvre au-dessus d'une zone et y fait
 ## pleuvoir des comètes. Chaque comète est AVERTIE : sa trajectoire se dessine
 ## et une étoile marque le sol où elle tombera (`delai_avertissement`) — on
 ## slalome entre les marques. Simple et spectaculaire, la famille du pilier de
@@ -123,7 +122,7 @@ func _lancer() -> void:
 		sol = trouve
 	var haut_faille := global_position.y - hauteur_faille
 	var chute := sol.y - haut_faille
-	# un biais au hasard, d'un côté ou de l'autre (Kaoru : elles partaient toutes
+	# un biais au hasard, d'un côté ou de l'autre (avant, elles partaient toutes
 	# dans le même sens) ; si le départ tombe hors de la faille, l'autre côté
 	var biais := randf_range(-pente, pente)
 	var depart := Vector2(sol.x - biais * chute, haut_faille)

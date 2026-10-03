@@ -1,6 +1,6 @@
 shader_type canvas_item;
 render_mode unshaded;
-// PILON (2 oct. 2026, piège imaginé par Kaoru) — le DÉCOR du concasseur, SANS
+// PILON (2 oct. 2026) — le DÉCOR du concasseur, SANS
 // contour (il fait partie du décor : le volume vient des tons, pas de l'encre).
 // Deux montants de pierre sur leurs socles, un linteau, la tige de fer du piston
 // qui coulisse dans le linteau, et la tête : un bloc de pierre cerclé de deux

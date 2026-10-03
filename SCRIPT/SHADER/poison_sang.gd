@@ -1,8 +1,8 @@
 extends Node2D
 ## ============================================================================
 ## SANG CORROMPU — le POISON (1er oct. 2026) — talisman « Sang corrompu » (id
-## "corrompu", idée de Kaoru : « une bloodball qui empoisonne, violette/mauve,
-## qui change aussi la tornade, et fait des dégâts sur la durée ») : l'ennemi
+## "corrompu" : une boule de sang violette qui empoisonne, la Tornade aussi,
+## avec des dégâts sur la durée) : l'ennemi
 ## touché par la boule corrompue perd `degats` PV toutes les `intervalle` s
 ## pendant `duree` s (Canon de verre compris), sans recul ni éclair blanc
 ## (BASE_IA : l'étiquette "poison"). Un nouveau coup corrompu (une boule, ou

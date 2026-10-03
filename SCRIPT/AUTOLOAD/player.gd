@@ -27,7 +27,7 @@ var hearts_initialized := false
 # sur la vraie sauvegarde disque quand elle existera.
 var coeurs_ramasses := {}
 # Registre des ROUES À POINTES brisées (même clé que les cœurs) : une roue
-# brisée ne revient QUE SI ON MEURT (Kaoru) — vidé à la réapparition après la
+# brisée ne revient QUE SI ON MEURT — vidé à la réapparition après la
 # mort (player.gd, dead_input), pas en changeant de tableau.
 var roues_brisees := {}
 # --- Réserve de soin BLOODHEAL : N barres côte à côte, chacune = un soin ---
@@ -62,7 +62,7 @@ signal monstre_tue(monstre: Node, attaquant: Node)
 ## ce compte autour de lui (player.gd, `_essaim_reprendre`). Remis à zéro à la
 ## mort et en nouvelle partie.
 var essaim_en_vol := 0
-## LES ÂMES PERDUES À LA MORT (1er oct. 2026, Kaoru : « comme dans les Souls ») :
+## LES ÂMES PERDUES À LA MORT (1er oct. 2026, comme dans les Souls) :
 ## le sang perdu en mourant attend en ESPRIT DE SANG dans le tableau où l'on est
 ## tombé (`ames_scene`), au-dessus du dernier sol où l'on a posé le pied
 ## (`ames_position`) — posé par le joueur à son arrivée dans ce tableau
@@ -71,17 +71,17 @@ var essaim_en_vol := 0
 ## sa place (`ames_id` change : l'ancien s'éteint). Vit le temps de la session,
 ## comme les cœurs ramassés.
 var ames_perdues := 0
-## TALISMAN « CŒUR NOIR » (1er oct. 2026, idée de Kaoru) : le joueur a-t-il son
+## TALISMAN « CŒUR NOIR » (1er oct. 2026) : le joueur a-t-il son
 ## cœur noir (un seul, jamais plus), et dans combien de secondes il revient s'il
 ## l'a perdu (0 : dès que le talisman est porté). Les checkpoints et le respawn
 ## remettent l'attente à 0. Ici : le joueur est recréé à chaque tableau.
 var coeur_noir := false
 var coeur_noir_attente := 0.0
-## TALISMAN « SANG NEUF » (2 oct. 2026, idée de Kaoru) : vrai entre une mort et
+## TALISMAN « SANG NEUF » (2 oct. 2026) : vrai entre une mort et
 ## la réapparition qui la suit — le joueur qui naît alors sait qu'il revient
 ## d'une mort (player.gd, `_sang_neuf` : la jauge de soin se remplit).
 var vient_de_mourir := false
-## TALISMAN « COURONNE DU DÉFI » (1er oct. 2026, idée de Kaoru) : un défi — tant
+## TALISMAN « COURONNE DU DÉFI » (1er oct. 2026) : un défi — tant
 ## qu'elle est portée on n'a plus qu'UN cœur, et tous les autres talismans sont
 ## retirés et VERROUILLÉS (`talisman_verrouille`). `defi_max_hp` garde le vrai
 ## nombre de cœurs pendant ce temps (0 : pas de défi) ; un cœur ramassé pendant
@@ -322,7 +322,7 @@ func bonus_talismans(cle: String) -> float:
 
 ## Le bonus de dégâts des COUPS D'ÉPÉE apporté par les talismans portés, en
 ## pour cent : la somme des `degats_pourcent` du catalogue (10 = +10 %). Un
-## POURCENTAGE, jamais un ajout fixe (Kaoru, 30 sept. 2026) : quand les dégâts
+## POURCENTAGE, jamais un ajout fixe : quand les dégâts
 ## de base du joueur monteront, le bonus suivra.
 ## Plus, AU DERNIER CŒUR seulement, la somme des `degats_pourcent_dernier_coeur`
 ## (talisman « Frénésie » : +50 %, 1er oct. 2026) — les deux s'additionnent.
@@ -345,8 +345,8 @@ func sang_plein_actif() -> bool:
 
 ## Vrai quand un bonus « dernier cœur » est porté ET qu'il ne reste qu'un cœur.
 ## Des STATS seulement, sans effet à l'écran : des veines au bord de l'écran et
-## un liseré rouge ont été essayés puis retirés (Kaoru, 1er oct. 2026 : « pas
-## nécessaire, pas beau, plus stressant pour le joueur »).
+## un liseré rouge ont été essayés puis retirés (1er oct. 2026 : pas beaux, et
+## plus stressants pour le joueur).
 func frenesie_active() -> bool:
 	return hp == 1 and bonus_talismans("degats_pourcent_dernier_coeur") > 0.0
 
@@ -375,10 +375,10 @@ func produit_talismans(cle: String) -> float:
 
 ## Ce par quoi multiplier le COUP D'ÉPÉE LUI-MÊME (avec l'éclair qui en bondit,
 ## Lame de foudre) et celui de l'OMBRE DE SANG, et rien d'autre (talisman
-## « Canon de verre » : ×2). Kaoru, 2 oct. 2026 : plus la boule ni la Tornade,
+## « Canon de verre » : ×2). Depuis le 2 oct. 2026 : plus la boule ni la Tornade,
 ## pour qu'il ne se cumule pas avec le Pacte de sang ; ni le reste de ce qui
-## découle d'un coup d'épée (épines, gardiennes, croissant, essaim — « oublie les
-## chauves-souris » —, plumes, offrande, sang bouillant, onde du cœur noir), ni
+## découle d'un coup d'épée (épines, gardiennes, croissant, essaim,
+## plumes, offrande, sang bouillant, onde du cœur noir), ni
 ## le poison, ni le sillage. Appliqué dans animator.gd (`_on_body_entered`) et
 ## ombre_sang.gd.
 func multiplicateur_infliges() -> float:

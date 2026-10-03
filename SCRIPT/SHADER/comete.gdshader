@@ -1,6 +1,6 @@
 shader_type canvas_item;
 render_mode unshaded, blend_premul_alpha;
-// COMÈTE (2 oct. 2026, piège « pluie d'étoiles » choisi par Kaoru) — une étoile
+// COMÈTE (2 oct. 2026, piège « pluie d'étoiles ») — une étoile
 // filante qui tombe sur un point du sol, AVERTIE. Tout est lumière ajoutée :
 //   • l'AVERTISSEMENT (`avert` 0 → 1) : sa trajectoire se déroule du ciel au sol
 //     en pointillés qui filent vers l'impact, une ÉTOILE scintille au-dessus du
@@ -109,8 +109,8 @@ void fragment() {
 		float t = explo;
 		float r = length(q);
 		float a = atan(q.y, q.x);
-		// l'éclat en étoile : huit rais FINS et COURTS qui raccourcissent (Kaoru :
-		// « beaucoup trop grands » — ils portaient à près de 400 px ; bornés à ~100)
+		// l'éclat en étoile : huit rais FINS et COURTS qui raccourcissent (ils
+		// portaient à près de 400 px, beaucoup trop : bornés à ~100)
 		float rais = pow(abs(cos(a * 4.0 + graine)), 40.0);
 		float long_rais = mix(40.0, 10.0, smoothstep(0.0, 0.6, t));
 		float eclat = rais * exp(-r / long_rais) * 1.8 * (1.0 - t) * (1.0 - smoothstep(60.0, 110.0, r));

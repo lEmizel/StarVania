@@ -1,14 +1,12 @@
 extends Node2D
 ## ============================================================================
 ## ENTRAVE DE SANG (v2, 1er oct. 2026) — l'anneau du talisman « Entraves » (id
-## "entraves", choisi par Kaoru) : posé sur un ennemi ENTRAVÉ (BASE_IA.gd,
+## "entraves") : posé sur un ennemi ENTRAVÉ (BASE_IA.gd,
 ## `entraver`), enfant de lui (il le suit), il l'enserre tant que dure le
-## ralenti, à MI-HAUTEUR de son corps (`hauteur` ; d'abord à ses pieds : « sur
-## les larves il apparaît trop bas, remonte, n'hésite pas à être à
-## mi-hauteur »), au sol comme en vol (« faut que ça marche aussi sur les
-## volants »).
-## v2 — Kaoru : « fais plutôt un anneau similaire à la couronne, avec un
-## décompte, c'est vachement plus joli » : c'est la COURONNE DE LA VENGEANCE
+## ralenti, à MI-HAUTEUR de son corps (`hauteur` ; à ses pieds, il apparaissait
+## trop bas sur les larves), au sol comme en vol (les volants aussi).
+## v2 — un anneau semblable à la couronne, avec un décompte : c'est la
+## COURONNE DE LA VENGEANCE
 ## passée autour de lui (entrave_sang.gdshader) — un anneau de trois quarts qui
 ## tourne, huit pointes, un dégradé, des gouttes —, et ses pointes rentrent une
 ## à une avec le temps qui reste (le DÉCOMPTE). Il se POSE d'un coup sec ; un

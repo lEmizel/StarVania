@@ -1,23 +1,23 @@
 shader_type canvas_item;
 render_mode unshaded;
 // LAME EN CROISSANT — la grande lame de la LAME À CHAÎNE
-// (SCRIPT/INTERACTIBLE/lame_chaine.gd), AU DESSIN DE KAORU (3 oct. 2026 :
-// MEDIA/INTERACTIBLE/lame_pendule.png — « finalement pour la lame j'ai refait
-// aussi un dessin ») : cornes vers l'anneau, pointe vers l'extérieur.
-// (Avant son dessin, la lame était dessinée ici : v1 acier brossé et rouille,
+// (SCRIPT/INTERACTIBLE/lame_chaine.gd), UN DESSIN
+// (MEDIA/INTERACTIBLE/lame_pendule.png) : cornes vers l'anneau, pointe vers
+// l'extérieur.
+// (Avant ce dessin, la lame était tracée ici : v1 acier brossé et rouille,
 // v2 acier propre et sang en aplat.)
-//   • `dessin` : son dessin. En jeu, le script passe une copie réduite, à
-//     mipmaps et aux couleurs prémultipliées (`dessin_premultiplie`) : son
-//     image fait 1736 px et la lame ~234 à l'écran ; sans mipmaps, elle
+//   • `dessin` : l'image. En jeu, le script passe une copie réduite, à
+//     mipmaps et aux couleurs prémultipliées (`dessin_premultiplie`) : elle
+//     fait 1736 px et la lame ~234 à l'écran ; sans mipmaps, elle
 //     scintillerait en tournant. Dans l'éditeur, c'est le dessin tel quel ;
 //   • `largeur` : la largeur du dessin en jeu (px, d'une corne à l'autre) ;
 //     `attache` : la place de l'anneau DANS le dessin (fractions de l'image) —
 //     le script le pose au-dessus du milieu du dos, qu'il mesure sur l'image ;
 //   • par-dessus : la platine rivetée au dos (`dos` px sous l'anneau), ses
 //     rivets et l'anneau où s'accroche la chaîne — du fer en APLAT, deux tons,
-//     sans ombrage, comme les maillons (Kaoru n'en voulait pas le « côté 3D »).
-//     Les deux tons du fer sont pris dans la palette de son dessin (un gris
-//     un peu vert), pour que l'attache ne jure pas avec sa lame.
+//     sans ombrage, comme les maillons (pas de « côté 3D »).
+//     Les deux tons du fer sont pris dans la palette du dessin (un gris
+//     un peu vert), pour que l'attache ne jure pas avec la lame.
 // Repère : `anneau` = le centre de l'anneau dans le rectangle (px) ; la lame
 // pend vers +y (vers l'extérieur du cercle qu'elle décrit).
 

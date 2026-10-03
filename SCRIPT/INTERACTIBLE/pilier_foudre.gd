@@ -1,8 +1,7 @@
 extends Node2D
 ## ============================================================================
-## PILIER DE FOUDRE (2 oct. 2026, piège imaginé par Kaoru : « quand il est
-## visible à l'écran, il lance des éclairs qui viennent du ciel sur le joueur,
-## avec un effet qui prévient à l'avance »).
+## PILIER DE FOUDRE (2 oct. 2026) : quand il est visible à l'écran, il lance
+## sur le joueur des éclairs venus du ciel, annoncés à l'avance.
 ##
 ## Tant que le pilier est À L'ÉCRAN (VisibleOnScreenNotifier2D « Ecran ») et le
 ## joueur en vie, il appelle la foudre toutes les `intervalle` secondes :
@@ -15,10 +14,10 @@ extends Node2D
 ##      puis l'éclair tombe : la bande blesse joueur ET monstres.
 ## Le premier appel vient `premier_appel` s après l'entrée à l'écran.
 ##
-## Le visuel du pilier : LE DESSIN DE KAORU (MEDIA/INTERACTIBLE/
-## pillier_de_foudre.png, 3 oct. 2026), posé par SCRIPT/SHADER/
+## Le visuel du pilier : UN DESSIN (MEDIA/INTERACTIBLE/
+## pillier_de_foudre.png), posé par SCRIPT/SHADER/
 ## pilier_foudre.gdshader (nœud Pilier), qui y ajoute le JOYAU dans sa coupe
-## (« j'ai pas mis le joyau au-dessus, je te laisse le mettre ») et la lumière :
+## (il n'est pas dans le dessin) et la lumière :
 ## elle monte le long de son axe pendant la charge, de petits arcs crépitent
 ## des cornes de la coupe au joyau, tout flashe à l'appel. L'origine du nœud
 ## est le PIED DU PILIER, au ras du sol.
@@ -130,8 +129,7 @@ func _appeler() -> void:
 	var vp := get_viewport()
 	var vue: Rect2 = vp.get_canvas_transform().affine_inverse() * vp.get_visible_rect()
 	# le point d'impact : TOUJOURS le sol sous le joueur, même s'il est en l'air
-	# (Kaoru : « l'éclair devrait toujours aller jusqu'au sol même s'il me
-	# détecte en l'air » — le rayon s'arrêtait à 900 px et, au-dessus d'un vide,
+	# (avant, le rayon s'arrêtait à 900 px et, au-dessus d'un vide,
 	# la foudre s'annonçait en plein air). On cherche loin sous l'écran, sols
 	# solides ET plateformes traversables (couches 1 et 2) ; au-dessus d'un
 	# gouffre sans fond, l'impact est posé sous le bas de la vue : l'éclair
@@ -144,8 +142,8 @@ func _appeler() -> void:
 	if not touche.is_empty():
 		sol = touche["position"]
 	# du ciel jusqu'au sol : il part une HAUTEUR D'ÉCRAN au-dessus du haut de la
-	# vue (Kaoru : « l'éclair ne démarre pas d'assez haut, si je saute je peux
-	# voir le dessus » — la caméra monte avec le saut pendant l'avertissement)
+	# vue (sinon on voyait son dessus en sautant : la caméra monte avec le saut
+	# pendant l'avertissement)
 	var f := FOUDRE_CIEL.instantiate()
 	f.demo_boucle = false
 	f.hauteur = maxf(sol.y - vue.position.y, 200.0) + vue.size.y

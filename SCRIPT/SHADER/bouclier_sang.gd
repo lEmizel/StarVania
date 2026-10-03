@@ -22,7 +22,7 @@ extends Node2D
 signal tombe
 
 ## demi-axes de la bulle (px) : elle doit englober le perso avec de la marge.
-## RONDE (Kaoru, 30 sept. 2026 : « rond et pas ovale ») : les deux égaux
+## RONDE, pas ovale : les deux égaux
 @export var rayons := Vector2(120.0, 120.0):
 	set(v):
 		rayons = v

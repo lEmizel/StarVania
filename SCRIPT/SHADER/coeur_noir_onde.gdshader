@@ -1,7 +1,7 @@
 shader_type canvas_item;
 render_mode unshaded;
-// L'ONDE DU CŒUR NOIR (1er oct. 2026) — talisman « Cœur noir » (idée de
-// Kaoru) : quand le cœur noir se brise, il ÉCLATE dans la poitrine du héros —
+// L'ONDE DU CŒUR NOIR (1er oct. 2026) — talisman « Cœur noir » :
+// quand le cœur noir se brise, il ÉCLATE dans la poitrine du héros —
 // une tache noire qui claque, des ÉCLATS de cœur noir (cernés d'un fil rouge)
 // qui volent — et une ONDE noire, liserée de sang, part de lui et court jusqu'au
 // bord de l'écran : chaque monstre qu'elle atteint est frappé (le script fait

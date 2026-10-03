@@ -2,8 +2,8 @@ shader_type canvas_item;
 render_mode unshaded;
 // COURONNE DE VENGEANCE (v2, 1er oct. 2026) — talisman « Vengeance » : tant que
 // la vengeance est chargée (un coup encaissé : tous les coups d'épée +50 %
-// pendant 5 s), une COURONNE DE SANG flotte au-dessus du perso (idée de Kaoru :
-// on ne voit pas l'épée hors des coups).
+// pendant 5 s), une COURONNE DE SANG flotte au-dessus du perso (l'épée ne
+// se voit pas hors des coups).
 //
 // EN VOLUME (la première était un aplat vu de face) : un ANNEAU vu de trois
 // quarts — on voit dans la couronne —, huit POINTES réparties tout autour (une
@@ -13,7 +13,7 @@ render_mode unshaded;
 // ce qui est devant porte un DÉGRADÉ (la base rouge, la pointe vive) et un
 // FIL rouge clair sur le bord de la bande. De temps en temps une GOUTTE perle
 // sous la bande et tombe. Aucun blanc ; pas de liseré d'encre par défaut
-// (comme Kaoru l'a réglé sur les épines et le croissant).
+// (comme sur les épines et le croissant).
 //   • elle se POSE d'un coup sec : un peu grande puis à sa taille, ses pointes
 //     jaillissent de la bande ;
 //   • le TEMPS QUI RESTE : ses pointes rentrent une à une, bien réparties

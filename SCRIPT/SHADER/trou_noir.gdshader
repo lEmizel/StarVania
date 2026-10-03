@@ -1,7 +1,7 @@
 shader_type canvas_item;
 render_mode unshaded, blend_premul_alpha;
-// TROU NOIR (2 oct. 2026, piège choisi par Kaoru : « simple et spectaculaire »,
-// sur le modèle du pilier de foudre). Inspiré de Gargantua (Interstellar) :
+// TROU NOIR (2 oct. 2026, un piège simple et spectaculaire, sur le modèle du
+// pilier de foudre). Inspiré de Gargantua (Interstellar) :
 //   • l'OMBRE : un disque parfaitement noir ;
 //   • la LENTILLE : le décor derrière lui se tord (il lit l'écran) — tout près
 //     de l'ombre, il se retourne en anneau (l'anneau d'Einstein) ;

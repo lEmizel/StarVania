@@ -4,8 +4,8 @@ render_mode unshaded;
 // entravé (ralenti) est pris dans un ANNEAU DE SANG à mi-hauteur de son corps,
 // au sol comme en vol.
 // v1 : un anneau plat cerné d'encre, des épines vers l'intérieur, des filets
-// jusqu'au sol → Kaoru : « fais plutôt un anneau similaire à la couronne, avec un
-// décompte, c'est vachement plus joli ». C'est donc LA COURONNE DE LA VENGEANCE
+// jusqu'au sol → remplacé par un anneau semblable à la couronne, avec un
+// décompte. C'est donc LA COURONNE DE LA VENGEANCE
 // (couronne_vengeance.gdshader, recopiée ici : la couronne n'est pas touchée)
 // passée autour de l'ennemi :
 //   • un ANNEAU vu de trois quarts qui TOURNE lentement, huit POINTES tout

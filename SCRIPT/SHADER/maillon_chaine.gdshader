@@ -5,9 +5,9 @@ render_mode unshaded;
 // Les maillons alternent : de FACE (un anneau ovale) et de PROFIL (une barre),
 // comme une vraie chaîne. Le rectangle est allongé dans le sens de la chaîne.
 // `profil` = 2 : le CAPUCHON rond de l'axe, posé sur le départ de la chaîne.
-// EN APLAT, deux tons de fer, SANS OMBRAGE (Kaoru, sur une capture : « retirer
-// l'ombrage de la chaîne pour retirer son côté 3D » — la v1 bombait chaque
-// maillon comme un tore éclairé, avec des taches de rouille) : les maillons de
+// EN APLAT, deux tons de fer, SANS OMBRAGE, pour ne pas avoir de « côté 3D »
+// (la v1 bombait chaque maillon comme un tore éclairé, avec des taches de
+// rouille) : les maillons de
 // face sont sombres, ceux de profil un ton plus clair, on lit l'emboîtement.
 
 uniform vec2 taille = vec2(34.0, 18.0);

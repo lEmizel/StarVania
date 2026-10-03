@@ -1,25 +1,24 @@
 @tool
 extends Node2D
 ## ============================================================================
-## LAME À CHAÎNE (3 oct. 2026, IDÉE DE KAORU, d'après une photo : « une grande
-## lame de ce style, accrochée à une chaîne elle-même accrochée à la base comme
-## les boules de feu ») — la cousine de la BARRE DE FEU (barre_feu.gd : même
+## LAME À CHAÎNE (3 oct. 2026) : une grande lame accrochée à une chaîne,
+## elle-même accrochée à un bloc comme les boules de feu — la cousine de la
+## BARRE DE FEU (barre_feu.gd : même
 ## bloc de pierre, même façon de se poser, en autant d'exemplaires qu'on veut) :
 ## une grande lame en croissant au bout d'une chaîne, qui tourne sans fin
 ## autour de son bloc.
 ##   • elle tourne D'UN SEUL TENANT, comme la barre de feu : chaîne tendue, lame
 ##     droite au bout, vitesse constante. (La v1 avait une physique : chaîne
 ##     avec du mou, lame lente en haut et rapide en bas, balancée sur son
-##     anneau. Kaoru l'a retirée : « ça rend pas bien au visuel ».)
+##     anneau. Retirée : le rendu n'était pas bon.)
 ##   • seule la LAME blesse, pas la chaîne : le joueur, repoussé dans le sens où
 ##     elle passe (`damage`, pas plus d'une fois par `delai_entre_coups` ;
 ##     roulade et dash passent au travers) ; les monstres qui s'y prennent
 ##     meurent (`degats_monstres`), sauf si `monstres_l_evitent` est coché (comme
 ##     la barre de feu : ils font demi-tour au bord du cercle). Près du bloc, la
 ##     chaîne passe sans faire de mal : on peut s'abriter au centre, sur le bloc.
-##   • la lame est LE DESSIN DE KAORU (MEDIA/INTERACTIBLE/lame_pendule.png,
-##     « finalement pour la lame j'ai refait aussi un dessin ») : cornes vers la
-##     chaîne, pointe vers l'extérieur. Le script le MESURE (voir _lire_dessin) :
+##   • la lame est UN DESSIN (MEDIA/INTERACTIBLE/lame_pendule.png) : cornes
+##     vers la chaîne, pointe vers l'extérieur. Le script le MESURE (voir _lire_dessin) :
 ##     le milieu de son dos, où il rivette la platine et l'anneau de la chaîne,
 ##     et son enveloppe, qui fait la zone qui blesse. Un dessin retouché est
 ##     donc repris tel quel, attache et zone comprises. En jeu, il en fait une
@@ -32,9 +31,9 @@ extends Node2D
 ## `monstres_l_evitent` cochée, la zone évitée par les monstres, en bleu). Rien
 ## n'est enregistré dans la scène : bloc, chaîne et lame sont fabriqués par le
 ## script (enfants internes).
-## Dessins : son dessin, posé par SCRIPT/SHADER/lame_croissant.gdshader (avec
+## Dessins : la lame, posée par SCRIPT/SHADER/lame_croissant.gdshader (avec
 ## la platine et l'anneau), maillon_chaine.gdshader (les maillons et le capuchon
-## de l'axe, en aplat, sans ombrage : Kaoru n'en voulait pas le « côté 3D »),
+## de l'axe, en aplat, sans ombrage : pas de « côté 3D »),
 ## barre_feu_socle.gdshader (le bloc, celui de la barre de feu).
 ## POUR LA JUGER : ouvrir la scène et faire F6.
 ## ============================================================================
@@ -47,7 +46,7 @@ const LARGEUR_LAME := 180.0             # la largeur de son dessin en jeu, d'une
 const ANNEAU_AU_DOS := 9.0              # l'anneau pend à … px au-dessus du milieu du dos, où la platine est rivetée
 const ZONE_TOUCHE := 0.9                # la zone qui blesse, un peu resserrée sur le dessin (cornes fines)
 const POINTS_CONTOUR := 14              # sommets gardés pour la zone qui blesse
-# les mesures de son dessin du 3 oct., si l'image n'est pas lisible (serveur de rendu factice)
+# les mesures du dessin au 3 oct., si l'image n'est pas lisible (serveur de rendu factice)
 const RAPPORT_SECOURS := 0.4003         # hauteur / largeur de l'image
 const DOS_SECOURS := 0.3237             # le milieu du dos, en fraction de la hauteur
 const CONTOUR_SECOURS: Array[Vector2] = [Vector2(0.009, 0.023), Vector2(1.0, 0.023), Vector2(0.954, 0.233),
@@ -138,7 +137,7 @@ func _ready() -> void:
 		position = get_viewport_rect().size * 0.5        # F6 : au milieu de l'écran
 	if Engine.is_editor_hint():
 		set_notify_transform(true)        # la zone bleue se redessine quand on la tourne
-		# il réenregistre son dessin : on le remesure (attache, zone)
+		# le dessin est réenregistré : on le remesure (attache, zone)
 		if not DESSIN.changed.is_connected(_dessin_change):
 			DESSIN.changed.connect(_dessin_change)
 	_requete.shape = _forme

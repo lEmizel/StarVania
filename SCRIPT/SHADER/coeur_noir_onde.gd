@@ -1,11 +1,11 @@
 extends Node2D
 ## ============================================================================
 ## L'ONDE DU CŒUR NOIR (1er oct. 2026) — talisman « Cœur noir » (id
-## "coeur_noir", idée de Kaoru) : posée par le joueur quand son cœur noir se
+## "coeur_noir") : posée par le joueur quand son cœur noir se
 ## brise (player.gd, `_coeur_noir_eclater`), au milieu de son corps. Le cœur
 ## éclate (une tache noire, des éclats), une onde noire court jusqu'au bord de
-## l'écran, et chaque monstre de `cibles` (ceux qui étaient VISIBLES À L'ÉCRAN,
-## Kaoru : « autour de nous ou visibles à l'écran, c'est le mieux ») est frappé
+## l'écran, et chaque monstre de `cibles` (ceux qui étaient VISIBLES À L'ÉCRAN)
+## est frappé
 ## AU MOMENT OÙ L'ONDE L'ATTEINT : `degats`, avec recul. Elle reste là où elle
 ## est née (le héros peut bouger) et se supprime seule.
 ##

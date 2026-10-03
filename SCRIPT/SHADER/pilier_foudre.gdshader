@@ -1,13 +1,11 @@
 shader_type canvas_item;
 render_mode unshaded, blend_premul_alpha;
-// PILIER DE FOUDRE (2 oct. 2026, piège imaginé par Kaoru) — le pilier, AU DESSIN
-// DE KAORU (3 oct. 2026 : MEDIA/INTERACTIBLE/pillier_de_foudre.png, « tu peux
-// aussi remplacer le pilier de foudre, attention j'ai pas mis le joyau
-// au-dessus, je te laisse le mettre ») : une colonne de pierre bleue à volutes,
-// une bande claire le long de son axe, trois anneaux, une COUPE à deux cornes.
-// Le shader pose son dessin tel quel (1 pixel du dessin = 1 pixel du jeu, avec
-// le filtre du nœud, celui de ses autres décors) et ajoute ce qu'il n'a pas
-// dessiné :
+// PILIER DE FOUDRE (2 oct. 2026) — le pilier, UN DESSIN
+// (MEDIA/INTERACTIBLE/pillier_de_foudre.png) : une colonne de pierre bleue à
+// volutes, une bande claire le long de son axe, trois anneaux, une COUPE à
+// deux cornes. Le shader pose le dessin tel quel (1 pixel du dessin = 1 pixel
+// du jeu, avec le filtre du nœud, celui des autres décors) et ajoute ce qui
+// n'est pas dessiné :
 //   • le JOYAU : un cristal taillé (quatre facettes en aplat) qui repose dans le
 //     creux de la coupe, entre les cornes ;
 //   • la lumière, pilotée par SCRIPT/INTERACTIBLE/pilier_foudre.gd :
@@ -20,7 +18,7 @@ render_mode unshaded, blend_premul_alpha;
 //     `appel` (1 → 0) : l'éclair d'appel part vers le ciel — tout flashe.
 // La pierre est opaque ; la lumière s'AJOUTE (alpha prémultiplié) et s'éteint
 // avant le bord du rectangle (aucun carré de lueur).
-// (Avant son dessin, le pilier était dessiné ici : socle, fût en assises, rune
+// (Avant ce dessin, le pilier était tracé ici : socle, fût en assises, rune
 // d'éclair, anneaux de cuivre, griffes de fer.)
 // Repère : `base` = le pied du pilier, au ras du sol, dans le rectangle ; le bas
 // de son dessin y est posé, son axe au milieu.

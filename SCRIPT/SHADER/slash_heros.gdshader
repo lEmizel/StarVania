@@ -67,7 +67,7 @@ uniform float temps = 0.0;
 uniform float origine = -2.5;
 uniform float vie = 1.0;
 uniform float graine = 0.0;
-// -1 : le slash a été mesuré sur ses dessins retournés gauche-droite (celui du
+// -1 : le slash a été mesuré sur des dessins retournés gauche-droite (celui du
 // squelette tourne dans l'autre sens) ; on le retourne au rendu
 uniform float miroir = 1.0;
 // ------------------------------------------------------------------------------
@@ -289,8 +289,8 @@ void fragment() {
 	float brulant = feu * vie;
 	if (brulant > 0.001) {
 		// =================== LE SLASH FAIT DE FEU ===================
-		// (2e version, 1er oct. 2026 : « plus épais, moins linéaire, plus
-		// flamme sur les bordures ») — une bande de feu bien plus épaisse que la
+		// (2e version, 1er oct. 2026 : plus épais, moins linéaire, plus de
+		// flammes sur les bords) — une bande de feu bien plus épaisse que la
 		// lame, presque régulière (un feu ne s'effile pas en aiguille), dont les
 		// BORDS sont des langues de flammes qui montent, et dont les bandes de
 		// couleur suivent ces flammes au lieu de courir parallèles à la lame.

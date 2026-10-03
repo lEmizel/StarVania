@@ -15,8 +15,8 @@ extends AnimatedSprite2D
 @onready var hitbox_langue: CollisionPolygon2D = $"../collision_attack/langue"
 
 ## La griffure des deux coups au corps à corps (30 sept. 2026) : un shader taillé
-## sur l'animation, qui REMPLACERA le FX dessiné dans les images 4 et 8 (en
-## attendant que Kaoru l'efface du dessin, les deux se superposent). Une par
+## sur l'animation, qui REMPLACERA le FX dessiné dans les images 4 et 8 (tant
+## qu'il n'est pas effacé du dessin, les deux se superposent). Une par
 ## xeno, créée avec lui sous POINT : elle se retourne avec lui, devant le sprite.
 const GRIFFURE := preload("res://SCRIPT/SHADER/griffure_xeno.tscn")
 var _griffure: Node2D = null

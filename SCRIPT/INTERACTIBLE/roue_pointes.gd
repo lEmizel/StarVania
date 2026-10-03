@@ -1,15 +1,14 @@
 extends CharacterBody2D
 ## ============================================================================
-## ROUE À POINTES (2 oct. 2026, piège choisi par Kaoru : « la roue à pointes est
-## chouette », puis « une roue seule, qui tient par elle-même, et quand elle nous
-## voit elle nous fonce dessus ; elle ne revient que si on meurt »).
+## ROUE À POINTES (2 oct. 2026) : une roue seule, qui tient par elle-même ;
+## quand elle nous voit elle nous fonce dessus, et ne revient que si on meurt.
 ##
 ## DEUX FAÇONS D'ÊTRE (`comportement`) ; en AUTO (par défaut), c'est l'endroit
 ## où on la pose qui décide : sur un ÎLOT dont elle peut faire le tour sans rien
 ## heurter, elle TOURNE AUTOUR ; sur le sol d'un niveau, elle FONCE.
 ##
 ## FONCER — posée au sol, elle GUETTE (elle se balance doucement). Elle ne part
-## que si TOUT est vrai (Kaoru : « qu'elle ne se déclenche pas pour rien ») :
+## que si TOUT est vrai (elle ne doit pas se déclencher pour rien) :
 ##   • elle est ENTIÈREMENT À L'ÉCRAN (on la voit avant qu'elle parte) ;
 ##   • on est AU SOL, sur LE MÊME SOL qu'elle : un sol continu de la roue
 ##     jusqu'à nos pieds (pentes douces permises ; ni trou, ni marche, ni
@@ -24,8 +23,8 @@ extends CharacterBody2D
 ## Brisée, elle NE REVIENT QUE SI ON MEURT (registre Player.roues_brisees, vidé à
 ## la réapparition) : sortir du tableau et y revenir ne la ramène pas.
 ##
-## TOURNER AUTOUR (demande de Kaoru : « sur une plateforme îlot, petite, avec du
-## vide, elle devrait pouvoir tourner indéfiniment autour ») — elle fait le TOUR
+## TOURNER AUTOUR (sur une petite plateforme îlot entourée de vide) — elle fait
+## le TOUR
 ## de l'îlot sans fin : dessus, sur le flanc, DESSOUS, sur l'autre flanc, à
 ## `vitesse_tour`, dans le sens `sens_horaire`. Elle ne guette pas, ne fonce
 ## pas, ne se brise jamais. Ses pointes blessent le joueur à chaque passage
@@ -35,10 +34,10 @@ extends CharacterBody2D
 ## calculé une fois pour toutes depuis leur contour réuni : écarté de son rayon,
 ## arrondi autour des coins saillants ; si l'îlot bouge, elle suit.
 ##
-## Son ÉCHELLE (`scale` du nœud, Kaoru l'agrandit) est prise en compte partout.
+## Son ÉCHELLE (`scale` du nœud) est prise en compte partout.
 ## L'origine du nœud est le SOL sous la roue (on la pose comme le pilon) ; posée
 ## un peu haut, elle tombe d'elle-même sur le sol.
-## Dessin : LE DESSIN DE KAORU (MEDIA/INTERACTIBLE/roue.png, 3 oct. 2026),
+## Dessin : MEDIA/INTERACTIBLE/roue.png,
 ## tourné, flouté et fendu en quatre par SCRIPT/SHADER/roue_pointes.gdshader
 ## (nœud Visuel). En jeu, il reçoit une copie à mipmaps du dessin (faite une
 ## fois pour toutes les roues) : réduit 8 fois et plus, le dessin brut

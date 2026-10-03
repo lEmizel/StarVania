@@ -21,8 +21,8 @@ const TALISMAN_BOUILLANT := "bouillant"
 ## TALISMAN « SANG CRISTALLISÉ » : une chance (player.gd `cristal_chance`) de
 ## figer l'ennemi touché (BASE_IA.cristalliser)
 const TALISMAN_CRISTAL := "cristal"
-## TALISMAN « BOULE CHERCHEUSE » (2 oct. 2026, id "chercheuse", choisi par
-## Kaoru : « très efficace contre les volants ») : la boule vise l'ennemi vivant
+## TALISMAN « BOULE CHERCHEUSE » (2 oct. 2026, id "chercheuse" ; très
+## efficace contre les volants) : la boule vise l'ennemi vivant
 ## le plus proche DEVANT elle (à `chercheuse_cone` degrés au plus de son sens de
 ## départ, à `chercheuse_rayon` px au plus, sans mur entre eux) et tourne vers
 ## lui d'au plus `chercheuse_virage` radians par seconde, sans jamais sortir de
@@ -205,7 +205,7 @@ func _on_body_entered(body: Node) -> void:
 	if _eclate or body.is_in_group("Player"):
 		return
 	if body.has_method("apply_damage"):
-		# (le Canon de verre ne la double pas : Kaoru, 2 oct. 2026, pour qu'il ne
+		# (le Canon de verre ne la double pas, pour qu'il ne
 		# se cumule pas avec le Pacte de sang)
 		var degats := damage
 		# le joueur est l'attaquant : ses victimes sont les siennes (Essaim)

@@ -21,8 +21,8 @@ extends Area2D
 ##     ne propulse jamais : on n'y arrive qu'en tombant.
 ##
 ## C'est le RÔLE du passage qui décide, pas la vitesse du joueur. (Premier jet :
-## je regardais le signe de sa vitesse en traversant. Faux dès qu'on entre dans
-## un passage du haut en retombant, ou du bas en sautant : Kaoru s'est retrouvé
+## le signe de sa vitesse en traversant. Faux dès qu'on entre dans
+## un passage du haut en retombant, ou du bas en sautant : on se retrouvait
 ## propulsé dans le tableau du bas et lâché au fond du trou dans celui du haut.)
 @export_group("Passage vertical")
 @export var vertical := false
@@ -34,7 +34,7 @@ enum Role { AUTO, HAUT_DU_TABLEAU, BAS_DU_TABLEAU }
 ## catapulte du grappin 1500). Hauteur gagnée ≈ propulsion² ÷ 6850 :
 ##   1300 → 245 px   1600 → 375 px   1900 → 525 px   2200 → 705 px
 ## Il faut couvrir la profondeur du trou PLUS de quoi passer le rebord.
-## (1300 au premier jet : « manque de punch », et ne sortait même pas d'un
+## (1300 au premier jet : trop mou, et ne sortait même pas d'un
 ## trou de 300 px.)
 @export var propulsion := 1900.0
 ## poussée de côté ajoutée à l'élan d'arrivée, pour retomber sur le rebord et
@@ -42,7 +42,7 @@ enum Role { AUTO, HAUT_DU_TABLEAU, BAS_DU_TABLEAU }
 ## de diriger sa retombée)
 @export var propulsion_laterale := 0.0
 
-## RAI DE LUMIÈRE (3 oct. 2026, d'après une image de référence de Kaoru) : la
+## RAI DE LUMIÈRE (3 oct. 2026, d'après une image de référence) : la
 ## lumière qui entre par ce passage — l'ouverture blanche, la nappe de lumière,
 ## ses poussières, sa brume. Dessiné par l'enfant RaiDeLumiere (rai_lumiere.gd,
 ## visible dans l'éditeur), qui lit ces réglages.

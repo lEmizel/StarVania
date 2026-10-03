@@ -1,6 +1,6 @@
 # skeleton_blue.gd
-## SQUELETTE BLEU — variante plus dangereuse du squelette. Script À LUI (demande
-## de Kaoru, sept. 2026 : un monstre = ses propres scripts, même si le
+## SQUELETTE BLEU — variante plus dangereuse du squelette. Script À LUI (règle
+## du projet : un monstre = ses propres scripts, même si le
 ## comportement est pour l'instant celui du squelette). Copie de skeleton.gd au
 ## 18 sept. 2026 ; ce qui change :
 ##   • poursuite plus rapide : speed 341 (squelette : 280 ; +30 %, encore +25 %,
@@ -327,7 +327,7 @@ func dead_execute(delta: float) -> void:
 
 #region BOULE DE FEU
 # ---------------------------------------------------------------------------
-# TIR À DISTANCE (18 sept. 2026, demande de Kaoru) : dès que le joueur est
+# TIR À DISTANCE (18 sept. 2026) : dès que le joueur est
 # REPÉRÉ, le squelette bleu lui envoie une boule de feu, à n'importe quelle
 # distance et SANS S'ARRÊTER — il tire aussi bien en marchant sur lui qu'à
 # l'arrêt. Seule son attaque au corps à corps l'en empêche : la pose de cast
@@ -375,7 +375,7 @@ const VISUEL_CHARGE := preload("res://SCRIPT/SHADER/boule_de_feu.tscn")
 @export var trainee_charge := 0.15
 ## Le geste est-il en cours ? Tant qu'il l'est, il est PLANTÉ : il peut
 ## déclencher son sort en marchant, mais pas continuer à avancer pendant la
-## pose (18 sept. 2026, demande de Kaoru). Couvre le lever de main, le délai
+## pose (18 sept. 2026). Couvre le lever de main, le délai
 ## d'anticipation et le petit temps de pose après le tir.
 func _en_cast() -> bool:
 	return _pose_cast > 0.0
@@ -402,7 +402,7 @@ func _tick_boule_de_feu(delta: float) -> void:
 	# Le geste en cours avorte — la boule dans sa main s'éteint, sans toucher à
 	# son animation (gelé, il garde sa pose) — et rien ne repart avant qu'il ait
 	# repris ses esprits, plus un petit temps de réaction. Ce sort tourne à part
-	# de son état : gelé, il lançait encore ses boules de feu (Kaoru, 1er oct. 2026).
+	# de son état : gelé, il lançait encore ses boules de feu (constaté le 1er oct. 2026).
 	if est_etourdi():
 		if _pose_cast > 0.0 or _charge >= 0.0:
 			_charge = -1.0
@@ -422,7 +422,7 @@ func _tick_boule_de_feu(delta: float) -> void:
 			# la pose doit TENIR jusqu'au bout. Tout changement d'état rejoue
 			# l'animation de SON état (walk, idle…) par-dessus : sans ce rappel, le
 			# squelette repassait en "walk" au milieu de son sort et, le déplacement
-			# étant gelé, il marchait sur place en lançant sa boule (vu par Kaoru
+			# étant gelé, il marchait sur place en lançant sa boule (constaté
 			# le 18 sept. 2026).
 			if String(animator.animation) != "cast":
 				animator.play("cast")
@@ -469,7 +469,7 @@ func _tirer_boule_de_feu() -> void:
 	if _ancre_boule != null:
 		origine = _ancre_boule.global_position
 	# TIR HORIZONTAL, droit devant lui (essayé visé sur le joueur le 18 sept. 2026,
-	# REFUSÉ par Kaoru : la boule ne suit ni ne vise personne, elle part à plat)
+	# ÉCARTÉ : la boule ne suit ni ne vise personne, elle part à plat)
 	var boule := BOULE_DE_FEU.instantiate()
 	boule.direction = Vector2(float(last_direction), 0.0)
 	boule.damage = degats_boule_de_feu

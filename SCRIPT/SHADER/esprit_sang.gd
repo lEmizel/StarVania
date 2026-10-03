@@ -1,9 +1,8 @@
 extends Node2D
 ## ============================================================================
-## ESPRIT DE SANG (1er oct. 2026) — LES ÂMES PERDUES À LA MORT (Kaoru : « qu'on
-## perde nos âmes et qu'elles soient laissées sur place comme dans les Souls,
-## représentées par un petit esprit rouge, wisp of blood, qu'on doit ramasser
-## pour les récupérer »).
+## ESPRIT DE SANG (1er oct. 2026) — LES ÂMES PERDUES À LA MORT : elles sont
+## laissées sur place comme dans les Souls, sous la forme d'un petit esprit
+## rouge qu'on doit ramasser pour les récupérer.
 ## Posé par le joueur quand il arrive dans le tableau où il est mort (player.gd,
 ## `_ames_poser`), à l'endroit gardé par l'autoload (`Player.ames_position`) :
 ## au-dessus du dernier sol où il a posé le pied — pas au fond d'un trou, pas

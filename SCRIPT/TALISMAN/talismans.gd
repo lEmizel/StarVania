@@ -54,7 +54,7 @@ extends RefCounted
 ## versé, le reliquaire, les gardiennes, le soin éclair, les entraves, le cœur
 ## noir et la couronne du défi le 1er oct. ; la boule chercheuse, le
 ## trop-plein, le sang neuf, l'inébranlable, le sixième coup et le pacte de
-## sang le 2 oct. — la collection est complète, dit Kaoru) : monte ce nombre
+## sang le 2 oct. — la collection est complète) : monte ce nombre
 ## s'il y en a un jour d'autres à découvrir.
 const NB_EMPLACEMENTS := 42
 

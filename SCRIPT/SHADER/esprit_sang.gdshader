@@ -1,8 +1,8 @@
 shader_type canvas_item;
 render_mode unshaded, blend_premul_alpha;
 // ESPRIT DE SANG (1er oct. 2026) — les âmes perdues à la mort, laissées sur place
-// comme dans les Souls (Kaoru : « un petit esprit rouge, wisp of blood, qu'on
-// doit ramasser pour les récupérer »).
+// comme dans les Souls : un petit esprit rouge qu'on doit ramasser pour les
+// récupérer.
 // Un FEU FOLLET de sang qui flotte : un corps de FLAMME — rond et chaud en bas,
 // effilé en haut, sa pointe qui ondule et vacille —, deux petites LANGUES de feu
 // qui s'en détachent et montent en s'éteignant, une vapeur qui s'en défait (des

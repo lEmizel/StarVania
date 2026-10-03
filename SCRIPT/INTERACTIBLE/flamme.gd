@@ -1,11 +1,11 @@
 extends Node2D
 ## ============================================================================
-## FLAMME DE TORCHE — la flamme que Kaoru pose sur les torches peintes de ses
-## décors (flamme_cartoon, à SES réglages), et depuis le 3 oct. 2026 son HALO
+## FLAMME DE TORCHE — la flamme posée sur les torches peintes des
+## décors (flamme_cartoon, aux réglages de la scène), et depuis le 3 oct. 2026 son HALO
 ## (SCRIPT/SHADER/halo_torche.gdshader, d'après une image de référence) : une
 ## lueur ronde cernée d'un liseré, des braises qui montent.
 ## Ce script la fait VACILLER : la lueur du halo et l'intensité de sa lumière
-## (PointLight2D, autour de SON réglage d'énergie) suivent le même souffle,
+## (PointLight2D, autour du réglage d'énergie de la scène) suivent le même souffle,
 ## irrégulier comme un feu — un bruit lent et un bruit vif mêlés. Chaque torche
 ## a le sien : elles ne battent pas ensemble.
 ## Seulement en jeu : dans l'éditeur, le halo reste à mi-souffle et rien n'est

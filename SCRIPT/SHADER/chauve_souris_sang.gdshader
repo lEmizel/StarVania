@@ -3,7 +3,7 @@ render_mode unshaded;
 // CHAUVE-SOURIS DE SANG (1er oct. 2026) — talisman « Essaim » : chaque ennemi
 // tué par le joueur lâche des chauves-souris de sang qui fondent sur les
 // ennemis proches et les mordent. Un ORIGAMI SIMPLE vu de côté, d'après le
-// croquis de Kaoru (la silhouette : chauve_souris_forme.gdshaderinc). Sobre
+// croquis de référence (la silhouette : chauve_souris_forme.gdshaderinc). Sobre
 // comme les autres effets de sang : des aplats rouges cernés d'encre, aucun
 // blanc.
 //   • elle vole vers +x : le nœud se tourne dans le sens du vol ;
@@ -58,7 +58,7 @@ void fragment() {
 	// `k` tombe à ZÉRO à la fin de la morsure : on divise ET on reconvertit en
 	// pixels avec la MÊME échelle bornée. Reconvertir avec `k` (distance × 0 =
 	// 0 px) mettait tout le rectangle « au bord » de la forme : un carré rouge
-	// d'une image sur la cible à chaque morsure (Kaoru, 1er oct. 2026).
+	// d'une image sur la cible à chaque morsure (constaté le 1er oct. 2026).
 	float ks = max(k, 0.001);
 	vec2 b = p / ks;
 	// le papier est encore plié à plat à la naissance

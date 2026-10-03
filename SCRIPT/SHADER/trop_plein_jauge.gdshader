@@ -1,7 +1,7 @@
 shader_type canvas_item;
 render_mode unshaded;
 // TROP-PLEIN (2 oct. 2026) — la ROUE du talisman « Trop-plein », comme la jauge
-// d'endurance de Zelda (demande de Kaoru) : un anneau qui se REMPLIT EN
+// d'endurance de Zelda : un anneau qui se REMPLIT EN
 // TOURNANT, depuis midi dans le sens des aiguilles d'une montre, d'un tiers à
 // chaque coup d'épée qui porte (le tiers gagné s'éclaire un instant). Des
 // encoches marquent les tiers. PLEINE, son cœur se remplit d'une boule de sang

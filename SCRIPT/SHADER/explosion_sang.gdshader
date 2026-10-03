@@ -4,11 +4,11 @@ render_mode unshaded;
 // au troisième coup (épée ou boule de sang), le sang de l'ennemi qui bout
 // explose, et blesse ses voisins (ébullition ; avant, c'était le cadavre d'un
 // ennemi tué).
-//   v1 : l'éclaboussure de la boule de sang → « manque de punch » ;
-//   v2 : jets de sang, gouttes, flaque → « trop goutte de sang, plus explosion
-//        tout court » ;
-//   v3 : une boule de feu en bandes (famille du kamikaze) → « une trop grosse
-//        boule opaque, pas fan, je préfère plus léger et impactant » (Kaoru).
+//   v1 : l'éclaboussure de la boule de sang → manquait de punch ;
+//   v2 : jets de sang, gouttes, flaque → trop « goutte de sang », pas assez
+//        explosion ;
+//   v3 : une boule de feu en bandes (famille du kamikaze) → une trop grosse
+//        boule opaque.
 // v4 : LÉGÈRE ET IMPACTANTE — tout se joue en un quart de seconde, et presque
 // rien n'est plein :
 //   0. L'INSPIRATION (`gonfle`, avant le boum) : une petite boule qui enfle en
@@ -23,7 +23,7 @@ render_mode unshaded;
 //   4. L'ONDE DE CHOC : un anneau fin qui file jusqu'au RAYON DES DÉGÂTS — on
 //      voit qui est touché ;
 //   5. quelques BRAISES. (La fumée qui montait à la fin est éteinte, `fumee`
-//      à 0 : Kaoru n'en voulait pas — remonter le réglage pour la revoir.)
+//      à 0 — remonter le réglage pour la revoir.)
 // Même famille que l'explosion du kamikaze (bruit à gradients, aplats en
 // bandes, palette de quatre couleurs), en rouge sang ; le plus chaud est un
 // corail clair, jamais du blanc.

@@ -1,7 +1,7 @@
 extends Node2D
 ## ============================================================================
-## TROU NOIR (2 oct. 2026, piège choisi par Kaoru parmi des pièges « simples
-## et spectaculaires », sur le modèle du pilier de foudre). Une seule règle :
+## TROU NOIR (2 oct. 2026, un piège simple et spectaculaire, sur le modèle du
+## pilier de foudre). Une seule règle :
 ## il t'ASPIRE, et son cœur blesse.
 ##
 ##   • À L'ÉCRAN (VisibleOnScreenNotifier2D « Ecran »), il s'ÉVEILLE : l'ombre

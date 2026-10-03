@@ -3,7 +3,7 @@ render_mode unshaded;
 // DESSIN DU TALISMAN « LAME DE FOUDRE » (menu START, 30 sept. 2026).
 // emplacement_talisman.gd le pose dans le rond et lui fournit `opacite`,
 // `eveil` et `temps`.
-// TOUT LE ROND est au dessin (Kaoru, 30 sept. 2026 : ni anneau ni grenats
+// TOUT LE ROND est au dessin (ni anneau ni grenats
 // autour) : un disque de nuit d'orage cerné d'un simple trait d'encre, et un
 // ÉCLAIR qui le traverse de haut en bas — la silhouette classique, bleue,
 // blanche à cœur, cernée d'encre. Pointé ou porté (`eveil`) il tremble, sa

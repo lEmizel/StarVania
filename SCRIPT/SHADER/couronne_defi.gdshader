@@ -1,8 +1,7 @@
 shader_type canvas_item;
 render_mode unshaded;
-// COURONNE DU DÉFI (1er oct. 2026) — talisman « Couronne du défi » (idée de
-// Kaoru : « un talisman de défi, on n'a plus qu'un cœur, il te donne une
-// magnifique couronne en or qui tourne au-dessus de la tête »).
+// COURONNE DU DÉFI (1er oct. 2026) — talisman « Couronne du défi » : on n'a
+// plus qu'un cœur, et une couronne d'or tourne au-dessus de la tête.
 // La forme de la couronne de la Vengeance (couronne_vengeance.gdshader, non
 // touchée) faite ROYALE :
 //   • un ANNEAU d'or vu de trois quarts qui TOURNE lentement : bande en

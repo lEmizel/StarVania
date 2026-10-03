@@ -3,7 +3,7 @@ render_mode unshaded;
 // EXPLOSION DE FEU — l'impact de la boule de feu du squelette bleu (1er oct.
 // 2026). Elle remplace l'éclaboussure de la bloodball recolorée en orange
 // qu'utilisait la boule : une éclaboussure de SANG n'avait plus de sens pour
-// une boule de FEU (Kaoru). explosion_feu.gd anime `progress` de 0 à 1.
+// une boule de FEU. explosion_feu.gd anime `progress` de 0 à 1.
 //
 // Même famille que boule_de_feu / jet_flamme / le slash de feu : bruit à
 // gradients (hash sans sin), aplats cartoon en bandes, même palette de quatre

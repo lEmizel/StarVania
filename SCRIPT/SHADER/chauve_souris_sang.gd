@@ -7,7 +7,7 @@ extends Node2D
 ## `player.essaim_nombre` chauves-souris de son cadavre (player.gd,
 ## `_essaim_lacher`). Chacune :
 ##   1. JAILLIT du cadavre en éventail (`envol` s) ;
-##   2. SUIT le joueur tant qu'elle n'a pas de proie (Kaoru, 1er oct. 2026) :
+##   2. SUIT le joueur tant qu'elle n'a pas de proie :
 ##      elle tourne AU-DESSUS de sa tête, à sa façon (`graine`) — jamais sur
 ##      sa tête ; sous un plafond trop bas, elle se range derrière lui — et
 ##      guette un ennemi toutes les `recherche` s ;
@@ -28,7 +28,7 @@ extends Node2D
 ## PAS quand le tableau la détruit. Le joueur du tableau suivant relâche ce
 ## compte autour de lui, déjà en vol (player.gd, `_essaim_reprendre`, `deja_la`).
 ##
-## Une chauve-souris DE PAPIER vue de côté (croquis de Kaoru) : le nœud se
+## Une chauve-souris DE PAPIER vue de côté : le nœud se
 ## TOURNE dans le sens du vol (`_orienter`, en miroir quand elle vole vers la
 ## gauche) ; la silhouette est dans chauve_souris_forme.gdshaderinc.
 ##

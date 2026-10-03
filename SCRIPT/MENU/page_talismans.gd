@@ -4,9 +4,8 @@ extends Control
 ##   • en haut, les emplacements où l'on ÉQUIPE (Player.EMPLACEMENTS_TALISMAN) ;
 ##   • dessous, la COLLECTION : un emplacement rond par talisman à découvrir
 ##     (le catalogue est dans SCRIPT/TALISMAN/talismans.gd). Elle DÉFILE quand
-##     elle ne tient pas en hauteur : les ronds gardent leur taille (Kaoru,
-##     1er oct. 2026 : « plutôt que les réduire, plus gros et dans un menu
-##     déroulant ») et la liste suit le rond pointé.
+##     elle ne tient pas en hauteur : les ronds gardent leur taille (plutôt que
+##     de rapetisser) et la liste suit le rond pointé.
 ##
 ## MANETTE : croix ou stick pour se déplacer, Croix pour équiper un talisman de
 ## la collection dans le premier emplacement libre, ou pour le retirer (depuis
@@ -278,8 +277,8 @@ func _dire_refus(titre: String, texte: String) -> void:
 #  Navigation à la manette : chaque emplacement connaît ses quatre voisins.
 #  (La recherche géométrique de Godot saute parfois une rangée.) Dans la
 #  collection, droite au bout d'une rangée passe au premier rond de la
-#  suivante, gauche au début d'une rangée au dernier de la précédente (Kaoru,
-#  1er oct. 2026) ; bas vers une dernière rangée plus courte va à son dernier
+#  suivante, gauche au début d'une rangée au dernier de la précédente ;
+#  bas vers une dernière rangée plus courte va à son dernier
 #  rond.
 # --------------------------------------------------------------------------
 

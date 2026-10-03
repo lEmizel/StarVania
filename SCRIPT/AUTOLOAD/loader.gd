@@ -15,8 +15,8 @@ var _target_scene_path: String
 ##   scene_06 : 795 Mo   scene_7 : 177 Mo   scene_08 : 275 Mo   scene_09 : 81 Mo
 ##   → 1,35 Go à quatre. scene_06 pèse à elle seule 60 % du total : c'est elle
 ##   qu'il faudra alléger le jour où la mémoire pose problème, pas les autres.
-## Depuis le menu on ne précharge que les ENTRÉES des démos (23 sept. 2026,
-## demande de Kaoru) : scene_7 (DEMO 1), scene_08 (DEMO 2) et, depuis le
+## Depuis le menu on ne précharge que les ENTRÉES des démos (23 sept.
+## 2026) : scene_7 (DEMO 1), scene_08 (DEMO 2) et, depuis le
 ## 30 sept., sc_10 (DEMO 3). Leurs suites (scene_06, scene_09) ne sont pas
 ## gardées en mémoire au menu.
 const SCENES_PRECHARGEES: Array[String] = [
@@ -33,8 +33,8 @@ var _file_prechargement: Array[String] = []      # scènes restant à précharge
 var _chargement_niveau_en_cours := false         # un load_scene_with_loading est en vol
 
 # ------------------------------------------------------------------
-# GARDE-FOUS (3 oct. 2026) : chez un ami de Kaoru, le préchargement de scene_08
-# n'a jamais rendu la main ; il a choisi DEMO 3, et le chargeur ATTENDAIT SANS
+# GARDE-FOUS (3 oct. 2026) : sur une machine, le préchargement de scene_08
+# n'a jamais rendu la main ; DEMO 3 choisie, le chargeur ATTENDAIT SANS
 # LIMITE la fin de ce préchargement avant de charger la démo demandée :
 # « LOADING » pour toujours, le journal s'arrêtant sur « démarrage du loading ».
 # Un confort d'arrière-plan ne doit jamais bloquer le niveau demandé :
@@ -286,7 +286,7 @@ func _basculer(scene: Node) -> void:
 
 
 # ------------------------------------------------------------------
-# VOISINAGE (23 sept. 2026, idée de Kaoru) : à chaque niveau posé, on regarde
+# VOISINAGE (23 sept. 2026) : à chaque niveau posé, on regarde
 # ses PASSAGES et on précharge leurs cibles en arrière-plan pendant que le
 # joueur joue — plus d'écran de chargement au passage suivant. Et on LÂCHE ce
 # qui n'est plus voisin : la mémoire suit le joueur au lieu de grossir jusqu'à

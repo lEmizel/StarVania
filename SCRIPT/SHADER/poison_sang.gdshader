@@ -6,7 +6,7 @@ render_mode unshaded;
 // renaissent ailleurs. À chaque morsure du poison
 // (`morsure` → 1), elles enflent un instant. Deux tons à plat (violet, cœur
 // mauve), translucides, sans trait d'encre ni reflet : cernées et brillantes,
-// elles faisaient des billes collées sur le squelette (v1, jugée par moi sur
+// elles faisaient des billes collées sur le squelette (v1, jugée sur
 // capture). Aucun blanc.
 // Repère : des pixels ; `origine` = le milieu du corps, dans le rectangle.
 

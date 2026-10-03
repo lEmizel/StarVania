@@ -1,16 +1,15 @@
 @tool
 extends Node2D
 ## ============================================================================
-## RAI DE LUMIÈRE d'un PASSAGE (3 oct. 2026, d'après une image de référence de
-## Kaoru : la lumière qui entre par une porte, ses poussières, sa brume) —
+## RAI DE LUMIÈRE d'un PASSAGE (3 oct. 2026, d'après une image de référence :
+## la lumière qui entre par une porte, ses poussières, sa brume) —
 ## enfant de SCRIPT/INTERACTIBLE/passage.tscn.
 ## Il se RÈGLE SUR LE PASSAGE lui-même (groupe « Rai de lumière » de
 ## passage.gd) : chaque passage posé se règle dans l'inspecteur, sans « enfants
 ## modifiables ».
 ##   • DE CÔTÉ (passage horizontal) : il part vers la SALLE, du côté du Marker2D
 ##     (le point d'arrivée), passage retourné compris ;
-##   • en VERTICAL (Kaoru : « faudrait en faire un pour les passages en mode
-##     vertical, à cocher pour expliciter le mode ») : une colonne qui TOMBE du
+##   • en VERTICAL (pour les passages verticaux) : une colonne qui TOMBE du
 ##     trou du plafond jusqu'au sol, ou qui MONTE du trou du sol. `rai_mode`
 ##     AUTO suit le passage : horizontal → de côté ; vertical → selon son rôle
 ##     (haut du tableau = elle tombe, bas = elle monte), déduit comme le fait
@@ -27,8 +26,8 @@ const META := "genere_par_rai_lumiere"
 const MARGE := 40.0                 # autour du rai : poussières, lueur du liseré
 const LARGEUR_OUVERTURE := 22.0     # l'ouverture blanche, derrière le départ du rai (comme le shader)
 const HALO_OUVERTURE := 60.0        # sa lueur déborde d'autant
-# en vertical, la colonne reste DROITE (Kaoru : « plus vertical droit plutôt qu'en
-# oblique, sinon il rentre dans les murs » — à 0,35 elle s'évasait sur les murs du puits)
+# en vertical, la colonne reste DROITE (à 0,35 elle s'évasait et rentrait dans
+# les murs du puits)
 const EVASEMENT := 0.0
 
 # les valeurs de passage.gd (ModeRai, Role)

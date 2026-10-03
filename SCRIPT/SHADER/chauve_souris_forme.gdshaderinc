@@ -1,12 +1,11 @@
 // LA CHAUVE-SOURIS DE PAPIER (1er oct. 2026) — la silhouette commune à la
 // chauve-souris de sang en jeu (chauve_souris_sang.gdshader) et au dessin du
-// talisman « Essaim » (dessin_essaim.gdshader). D'après le croquis de Kaoru :
+// talisman « Essaim » (dessin_essaim.gdshader). D'après le croquis de référence :
 // pas une chauve-souris « littérale » mais un ORIGAMI SIMPLE, vu de côté
 // (trois quarts), comme l'aile du héros : un corps en losange, la tête = UNE
 // pointe, chaque aile = DEUX triangles (un grand dont la pointe part loin
-// derrière, un petit dessous), rien de plus (« la tête un simple pic, les
-// ailes juste deux triangles, pas plus »). Des aplats cernés d'encre ; l'aile
-// lointaine, plus petite et plus sombre, passe derrière le corps.
+// derrière, un petit dessous), rien de plus. Des aplats cernés d'encre ;
+// l'aile lointaine, plus petite et plus sombre, passe derrière le corps.
 //
 // Repère : « unités de chauve-souris », l'origine est l'ÉPAULE, elle vole vers
 // +x, y vers le BAS. Les ailes tournent autour de l'épaule : angle 0 = à plat

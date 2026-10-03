@@ -1,7 +1,7 @@
 extends Node2D
 ## ============================================================================
-## COURONNE DU DÉFI (1er oct. 2026) — talisman « Couronne du défi » (id "defi",
-## idée de Kaoru) : tant qu'il est porté, une magnifique COURONNE D'OR tourne
+## COURONNE DU DÉFI (1er oct. 2026) — talisman « Couronne du défi » (id "defi") :
+## tant qu'il est porté, une COURONNE D'OR tourne
 ## au-dessus de la tête du héros (couronne_defi.gdshader : fleurons et perles,
 ## rubis, reflet qui la balaie, étincelles). Visuel seul : le défi lui-même
 ## (un seul cœur, les autres talismans verrouillés) est dans l'autoload Player
@@ -20,7 +20,7 @@ extends Node2D
 ## juste au-dessus des cheveux à leur plus haut (−170, coups d'épée compris ;
 ## au repos ils sont vers −148)
 @export var hauteur := -188.0
-## sa taille (1 = celle du dessin du shader ; à 1, « c'est trop gros », Kaoru)
+## sa taille (1 = celle du dessin du shader ; à 1, elle est trop grosse)
 @export var echelle := 0.65
 
 const TALISMAN := "defi"

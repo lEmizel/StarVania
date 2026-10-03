@@ -5,16 +5,16 @@ extends Node2D
 ## bouillant » (id "bouillant") : chaque coup d'épée ou de boule de sang qui
 ## touche un ennemi (et le laisse en vie) fait BOUILLIR son sang — une CHARGE de
 ## plus, des bulles qui bouillonnent sur lui. À la `CHARGES_MAX`-ième (la
-## troisième ; essayé à deux coups le même jour, avec la boule en plus :
-## « 2 c'est trop fort », Kaoru), il INSPIRE puis EXPLOSE : il prend `part`
+## troisième ; à deux coups, avec la boule en plus, c'était trop fort),
+## il INSPIRE puis EXPLOSE : il prend `part`
 ## d'un coup d'épée (bonus compris), et ses voisins à
 ## moins de `rayon` px (sans mur entre eux) aussi. SANS RECUL (comme l'Ombre de
 ## sang : un recul renverrait des ennemis sur le héros). Sans coup pendant
 ## `duree_charge` s, les bulles crèvent et les charges retombent à zéro.
 ##
-## La v1 (1er oct. 2026) faisait exploser les ennemis TUÉS, en cascade : « il
-## sert à rien, il y a peu de groupes, et même en groupe la Lame de foudre le
-## supplante » (Kaoru) → il frappe maintenant dans le combat contre un seul
+## La v1 (1er oct. 2026) faisait exploser les ennemis TUÉS, en cascade : elle
+## servait peu (il y a peu de groupes, et en groupe la Lame de foudre la
+## supplantait) → il frappe maintenant dans le combat contre un seul
 ## ennemi aussi (un boum tous les trois coups).
 ##
 ## Trois temps, dans ce nœud qui suit l'ennemi :
@@ -31,7 +31,7 @@ extends Node2D
 ## Posé et rechargé par player.gd (`bouillant_charger`), sur chaque coup
 ## d'épée qui porte (animator.gd), chaque boule de sang qui touche
 ## (bloodball.gd, la Tornade de sang comprise) et chaque coup du double de
-## l'Ombre de sang (ombre_sang.gd : la synergie voulue par Kaoru).
+## l'Ombre de sang (ombre_sang.gd : une synergie voulue).
 ##
 ## POUR LE JUGER : ouvrir la scène et faire F6 (trois charges, boum, en boucle
 ## — seulement lancé seul). Les bulles se règlent sur le matériau du nœud
