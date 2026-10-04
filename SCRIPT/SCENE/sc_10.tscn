@@ -97,7 +97,7 @@ position = Vector2(2395.5, -3663)
 
 [node name="SAWBLADE" parent="interactible" unique_id=388117046 instance=ExtResource("6_5ylk2")]
 position = Vector2(1466, -999)
-frame_progress = 0.49864328
+frame_progress = 0.09875784
 position_a = Vector2(1466, -999)
 position_b = Vector2(1466, -2128)
 
@@ -453,7 +453,7 @@ texture = ExtResource("19_6t8y0")
 [node name="enemi" type="Node2D" parent="." unique_id=1354596315]
 
 [node name="loup_garou_elite" parent="enemi" unique_id=627255339 instance=ExtResource("20_5gsh0")]
-position = Vector2(786, 0)
+position = Vector2(786, 2)
 
 [node name="screenshot" type="Node" parent="." unique_id=599869060]
 script = ExtResource("16_1q33d")

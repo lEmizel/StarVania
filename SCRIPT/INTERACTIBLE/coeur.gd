@@ -17,7 +17,7 @@ var _persist_key := ""
 
 
 func _ready() -> void:
-	# persistance : déjà ramassé dans cette session → il n'existe plus
+	# persistance : déjà ramassé dans cette partie → il n'existe plus
 	_persist_key = _make_persist_key()
 	if Player.coeurs_ramasses.has(_persist_key):
 		set_process(false)
@@ -34,7 +34,8 @@ func _ready() -> void:
 
 ## Identité stable du pickup : scène du niveau + position arrondie —
 ## aucun ID à poser à la main, mais déplacer la goutte dans l'éditeur
-## change sa clé (sans conséquence : le registre vit une session)
+## change sa clé : dans une partie sauvegardée AVANT le déplacement, une goutte
+## déjà ramassée reparaît à sa nouvelle place
 func _make_persist_key() -> String:
 	var racine := get_parent()
 	var niveau: String = racine.owner.scene_file_path \
@@ -57,6 +58,7 @@ func _on_body_entered(body: Node2D) -> void:
 	Player.add_max_hp(1)  # la rangée de cœurs s'agrandit (signal "hp")
 	# soin complet : ramasser un cœur restaure TOUTE la vie
 	Player.changement_de_vie(Player.MAX_HP - Player.hp)
+	Player.sauvegarder()  # le cœur gagné est écrit tout de suite
 	# cérémonie visuelle : gros plan + envol en comète vers la rangée du HUD
 	var ui := get_tree().get_nodes_in_group("UI_Health")
 	if not ui.is_empty() and ui[0].has_method("heart_pickup_fx"):

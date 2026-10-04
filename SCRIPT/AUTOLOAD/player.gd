@@ -23,8 +23,7 @@ var max_hearts := 5  # nombre de cœurs affichés
 var hearts_initialized := false
 # Registre des cœurs déjà ramassés (clé = scène niveau + position) : un
 # pickup présent ici se détruit à son chargement — sinon il renaîtrait à
-# chaque respawn (cœurs infinis). Vit le temps de la session ; à brancher
-# sur la vraie sauvegarde disque quand elle existera.
+# chaque respawn (cœurs infinis). Gardé dans la sauvegarde.
 var coeurs_ramasses := {}
 # Registre des ROUES À POINTES brisées (même clé que les cœurs) : une roue
 # brisée ne revient QUE SI ON MEURT — vidé à la réapparition après la
@@ -46,8 +45,7 @@ var MAX_BLOODHEAL := BARRES_BLOODHEAL_DEPART * BARRE_BLOODHEAL  # dérivé : nb_
 # --- TALISMANS : ce que le joueur a découvert, et ce qu'il porte ---
 # Le catalogue (la liste de tous les talismans du jeu) est dans
 # SCRIPT/TALISMAN/talismans.gd ; le menu START, onglet Talismans, montre et
-# modifie ce qui suit. Vit le temps de la session, comme les cœurs ramassés : à
-# brancher sur la vraie sauvegarde disque quand elle existera.
+# modifie ce qui suit. Gardé dans la sauvegarde, comme les cœurs ramassés.
 const Talismans := preload("res://SCRIPT/TALISMAN/talismans.gd")
 ## émis à chaque découverte, équipement ou retrait : le menu se redessine, et le
 ## gameplay pourra s'y brancher pour appliquer les effets
@@ -68,7 +66,7 @@ var essaim_en_vol := 0
 ## (`ames_position`) — posé par le joueur à son arrivée dans ce tableau
 ## (player.gd, `_ames_poser`) ; le toucher les rend (`reprendre_ames`). Une
 ## nouvelle mort avant : l'ancien esprit est perdu pour de bon, le nouveau prend
-## sa place (`ames_id` change : l'ancien s'éteint). Vit le temps de la session,
+## sa place (`ames_id` change : l'ancien s'éteint). Gardé dans la sauvegarde,
 ## comme les cœurs ramassés.
 var ames_perdues := 0
 ## TALISMAN « CŒUR NOIR » (1er oct. 2026) : le joueur a-t-il son
@@ -100,6 +98,15 @@ var talismans_equipes: Array[String] = []  # un id par emplacement, "" = libre
 
 func _ready() -> void:
 	_talismans_page_blanche()
+	# trouver, équiper ou retirer un talisman : la partie est écrite aussitôt
+	# (branché APRÈS la page blanche : au démarrage il n'y a rien à écrire)
+	talismans_changes.connect(sauvegarder)
+
+
+func _notification(what: int) -> void:
+	# la fenêtre se ferme (croix, Alt+F4) : la partie est écrite avant
+	if what == NOTIFICATION_WM_CLOSE_REQUEST:
+		sauvegarder()
 
 
 ## Réinitialise TOUT l'état de partie — appelé par PLAY au menu principal.
@@ -165,6 +172,7 @@ func reprendre_ames() -> int:
 	ames_scene = ""
 	ames_id += 1
 	changement_de_blood(n)
+	sauvegarder()          # les âmes reprises sont écrites tout de suite
 	return n
 
 
@@ -415,6 +423,205 @@ func multiplicateur_blood() -> float:
 ## compteur (dépenses à venir) passent par `changement_de_blood`, sans bonus.
 func recolter_blood(montant: int) -> void:
 	changement_de_blood(roundi(montant * multiplicateur_blood()))
+
+
+# ---------- SAUVEGARDE ----------
+# La partie est gardée sur le disque, UNE SEULE (user://sauvegarde.cfg). Elle
+# est écrite EN CONTINU : à chaque checkpoint touché, à l'arrivée dans un
+# tableau, quand on ramasse un cœur, qu'on trouve, équipe ou retire un
+# talisman, qu'on meurt, qu'on reprend ses âmes, et en quittant (menu de pause,
+# fermeture de la fenêtre). Rien de ce qu'on a gagné n'est perdu en quittant.
+#   • LOAD (menu principal) la reprend AU DERNIER CHECKPOINT TOUCHÉ, cœurs
+#     pleins — sans checkpoint, au début du tableau où l'on était ;
+#   • PLAY commence une partie neuve, qui la remplace à sa première écriture.
+# Ce qui est gardé : le checkpoint, le sang, les cœurs (et les gouttes déjà
+# ramassées), la jauge de soin, les talismans trouvés et portés, le cœur noir,
+# les âmes perdues qui attendent. Ce qui ne l'est pas, comme à une
+# réapparition : la vie courante, les temps de recharge, les roues à pointes
+# brisées, l'essaim.
+# On n'écrit qu'EN PARTIE (un tableau posé par le Loader) : jamais au menu, ni
+# quand un tableau est lancé seul depuis l'éditeur.
+# L'écriture passe par un fichier provisoire, et la sauvegarde d'avant reste en
+# copie de secours (.bak) : une écriture interrompue ne casse rien. Une
+# sauvegarde illisible, d'une version inconnue ou dont le tableau n'existe plus
+# est ignorée (LOAD reste grisé) — elle ne fait jamais planter le jeu.
+const SAUVEGARDE := "user://sauvegarde.cfg"
+const SAUVEGARDE_SECOURS := "user://sauvegarde.cfg.bak"
+const SAUVEGARDE_VERSION := 1
+## le plus grand nombre de cœurs qu'une sauvegarde peut rendre
+const SAUVEGARDE_COEURS_MAX := 99
+var _sauvegarde_gelee := false       # pendant une lecture : on n'écrit pas par-dessus
+
+
+## Le tableau où l'on joue (chemin res://) : celui que le Loader a posé ; lancé
+## seul depuis l'éditeur, la scène courante.
+func niveau_courant() -> String:
+	var loader := get_node_or_null("/root/Loader")
+	if loader != null and loader.niveau_courant != "":
+		return loader.niveau_courant
+	var scene := get_tree().current_scene
+	return scene.scene_file_path if scene != null else ""
+
+
+## Une partie est-elle en cours (un tableau posé par le Loader) ?
+func en_partie() -> bool:
+	var loader := get_node_or_null("/root/Loader")
+	return loader != null and loader.niveau_courant != ""
+
+
+## Écrit la partie sur le disque. Sans effet hors partie. Renvoie true si elle
+## est écrite.
+func sauvegarder() -> bool:
+	if _sauvegarde_gelee or not en_partie():
+		return false
+	var cfg := ConfigFile.new()
+	cfg.set_value("sauvegarde", "version", SAUVEGARDE_VERSION)
+	cfg.set_value("sauvegarde", "date", Time.get_datetime_string_from_system())
+	cfg.set_value("sauvegarde", "niveau", niveau_courant())
+	cfg.set_value("partie", "checkpoint", has_checkpoint)
+	cfg.set_value("partie", "checkpoint_scene", last_checkpoint_scene)
+	cfg.set_value("partie", "checkpoint_position", last_checkpoint_pos)
+	cfg.set_value("partie", "sang", blood)
+	cfg.set_value("partie", "coeurs", MAX_HP)
+	cfg.set_value("partie", "coeurs_initialises", hearts_initialized)
+	cfg.set_value("partie", "defi_coeurs", defi_max_hp)
+	cfg.set_value("partie", "coeurs_ramasses", coeurs_ramasses.keys())
+	cfg.set_value("partie", "barres_soin", nb_barres_bloodheal)
+	cfg.set_value("partie", "soin", bloodheal)
+	cfg.set_value("partie", "coeur_noir", coeur_noir)
+	cfg.set_value("partie", "talismans_trouves", talismans_decouverts.keys())
+	cfg.set_value("partie", "talismans_portes", Array(talismans_equipes))
+	cfg.set_value("partie", "ames", ames_perdues)
+	cfg.set_value("partie", "ames_scene", ames_scene)
+	cfg.set_value("partie", "ames_position", ames_position)
+	# écrite à côté, puis mise en place : l'ancienne devient la copie de secours
+	var provisoire := SAUVEGARDE + ".tmp"
+	var err := cfg.save(provisoire)
+	if err != OK:
+		push_warning("[SAUVEGARDE] écriture impossible (erreur %d)" % err)
+		return false
+	if FileAccess.file_exists(SAUVEGARDE):
+		if FileAccess.file_exists(SAUVEGARDE_SECOURS):
+			DirAccess.remove_absolute(SAUVEGARDE_SECOURS)
+		DirAccess.rename_absolute(SAUVEGARDE, SAUVEGARDE_SECOURS)
+	err = DirAccess.rename_absolute(provisoire, SAUVEGARDE)
+	if err != OK:
+		push_warning("[SAUVEGARDE] mise en place impossible (erreur %d)" % err)
+		return false
+	return true
+
+
+## Y a-t-il une partie à reprendre (lisible, et dont le tableau existe) ?
+func sauvegarde_existe() -> bool:
+	return _lire_sauvegarde() != null
+
+
+## Reprend la partie sauvegardée : tout l'état de partie est remplacé par le
+## sien. Renvoie le tableau à charger (celui du dernier checkpoint touché ;
+## sans checkpoint, celui où l'on était), ou "" s'il n'y a rien à reprendre —
+## dans ce cas rien n'est touché.
+func charger() -> String:
+	var cfg := _lire_sauvegarde()
+	if cfg == null:
+		return ""
+	_sauvegarde_gelee = true
+	reset_partie()
+	var p := "partie"
+	blood = maxi(_sauv_entier(cfg, p, "sang", 0), 0)
+	for cle in _sauv_liste(cfg, p, "coeurs_ramasses"):
+		if cle is String:
+			coeurs_ramasses[cle] = true
+	nb_barres_bloodheal = clampi(_sauv_entier(cfg, p, "barres_soin", BARRES_BLOODHEAL_DEPART), 1, MAX_BARRES_BLOODHEAL)
+	MAX_BLOODHEAL = nb_barres_bloodheal * BARRE_BLOODHEAL
+	bloodheal = clampi(_sauv_entier(cfg, p, "soin", 0), 0, MAX_BLOODHEAL)
+	coeur_noir = cfg.get_value(p, "coeur_noir", false) == true
+	# les talismans : ceux du départ, plus ceux de la sauvegarde que le catalogue
+	# connaît encore ; portés seulement s'ils sont trouvés, jamais en double
+	for id in _sauv_liste(cfg, p, "talismans_trouves"):
+		if id is String and not Talismans.trouver(id).is_empty():
+			talismans_decouverts[id] = true
+	var portes := _sauv_liste(cfg, p, "talismans_portes")
+	for i in mini(portes.size(), EMPLACEMENTS_TALISMAN):
+		var id = portes[i]
+		if id is String and id != "" and talisman_decouvert(id) and not talismans_equipes.has(id):
+			talismans_equipes[i] = id
+	# les cœurs ; avec la Couronne du défi : elle seule est portée, un seul
+	# cœur, et les vrais cœurs sont mis de côté
+	var coeurs := clampi(_sauv_entier(cfg, p, "coeurs", MAX_HP), 1, SAUVEGARDE_COEURS_MAX)
+	if talismans_equipes.has(TALISMAN_DEFI):
+		for i in talismans_equipes.size():
+			if talismans_equipes[i] != TALISMAN_DEFI:
+				talismans_equipes[i] = ""
+		defi_max_hp = clampi(maxi(_sauv_entier(cfg, p, "defi_coeurs", 0), coeurs), 1, SAUVEGARDE_COEURS_MAX)
+		coeurs = 1
+	# (une partie écrite avant la première apparition du héros n'a pas encore
+	# ses cœurs : il les lira à son arrivée, comme en partie neuve)
+	if cfg.get_value(p, "coeurs_initialises", true) == true:
+		hearts_initialized = true
+		MAX_HP = coeurs
+		max_hearts = coeurs
+		hp = coeurs                       # on reprend cœurs pleins
+	# le point de retour
+	var scene = cfg.get_value(p, "checkpoint_scene", "")
+	var position = cfg.get_value(p, "checkpoint_position", Vector2.ZERO)
+	if cfg.get_value(p, "checkpoint", false) == true and scene is String \
+			and scene != "" and ResourceLoader.exists(scene) and position is Vector2:
+		has_checkpoint = true
+		last_checkpoint_scene = scene
+		last_checkpoint_pos = position
+	# les âmes perdues qui attendent encore
+	var ames := maxi(_sauv_entier(cfg, p, "ames", 0), 0)
+	scene = cfg.get_value(p, "ames_scene", "")
+	position = cfg.get_value(p, "ames_position", Vector2.ZERO)
+	if ames > 0 and scene is String and scene != "" and position is Vector2:
+		ames_perdues = ames
+		ames_scene = scene
+		ames_position = position
+	ames_id += 1
+	talismans_changes.emit()
+	_sauvegarde_gelee = false
+	return _sauv_scene_de_reprise(cfg)
+
+
+## la sauvegarde si elle est utilisable, sinon sa copie de secours, sinon null
+func _lire_sauvegarde() -> ConfigFile:
+	for chemin in [SAUVEGARDE, SAUVEGARDE_SECOURS]:
+		if not FileAccess.file_exists(chemin):
+			continue
+		var cfg := ConfigFile.new()
+		if cfg.load(chemin) != OK:
+			push_warning("[SAUVEGARDE] fichier illisible : " + chemin)
+			continue
+		var version = cfg.get_value("sauvegarde", "version", 0)
+		if typeof(version) != TYPE_INT or version < 1 or version > SAUVEGARDE_VERSION:
+			continue
+		if _sauv_scene_de_reprise(cfg) == "":
+			continue
+		return cfg
+	return null
+
+
+## le tableau où reprendre : celui du dernier checkpoint touché ; sans
+## checkpoint, celui où l'on était ; "" si aucun des deux n'existe
+func _sauv_scene_de_reprise(cfg: ConfigFile) -> String:
+	var scene = cfg.get_value("partie", "checkpoint_scene", "")
+	if cfg.get_value("partie", "checkpoint", false) == true and scene is String \
+			and scene != "" and ResourceLoader.exists(scene):
+		return scene
+	scene = cfg.get_value("sauvegarde", "niveau", "")
+	if scene is String and scene != "" and ResourceLoader.exists(scene):
+		return scene
+	return ""
+
+
+func _sauv_entier(cfg: ConfigFile, section: String, cle: String, defaut: int) -> int:
+	var v = cfg.get_value(section, cle, defaut)
+	return int(v) if (v is int or v is float) else defaut
+
+
+func _sauv_liste(cfg: ConfigFile, section: String, cle: String) -> Array:
+	var v = cfg.get_value(section, cle, [])
+	return v if v is Array else []
 
 
 #Player.add_max_sang(50)        # +50 de capacité de jauge de sang (la barre s'allonge)

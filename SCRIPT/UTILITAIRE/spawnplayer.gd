@@ -16,6 +16,9 @@ func _ready() -> void:
 		player_body = _instantiate_player(spawn_pos)
 		if not player_body:
 			return
+	# le héros est là (ses cœurs sont connus) : la partie est écrite à chaque
+	# arrivée dans un tableau, réapparition comprise
+	Player.sauvegarder()
 	if spawn_pos == null:
 		push_warning("[SPAWN] Aucune position de spawn trouvée")
 		return

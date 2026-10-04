@@ -23,18 +23,23 @@ func _ready() -> void:
 	area.body_entered.connect(_on_body_entered)
 
 func _on_body_entered(body: Node2D) -> void:
+	if not body.is_in_group("Player"):
+		return
 	# TALISMAN « SECOND SOUFFLE » : chaque checkpoint touché le recharge, même
 	# un checkpoint déjà allumé (1er oct. 2026)
-	if body.is_in_group("Player"):
-		Player.second_souffle_attente = 0.0
-		# TALISMAN « CŒUR NOIR » : chaque checkpoint touché le rend (s'il manque)
-		Player.coeur_noir_attente = 0.0
-	if active:
-		return
-	if body.is_in_group("Player"):
+	Player.second_souffle_attente = 0.0
+	# TALISMAN « CŒUR NOIR » : chaque checkpoint touché le rend (s'il manque)
+	Player.coeur_noir_attente = 0.0
+	# Le DERNIER checkpoint touché est le point de retour, MÊME S'IL ÉTAIT DÉJÀ
+	# ALLUMÉ. Avant (jusqu'au 4 oct. 2026), un checkpoint allumé ne se
+	# réenregistrait pas : on touchait A, puis B, on revenait sur A, et c'était B
+	# qui restait.
+	# position + scène : survivent au rechargement, contrairement au NodePath
+	Player.last_checkpoint_pos = global_position
+	Player.last_checkpoint_scene = _level_path()
+	Player.has_checkpoint = true
+	if not active:
 		active = true
 		sprite_2d.material = _shader_material
-		# position + scène : survivent au rechargement, contrairement au NodePath
-		Player.last_checkpoint_pos = global_position
-		Player.last_checkpoint_scene = _level_path()
-		Player.has_checkpoint = true
+	# la partie est écrite sur le disque à chaque checkpoint touché
+	Player.sauvegarder()

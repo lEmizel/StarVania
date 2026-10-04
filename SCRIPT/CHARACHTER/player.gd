@@ -5,6 +5,7 @@ enum States { IDLE, RUN, CHUTE, JUMP, WALL_GRIFFE, WALL_JUMP, CLIMB, ROLL, CHUTE
 
 
 
+@export_group("Base")
 # CAMP (23 sept. 2026) : même système que les monstres (`faction` de BASE_IA).
 # Un monstre du même camp ne nous attaque pas. 1 par défaut, les monstres à 0.
 @export_range(0, 10) var faction: int = 1
@@ -73,6 +74,8 @@ const IMPACT_SANG := preload("res://SCRIPT/SHADER/impact_sang.tscn")
 ## L'allure de la bulle se règle dans SCRIPT/SHADER/bouclier_sang.tscn.
 const BOUCLIER_SCENE := preload("res://SCRIPT/SHADER/bouclier_sang.tscn")
 const TALISMAN_BOUCLIER := "bouclier"
+@export_group("Talismans")
+@export_subgroup("Bouclier de sang")
 ## combien de temps le bouclier tient (s)
 @export var bouclier_duree := 2.0
 ## temps mort après sa chute avant qu'un coup puisse le relever (s, 0 = aucun)
@@ -89,6 +92,7 @@ var _bouclier_recharge_reste := 0.0
 ## L'allure des pics se règle dans SCRIPT/SHADER/epines_sang.tscn.
 const EPINES_SCENE := preload("res://SCRIPT/SHADER/epines_sang.tscn")
 const TALISMAN_EPINES := "epines"
+@export_subgroup("Épines de sang")
 ## portée des pics depuis le milieu du corps (px) — le dessin la suit
 @export var epines_rayon := 200.0
 ## dégâts : part d'un coup d'épée (1 = autant qu'un coup, bonus compris)
@@ -103,10 +107,12 @@ const TALISMAN_EPINES := "epines"
 ## L'attente vit dans l'autoload (`Player.second_souffle_attente`) : le joueur
 ## est recréé à chaque respawn.
 const TALISMAN_SOUFFLE := "souffle"
+@export_subgroup("Second souffle")
 @export var second_souffle_recharge := 120.0
 @export var second_souffle_grace := 1.0
 var _souffle_grace_reste := 0.0
 
+@export_subgroup("Marque de sang")
 ## TALISMAN « MARQUE DE SANG » (1er oct. 2026, id "marque") : la boule de sang
 ## (et la tornade) marque l'ennemi qu'elle touche (SCRIPT/SPELL/bloodball.gd) ;
 ## le prochain coup d'épée qui PORTE sur lui fait `marque_multiplicateur` fois
@@ -144,6 +150,7 @@ var _oeil: Node2D
 ## s'efface quand le temps est écoulé.
 const TALISMAN_VENGEANCE := "vengeance"
 const COURONNE_SCENE := preload("res://SCRIPT/SHADER/couronne_vengeance.tscn")
+@export_subgroup("Vengeance")
 @export var vengeance_duree := 5.0
 @export var vengeance_multiplicateur := 1.5
 ## où flotte la couronne (repère du joueur : ses pieds sont à 0) : son bas
@@ -160,6 +167,7 @@ var _couronne: Node2D
 ## Voir animator.gd (`_on_body_entered`, `_de_dos`). Le héros traverse les
 ## ennemis : passer de l'autre côté et frapper avant qu'il se retourne.
 const TALISMAN_DOS := "dos"
+@export_subgroup("Coup dans le dos")
 @export var dos_multiplicateur := 1.5
 
 ## TALISMAN « CRESCENDO » (1er oct. 2026, id "crescendo") : chaque coup d'épée
@@ -172,6 +180,7 @@ const TALISMAN_DOS := "dos"
 ## s'épaissit avec la série (animator.gd, `_crescendo_habiller`).
 const TALISMAN_CRESCENDO := "crescendo"
 const CRESCENDO_PALIERS := [5.0, 10.0, 20.0, 40.0, 50.0]
+@export_subgroup("Crescendo")
 @export var crescendo_delai := 4.0
 ## le slash au plus fort de la série : sa couleur, son épaisseur (× celle des
 ## dessins)
@@ -194,6 +203,7 @@ var _crescendo_reste := 0.0       # avant que la série s'éteigne (s)
 ## SCRIPT/SHADER/parade_choc.tscn.
 const TALISMAN_PARADE := "parade"
 const PARADE_CHOC_SCENE := preload("res://SCRIPT/SHADER/parade_choc.tscn")
+@export_subgroup("Parade")
 @export var parade_etourdi := 1.0
 ## la caméra tremble au choc (0 = pas du tout)
 @export var parade_secousse := 3.0
@@ -206,6 +216,7 @@ const PARADE_CHOC_SCENE := preload("res://SCRIPT/SHADER/parade_choc.tscn")
 ## l'éclair touche est empoisonné à son tour. Voir animator.gd
 ## (`_on_body_entered`, `_foudre_bondir`, `_habiller_slash`).
 const TALISMAN_LAME_CORROMPUE := "lame_corrompue"
+@export_subgroup("Lame corrompue")
 ## le slash corrompu (la couleur de sa lame) ; sa foudre avec la Lame de
 ## foudre : le trait, le halo ; le cœur de l'éclair qui bondit
 @export var lame_corrompue_couleur := Color(0.7, 0.38, 1.0)
@@ -224,6 +235,7 @@ const TALISMAN_PRISE := "prise"
 ## le poison compris — appliqué dans BASE_IA.apply_damage (`_venin`) ; l'éclat
 ## d'un coup d'épée renforcé se cerne de violet (animator.gd `_eclat_impact`).
 const TALISMAN_VENIN := "venin"
+@export_subgroup("Venin")
 @export var venin_multiplicateur := 1.3
 
 ## TALISMAN « COUP DE GRÂCE » (1er oct. 2026, id "grace") : un ennemi à moins
@@ -235,6 +247,7 @@ const TALISMAN_VENIN := "venin"
 ## animator.gd (`_on_body_entered`) et `grace_executer`.
 const TALISMAN_GRACE := "grace"
 const GRACE_SCENE := preload("res://SCRIPT/SHADER/grace_eclats.tscn")
+@export_subgroup("Coup de grâce")
 @export var grace_bloodheal := 50
 @export var grace_secousse := 5.0
 
@@ -245,6 +258,7 @@ const GRACE_SCENE := preload("res://SCRIPT/SHADER/grace_eclats.tscn")
 ## bulle comme le Bouclier, trop gros) ; notre coup d'épée suivant le BRISE pour
 ## `cristal_bonus` fois ses dégâts. Voir bloodball.gd et animator.gd.
 const TALISMAN_CRISTAL := "cristal"
+@export_subgroup("Sang cristallisé")
 @export_range(0.0, 1.0) var cristal_chance := 0.2
 @export var cristal_duree := 1.5
 @export var cristal_bonus := 1.5
@@ -259,6 +273,7 @@ const TALISMAN_CRISTAL := "cristal"
 ## couleurs de l'aile. Voir `_plumes_lancer` (appelé par `_try_double_jump`).
 const TALISMAN_PLUMES := "plumes"
 const PLUME_ACEREE := preload("res://SCRIPT/SHADER/plume_aceree.tscn")
+@export_subgroup("Plumes acérées")
 @export var plumes_nombre := 5
 ## chaque plume vaut un coup d'épée entier (70 sans bonus) — à 0,35 (25) c'était
 ## trop faible
@@ -272,8 +287,10 @@ const PLUME_ACEREE := preload("res://SCRIPT/SHADER/plume_aceree.tscn")
 ## quand un coup est VRAIMENT encaissé (`apply_damage`, `apply_environment_damage` :
 ## pas s'il est paré, esquivé, ou si on en meurt).
 const TALISMAN_SANG_VERSE := "sang_verse"
+@export_subgroup("Sang versé")
 @export var sang_verse_par_coeur := 50
 
+@export_subgroup("Reliquaire et âmes perdues")
 ## LE SANG PERDU À LA MORT (1er oct. 2026) : en mourant, on perd
 ## `blood_perdu_a_la_mort` du sang récolté (le compteur `Player.blood`, les
 ## « âmes ») — 1 = tout, 0 = rien. JUSQUE-LÀ ON NE PERDAIT RIEN : ajouté avec le
@@ -296,6 +313,7 @@ const SOL_SUR_IMAGES := 6
 var _dernier_sol_sur := Vector2.INF
 var _au_sol_depuis := 0
 
+@export_subgroup("Croissant de sang")
 ## TALISMAN « CROISSANT DE SANG » (1er oct. 2026, id "croissant") : le DERNIER
 ## coup du combo (le 2e : le combo n'en a que deux) projette son slash vers
 ## l'avant (animator.gd, `_croissant`) ; ses
@@ -320,6 +338,7 @@ var _au_sol_depuis := 0
 ## disperse. Leur vol et leur allure : SCRIPT/SHADER/chauve_souris_sang.tscn.
 const TALISMAN_ESSAIM := "essaim"
 const CHAUVE_SOURIS_SCENE := preload("res://SCRIPT/SHADER/chauve_souris_sang.tscn")
+@export_subgroup("Essaim")
 @export var essaim_nombre := 2
 @export var essaim_part := 0.5
 @export var essaim_max := 10
@@ -334,6 +353,7 @@ const CHAUVE_SOURIS_SCENE := preload("res://SCRIPT/SHADER/chauve_souris_sang.tsc
 ## SCRIPT/SHADER/sceau_sang.tscn.
 const TALISMAN_OFFRANDE := "offrande"
 const SCEAU_SCENE := preload("res://SCRIPT/SHADER/sceau_sang.tscn")
+@export_subgroup("Offrande")
 @export var offrande_rayon := 280.0
 @export var offrande_part := 1.0
 var _sceau: Node2D
@@ -351,6 +371,7 @@ var _sceau: Node2D
 ## cascade — inutile sans groupes, et la Lame de foudre faisait mieux.)
 const TALISMAN_BOUILLANT := "bouillant"
 const BOUILLON_SCENE := preload("res://SCRIPT/SHADER/bouillon_sang.tscn")
+@export_subgroup("Sang bouillant")
 @export var bouillant_rayon := 180.0
 @export var bouillant_part := 1.0
 @export var bouillant_duree_charge := 3.0
@@ -366,6 +387,7 @@ const BOUILLON_SCENE := preload("res://SCRIPT/SHADER/bouillon_sang.tscn")
 ## nous suivait avec du retard ; il ne touchait jamais, le recul de notre coup
 ## avait déjà emporté l'ennemi.)
 const OMBRE_SCENE := preload("res://SCRIPT/SHADER/ombre_sang.tscn")
+@export_subgroup("Ombre de sang")
 @export var ombre_part := 0.5
 
 ## TALISMAN « SANG CORROMPU » (1er oct. 2026, id "corrompu") :
@@ -377,6 +399,7 @@ const OMBRE_SCENE := preload("res://SCRIPT/SHADER/ombre_sang.tscn")
 ## SCRIPT/SHADER/poison_sang.gd.
 const TALISMAN_CORROMPU := "corrompu"
 const POISON_SCENE := preload("res://SCRIPT/SHADER/poison_sang.tscn")
+@export_subgroup("Sang corrompu")
 @export var poison_degats := 15
 @export var poison_intervalle := 0.5
 @export var poison_duree := 3.0
@@ -393,6 +416,7 @@ const POISON_SCENE := preload("res://SCRIPT/SHADER/poison_sang.tscn")
 ## eux, puis se reforment. Leur ronde, leur garde et leur allure :
 ## SCRIPT/SHADER/gardiennes_sang.tscn, posé une fois par `_gardiennes_preparer`.
 const GARDIENNES_SCENE := preload("res://SCRIPT/SHADER/gardiennes_sang.tscn")
+@export_subgroup("Gardiennes")
 @export var gardiennes_part := 0.5
 var _gardiennes: Node2D
 
@@ -401,6 +425,7 @@ var _gardiennes: Node2D
 ## l'interrompt — joue `soin_eclair_vitesse` fois plus vite (0,73 s → 0,37 s).
 ## Même coût, mêmes cœurs. Voir `heal_enter`.
 const TALISMAN_SOIN_ECLAIR := "soin_eclair"
+@export_subgroup("Soin éclair")
 @export var soin_eclair_vitesse := 2.0
 
 ## TALISMAN « CŒUR NOIR » (1er oct. 2026, id "coeur_noir") : un
@@ -425,11 +450,13 @@ const COURONNE_DEFI_SCENE := preload("res://SCRIPT/SHADER/couronne_defi.tscn")
 
 const TALISMAN_COEUR_NOIR := "coeur_noir"
 const COEUR_NOIR_ONDE := preload("res://SCRIPT/SHADER/coeur_noir_onde.tscn")
+@export_subgroup("Cœur noir")
 @export var coeur_noir_recharge := 120.0
 @export var coeur_noir_part := 2.0
 ## la caméra tremble quand il éclate (0 = pas du tout)
 @export var coeur_noir_secousse := 7.0
 
+@export_subgroup("Entraves")
 ## TALISMAN « ENTRAVES » (1er oct. 2026, id "entraves") : chaque
 ## coup d'épée qui porte ENTRAVE l'ennemi — il vit à `entraves_facteur` de sa
 ## vitesse pendant `entraves_duree` s (marche, vol, chute, coups, animation), au
@@ -451,6 +478,7 @@ const COEUR_NOIR_ONDE := preload("res://SCRIPT/SHADER/coeur_noir_onde.tscn")
 ## et `bloodball_enter`.
 const TALISMAN_TROP_PLEIN := "trop_plein"
 const TROP_PLEIN_JAUGE := preload("res://SCRIPT/SHADER/trop_plein_jauge.tscn")
+@export_subgroup("Trop-plein")
 @export var trop_plein_coups_requis := 3
 @export var trop_plein_taille := 2.0
 @export var trop_plein_degats := 2.0
@@ -469,6 +497,7 @@ var _trop_plein: Node2D
 ## Les PIÈGES gardent leur renvoi (il nous sort des piques), et un coup
 ## interrompt toujours le SOIN. Voir `apply_damage`.
 const TALISMAN_INEBRANLABLE := "inebranlable"
+@export_subgroup("Inébranlable")
 @export var inebranlable_repit := 0.35
 var _inebranlable_reste := 0.0
 
@@ -479,6 +508,7 @@ var _inebranlable_reste := 0.0
 ## même s'il touche plusieurs ennemis (tous prennent le critique). Voir
 ## animator.gd (`_on_body_entered`), `sixieme_critique`, `sixieme_porte`.
 const TALISMAN_SIXIEME := "sixieme"
+@export_subgroup("Sixième coup")
 @export var sixieme_tous_les := 6
 @export var sixieme_multiplicateur := 2.0
 ## la caméra tremble au coup critique (0 = pas du tout)
@@ -498,6 +528,7 @@ var _sixieme_coup_critique := -1    # le coup d'épée critique
 ## peine). Voir `bloodball_enter`
 ## et bloodball.gd (`pacte`).
 const TALISMAN_PACTE := "pacte"
+@export_subgroup("Pacte de sang")
 @export var pacte_cout := 34
 @export var pacte_multiplicateur := 3.0
 @export var pacte_coeur := Color(1.0, 0.7, 0.58)
@@ -509,6 +540,7 @@ const TALISMAN_PACTE := "pacte"
 ## monter `sang_neuf_delai` s après la réapparition. `dead_input` note la mort
 ## dans l'autoload (`Player.vient_de_mourir`) ; voir `_sang_neuf`.
 const TALISMAN_SANG_NEUF := "sang_neuf"
+@export_subgroup("Sang neuf")
 @export var sang_neuf_delai := 0.6
 
 # AMÉLIORATION: combo_count remplace le bool "combo" — plus clair et extensible
@@ -1245,8 +1277,10 @@ func _perdre_blood() -> void:
 	if perte > 0:
 		Player.changement_de_blood(-perte)
 	var lieu := _dernier_sol_sur if _dernier_sol_sur.is_finite() else global_position
-	var scene := get_tree().current_scene
-	Player.laisser_ames(perte, scene.scene_file_path if scene != null else "", lieu + Vector2(0.0, -ames_hauteur))
+	# le TABLEAU où l'on tombe (pas la scène courante : en jeu c'est le conteneur
+	# du Loader, le même pour tous les tableaux — l'esprit reparaissait alors dans
+	# n'importe lequel, aux coordonnées d'un autre)
+	Player.laisser_ames(perte, Player.niveau_courant(), lieu + Vector2(0.0, -ames_hauteur))
 	print("[MORT] sang perdu : ", perte, " (il en reste ", Player.blood, ")",
 		" — il attend en esprit de sang à ", Player.ames_position if perte > 0 else "nulle part")
 
@@ -1255,7 +1289,7 @@ func _perdre_blood() -> void:
 ## esprit de sang y flotte (une seule fois : pas s'il y est déjà)
 func _ames_poser() -> void:
 	var scene := get_tree().current_scene
-	if Player.ames_perdues <= 0 or scene == null or scene.scene_file_path != Player.ames_scene:
+	if Player.ames_perdues <= 0 or scene == null or Player.niveau_courant() != Player.ames_scene:
 		return
 	if not get_tree().get_nodes_in_group("esprit_sang").is_empty():
 		return
@@ -1507,6 +1541,7 @@ func _essaim_hote() -> Node:
 
 ## --- le pas de côté ---
 
+@export_subgroup("Pas de côté")
 ## TALISMAN « PAS DE CÔTÉ » (30 sept. 2026, id "esquive") : à chaque coup
 ## d'ENNEMI (pas les pièges : leur renvoi doit rester), une chance
 ## (`Player.chance_esquive()`, 20 %) que le coup soit ignoré — ni dégât, ni
@@ -1615,6 +1650,7 @@ func _z_absolu(ci: CanvasItem) -> int:
 
 ## --- la traînée fantomatique (dash aérien, roulade) ---
 
+@export_group("Traînée fantôme")
 ## TRAÎNÉE (30 sept. 2026) : pendant le dash aérien et la
 ## roulade, le perso sème derrière lui des fantômes de sa pose — la même famille
 ## que le pas de côté, en traînée. Une copie tous les `trainee_espacement` px
@@ -1642,6 +1678,8 @@ var _trainee_derniere := Vector2.INF     # où a été posée la dernière copie
 ## les points du trajet.
 const SILLAGE_SCENE := preload("res://SCRIPT/SHADER/sillage_sang.tscn")
 const TALISMAN_SILLAGE := "sillage"
+@export_group("Talismans")
+@export_subgroup("Sillage de sang")
 ## combien de temps la brume vit en chaque endroit (s)
 @export var sillage_duree := 3.0
 ## dégâts d'un tick de brume (le coup d'épée fait 70 ; 12 au départ, ×3 le
@@ -1710,6 +1748,8 @@ func _trainee_tick() -> void:
 	_poser_fantome(trainee_couleur, trainee_duree, Vector2.ZERO, false)
 
 
+@export_group("Coups reçus")
+@export_subgroup("Pièges")
 ## Renvoi des dégâts d'environnement (piques, scie). Le danger fournit une
 ## DIRECTION de repoussée et chaque axe a sa force (sept. 2026 : avant, le renvoi
 ## était toujours vers le haut : une pique de plafond nous renvoyait DANS elle).
@@ -1942,6 +1982,7 @@ func _raycast_zone_du_groupe(rc: RayCast2D, group_name: String) -> Area2D:
 
 
 
+@export_subgroup("Chute")
 ## Dégâts de chute activables/désactivables depuis l'inspecteur
 ## (désactivés pour le moment — la logique reste calculée et loguée)
 @export var FALL_DAMAGE_ENABLED := false
@@ -2156,6 +2197,7 @@ func run_exit() -> void:
 
 #region JUMP
 
+@export_group("Saut et chute")
 ## Impulsion de saut (négatif = vers le haut). Plus la valeur est grande
 ## en absolu, plus le saut monte haut.
 ## Réglage "nerveux" (sept. 2026 : les sauts et les chutes étaient mollassons ;
@@ -2186,6 +2228,7 @@ var _walkoff_jump := false
 var _climb_auto_exit := false
 const CLIMB_EXIT_VELOCITY := -1000.0  # plus fort que JUMP_VELOCITY (-700)
 
+@export_subgroup("Double saut")
 # --- DOUBLE SAUT ---
 ## Capacité metroidvania : désactivable tant qu'elle n'est pas débloquée
 @export var double_jump_enabled := true
@@ -2288,6 +2331,7 @@ func _plumes_lancer() -> void:
 		" plumes de ", degats, " dégâts")
 
 
+@export_subgroup("Plané")
 # --- PLANER (1er oct. 2026) ---
 ## Capacité metroidvania : MAINTENIR le saut pendant qu'on retombe — après un
 ## saut simple comme après un double saut — ouvre l'aile de sang et fait
@@ -2645,6 +2689,8 @@ func wall_griffe_enter():
 	# Le mur bloque le déplacement réel, mais la vélocité garde le contact
 	velocity.x = 700.0 * last_direction   # 500 → 700 (sept. 2026) : c'est la "vitesse du wall run"
 
+@export_group("Mur")
+@export_subgroup("Course au mur (griffe)")
 ## Le wall run se cale sur le MILIEU du mur (30 sept. 2026) : où qu'on
 ## l'accroche, trop haut ou trop bas, le perso glisse vers la ligne médiane du
 ## mur de griffe pendant qu'il court, et y reste.
@@ -2758,6 +2804,7 @@ func _griffe_lacher() -> void:
 
 
 #region WALL_JUMP
+@export_subgroup("Accroche et saut mural")
 ## vitesse de glisse le long du mur en état WALL_JUMP
 @export var WALL_GLIDE_SPEED: float = 300.0
 
@@ -2940,6 +2987,7 @@ func climb_exit() -> void:
 ## État parallèle à CLIMB, dédié aux échelles (zones Area2D du groupe
 ## "ECHELLE") : on ne peut QUE monter et descendre. Seule échappatoire : sauter.
 
+@export_group("Échelle")
 @export var ECHELLE_SPEED: float = 250.0
 ## Butée haute de grimpe : distance (px) entre le sommet de la ZONE de
 ## l'échelle et l'origine du perso au maximum de la montée. Plus grand =
@@ -3254,6 +3302,7 @@ func roll_exit() -> void:
 ## que la roulade (700 px/s pendant 0.727 s ≈ 509 px), horizontal pur.
 ## Un seul dash par phase aérienne, rechargé au sol / mur / grab.
 
+@export_group("Dash aérien")
 ## Capacité metroidvania : désactivable tant qu'elle n'est pas débloquée
 @export var air_dash_enabled := true
 ## Vitesse du dash (2× la roulade — la distance reste identique grâce à
@@ -3445,11 +3494,14 @@ func grab_exit() -> void:
 # - input: si le joueur appuie pendant l'anim principale → combo_buffered = true
 # - animation_finished: si combo_buffered → chaîne, sinon → recovery (anim _r)
 
+@export_group("Attaques")
 ## Le slash des attaques est joué EN SHADER (SCRIPT/SHADER/slash_heros.tscn :
 ## le même croissant que les dessins, mais à chaque image d'écran). Décoché :
 ## retour aux dessins d'origine. Visuel seulement, la hitbox ne change pas.
 @export var slash_en_shader := true
 
+@export_group("Talismans")
+@export_subgroup("Lame de foudre")
 ## TALISMAN « LAME DE FOUDRE » (30 sept. 2026, id "foudre" dans
 ## SCRIPT/TALISMAN/talismans.gd) : porté, le slash est fait de foudre (réglages
 ## sur le matériau de SCRIPT/SHADER/slash_heros.tscn), les coups font +10 %
@@ -3708,6 +3760,8 @@ func attack_air_exit() -> void:
 
 
 
+@export_group("Soin et boule de sang")
+@export_subgroup("Soin")
 ## Coût du soin, en SANG (la jauge remplie par les récoltes)
 @export var HEAL_COST: int = 100
 ## Cœurs rendus par un soin complet
@@ -3789,6 +3843,7 @@ const BLOODBALL_SCENE := preload("res://SCRIPT/SPELL/bloodball.tscn")
 ## projectile-là à la place de la boule (même coût, même geste)
 const TORNADE_SCENE := preload("res://SCRIPT/SPELL/tornade_de_sang.tscn")
 const TALISMAN_TORNADE := "tornade_bloodball"
+@export_subgroup("Boule de sang")
 ## Durée du lancer avant de rendre la main (en attendant une anim de cast dédiée)
 @export var BLOODBALL_CAST_TIME: float = 0.25
 ## Coût en sang d'une boule
@@ -3877,6 +3932,8 @@ func bloodball_exit() -> void:
 
 
 
+@export_group("Coups reçus")
+@export_subgroup("Monstres")
 @export var HIT_STUN_TIME: float = 0.25
 @export var HIT_KNOCK_X:  float = 1300.0
 @export var HIT_KNOCK_Y:  float = -287.0   # × 1,6 avec la gravité projet à 2500 : même soulèvement qu'à −180 sous 980
@@ -3918,6 +3975,7 @@ const ECRAN_MORT_DEMO := preload("res://SCRIPT/UTILITAIRE/ecran_mort_demo.gd")
 func dead_enter() -> void:
 	animator.play("death")
 	_perdre_blood()
+	Player.sauvegarder()        # la mort est écrite : quitter ne l'efface pas
 	velocity.x = 0.0            # FIX: stoppe le mouvement horizontal
 	if _bouclier != null:
 		_bouclier.tomber()      # le bouclier de sang meurt avec nous
@@ -4032,6 +4090,8 @@ func drop_exit() -> void:
 ## esquive = on se laisse tomber. Toute accroche recharge double saut et dash.
 
 const CORDE_COOLDOWN := 0.35             # s avant de pouvoir reprendre une corde
+@export_group("Corde et grappin")
+@export_subgroup("Corde")
 ## impulsion verticale ajoutée à l'élan quand on saute de la corde
 @export var CORDE_SAUT_IMPULSION: float = -450.0
 var _corde: Node2D = null
@@ -4134,6 +4194,7 @@ func corde_exit() -> void:
 ##      et dash rechargés. Aucune suspension. Un coup reçu interrompt tout
 ##      (le câble est caché par grappin_exit).
 
+@export_subgroup("Grappin")
 @export var GRAPPIN_ACCEL: float = 6520.0        ## force de traction MAX du câble (px/s²), la gravité (2500) tire contre — même traction nette qu'à 5000 sous 980
 @export var GRAPPIN_VITESSE_MAX: float = 1600.0  ## vitesse plafond de la traction (px/s)
 ## durée minimale d'une traction (s) : une accroche toute proche est hissée

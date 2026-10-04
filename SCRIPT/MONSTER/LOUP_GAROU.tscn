@@ -34,8 +34,8 @@
 [ext_resource type="Texture2D" uid="uid://cfxt040xk1aef" path="res://MEDIA/MONSTER/LOUP_GAROU/Walk/Werewolf_walk-8.png" id="38_2a4gh"]
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_7joub"]
-radius = 59.0
-height = 346.0
+radius = 84.0
+height = 218.0
 
 [sub_resource type="SpriteFrames" id="SpriteFrames_dnpf1"]
 animations = [{
@@ -189,8 +189,7 @@ position = Vector2(-116, -319)
 scale = Vector2(0.525, 0.525)
 
 [node name="Collision" type="CollisionShape2D" parent="." unique_id=287775973]
-visible = false
-position = Vector2(-1, -172)
+position = Vector2(-1, -105)
 shape = SubResource("CapsuleShape2D_7joub")
 
 [node name="POINT" type="Node2D" parent="." unique_id=1327697225]
@@ -205,7 +204,8 @@ light_mask = 0
 texture_filter = 1
 position = Vector2(-25, -109)
 sprite_frames = SubResource("SpriteFrames_dnpf1")
-animation = &"attack_cri"
+animation = &"idle"
+frame_progress = 0.8159444
 
 [node name="vision" type="Area2D" parent="POINT" unique_id=1946126189]
 visible = false

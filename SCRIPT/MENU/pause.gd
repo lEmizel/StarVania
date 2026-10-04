@@ -62,7 +62,9 @@ func _ready() -> void:
 	btn_reprendre.pressed.connect(fermer)
 	btn_options.pressed.connect(_on_options_pressed)
 	btn_menu.pressed.connect(_on_menu_principal_pressed)
-	btn_quitter.pressed.connect(func() -> void: get_tree().quit())
+	btn_quitter.pressed.connect(func() -> void:
+		Player.sauvegarder()    # la partie est écrite avant de fermer le jeu
+		get_tree().quit())
 	_cabler_focus_menu()
 	for i in _boutons_onglets.size():
 		(_boutons_onglets[i] as Button).pressed.connect(_montrer_onglet.bind(i))
@@ -203,6 +205,7 @@ func _on_options_pressed() -> void:
 
 
 func _on_menu_principal_pressed() -> void:
+	Player.sauvegarder()        # la partie est écrite avant de revenir au menu
 	get_tree().paused = false
 	Loader.load_scene_with_loading(MENU_PRINCIPAL_SCENE)
 	queue_free()

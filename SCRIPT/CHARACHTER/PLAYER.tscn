@@ -1131,6 +1131,7 @@ z_index = 1
 collision_mask = 3
 script = ExtResource("1_gvikp")
 MAX_HEARTS = 3
+essaim_nombre = 3
 
 [node name="POINT" type="Node2D" parent="." unique_id=984331396]
 

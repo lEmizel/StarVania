@@ -5,6 +5,10 @@ var loading_scene_path: String = "uid://cei7xxsf7frsh"
 
 # Chemin de la scène finale à charger (mémorisé)
 var _target_scene_path: String
+## Le tableau où l'on joue, en chemin res:// — vide au menu, et tant qu'aucun
+## tableau n'a été posé par le Loader (un tableau lancé seul depuis l'éditeur).
+## C'est lui qui dit si une partie est en cours (la sauvegarde, les âmes perdues).
+var niveau_courant := ""
 
 # ------------------------------------------------------------------
 # PRÉCHARGEMENT : scènes chargées en arrière-plan dès l'ouverture du menu
@@ -50,6 +54,35 @@ const PRECHARGE_BLOQUE := 15.0
 const SUIVI := 2.0
 var _suivi: Dictionary = {}                      # chemin → {progres, avance, debut, dit} (ms)
 
+# ------------------------------------------------------------------
+# LES SCRIPTS D'ABORD (4 oct. 2026) : la cause du chargement qui ne finit jamais.
+# Quand un script qui contient des preload() est compilé À L'INTÉRIEUR d'une
+# charge threadée, cette charge peut rester bloquée pour toujours. Le jeu
+# continue de tourner, la charge reste à 6 % ou à 50 %, sans erreur (elles ne
+# sortent qu'à la fermeture : « Could not preload resource file »).
+# Explication probable, non vérifiée dans le moteur : chaque preload lance une
+# seconde charge que le fil attend, et selon l'ordre dans lequel les fils du
+# moteur se servent, ils finissent par s'attendre l'un l'autre. C'est donc une
+# affaire de hasard et de cadence, différente d'une machine à l'autre.
+# MESURÉ sans fenêtre, AVANT : avec `--fixed-fps 60` (boucle principale à
+# ~100 000 tours par seconde), 21 charges de scene_08 bloquées sur 25, et au
+# vrai démarrage le préchargement du menu bloqué 4 fois sur 4 (scene_7 à 6 %,
+# scene_08 à 50 %) ; en temps réel (145 images par seconde), 1 charge sur 9.
+# APRÈS, mêmes conditions : 36 charges sur 36, 8 démarrages sur 8 et 10 parcours
+# complets (tableaux, voisins préchargés, retour au menu) sans aucun blocage.
+# LA RÈGLE : avant toute charge threadée d'une scène, les scripts dont elle
+# dépend — les siens et ceux de ses sous-scènes — sont chargés ICI, sur le fil
+# principal, et GARDÉS toute la session : le fil n'a plus aucun script à
+# compiler. Ce qu'ils préchargent (héros, caméra, effets, menus) reste donc en
+# mémoire ; aucun ne précharge un tableau.
+# COÛT : ~0,7 s sur le fil principal au démarrage (les scripts des trois entrées
+# de démo, dont le héros), avant la première image ; ensuite quelques dizaines
+# de millisecondes à l'arrivée dans un tableau dont un voisin apporte des
+# scripts encore jamais vus.
+# ------------------------------------------------------------------
+var _scripts_gardes: Dictionary = {}             # chemin res:// → Script (la référence le garde en cache)
+var _dependances_vues: Dictionary = {}           # fichiers dont les dépendances ont déjà été parcourues
+
 
 func _ready() -> void:
 	# le chargeur ne se fige jamais : un préchargement qui finit pendant une pause
@@ -73,6 +106,7 @@ func precharger_scenes() -> void:
 		if not _prechargees.has(chemin) and not (chemin in _prechargement_en_cours) \
 				and not (chemin in _file_prechargement):
 			_file_prechargement.append(chemin)
+	_scripts_de_la_file()
 	_lancer_prochain_prechargement()
 
 
@@ -84,6 +118,7 @@ func _lancer_prochain_prechargement() -> void:
 	if _prechargees.has(chemin):
 		_lancer_prochain_prechargement()
 		return
+	_scripts_d_abord(chemin)
 	if ResourceLoader.load_threaded_request(chemin) == OK:
 		_prechargement_en_cours.append(chemin)
 		set_process(true)
@@ -231,6 +266,7 @@ func _do_async_load() -> void:
 		_lancer_prochain_prechargement()
 		return
 	# 3) Lance la requête de pré-chargement asynchrone
+	_scripts_d_abord(_target_scene_path)
 	var err = ResourceLoader.load_threaded_request(_target_scene_path)
 	if err != OK:
 		push_error("[LOAD] load_threaded_request a échoué pour " + str(_target_scene_path))
@@ -260,6 +296,7 @@ func _continue_preloading() -> void:
 			_prechargees[_chemin_res(_target_scene_path)] = res
 			var scene = res.instantiate()
 			print("[LOAD] scène finale instanciée, remplacement…")
+			_noter_niveau()
 			replace_scene_in_viewport(scene)
 			save_scene()
 			Warmup.chauffer_arbre(scene, "niveau")
@@ -279,10 +316,19 @@ func _fin_chargement_niveau() -> void:
 
 
 func _basculer(scene: Node) -> void:
+	_noter_niveau()
 	replace_scene_in_viewport(scene)
 	save_scene()
 	Warmup.chauffer_arbre(scene, "niveau")
 	_niveau_pose(scene)
+
+
+## Note le tableau qui va être posé (rien pour le menu) AVANT qu'il entre dans
+## l'arbre : ses nœuds peuvent lire niveau_courant dès leur _ready. Pendant
+## l'écran de chargement, c'est encore le tableau qu'on quitte.
+func _noter_niveau() -> void:
+	var courant := _chemin_res(_target_scene_path)
+	niveau_courant = "" if courant == _chemin_res(MENU_SCENE) else courant
 
 
 # ------------------------------------------------------------------
@@ -321,7 +367,59 @@ func _niveau_pose(scene: Node) -> void:
 	print("[LOAD] niveau posé : ", courant.get_file(),
 		" | voisins : ", _noms(voisins),
 		" | lâchés : ", _noms(laches))
+	_scripts_de_la_file()
 	_lancer_prochain_prechargement()
+
+
+## Charge sur le fil principal, et garde pour la session, les scripts dont
+## dépend cette scène (voir LES SCRIPTS D'ABORD). Les dépendances sont lues dans
+## l'en-tête des fichiers, sans rien charger, sous-scènes et ressources
+## comprises ; chaque fichier n'est parcouru qu'une fois par session.
+func _scripts_d_abord(chemin: String) -> void:
+	var debut := Time.get_ticks_msec()
+	var nouveaux := 0
+	var pile: Array[String] = [_chemin_res(chemin)]
+	while not pile.is_empty():
+		var fichier: String = pile.pop_back()
+		if _dependances_vues.has(fichier):
+			continue
+		_dependances_vues[fichier] = true
+		for brut in ResourceLoader.get_dependencies(fichier):
+			var dependance := _chemin_dependance(brut)
+			match dependance.get_extension():
+				"gd":
+					if not _scripts_gardes.has(dependance):
+						var script := load(dependance)
+						if script != null:
+							_scripts_gardes[dependance] = script
+							nouveaux += 1
+				"tscn", "scn", "tres", "res":
+					pile.append(dependance)
+	if nouveaux > 0:
+		print("[LOAD] %d scripts chargés d'avance pour %s (%d ms)" % [
+			nouveaux, chemin.get_file(), Time.get_ticks_msec() - debut])
+
+
+## Les scripts de toutes les scènes en file, d'un coup : le coût tombe à
+## l'arrivée dans le tableau (ou au démarrage), pas plus tard en plein jeu.
+## Seulement si aucune charge threadée n'est en vol — sinon chaque scène fait
+## les siens à son tour, juste avant sa charge.
+func _scripts_de_la_file() -> void:
+	if not _prechargement_en_cours.is_empty() or _chargement_niveau_en_cours:
+		return
+	for chemin in _file_prechargement:
+		_scripts_d_abord(chemin)
+
+
+## Une dépendance telle que la rend ResourceLoader.get_dependencies — un chemin,
+## ou « uid::type::chemin » — en chemin res://
+static func _chemin_dependance(brut: String) -> String:
+	if not brut.contains("::"):
+		return _chemin_res(brut)
+	var par_uid := _chemin_res(brut.get_slice("::", 0))
+	if not par_uid.begins_with("uid://"):
+		return par_uid
+	return brut.get_slice("::", 2)
 
 
 ## les scènes visées par les passages/portes de ce niveau (tout nœud portant

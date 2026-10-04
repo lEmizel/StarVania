@@ -34,6 +34,11 @@ func _ready() -> void:
 	SignalUtils.connect_signal(btn_options, "pressed", self, "_on_options_pressed")
 	SignalUtils.connect_signal(btn_quit, "pressed", self, "_on_quit_pressed")
 	_construire_liste_demos()
+	# LOAD reprend la partie sauvegardée ; sans sauvegarde il est grisé, et la
+	# manette saute par-dessus
+	if not Player.sauvegarde_existe():
+		btn_load.disabled = true
+		btn_load.focus_mode = Control.FOCUS_NONE
 
 	btn_play.grab_focus()
 
@@ -135,8 +140,13 @@ func _on_demo_pressed(i: int) -> void:
 	Loader.load_scene_with_loading(String(DEMOS[i]["scene"]))
 
 #const LOADING_SCENE := preload("uid://dm012xrdmag4v")
+## LOAD : la partie sauvegardée reprend au dernier checkpoint touché
 func _on_load_pressed() -> void:
-	print("[MENU] _on_load_pressed")
+	var scene := Player.charger()
+	if scene == "":
+		return
+	print("[MENU] LOAD → ", scene)
+	Loader.load_scene_with_loading(scene)
 
 func _on_quit_pressed() -> void:
 	print("[MENU] _on_quit_pressed → on ferme le jeu")
