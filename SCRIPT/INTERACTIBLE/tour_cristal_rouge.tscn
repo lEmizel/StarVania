@@ -1,0 +1,28 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://SCRIPT/INTERACTIBLE/tour_cristal_rouge.gd" id="1_tr"]
+[ext_resource type="Shader" path="res://SCRIPT/SHADER/pilier_foudre.gdshader" id="2_tr"]
+[ext_resource type="Texture2D" uid="uid://clvcmpd0mf15d" path="res://MEDIA/INTERACTIBLE/pillier_de_foudre.png" id="3_tr"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_tr"]
+resource_local_to_scene = true
+shader = ExtResource("2_tr")
+shader_parameter/taille = Vector2(260, 510)
+shader_parameter/base = Vector2(130, 500)
+shader_parameter/dessin = ExtResource("3_tr")
+shader_parameter/couleur = Color(1, 0.88, 0.84, 1)
+shader_parameter/couleur_foudre = Color(1, 0.13, 0.16, 1)
+
+[node name="TourCristalRouge" type="Node2D"]
+script = ExtResource("1_tr")
+
+[node name="Pilier" type="ColorRect" parent="."]
+material = SubResource("ShaderMaterial_tr")
+offset_left = -130.0
+offset_top = -500.0
+offset_right = 130.0
+offset_bottom = 10.0
+mouse_filter = 2
+
+[node name="Ecran" type="VisibleOnScreenNotifier2D" parent="."]
+rect = Rect2(-86, -400, 172, 400)

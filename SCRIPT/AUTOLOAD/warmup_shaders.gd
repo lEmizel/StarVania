@@ -97,6 +97,7 @@ const SHADERS: Array[String] = [
 	"res://SCRIPT/SHADER/sceau_runes.gdshader",      # le piège sceau de runes (2 oct. 2026)
 	"res://SCRIPT/SHADER/pilier_foudre.gdshader",    # le piège pilier de foudre (2 oct. 2026)
 	"res://SCRIPT/SHADER/foudre_ciel.gdshader",      # l'éclair qu'il appelle du ciel, averti au sol
+	"res://SCRIPT/SHADER/eclair_rouge.gdshader",     # l'éclair de la tour au cristal rouge, tiré droit sur sa cible
 	"res://SCRIPT/SHADER/trou_noir.gdshader",        # piège trou noir : il aspire, lentille sur le décor
 	"res://SCRIPT/SHADER/vent.gdshader",             # piège de vent : filets et anneaux d'air
 	"res://SCRIPT/SHADER/faille_etoilee.gdshader",   # pluie d'étoiles : la faille dans le ciel
@@ -131,6 +132,7 @@ const SHADERS: Array[String] = [
 	"res://SCRIPT/SCENE/ss.gdshader",                  # cadre mur griffe, grotte
 	"res://SCRIPT/SCENE/scene_3.gdshader",             # décor de scene_3
 	"res://SCRIPT/MONSTER/hit_flash.gdshader",         # flash de coup (BASE_IA)
+	"res://SCRIPT/MONSTER/slime.gdshader",             # le slime : il est dessiné par son shader
 	"res://SCRIPT/SPELL/bloodball.gdshader",
 	"res://SCRIPT/SPELL/bloodball_explosion.gdshader",
 	"res://SCRIPT/SPELL/tornade_de_sang.gdshader",   # la boule de sang du talisman « Tornade de sang » (sept. 2026)

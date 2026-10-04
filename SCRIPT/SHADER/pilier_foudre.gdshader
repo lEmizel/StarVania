@@ -36,6 +36,7 @@ uniform vec2 demi_cristal = vec2(15.0, 26.0);    // sa demi-largeur, sa demi-hau
 uniform vec2 corne = vec2(53.5, 362.0);          // le bout d'une corne de la coupe : de part et d'autre de l'axe, au-dessus du pied
 uniform float creux = 342.0;                     // le fond de la coupe, au-dessus du pied
 uniform float demi_bande = 4.0;                  // la bande claire de son axe (demi-largeur)
+uniform float tourne = 0.0;                      // le joyau pivote autour de son milieu (rad ; 0 : debout). La tour au cristal rouge le tourne vers sa cible
 
 uniform vec4 couleur : source_color = vec4(1.0, 1.0, 1.0, 1.0);
 uniform vec4 couleur_foudre : source_color = vec4(0.45, 0.72, 1.0, 1.0);
@@ -114,6 +115,7 @@ void fragment() {
 
 	// ===================== LE JOYAU, taillé : quatre facettes en aplat =====================
 	vec2 qc = p - vec2(0.0, -hc);
+	qc = vec2(qc.x * cos(tourne) + qc.y * sin(tourne), -qc.x * sin(tourne) + qc.y * cos(tourne));
 	float d_cristal = (abs(qc.x) / demi_cristal.x + abs(qc.y) / demi_cristal.y - 1.0) * min(demi_cristal.x, demi_cristal.y) * 0.85;
 	// claire à gauche, sombre à droite ; le haut plus clair que le bas
 	float ton = (qc.x < 0.0 ? 1.0 : 0.56) * (qc.y < 0.0 ? 1.0 : 0.8);

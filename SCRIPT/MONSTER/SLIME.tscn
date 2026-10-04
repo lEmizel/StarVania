@@ -1,0 +1,42 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://SCRIPT/MONSTER/slime.gd" id="1_slime"]
+[ext_resource type="PackedScene" uid="uid://c8y35es6jse5x" path="res://SCRIPT/MENU/heatle_bare_monster.tscn" id="2_vie"]
+[ext_resource type="Script" path="res://SCRIPT/MONSTER/slime_corps.gd" id="3_corps"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_slime"]
+radius = 34.0
+
+[node name="slime" type="CharacterBody2D"]
+light_mask = 0
+collision_layer = 8
+collision_mask = 6
+script = ExtResource("1_slime")
+
+[node name="detection_vide" type="RayCast2D" parent="."]
+position = Vector2(48, -13)
+target_position = Vector2(0, 94)
+collision_mask = 6
+
+[node name="bare_de_vie" parent="." instance=ExtResource("2_vie")]
+light_mask = 0
+position = Vector2(-90, -131)
+scale = Vector2(0.37, 0.37)
+
+[node name="Collision" type="CollisionShape2D" parent="."]
+visible = false
+light_mask = 0
+position = Vector2(0, -34)
+shape = SubResource("CircleShape2D_slime")
+
+[node name="POINT" type="Node2D" parent="."]
+
+[node name="animator" type="Node2D" parent="POINT"]
+script = ExtResource("3_corps")
+
+[node name="vision" type="Area2D" parent="POINT"]
+visible = false
+position = Vector2(0, -34)
+
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="POINT/vision"]
+polygon = PackedVector2Array(-50, -40, 460, -190, 460, 120, -50, 40)
