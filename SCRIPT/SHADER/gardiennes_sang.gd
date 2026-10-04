@@ -14,7 +14,11 @@ extends Node2D
 ##     libre la plus proche quitte la ronde, FOND dessus et ÉCLATE avec lui ;
 ##     elle se reforme ensuite à sa place dans la ronde en `recharge` s (on la
 ##     voit renaître, petite et pâle). Un tir qui passe sur une goutte de la
-##     ronde éclate aussi.
+##     ronde éclate aussi ;
+##   • un tir ANNONCÉ mais trop rapide pour être poursuivi (la comète de la
+##     pluie d'étoiles) prévient lui-même : `garder_passage(tir, point, dans)` —
+##     une goutte va SE POSTER sur sa trajectoire, et éclate avec lui quand il y
+##     passe (`tir_arrive`).
 ## Deux rectangles dessinent le tout (gardiennes_sang.gdshader) : `Derriere`,
 ## sous le sprite du héros, et `Devant`, par-dessus ; chacun ne dessine que ce
 ## qui est de son côté. Ils partagent le même matériau dans la scène (le régler
@@ -60,6 +64,8 @@ extends Node2D
 
 const TALISMAN := "gardiennes"
 const GROUPE_TIRS := "projectiles_ennemis"
+## le groupe de ce nœud : les tirs annoncés y cherchent qui prévenir
+const GROUPE := "gardiennes"
 const COUCHE_MONSTRES := 8
 const BOULE_DE_FEU := preload("res://SCRIPT/SPELL/projectile_feu.tscn")
 ## l'éclatement ; le gonflement d'une goutte qui redevient pleine ; l'écrasement
@@ -75,8 +81,19 @@ const RECHARGE_COURTE := 0.8
 const PORTEE_MAX := Vector2(240.0, 160.0)
 ## (s) au plus, la poursuite d'un tir
 const GARDE_MAX := 0.6
+## une goutte postée attend son tir au plus… après l'heure annoncée (s)
+const POSTE_PATIENCE := 0.25
+## elle part AU DERNIER MOMENT : de quoi être à son poste au plus… avant le tir
+## (s). Partie plus tôt, elle attendait immobile dans le vide.
+const POSTE_AVANCE := 0.05
+## elle part encore si elle doit arriver… après le tir, au plus (s) : elle
+## l'arrête d'un peu loin (voir `tir_arrive`)
+const POSTE_RETARD := 0.02
+## la silhouette du héros vue du centre de la ronde : sa demi-largeur, et la
+## hauteur du dessus de sa tête (px)
+const SILHOUETTE := Vector2(45.0, 75.0)
 
-enum { RONDE, GARDE, DISSIPE, RECHARGE }
+enum { RONDE, GARDE, DISSIPE, RECHARGE, POSTE }
 
 class Goutte:
 	var etat := RONDE
@@ -84,7 +101,10 @@ class Goutte:
 	var pos := Vector2.ZERO         # depuis le centre de la ronde (px)
 	var sens := Vector2.RIGHT       # le sens de sa course
 	var etirement := 1.0
-	var cible: Node2D = null        # le tir sur lequel elle fond
+	var cible: Node2D = null        # le tir sur lequel elle fond, ou qu'elle attend à son poste
+	var poste := Vector2.ZERO       # (postée) le point du monde où elle attend son tir
+	var poste_fin := 0.0            # (postée) elle n'attend pas plus longtemps que ça (s)
+	var derriere := 0.0             # (postée) partie de derrière le héros : sa profondeur d'alors (< 0), gardée tant qu'elle est dans sa silhouette
 	var attente := 0.0              # (recharge) avant de commencer à renaître (s)
 	var duree_recharge := 0.0
 	var eclat_t := -1.0             # depuis son éclatement (s ; < 0 : aucun)
@@ -111,6 +131,7 @@ var _cercle := CircleShape2D.new()
 
 
 func _ready() -> void:
+	add_to_group(GROUPE)
 	_demo = demo_boucle and get_parent() == get_tree().root
 	for i in nombre:
 		_gouttes.append(Goutte.new())
@@ -194,6 +215,8 @@ func _faire_vivre(i: int, delta: float, porte: bool) -> void:
 				_toucher_tirs(g)
 		GARDE:
 			_fondre(g, delta)
+		POSTE:
+			_se_poster(g, delta)
 		DISSIPE:
 			if g.t >= DUREE_DISSIPATION:
 				_recharger(g, 0.0, RECHARGE_COURTE)
@@ -285,7 +308,7 @@ func _guetter_tirs() -> void:
 
 func _deja_garde(tir: Node) -> bool:
 	for g in _gouttes:
-		if g.etat == GARDE and g.cible == tir:
+		if (g.etat == GARDE or g.etat == POSTE) and g.cible == tir:
 			return true
 	return false
 
@@ -351,6 +374,92 @@ func _intercepter(g: Goutte, tir: Node) -> void:
 		" arrêté ; la goutte se reforme en ", recharge, " s")
 
 
+## UN TIR ANNONCÉ, trop rapide pour être poursuivi (la comète de la pluie
+## d'étoiles) : il passera au point `point` (monde) dans `dans` secondes. Le
+## tir rappelle cette fonction À CHAQUE IMAGE tant que personne ne le garde :
+## une goutte libre ne part que lorsque c'est l'heure POUR ELLE — juste le temps
+## de son trajet, pour arriver quand le tir passe (partie dès l'annonce, elle
+## attendait dans le vide). Rend vrai quand une goutte part ; le tir appellera
+## `tir_arrive` en passant au point.
+func garder_passage(tir: Node2D, point: Vector2, dans: float) -> bool:
+	if _demo or not visible or _presence < 1.0 or tir == null:
+		return false
+	if _deja_garde(tir):
+		return true
+	var rel := point - global_position
+	if absf(rel.x) > PORTEE_MAX.x or absf(rel.y) > PORTEE_MAX.y:
+		return false
+	var choisie: Goutte = null
+	var trajet_choisi := INF
+	var derriere_choisie := 0.0
+	for i in _gouttes.size():
+		var g := _gouttes[i]
+		if g.etat != RONDE:
+			continue
+		var trajet := (global_position + g.pos).distance_to(point)
+		var voyage := trajet / maxf(vitesse_garde, 1.0)
+		if voyage > dans + POSTE_RETARD:
+			continue              # elle n'y serait pas à temps
+		if dans > voyage + POSTE_AVANCE:
+			continue              # trop tôt pour elle
+		if trajet < trajet_choisi:
+			trajet_choisi = trajet
+			choisie = g
+			# derrière le héros : elle part quand même (sinon, seule goutte libre,
+			# elle laissait passer le tir une fois sur huit), mais reste dessinée
+			# derrière lui tant qu'elle est dans sa silhouette — elle n'en sort
+			# qu'au-dessus de sa tête, sans sauter devant lui sous nos yeux
+			var fond := sin(_angle_de(i))
+			derriere_choisie = fond if (fond < -0.25 and absf(g.pos.x) < SILHOUETTE.x) else 0.0
+	if choisie == null:
+		return false
+	choisie.etat = POSTE
+	choisie.derriere = derriere_choisie
+	choisie.t = 0.0
+	choisie.cible = tir
+	choisie.poste = point
+	choisie.poste_fin = maxf(dans, 0.0) + POSTE_PATIENCE
+	print("[GARDIENNES] f=", Engine.get_physics_frames(), " une goutte part se poster sur le passage de ", tir.name,
+		" (", roundi(trajet_choisi), " px à faire, le tir y passe dans ", snappedf(dans, 0.01), " s)")
+	return true
+
+
+## le tir annoncé passe à son point gardé : si la goutte y est, elle l'arrête et
+## éclate avec lui. Rend vrai s'il est arrêté (c'est au tir de s'éteindre).
+func tir_arrive(tir: Node) -> bool:
+	for g in _gouttes:
+		if g.etat != POSTE or g.cible != tir:
+			continue
+		if (global_position + g.pos).distance_to(g.poste) > rayon_touche + 14.0:
+			_dissiper(g)          # elle n'y était pas
+			return false
+		g.eclat_t = 0.0
+		g.eclat_global = global_position + g.pos
+		_recharger(g, DUREE_ECLAT, recharge)
+		print("[GARDIENNES] f=", Engine.get_physics_frames(), " ", tir.name,
+			" arrêté à son passage ; la goutte se reforme en ", recharge, " s")
+		return true
+	return false
+
+
+## la goutte va à son poste (un point du monde : elle y reste même si le héros
+## bouge) et y attend son tir
+func _se_poster(g: Goutte, delta: float) -> void:
+	if g.cible == null or not is_instance_valid(g.cible) or g.t > g.poste_fin:
+		_dissiper(g)
+		return
+	var vers := g.poste - (global_position + g.pos)
+	if vers.length() > 0.5:
+		g.sens = vers.normalized()
+	g.pos += vers.limit_length(vitesse_garde * delta)
+	g.etirement = 2.0 if vers.length() > 8.0 else 1.0
+	# sortie de la silhouette du héros : elle passe devant
+	if g.derriere < 0.0 and (absf(g.pos.x) >= SILHOUETTE.x or g.pos.y < -SILHOUETTE.y):
+		g.derriere = 0.0
+	if absf(g.pos.x) > PORTEE_MAX.x or absf(g.pos.y) > PORTEE_MAX.y:
+		_dissiper(g)
+
+
 ## son tir lui a échappé (il a touché autre chose, il s'est éteint) : elle se
 ## dissipe là où elle est, et se reforme vite dans la ronde
 func _dissiper(g: Goutte) -> void:
@@ -404,8 +513,10 @@ func _appliquer() -> void:
 			continue
 		var g := _gouttes[i]
 		var theta := _angle_de(i)
-		var hors_ronde := g.etat == GARDE or g.etat == DISSIPE
+		var hors_ronde := g.etat == GARDE or g.etat == DISSIPE or g.etat == POSTE
 		var profondeur := 1.0 if hors_ronde else sin(theta)
+		if g.etat == POSTE and g.derriere < 0.0:
+			profondeur = g.derriere
 		pos.append(Vector4(g.pos.x, g.pos.y, profondeur, _forme(g) * presence))
 		var sillage := clampf(g.pop_t / 0.25, 0.0, 1.0) if g.etat == RONDE else 0.0
 		mouv.append(Vector4(g.sens.x, g.sens.y, g.etirement, sillage))

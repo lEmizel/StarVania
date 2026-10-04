@@ -21,12 +21,11 @@
 [ext_resource type="Shader" uid="uid://jblop3f3vfan" path="res://SCRIPT/SHADER/flou_fond.gdshader" id="17_vw2kw"]
 [ext_resource type="Texture2D" uid="uid://x774gue4he8e" path="res://MEDIA/scene 6/background/background.png" id="18_v7ylp"]
 [ext_resource type="Texture2D" uid="uid://bnx8i3kgl6iic" path="res://MEDIA/scene 6/background/colonne.png" id="19_6t8y0"]
+[ext_resource type="PackedScene" uid="uid://dokxn6rjr6sc6" path="res://SCRIPT/MONSTER/LOUP_GAROU.tscn" id="20_5gsh0"]
 [ext_resource type="PackedScene" path="res://SCRIPT/INTERACTIBLE/pilier_foudre.tscn" id="23_ubcjy"]
 [ext_resource type="PackedScene" path="res://SCRIPT/INTERACTIBLE/lanceur_feu.tscn" id="25_utlbw"]
 [ext_resource type="PackedScene" uid="uid://cvykyqaa2ik7i" path="res://SCRIPT/INTERACTIBLE/roue_pointes.tscn" id="25_xjew0"]
 [ext_resource type="PackedScene" uid="uid://bobswn5tah03s" path="res://SCRIPT/INTERACTIBLE/passage.tscn" id="27_rgcqs"]
-[ext_resource type="PackedScene" path="res://SCRIPT/MONSTER/SLIME.tscn" id="28_5gsh0"]
-[ext_resource type="PackedScene" path="res://SCRIPT/INTERACTIBLE/tour_cristal_rouge.tscn" id="29_m3de5"]
 [ext_resource type="PackedScene" path="res://SCRIPT/INTERACTIBLE/pluie_etoiles.tscn" id="29_vao7l"]
 [ext_resource type="PackedScene" path="res://SCRIPT/INTERACTIBLE/trou_noir.tscn" id="30_er8y1"]
 
@@ -98,7 +97,7 @@ position = Vector2(2395.5, -3663)
 
 [node name="SAWBLADE" parent="interactible" unique_id=388117046 instance=ExtResource("6_5ylk2")]
 position = Vector2(1466, -999)
-frame_progress = 0.078317754
+frame_progress = 0.6511053
 position_a = Vector2(1466, -999)
 position_b = Vector2(1466, -2128)
 
@@ -494,8 +493,5 @@ position = Vector2(3965, -3677)
 [node name="TrouNoir" parent="." unique_id=2087883557 instance=ExtResource("30_er8y1")]
 position = Vector2(4847, -3655)
 
-[node name="slime2" parent="." unique_id=1558368362 instance=ExtResource("28_5gsh0")]
-position = Vector2(66, 1)
-
-[node name="TourCristalRouge" parent="." unique_id=1093256270 instance=ExtResource("29_m3de5")]
-position = Vector2(334, 3)
+[node name="loup_garou_elite" parent="." unique_id=627255339 instance=ExtResource("20_5gsh0")]
+position = Vector2(946, 4)

@@ -14,6 +14,13 @@ extends Node2D
 ## L'origine du nœud est le POINT D'IMPACT, au ras du sol ; `depart` est le
 ## point du ciel d'où elle part, vu depuis l'impact.
 ##
+## TALISMAN « GARDIENNES » (4 oct. 2026) : elle est trop rapide pour qu'une
+## goutte la poursuive, mais elle est annoncée. Un peu avant de partir, si
+## quelqu'un que des Gardiennes protègent se tient sous l'impact, elle les
+## prévient (`garder_passage`) : une goutte va se poster sur sa trajectoire,
+## au-dessus de sa tête. Quand la comète y passe et que la goutte y est
+## (`tir_arrive`), elle éclate là, en l'air : ni dégât, ni secousse, ni braise.
+##
 ## POUR LA JUGER : ouvrir la scène et faire F6 (elle tombe en boucle).
 ## ============================================================================
 
@@ -31,6 +38,14 @@ var secousse := 4.0
 const DUREE_VOL := 0.22
 const DUREE_EXPLO := 0.7
 const HAUTEUR_IMPACT := 130.0     # l'impact blesse jusqu'à cette hauteur au-dessus du sol (px)
+const GROUPE_GARDIENNES := "gardiennes"
+## les Gardiennes sont prévenues… avant le départ (s) : le temps qu'une goutte se poste
+const GARDE_AVANCE := 0.12
+## le poste de la goutte : sur la trajectoire, à cette hauteur au-dessus des
+## pieds de celui qu'elle garde (sa tête, et un peu d'air), et jamais plus bas
+## que GARDE_MINI au-dessus du sol (px)
+const GARDE_HAUTEUR := 195.0
+const GARDE_MINI := 90.0
 
 @onready var _rect: ColorRect = $Comete
 
@@ -38,6 +53,12 @@ var _t := 0.0
 var _frappe_faite := false
 var _graine := 0.0
 var _demo := false
+var _coin := Vector2.ZERO          # le coin du rectangle, depuis l'impact
+var _garde: Node = null            # les Gardiennes dont une goutte attend sur la trajectoire
+var _garde_tentee := false         # elle a déjà été attendue à son poste (une seule fois)
+var _garde_vol := 0.0              # la part du vol (0 → 1) où la tête passe à ce poste
+var _arret := Vector2.ZERO         # ce poste, depuis l'impact
+var _arret_t := -1.0               # l'instant où elle y a été arrêtée (s ; < 0 : elle ne l'a pas été)
 
 
 func _ready() -> void:
@@ -48,6 +69,7 @@ func _ready() -> void:
 	# le rectangle : de l'impact (et son éclat) jusqu'au point de départ
 	var mini := Vector2(minf(0.0, depart.x), minf(0.0, depart.y)) - Vector2(170.0, 60.0)
 	var maxi := Vector2(maxf(0.0, depart.x), maxf(0.0, depart.y)) + Vector2(170.0, 60.0)
+	_coin = mini
 	_rect.position = mini
 	_rect.size = maxi - mini
 	var mat := _rect.material as ShaderMaterial
@@ -60,7 +82,14 @@ func _ready() -> void:
 
 func _physics_process(delta: float) -> void:
 	_t += delta
-	if not _frappe_faite and _t >= delai + DUREE_VOL:
+	if _arret_t >= 0.0:
+		# arrêtée en vol : son éclat, puis plus rien
+		if _t >= _arret_t + DUREE_EXPLO:
+			queue_free()
+		return
+	if not _frappe_faite and not _demo:
+		_voir_les_gardiennes()
+	if _arret_t < 0.0 and not _frappe_faite and _t >= delai + DUREE_VOL:
 		_frappe_faite = true
 		_frapper()
 	if _t >= delai + DUREE_VOL + DUREE_EXPLO:
@@ -76,10 +105,8 @@ func _process(_delta: float) -> void:
 	_appliquer()
 
 
-## l'impact : tout ce qui est au-dessus de la marque
-func _frapper() -> void:
-	if _demo:
-		return
+## ce qui se tient au-dessus de la marque : les corps que l'impact blesse
+func _corps_sous_l_impact() -> Array:
 	var forme := RectangleShape2D.new()
 	forme.size = Vector2(rayon_impact * 2.0, HAUTEUR_IMPACT)
 	var requete := PhysicsShapeQueryParameters2D.new()
@@ -87,12 +114,18 @@ func _frapper() -> void:
 	requete.transform = Transform2D(0.0, global_position + Vector2(0.0, -HAUTEUR_IMPACT * 0.5))
 	requete.collision_mask = 0b1011          # joueur et monstres, comme les pièges
 	requete.collide_with_areas = false
-	var vus := {}
+	var corps := []
 	for resultat in get_world_2d().direct_space_state.intersect_shape(requete, 16):
-		var corps = resultat["collider"]
-		if vus.has(corps):
-			continue
-		vus[corps] = true
+		if not corps.has(resultat["collider"]):
+			corps.append(resultat["collider"])
+	return corps
+
+
+## l'impact : tout ce qui est au-dessus de la marque
+func _frapper() -> void:
+	if _demo:
+		return
+	for corps in _corps_sous_l_impact():
 		if corps.has_method("apply_environment_damage"):
 			# repoussé hors de l'impact, un peu vers le haut
 			var cote := signf((corps as Node2D).global_position.x - global_position.x)
@@ -107,9 +140,57 @@ func _frapper() -> void:
 			cam.shake(secousse, 10.0)
 
 
+## TALISMAN « GARDIENNES » : prévenir celles de quiconque se tient sous
+## l'impact, puis, en passant à leur poste, voir si la goutte y est
+func _voir_les_gardiennes() -> void:
+	if _garde != null:
+		if _t >= delai + _garde_vol * DUREE_VOL:
+			var gardiennes := _garde
+			_garde = null
+			_garde_tentee = true
+			if is_instance_valid(gardiennes) and gardiennes.tir_arrive(self):
+				_arret_t = _t
+				_frappe_faite = true
+		return
+	if _garde_tentee or _t < delai - GARDE_AVANCE or _t >= delai + DUREE_VOL:
+		return
+	var menaces := []
+	var cherche := false
+	for gardiennes in get_tree().get_nodes_in_group(GROUPE_GARDIENNES):
+		# (le nœud existe même sans le talisman : il est alors caché)
+		if not (gardiennes as CanvasItem).visible:
+			continue
+		if not cherche:
+			cherche = true
+			menaces = _corps_sous_l_impact()
+		var porteur = gardiennes.get("joueur")
+		if not (porteur is Node2D) or not menaces.has(porteur):
+			continue
+		# le poste : sur la trajectoire, au-dessus de sa tête
+		var chute := maxf(-depart.y, 1.0)
+		var hauteur := clampf(global_position.y - (porteur as Node2D).global_position.y + GARDE_HAUTEUR, GARDE_MINI, chute * 0.9)
+		var part := clampf(1.0 - hauteur / chute, 0.02, 0.98)       # la part du trajet déjà faite à ce poste
+		var vol_poste := sqrt(part)                                    # elle accélère : trajet = vol²
+		var poste := depart * (1.0 - part)
+		var dans := delai + vol_poste * DUREE_VOL - _t
+		if dans > 0.0 and gardiennes.garder_passage(self, global_position + poste, dans):
+			_garde = gardiennes
+			_garde_vol = vol_poste
+			_arret = poste
+			return
+
+
 func _appliquer() -> void:
 	var mat := _rect.material as ShaderMaterial
 	if mat == null:
+		return
+	if _arret_t >= 0.0:
+		# arrêtée en vol : plus de tête ni de traîne, son éclat là où elle en était
+		mat.set_shader_parameter("vol", 0.0)
+		mat.set_shader_parameter("explo", clampf((_t - _arret_t) / DUREE_EXPLO, 0.0001, 1.0))
+		mat.set_shader_parameter("arretee", 1.0)
+		mat.set_shader_parameter("arret", _arret - _coin)
+		mat.set_shader_parameter("temps", maxf(_t, 0.0))
 		return
 	var avert := clampf(_t / maxf(delai, 0.001), 0.0, 1.0) if _t >= 0.0 else 0.0
 	var vol := clampf((_t - delai) / DUREE_VOL, 0.0, 1.0) if _t >= delai else 0.0
@@ -117,5 +198,6 @@ func _appliquer() -> void:
 	mat.set_shader_parameter("avert", avert)
 	mat.set_shader_parameter("vol", vol if vol < 1.0 else 0.0)
 	mat.set_shader_parameter("explo", maxf(explo, 0.0001) if _t >= delai + DUREE_VOL else 0.0)
+	mat.set_shader_parameter("arretee", 0.0)
 	mat.set_shader_parameter("temps", maxf(_t, 0.0))
 	mat.set_shader_parameter("graine", _graine)

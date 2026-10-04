@@ -9,7 +9,10 @@ render_mode unshaded, blend_premul_alpha;
 //     accélérant, une traîne or → violet derrière elle, des paillettes ;
 //   • l'IMPACT (`explo` 0 → 1) : un éclat en étoile, un dôme de lumière qui
 //     s'ouvre au-dessus du sol, des étincelles qui jaillissent et retombent, une
-//     braise qui refroidit sur le sol.
+//     braise qui refroidit sur le sol ;
+//   • ARRÊTÉE EN VOL (`arretee`, talisman « Gardiennes ») : elle éclate là où
+//     elle en était (`arret`), en l'air — l'éclat en étoile, un anneau entier,
+//     des étincelles qui tombent ; ni dôme coupé par le sol, ni braise.
 // Repère : `impact` et `depart` sont dans le rectangle (px). Piloté par
 // SCRIPT/SHADER/comete.gd.
 
@@ -21,6 +24,9 @@ uniform float vol : hint_range(0.0, 1.0) = 0.0;
 uniform float explo : hint_range(0.0, 1.0) = 0.0;
 uniform float temps = 0.0;
 uniform float graine = 0.0;
+// arrêtée en vol : l'impact est dessiné en `arret` (dans le rectangle), en l'air
+uniform float arretee : hint_range(0.0, 1.0) = 0.0;
+uniform vec2 arret = vec2(0.0);
 
 uniform vec4 couleur_noyau : source_color = vec4(1.0, 0.98, 0.92, 1.0);
 uniform vec4 couleur_or : source_color = vec4(1.0, 0.82, 0.4, 1.0);
@@ -107,6 +113,10 @@ void fragment() {
 	// ===================== L'IMPACT =====================
 	if (explo > 0.0) {
 		float t = explo;
+		bool en_l_air = arretee > 0.5;
+		if (en_l_air) {
+			q = p - arret;
+		}
 		float r = length(q);
 		float a = atan(q.y, q.x);
 		// l'éclat en étoile : huit rais FINS et COURTS qui raccourcissent (ils
@@ -116,11 +126,11 @@ void fragment() {
 		float eclat = rais * exp(-r / long_rais) * 1.8 * (1.0 - t) * (1.0 - smoothstep(60.0, 110.0, r));
 		eclat += exp(-r * r / (260.0 * (1.0 + 7.0 * t))) * 2.6 * pow(abs(1.0 - t), 1.5);
 		// sous le sol, la lumière ne passe qu'à moitié
-		eclat *= q.y > 0.0 ? 0.35 : 1.0;
+		eclat *= (q.y > 0.0 && !en_l_air) ? 0.35 : 1.0;
 		lum += mix(couleur_noyau.rgb, couleur_or.rgb, 0.35) * eclat;
 		// le dôme de lumière qui s'ouvre au-dessus du sol
 		float rd = mix(12.0, 130.0, 1.0 - pow(abs(1.0 - t), 3.0));
-		float dome = exp(-pow(abs((r - rd) / 5.0), 2.0)) * (1.0 - t) * step(q.y, 0.5);
+		float dome = exp(-pow(abs((r - rd) / 5.0), 2.0)) * (1.0 - t) * (en_l_air ? 1.0 : step(q.y, 0.5));
 		lum += couleur_traine.rgb * dome * 1.3;
 		// les étincelles : elles jaillissent et retombent
 		for (int k = 0; k < 12; k++) {
@@ -129,7 +139,7 @@ void fragment() {
 			float vit = 260.0 + 380.0 * alea(fk * 5.3 + graine);
 			float tt = t * 0.7;
 			vec2 pos = vec2(cos(ang), sin(ang)) * vit * tt + vec2(0.0, 0.5 * 1800.0 * tt * tt);
-			if (pos.y > 4.0) {
+			if (pos.y > 4.0 && !en_l_air) {
 				continue;
 			}
 			vec2 vel = normalize(vec2(cos(ang) * vit, sin(ang) * vit + 1800.0 * tt) + vec2(0.0001));
@@ -141,7 +151,7 @@ void fragment() {
 			lum += mix(couleur_noyau.rgb, couleur_or.rgb, 0.5) * e * (1.0 - t) * 1.4;
 		}
 		// la braise sur le sol, qui refroidit (du blanc-or au rouge)
-		float braise = exp(-pow(abs(q.y / 3.0), 2.0)) * exp(-pow(abs(q.x / 24.0), 2.0)) * (1.0 - t * 0.85);
+		float braise = exp(-pow(abs(q.y / 3.0), 2.0)) * exp(-pow(abs(q.x / 24.0), 2.0)) * (1.0 - t * 0.85) * (en_l_air ? 0.0 : 1.0);
 		lum += mix(couleur_or.rgb, vec3(1.0, 0.35, 0.12), t) * braise * 1.2;
 	}
 
