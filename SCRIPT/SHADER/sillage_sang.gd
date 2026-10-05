@@ -27,7 +27,8 @@ extends Node2D
 ##
 ## POUR LE JUGER : ouvrir la scène et faire F6 : un sillage est semé en boucle
 ## au milieu de l'écran. L'allure (épaisseur, volutes, couleurs) se règle sur
-## le matériau du nœud Brume.
+## le matériau du nœud Brume ; le rendu, fumée douce ou marbré, sur ce nœud
+## (`douceur`).
 ## ============================================================================
 
 ## nombre de points d'un sillage (le shader en prend autant) : au-delà, le
@@ -51,6 +52,12 @@ const MAX_POINTS := 24
 ## forme.
 @export var effilage := 110.0
 @export_range(0.0, 1.0) var bout_min := 0.3
+## 1 = une fumée faite comme un nuage : un bord en bosses qui fond, un cœur
+## plein, un relief doux, plus de veines claires. 0 = le rendu marbré d'avant,
+## très enroulé. Entre les deux, les deux rendus se fondent l'un dans l'autre.
+## Sans effet si `toon` vaut 1 sur le matériau. Réglé ici et pas sur le
+## matériau, comme l'effilage : c'est ce script qui le donne au shader.
+@export_range(0.0, 1.0) var douceur := 1.0
 ## lancé seul (F6) : un sillage est semé en boucle
 @export var demo_boucle := true
 
@@ -206,7 +213,9 @@ func _points_du_corps(c: BaseAI) -> Array[Vector2]:
 ## ANCRÉE COMME UNE FLAMME ») : autour du point du trajet le plus proche, base
 ## posée à 0,55 × R dessous, haut qui monte avec l'âge de R + montée ; les
 ## renflements et les colonnes du bruit sont pris à leur valeur moyenne, les
-## volutes qui débordent sont couvertes par `marge`.
+## volutes qui débordent sont couvertes par `marge`. La fumée douce (`douceur`)
+## a une enveloppe un peu plus grande dont le bord fond : sa partie visible
+## couvre la même zone.
 func dans_la_brume(p: Vector2, limite: float) -> bool:
 	if _points.is_empty():
 		return false
@@ -298,6 +307,7 @@ func _appliquer() -> void:
 	mat.set_shader_parameter("longueur", _longueur())
 	mat.set_shader_parameter("effilage", effilage)
 	mat.set_shader_parameter("bout_min", bout_min)
+	mat.set_shader_parameter("douceur", douceur)
 
 
 # --- la démo (F6) : une roulade vers la droite, semée en boucle ---

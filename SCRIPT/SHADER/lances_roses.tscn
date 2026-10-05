@@ -1,0 +1,20 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://SCRIPT/SHADER/lances_roses.gd" id="1_lr"]
+[ext_resource type="Shader" path="res://SCRIPT/SHADER/lances_roses.gdshader" id="2_lr"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_lr"]
+resource_local_to_scene = true
+shader = ExtResource("2_lr")
+
+[node name="LancesRoses" type="Node2D"]
+z_index = 3
+script = ExtResource("1_lr")
+
+[node name="Lances" type="ColorRect" parent="."]
+material = SubResource("ShaderMaterial_lr")
+offset_left = -940.0
+offset_top = -100.0
+offset_right = 940.0
+offset_bottom = 600.0
+mouse_filter = 2

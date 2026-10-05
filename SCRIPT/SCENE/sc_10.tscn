@@ -21,13 +21,15 @@
 [ext_resource type="Shader" uid="uid://jblop3f3vfan" path="res://SCRIPT/SHADER/flou_fond.gdshader" id="17_vw2kw"]
 [ext_resource type="Texture2D" uid="uid://x774gue4he8e" path="res://MEDIA/scene 6/background/background.png" id="18_v7ylp"]
 [ext_resource type="Texture2D" uid="uid://bnx8i3kgl6iic" path="res://MEDIA/scene 6/background/colonne.png" id="19_6t8y0"]
-[ext_resource type="PackedScene" uid="uid://dokxn6rjr6sc6" path="res://SCRIPT/MONSTER/LOUP_GAROU.tscn" id="20_5gsh0"]
+[ext_resource type="PackedScene" path="res://SCRIPT/SHADER/lances_roses.tscn" id="22_c6yxa"]
 [ext_resource type="PackedScene" path="res://SCRIPT/INTERACTIBLE/pilier_foudre.tscn" id="23_ubcjy"]
 [ext_resource type="PackedScene" path="res://SCRIPT/INTERACTIBLE/lanceur_feu.tscn" id="25_utlbw"]
 [ext_resource type="PackedScene" uid="uid://cvykyqaa2ik7i" path="res://SCRIPT/INTERACTIBLE/roue_pointes.tscn" id="25_xjew0"]
 [ext_resource type="PackedScene" uid="uid://bobswn5tah03s" path="res://SCRIPT/INTERACTIBLE/passage.tscn" id="27_rgcqs"]
+[ext_resource type="PackedScene" path="res://SCRIPT/MONSTER/SLIME.tscn" id="28_5gsh0"]
 [ext_resource type="PackedScene" path="res://SCRIPT/INTERACTIBLE/pluie_etoiles.tscn" id="29_vao7l"]
 [ext_resource type="PackedScene" path="res://SCRIPT/INTERACTIBLE/trou_noir.tscn" id="30_er8y1"]
+[ext_resource type="PackedScene" path="res://SCRIPT/INTERACTIBLE/pilon.tscn" id="31_7gafa"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_ubcjy"]
 shader = ExtResource("17_vw2kw")
@@ -97,14 +99,17 @@ position = Vector2(2395.5, -3663)
 
 [node name="SAWBLADE" parent="interactible" unique_id=388117046 instance=ExtResource("6_5ylk2")]
 position = Vector2(1466, -999)
-frame_progress = 0.6511053
+frame_progress = 0.8295095
 position_a = Vector2(1466, -999)
 position_b = Vector2(1466, -2128)
+
+[node name="Pilon" parent="interactible" unique_id=1921633621 instance=ExtResource("31_7gafa")]
+position = Vector2(-815, -2399)
 
 [node name="grayboxing" type="Node2D" parent="." unique_id=1166067719]
 visible = false
 
-[node name="200x50" parent="grayboxing" unique_id=436297158 instance=ExtResource("7_5ylk2")]
+[node name="200x50" parent="grayboxing" unique_id=1346090544 instance=ExtResource("7_5ylk2")]
 position = Vector2(-254, -3220)
 
 [node name="200x51" parent="grayboxing" unique_id=616493478 instance=ExtResource("7_5ylk2")]
@@ -452,6 +457,12 @@ texture = ExtResource("19_6t8y0")
 
 [node name="enemi" type="Node2D" parent="." unique_id=1354596315]
 
+[node name="slime" parent="enemi" unique_id=1427151632 instance=ExtResource("28_5gsh0")]
+position = Vector2(429, 4)
+
+[node name="LancesRoses" parent="enemi" unique_id=3998012 instance=ExtResource("22_c6yxa")]
+position = Vector2(188, 6)
+
 [node name="screenshot" type="Node" parent="." unique_id=599869060]
 script = ExtResource("16_1q33d")
 export_path = "res://sc_10.png"
@@ -492,6 +503,3 @@ position = Vector2(3965, -3677)
 
 [node name="TrouNoir" parent="." unique_id=2087883557 instance=ExtResource("30_er8y1")]
 position = Vector2(4847, -3655)
-
-[node name="loup_garou_elite" parent="." unique_id=627255339 instance=ExtResource("20_5gsh0")]
-position = Vector2(946, 4)
