@@ -104,6 +104,12 @@ const SHADERS: Array[String] = [
 	"res://SCRIPT/SHADER/comete.gdshader",           # pluie d'étoiles : une comète avertie et son impact
 	"res://SCRIPT/SHADER/pluie_petales.gdshader",    # pluie de pétales : l'attaque en rideaux du premier boss
 	"res://SCRIPT/SHADER/lances_roses.gdshader",     # lances roses : les lances qui sortent du sol en rythme (premier boss)
+	"res://SCRIPT/SHADER/griffes_roses.gdshader",    # griffes roses : les griffes à la main et le slash en trois croissants (premier boss)
+	"res://SCRIPT/SHADER/chute_eau.gdshader",        # chute d'eau (décor) : la nappe, ses trous qui tombent, l'écume au pied
+	"res://SCRIPT/BOSS/premier_boss.gdshader",       # premier boss : sa figure provisoire, dessinée par shader
+	"res://SCRIPT/BOSS/vent_aspire.gdshader",        # premier boss : le vent qui tire le héros vers elle
+	"res://SCRIPT/BOSS/rafale_petales.gdshader",     # premier boss : les rafales de pétales, basses ou hautes
+	"res://SCRIPT/BOSS/regard_rose.gdshader",        # premier boss : le regard (phase 2), le fil qui vise et le rayon
 	"res://SCRIPT/SHADER/pilon.gdshader",            # le pilon : le concasseur (décor, sans contour)
 	"res://SCRIPT/SHADER/roue_pointes.gdshader",     # roue à pointes : la roue seule, ses étincelles, son éclatement
 	"res://SCRIPT/SHADER/barre_feu_socle.gdshader",  # barre de feu : le bloc de pierre au centre (décor, sans contour)

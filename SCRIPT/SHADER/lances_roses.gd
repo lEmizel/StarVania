@@ -13,7 +13,8 @@ extends Node2D
 ## seule tant que le héros est à portée (à peu près : à l'écran). Dans
 ## l'éditeur, un trait rose montre la largeur de la zone et des traits pâles
 ## les emplacements, sur toute la hauteur où le sol est cherché.
-## AVEC UN BOSS : il met `automatique` à faux et appelle `lancer()`. Les signaux
+## AVEC UN BOSS : il met `automatique` à faux et appelle `lancer()` (`arreter()`
+## coupe la salve net, s'il meurt). Les signaux
 ## `vague_annoncee(n)` et `vague_sortie(n)` donnent le rythme (le claquement de
 ## doigts tombe sur `vague_sortie`).
 ##
@@ -25,7 +26,12 @@ extends Node2D
 ##     une perd `damage` cœur(s) et il est repoussé de côté — une seule fois par
 ##     vague ;
 ##   • elles rentrent dans le sol, et ne blessent plus dès qu'elles rentrent.
-## LE TIRAGE d'une vague : une `part` des emplacements, au hasard, jamais plus
+## LE TIRAGE d'une vague, fait à son annonce : une lance EXACTEMENT SOUS LE
+## HÉROS, là où il est à ce moment-là (`vise_le_heros` : tous les emplacements
+## de la vague se décalent pour qu'un d'eux tombe sous ses pieds ; il doit
+## bouger à chaque vague), une autre juste à côté de lui d'un côté au hasard
+## (`ferme_un_cote` : il doit lire de quel côté partir), puis
+## une `part` des emplacements en tout, au hasard, jamais plus
 ## de `suite_max` lances côte à côte (un mur trop large ne se quitterait pas à
 ## temps) — les deux bords de la zone comptent comme une lance, ce sont les
 ## murs de la salle : on ne reste pas coincé dans un coin — et jamais le même
@@ -46,8 +52,9 @@ signal finie
 signal vague_annoncee(numero: int)
 signal vague_sortie(numero: int)
 
-## nombre d'emplacements au plus (le shader en prend autant)
-const MAX_CASES := 32
+## nombre d'emplacements au plus (le shader en prend autant) : une zone de
+## 4800 px à 100 px d'écart
+const MAX_CASES := 48
 ## la sortie et le retrait d'une lance (s)
 const SORTIE := 0.08
 const RETRAIT := 0.16
@@ -71,6 +78,13 @@ const RECHERCHE_AU_DESSUS := 200.0
 @export var espacement := 100.0
 ## la part des emplacements d'où sort une lance, à chaque vague
 @export_range(0.1, 0.9) var part := 0.5
+## chaque vague vise le héros : ses emplacements se calent sur lui et une lance
+## sort exactement sous ses pieds, il doit bouger à chaque fois ; décoché : tout
+## est tiré au hasard, il peut se trouver dans un trou sans avoir bougé
+@export var vise_le_heros := true
+## … et une autre sort juste à côté de lui, d'un côté au hasard : il doit LIRE
+## de quel côté partir (décoché : les deux côtés peuvent être libres)
+@export var ferme_un_cote := true
 @export_group("Le rythme")
 ## nombre de vagues d'une salve
 @export var vagues := 4
@@ -106,7 +120,10 @@ var _graine := 0
 var _sols := PackedFloat32Array()         # hauteur du sol sous chaque emplacement (> chute : aucun)
 var _base_x := 0.0                        # abscisse du premier emplacement
 var _pas := 100.0                         # l'écart réel entre deux emplacements
-var _motifs: Array[PackedByteArray] = []  # par vague : 1 = une lance sort de cet emplacement
+var _motifs: Array[PackedByteArray] = []  # par vague ANNONCÉE : 1 = une lance sort de cet emplacement
+var _nb_vagues := 4                       # le nombre de vagues de cette salve
+var _decals := PackedFloat32Array()       # par vague annoncée : le décalage de ses emplacements (px)
+var _decal_tire := 0.0                    # celui du dernier tirage
 var _annoncees := PackedByteArray()       # par vague : son signal d'annonce est parti
 var _sorties := PackedByteArray()         # par vague : ses lances sont sorties
 var _touche := PackedByteArray()          # par vague : elle a déjà pris son cœur
@@ -156,18 +173,19 @@ func lancer() -> void:
 	if not is_finite(plus_haut):
 		plus_haut = 0.0
 		plus_bas = 0.0
-	# les tirages de toutes les vagues
+	# le tirage de la 1re vague ; les suivantes sont tirées à leur annonce : elles
+	# visent le héros là où il est à ce moment-là
+	_nb_vagues = maxi(vagues, 1)
 	_motifs = []
-	var precedent := PackedByteArray()
-	for k in maxi(vagues, 1):
-		precedent = _tirer(precedent)
-		_motifs.append(precedent)
+	_decals = PackedFloat32Array()
+	_motifs.append(_tirer(PackedByteArray()))
+	_decals.append(_decal_tire)
 	_annoncees = PackedByteArray()
-	_annoncees.resize(_motifs.size())
+	_annoncees.resize(_nb_vagues)
 	_sorties = PackedByteArray()
-	_sorties.resize(_motifs.size())
+	_sorties.resize(_nb_vagues)
 	_touche = PackedByteArray()
-	_touche.resize(_motifs.size())
+	_touche.resize(_nb_vagues)
 	# le rectangle : toute la zone, du sol le plus bas au-dessus des plus hautes lances
 	var dessus := plus_haut - hauteur * 1.08 - 100.0
 	_rect.position = Vector2(-largeur * 0.5 - 140.0, dessus)
@@ -181,6 +199,16 @@ func en_cours() -> bool:
 	return _active
 
 
+## la salve s'arrête net (le boss meurt) : plus de lances, plus de dégâts, et le
+## signal `finie` ne part pas
+func arreter() -> void:
+	if not _active:
+		return
+	_active = false
+	_rect.visible = false
+	_rattacher()
+
+
 ## le nombre d'emplacements : de quoi remplir juste la largeur, à l'espacement près
 func _nb_cases() -> int:
 	return clampi(roundi(largeur / maxf(espacement, 30.0)), 1, MAX_CASES)
@@ -191,9 +219,16 @@ func _vie() -> float:
 	return annonce + SORTIE + tenue + RETRAIT
 
 
-## le tirage d'une vague : quels emplacements poussent une lance (1). Une `part`
-## de ceux qui ont un sol, au hasard, jamais plus de `suite_max` côte à côte, et
-## pas le tirage de la vague d'avant (au mieux : après 80 essais, tant pis).
+## l'heure de l'annonce de la vague n°`k` (s depuis le lancer)
+func _heure(k: int) -> float:
+	return k * rythme
+
+
+## le tirage d'une vague : quels emplacements poussent une lance (1). Celui du
+## héros d'abord (`vise_le_heros`), puis une `part` de ceux qui ont un sol en
+## tout, au hasard, jamais plus de `suite_max` côte à côte (les lances sont
+## posées une à une, celles qui allongeraient trop une suite sont écartées : il
+## peut en manquer une ou deux), et pas le tirage de la vague d'avant.
 func _tirer(precedent: PackedByteArray) -> PackedByteArray:
 	var n := _sols.size()
 	var avec_sol: Array[int] = []
@@ -201,16 +236,65 @@ func _tirer(precedent: PackedByteArray) -> PackedByteArray:
 		if _sols[i] <= chute:
 			avec_sol.append(i)
 	var combien := clampi(roundi(avec_sol.size() * part), 0, avec_sol.size())
+	_decal_tire = 0.0
+	var vise := _case_du_heros() if vise_le_heros else -1
+	var limite := maxi(suite_max, 1)
 	var motif := PackedByteArray()
-	for essai in 80:
+	for essai in 8:
 		motif = PackedByteArray()
 		motif.resize(n)
 		avec_sol.shuffle()
-		for k in combien:
-			motif[avec_sol[k]] = 1
-		if _plus_longue_suite(motif) <= maxi(suite_max, 1) and motif != precedent:
+		var reste := combien
+		# sous le héros d'abord ; puis les autres un à un, au hasard, en écartant
+		# ceux qui feraient une suite trop longue (tirer tout d'un coup puis
+		# vérifier ne tient plus dans une grande zone : sur 40 emplacements,
+		# presque aucun tirage ne passe)
+		if vise >= 0 and reste > 0:
+			motif[vise] = 1
+			reste -= 1
+			# sa voisine, d'un côté au hasard (de l'autre si le mur ou la règle des
+			# suites l'interdit)
+			if ferme_un_cote and reste > 0:
+				var cote := 1 if randf() < 0.5 else -1
+				for j: int in [vise + cote, vise - cote]:
+					if j < 0 or j >= n or _sols[j] > chute:
+						continue
+					motif[j] = 1
+					if _plus_longue_suite(motif) > limite:
+						motif[j] = 0
+						continue
+					reste -= 1
+					break
+		for i in avec_sol:
+			if reste <= 0:
+				break
+			if motif[i] == 1:
+				continue
+			motif[i] = 1
+			if _plus_longue_suite(motif) > limite:
+				motif[i] = 0
+			else:
+				reste -= 1
+		if motif != precedent:
 			break
 	return motif
+
+
+## l'emplacement du héros (−1 : hors de la zone, ou pas de sol à cet endroit) ;
+## pose aussi `_decal_tire` : de combien décaler les emplacements de la vague
+## pour que celui-là tombe exactement sous lui (d'un demi-écart au plus)
+func _case_du_heros() -> int:
+	if _demo:
+		return -1
+	var pas := maxf(_pas, 1.0)
+	for joueur in get_tree().get_nodes_in_group("Player"):
+		if joueur is Node2D:
+			var p := to_local((joueur as Node2D).global_position)
+			var i := roundi((p.x - _base_x) / pas)
+			if i >= 0 and i < _sols.size() and _sols[i] <= chute:
+				_decal_tire = p.x - (_base_x + i * pas)
+				return i
+	return -1
 
 
 ## le plus grand nombre de lances côte à côte d'un tirage ; chaque bord de la
@@ -267,10 +351,13 @@ func _physics_process(delta: float) -> void:
 	if Engine.is_editor_hint() or not _active:
 		return
 	_t += delta
-	for k in _motifs.size():
-		var tau := _t - k * rythme
+	for k in _nb_vagues:
+		var tau := _t - _heure(k)
 		if tau < 0.0:
 			break
+		if k >= _motifs.size():
+			_motifs.append(_tirer(_motifs[k - 1]))      # elle s'annonce : son tirage
+			_decals.append(_decal_tire)
 		if _annoncees[k] == 0:
 			_annoncees[k] = 1
 			vague_annoncee.emit(k)
@@ -283,7 +370,7 @@ func _physics_process(delta: float) -> void:
 		# sorties, elles blessent ; dès qu'elles rentrent, plus
 		if not _demo and _touche[k] == 0 and tau < annonce + SORTIE + tenue:
 			_blesser(k, tau)
-	if _t >= (_motifs.size() - 1) * rythme + _vie() + DUREE_TRACE:
+	if _t >= _heure(_nb_vagues - 1) + _vie() + DUREE_TRACE:
 		_active = false
 		_rect.visible = false
 		_rattacher()
@@ -304,10 +391,11 @@ func _process(delta: float) -> void:
 			lancer()
 
 
-## dans l'éditeur seulement : la largeur de la zone, ses bords, et les
-## emplacements des lances jusqu'où le sol est cherché
+## dans l'éditeur seulement, et en automatique (commandée par un boss, c'est lui
+## qui la place) : la largeur de la zone, ses bords, et les emplacements des
+## lances jusqu'où le sol est cherché
 func _draw() -> void:
-	if not Engine.is_editor_hint():
+	if not Engine.is_editor_hint() or not automatique:
 		return
 	var rose := Color(1.0, 0.5, 0.8)
 	var demi := largeur * 0.5
@@ -347,11 +435,12 @@ func _blesser(k: int, tau: float) -> void:
 		if not (joueur is Node2D) or not joueur.has_method("apply_environment_damage"):
 			continue
 		var p := to_local((joueur as Node2D).global_position)
-		var proche := roundi((p.x - _base_x) / maxf(_pas, 1.0))
+		var depart := _base_x + _decals[k]
+		var proche := roundi((p.x - depart) / maxf(_pas, 1.0))
 		for i: int in [proche, proche - 1, proche + 1]:
 			if i < 0 or i >= motif.size() or motif[i] == 0 or _sols[i] > chute:
 				continue
-			var x := _base_x + i * _pas
+			var x := depart + i * _pas
 			if not _corps_dans(joueur, x, _sols[i], haut):
 				continue
 			var cote := signf(p.x - x)
@@ -382,13 +471,14 @@ func _appliquer() -> void:
 	var mat := _rect.material as ShaderMaterial
 	if mat == null:
 		return
-	# les deux vagues visibles : la plus ancienne encore là, et la suivante
+	# les vagues visibles (trois au plus : à un rythme serré, deux vagues et la
+	# traîne de la précédente se chevauchent)
 	var visibles: Array[int] = []
 	for k in _motifs.size():
-		var tau := _t - k * rythme
+		var tau := _t - _heure(k)
 		if tau >= 0.0 and tau < _vie() + DUREE_TRACE:
 			visibles.append(k)
-	while visibles.size() > 2:
+	while visibles.size() > 3:
 		visibles.pop_front()
 	var sols := PackedFloat32Array()
 	sols.resize(MAX_CASES)
@@ -401,8 +491,8 @@ func _appliquer() -> void:
 	mat.set_shader_parameter("pas", maxf(_pas, 1.0))
 	mat.set_shader_parameter("sols", sols)
 	mat.set_shader_parameter("chute", chute)
-	for rang in 2:
-		var lettre := "a" if rang == 0 else "b"
+	for rang in 3:
+		var lettre: String = ["a", "b", "c"][rang]
 		var motif := PackedFloat32Array()
 		motif.resize(MAX_CASES)
 		var tau := -1.0
@@ -411,8 +501,9 @@ func _appliquer() -> void:
 			var k := visibles[rang]
 			for i in _motifs[k].size():
 				motif[i] = float(_motifs[k][i])
-			tau = _t - k * rythme
+			tau = _t - _heure(k)
 			graine = float(_graine + k * 17)
+			mat.set_shader_parameter("decal_" + lettre, _decals[k])
 		mat.set_shader_parameter("motif_" + lettre, motif)
 		mat.set_shader_parameter("temps_" + lettre, tau)
 		mat.set_shader_parameter("graine_" + lettre, graine)

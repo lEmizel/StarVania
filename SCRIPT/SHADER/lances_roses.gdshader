@@ -34,16 +34,24 @@ uniform vec2 origine = vec2(-940.0, -100.0);
 uniform int nb_cases = 0;
 uniform float base_x = -750.0;
 uniform float pas = 100.0;
-uniform float sols[32];
+uniform float sols[48];
 uniform float chute = 1600.0;
 // les deux vagues visibles : pour chacune, quels emplacements sont visés
 // (1 ou 0), l'heure depuis son annonce (s ; négative : pas de vague), sa graine
-uniform float motif_a[32];
+uniform float motif_a[48];
 uniform float temps_a = -1.0;
 uniform float graine_a = 0.0;
-uniform float motif_b[32];
+// de combien les emplacements de cette vague sont décalés (px) : elle se cale
+// sur le héros
+uniform float decal_a = 0.0;
+uniform float motif_b[48];
 uniform float temps_b = -1.0;
 uniform float graine_b = 0.0;
+uniform float decal_b = 0.0;
+uniform float motif_c[48];
+uniform float temps_c = -1.0;
+uniform float graine_c = 0.0;
+uniform float decal_c = 0.0;
 // la vie d'une vague (s) : l'annonce, la sortie, le temps où elles restent
 // sorties, le retrait ; et la hauteur des lances (px)
 uniform float annonce = 0.7;
@@ -244,22 +252,38 @@ void fragment() {
 	float a = 0.0;
 	vec3 lueur = vec3(0.0);     // ce qui s'ajoute
 	if (nb_cases > 0) {
-		int i0 = int(floor((pos.x - base_x) / pas + 0.5));
-		for (int di = -1; di <= 1; di++) {
-			int i = i0 + di;
-			if (i < 0 || i >= nb_cases) {
+		// chaque vague a ses emplacements : les mêmes, décalés de son calage
+		for (int vague = 0; vague < 3; vague++) {
+			float t_vague = temps_a;
+			float decal_v = decal_a;
+			int graine_v = int(graine_a);
+			if (vague == 1) {
+				t_vague = temps_b;
+				decal_v = decal_b;
+				graine_v = int(graine_b);
+			} else if (vague == 2) {
+				t_vague = temps_c;
+				decal_v = decal_c;
+				graine_v = int(graine_c);
+			}
+			if (t_vague < 0.0) {
 				continue;
 			}
-			float sol = sols[i];
-			if (sol > chute) {
-				continue;
-			}
-			float cx = base_x + float(i) * pas;
-			if (temps_a >= 0.0 && motif_a[i] > 0.5) {
-				lance(pos, cx, sol, temps_a, i, int(graine_a), rgb, a, lueur);
-			}
-			if (temps_b >= 0.0 && motif_b[i] > 0.5) {
-				lance(pos, cx, sol, temps_b, i, int(graine_b), rgb, a, lueur);
+			float depart = base_x + decal_v;
+			int i0 = int(floor((pos.x - depart) / pas + 0.5));
+			for (int di = -1; di <= 1; di++) {
+				int i = i0 + di;
+				if (i < 0 || i >= nb_cases) {
+					continue;
+				}
+				float sol = sols[i];
+				if (sol > chute) {
+					continue;
+				}
+				float visee = (vague == 0) ? motif_a[i] : ((vague == 1) ? motif_b[i] : motif_c[i]);
+				if (visee > 0.5) {
+					lance(pos, depart + float(i) * pas, sol, t_vague, i, graine_v, rgb, a, lueur);
+				}
 			}
 		}
 	}

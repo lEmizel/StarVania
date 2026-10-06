@@ -1,0 +1,76 @@
+[gd_scene format=3 uid="uid://ce6646rhyc17i"]
+
+[ext_resource type="Script" uid="uid://dftar4ptyhjxe" path="res://SCRIPT/UTILITAIRE/spawnplayer.gd" id="1_c7ohn"]
+[ext_resource type="PackedScene" uid="uid://ckxwmy0iav2h2" path="res://SCRIPT/INTERACTIBLE/Checkpoint.tscn" id="2_nywfe"]
+[ext_resource type="PackedScene" uid="uid://47qcpwpulk4y" path="res://SCRIPT/grayboxing/800x400.tscn" id="3_c7ohn"]
+[ext_resource type="PackedScene" path="res://SCRIPT/BOSS/premier_boss.tscn" id="3_nywfe"]
+
+[node name="aréne du premier boss" type="Node2D" unique_id=1205698044]
+
+[node name="spawnplayer" type="Node" parent="." unique_id=596449119]
+script = ExtResource("1_c7ohn")
+
+[node name="interactible" type="Node2D" parent="." unique_id=400474264]
+
+[node name="checkpoint" parent="interactible" unique_id=524856083 groups=["Checkpoint"] instance=ExtResource("2_nywfe")]
+position = Vector2(-2344, -1208)
+
+[node name="grayboxing" type="Node2D" parent="." unique_id=1460458771]
+
+[node name="800x400" parent="grayboxing" unique_id=436297158 instance=ExtResource("3_c7ohn")]
+position = Vector2(-1, 196)
+
+[node name="800x401" parent="grayboxing" unique_id=1448781020 instance=ExtResource("3_c7ohn")]
+position = Vector2(799, 196)
+
+[node name="800x402" parent="grayboxing" unique_id=733630777 instance=ExtResource("3_c7ohn")]
+position = Vector2(1599, 196)
+
+[node name="800x409" parent="grayboxing" unique_id=1532922286 instance=ExtResource("3_c7ohn")]
+position = Vector2(2399, 196)
+
+[node name="800x410" parent="grayboxing" unique_id=306262341 instance=ExtResource("3_c7ohn")]
+position = Vector2(2399, -204)
+
+[node name="800x411" parent="grayboxing" unique_id=755011310 instance=ExtResource("3_c7ohn")]
+position = Vector2(2399, -604)
+
+[node name="800x412" parent="grayboxing" unique_id=798516357 instance=ExtResource("3_c7ohn")]
+position = Vector2(2399, -1004)
+
+[node name="800x403" parent="grayboxing" unique_id=674011444 instance=ExtResource("3_c7ohn")]
+position = Vector2(-801, 196)
+
+[node name="800x404" parent="grayboxing" unique_id=810730263 instance=ExtResource("3_c7ohn")]
+position = Vector2(-1601, 196)
+
+[node name="800x405" parent="grayboxing" unique_id=383261681 instance=ExtResource("3_c7ohn")]
+position = Vector2(-2401, 196)
+
+[node name="800x406" parent="grayboxing" unique_id=966137125 instance=ExtResource("3_c7ohn")]
+position = Vector2(-2401, -204)
+
+[node name="800x407" parent="grayboxing" unique_id=1438227817 instance=ExtResource("3_c7ohn")]
+position = Vector2(-2401, -604)
+
+[node name="800x408" parent="grayboxing" unique_id=1518922798 instance=ExtResource("3_c7ohn")]
+position = Vector2(-2401, -1004)
+
+[node name="VISUAL" type="Node2D" parent="." unique_id=588867009]
+
+[node name="enemi" type="Node2D" parent="." unique_id=1500096856]
+
+[node name="premier_boss" parent="." unique_id=362777658 instance=ExtResource("3_nywfe")]
+position = Vector2(15, -232)
+points_de_vie = 2300
+vitesse_vol = 740.0
+repos = 1.5
+eveil = 1.0
+vitesse_retour = 1500.0
+annonce_pluie = 0.4
+annonce_lances = 0.4
+hauteur_lances = 330.0
+distance_vent = 1500.0
+annonce_vent = 0.4
+vitesse_rafale = 2500.0
+annonce_rafale = 0.3

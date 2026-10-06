@@ -13,7 +13,8 @@ extends Node2D
 ## la ligne d'où ils tombent, deux traits la largeur de ce qui blesse, et des
 ## traits pâles la place des rideaux, jusqu'où le sol est cherché.
 ## AVEC UN BOSS : il met `automatique` à faux, règle `envergure` sur ses ailes
-## et appelle `lancer()` ; le nœud se place à la hauteur de ses ailes.
+## et appelle `lancer()` ; le nœud se place à la hauteur de ses ailes
+## (`arreter()` coupe la salve net, s'il meurt).
 ##
 ## Une salve :
 ##   • `delai_avertissement` s d'ANNONCE, brève : sous toute l'envergure, des
@@ -166,6 +167,16 @@ func en_cours() -> bool:
 	return _active
 
 
+## la salve s'arrête net (le boss meurt) : plus de pétales, plus de dégâts, et le
+## signal `finie` ne part pas
+func arreter() -> void:
+	if not _active:
+		return
+	_active = false
+	_rect.visible = false
+	_rattacher()
+
+
 ## le nombre de rideaux : de quoi remplir juste l'envergure, à l'espacement près
 func _nb_rideaux() -> int:
 	return clampi(roundi(2.0 * envergure / maxf(espacement, 20.0)), 1, MAX_COLONNES)
@@ -250,11 +261,12 @@ func _process(delta: float) -> void:
 			lancer()
 
 
-## dans l'éditeur seulement : la ligne d'où tombent les pétales, la largeur de
-## ce qui blesse, et la place des rideaux (sans leur écart au hasard) jusqu'où
-## le sol est cherché
+## dans l'éditeur seulement, et en automatique (commandée par un boss, c'est lui
+## qui la place) : la ligne d'où tombent les pétales, la largeur de ce qui
+## blesse, et la place des rideaux (sans leur écart au hasard) jusqu'où le sol
+## est cherché
 func _draw() -> void:
-	if not Engine.is_editor_hint():
+	if not Engine.is_editor_hint() or not automatique:
 		return
 	var rose := Color(1.0, 0.5, 0.8)
 	draw_line(Vector2(-envergure, 0.0), Vector2(envergure, 0.0), Color(rose, 0.9), 3.0)

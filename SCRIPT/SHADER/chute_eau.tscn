@@ -1,0 +1,7 @@
+[gd_scene format=3 uid="uid://bf0asbh2303ce"]
+
+[ext_resource type="Script" uid="uid://bso2fcvt2n5jm" path="res://SCRIPT/SHADER/chute_eau.gd" id="1_ce"]
+
+[node name="ChuteEau" type="Node2D" unique_id=993088765]
+script = ExtResource("1_ce")
+vitesse = 1500.0

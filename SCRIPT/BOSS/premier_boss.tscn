@@ -1,0 +1,71 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://SCRIPT/BOSS/premier_boss.gd" id="1_boss"]
+[ext_resource type="PackedScene" uid="uid://c8y35es6jse5x" path="res://SCRIPT/MENU/heatle_bare_monster.tscn" id="2_vie"]
+[ext_resource type="Script" path="res://SCRIPT/BOSS/premier_boss_corps.gd" id="3_corps"]
+[ext_resource type="PackedScene" path="res://SCRIPT/SHADER/pluie_petales.tscn" id="4_petales"]
+[ext_resource type="PackedScene" path="res://SCRIPT/SHADER/lances_roses.tscn" id="5_lances"]
+[ext_resource type="PackedScene" path="res://SCRIPT/BOSS/rafale_petales.tscn" id="6_rafale"]
+[ext_resource type="PackedScene" path="res://SCRIPT/BOSS/regard_rose.tscn" id="7_regard"]
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_boss"]
+radius = 62.0
+height = 446.0
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_vue"]
+radius = 1100.0
+
+[node name="premier_boss" type="CharacterBody2D"]
+light_mask = 0
+collision_layer = 8
+collision_mask = 2
+script = ExtResource("1_boss")
+contact_damage = 0
+
+[node name="bare_de_vie" parent="." instance=ExtResource("2_vie")]
+light_mask = 0
+position = Vector2(-170, -540)
+scale = Vector2(0.7, 0.7)
+
+[node name="Collision" type="CollisionShape2D" parent="."]
+visible = false
+light_mask = 0
+position = Vector2(0, -223)
+shape = SubResource("CapsuleShape2D_boss")
+
+[node name="POINT" type="Node2D" parent="."]
+
+[node name="animator" type="Node2D" parent="POINT"]
+script = ExtResource("3_corps")
+
+[node name="vision" type="Area2D" parent="POINT"]
+visible = false
+position = Vector2(0, -223)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="POINT/vision"]
+shape = SubResource("CircleShape2D_vue")
+
+[node name="Petales" parent="." instance=ExtResource("4_petales")]
+automatique = false
+demo_boucle = false
+
+[node name="Lances" parent="." instance=ExtResource("5_lances")]
+automatique = false
+demo_boucle = false
+
+[node name="Rafale" parent="." instance=ExtResource("6_rafale")]
+automatique = false
+demo_boucle = false
+
+[node name="LancesPluie" parent="." instance=ExtResource("5_lances")]
+automatique = false
+vagues = 2
+rythme = 0.9
+part = 0.35
+vise_le_heros = false
+ferme_un_cote = false
+demo_boucle = false
+
+[node name="Regard" parent="." instance=ExtResource("7_regard")]
+automatique = false
+demo_boucle = false

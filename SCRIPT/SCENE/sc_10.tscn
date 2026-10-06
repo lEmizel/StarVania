@@ -21,12 +21,11 @@
 [ext_resource type="Shader" uid="uid://jblop3f3vfan" path="res://SCRIPT/SHADER/flou_fond.gdshader" id="17_vw2kw"]
 [ext_resource type="Texture2D" uid="uid://x774gue4he8e" path="res://MEDIA/scene 6/background/background.png" id="18_v7ylp"]
 [ext_resource type="Texture2D" uid="uid://bnx8i3kgl6iic" path="res://MEDIA/scene 6/background/colonne.png" id="19_6t8y0"]
-[ext_resource type="PackedScene" path="res://SCRIPT/SHADER/lances_roses.tscn" id="22_c6yxa"]
 [ext_resource type="PackedScene" path="res://SCRIPT/INTERACTIBLE/pilier_foudre.tscn" id="23_ubcjy"]
 [ext_resource type="PackedScene" path="res://SCRIPT/INTERACTIBLE/lanceur_feu.tscn" id="25_utlbw"]
 [ext_resource type="PackedScene" uid="uid://cvykyqaa2ik7i" path="res://SCRIPT/INTERACTIBLE/roue_pointes.tscn" id="25_xjew0"]
 [ext_resource type="PackedScene" uid="uid://bobswn5tah03s" path="res://SCRIPT/INTERACTIBLE/passage.tscn" id="27_rgcqs"]
-[ext_resource type="PackedScene" path="res://SCRIPT/MONSTER/SLIME.tscn" id="28_5gsh0"]
+[ext_resource type="PackedScene" uid="uid://bf0asbh2303ce" path="res://SCRIPT/SHADER/chute_eau.tscn" id="29_m3de5"]
 [ext_resource type="PackedScene" path="res://SCRIPT/INTERACTIBLE/pluie_etoiles.tscn" id="29_vao7l"]
 [ext_resource type="PackedScene" path="res://SCRIPT/INTERACTIBLE/trou_noir.tscn" id="30_er8y1"]
 [ext_resource type="PackedScene" path="res://SCRIPT/INTERACTIBLE/pilon.tscn" id="31_7gafa"]
@@ -43,7 +42,7 @@ script = ExtResource("1_b1u0x")
 [node name="interactible" type="Node2D" parent="." unique_id=1625063554]
 
 [node name="checkpoint" parent="interactible" unique_id=524856083 groups=["Checkpoint"] instance=ExtResource("2_hqu2c")]
-position = Vector2(-1338.6771, -399)
+position = Vector2(-148, -6)
 
 [node name="AccrocheGrappin" parent="interactible" unique_id=1635525328 instance=ExtResource("8_xj2qt")]
 z_index = 1
@@ -99,7 +98,7 @@ position = Vector2(2395.5, -3663)
 
 [node name="SAWBLADE" parent="interactible" unique_id=388117046 instance=ExtResource("6_5ylk2")]
 position = Vector2(1466, -999)
-frame_progress = 0.8295095
+frame_progress = 0.026146164
 position_a = Vector2(1466, -999)
 position_b = Vector2(1466, -2128)
 
@@ -457,12 +456,6 @@ texture = ExtResource("19_6t8y0")
 
 [node name="enemi" type="Node2D" parent="." unique_id=1354596315]
 
-[node name="slime" parent="enemi" unique_id=1427151632 instance=ExtResource("28_5gsh0")]
-position = Vector2(429, 4)
-
-[node name="LancesRoses" parent="enemi" unique_id=3998012 instance=ExtResource("22_c6yxa")]
-position = Vector2(188, 6)
-
 [node name="screenshot" type="Node" parent="." unique_id=599869060]
 script = ExtResource("16_1q33d")
 export_path = "res://sc_10.png"
@@ -472,11 +465,11 @@ margin = 50
 [node name="PilierFoudre2" parent="." unique_id=1055213777 instance=ExtResource("23_ubcjy")]
 position = Vector2(2306, -27)
 
+[node name="RoueAPointes" parent="." unique_id=1617467562 instance=ExtResource("25_xjew0")]
+position = Vector2(-1395, -408)
+
 [node name="PilierFoudre3" parent="." unique_id=1594706487 instance=ExtResource("23_ubcjy")]
 position = Vector2(4062, -717)
-
-[node name="PilierFoudre4" parent="." unique_id=955657252 instance=ExtResource("23_ubcjy")]
-position = Vector2(2529, -1500)
 
 [node name="RoueAPointes2" parent="." unique_id=1130073372 instance=ExtResource("25_xjew0")]
 position = Vector2(325.70282, -1510.4092)
@@ -503,3 +496,8 @@ position = Vector2(3965, -3677)
 
 [node name="TrouNoir" parent="." unique_id=2087883557 instance=ExtResource("30_er8y1")]
 position = Vector2(4847, -3655)
+
+[node name="ChuteEau" parent="." unique_id=993088765 instance=ExtResource("29_m3de5")]
+z_index = 5
+position = Vector2(-811, -1926)
+hauteur = 2500.0

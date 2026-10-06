@@ -1,0 +1,18 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://SCRIPT/BOSS/rafale_petales.gd" id="1_rp"]
+[ext_resource type="Shader" path="res://SCRIPT/BOSS/rafale_petales.gdshader" id="2_rp"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_rp"]
+shader = ExtResource("2_rp")
+
+[node name="RafalePetales" type="Node2D"]
+script = ExtResource("1_rp")
+
+[node name="Petales" type="ColorRect" parent="."]
+material = SubResource("ShaderMaterial_rp")
+offset_left = -2000.0
+offset_top = -500.0
+offset_right = 2000.0
+offset_bottom = 100.0
+mouse_filter = 2
