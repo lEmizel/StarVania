@@ -19,6 +19,7 @@ const DEMOS := [
 	{"nom": "DEMO 1", "scene": "uid://gq88m0garham"},                 # la démo d'origine, démarre sur scene_7
 	{"nom": "DEMO 2", "scene": "res://SCRIPT/SCENE/scene_08.tscn"},
 	{"nom": "DEMO 3", "scene": "res://SCRIPT/SCENE/sc_10.tscn"},       # sc_10 (30 sept. 2026 ; avant : le banc d'essai teste_bas, qui n'est plus branché nulle part)
+	{"nom": "DEMO 4", "scene": "uid://ce6646rhyc17i"},                 # l'arène du premier boss (6 oct. 2026), par son uid : son nom de fichier a un accent
 ]
 const OPTIONS_SCENE := preload("res://SCRIPT/MENU/options.tscn")
 

@@ -20,13 +20,15 @@ var niveau_courant := ""
 ##   → 1,35 Go à quatre. scene_06 pèse à elle seule 60 % du total : c'est elle
 ##   qu'il faudra alléger le jour où la mémoire pose problème, pas les autres.
 ## Depuis le menu on ne précharge que les ENTRÉES des démos (23 sept.
-## 2026) : scene_7 (DEMO 1), scene_08 (DEMO 2) et, depuis le
-## 30 sept., sc_10 (DEMO 3). Leurs suites (scene_06, scene_09) ne sont pas
-## gardées en mémoire au menu.
+## 2026) : scene_7 (DEMO 1), scene_08 (DEMO 2), depuis le 30 sept. sc_10
+## (DEMO 3) et, depuis le 6 oct., l'arène du premier boss (DEMO 4 : du
+## grayboxing, elle ne pèse rien). Leurs suites (scene_06, scene_09) ne sont
+## pas gardées en mémoire au menu.
 const SCENES_PRECHARGEES: Array[String] = [
 	"res://SCRIPT/SCENE/scene_7.tscn",
 	"res://SCRIPT/SCENE/scene_08.tscn",
 	"res://SCRIPT/SCENE/sc_10.tscn",
+	"res://SCRIPT/SCENE/aréne du premier boss.tscn",
 ]
 ## Le menu principal : ses « voisins » sont les entrées des démos ci-dessus
 const MENU_SCENE := "uid://dm012xrdmag4v"        # SCRIPT/MENU/menu.tscn
