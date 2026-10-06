@@ -11,9 +11,19 @@ extends Node
 ## que ça ne freeze QUE sur un PC qui lance le jeu pour la première fois.
 ##
 ## COMMENT : chaque matériau est dessiné sur un sprite d'un pixel, deux fois
-## (hors lumière + sous une PointLight2D), chaque type de particule GPU émet
-## une fois, pendant quelques frames dans une couche invisible, puis tout est
-## jeté. Trois moments :
+## (SANS lumière — `light_mask` 0 — et sous une PointLight2D), chaque type de
+## particule GPU émet une fois, pendant quelques frames dans une couche
+## invisible, puis tout est jeté. Le pipeline dépend aussi de la FAÇON de
+## dessiner : les primitives (`draw_line`, `draw_polygon`, `draw_arc`, Line2D,
+## Polygon2D) et les cadres (NinePatch des boutons) ont les leurs — chauffées
+## avec le matériau par défaut, et avec les shaders qui s'en servent
+## (SHADERS_LINE2D).
+## MESURÉ (6 oct. 2026, compteurs `RenderingServer.get_rendering_info`) : les
+## deux sprites étaient dans le rectangle de la lumière (482 px de côté) — la
+## chauffe ne compilait que la variante ÉCLAIRÉE, et les niveaux n'ont aucune
+## lumière : chaque shader recompilait à sa première apparition en jeu (le
+## freeze Mac à l'approche du boss, au menu des talismans, à la pluie
+## d'étoiles). Trois moments :
 ##   • au boot (derrière le menu) : shaders fichiers + scènes d'effets légères,
 ##     lues via SceneState sans les instancier ;
 ##   • au spawn du joueur : `chauffer_arbre(joueur)` (ses matériaux internes,
@@ -157,6 +167,10 @@ const SCENES_FX: Array[String] = [
 	"res://SCRIPT/SPELL/bloodball_explosion.tscn",
 	"res://SCRIPT/PARTICLE/BLOOD_PARTICLE.tscn",
 ]
+## les shaders posés sur un Line2D (variante « attributs » du pipeline)
+const SHADERS_LINE2D: Array[String] = [
+	"res://SCRIPT/SHADER/cable_de_sang.gdshader",   # le câble du grappin
+]
 const LIGHT_TEXTURE := "res://MEDIA/UTILITAIRE/light.png"
 const ZOO_LAYER := -100          # couche canvas derrière tout (menu = 0)
 const FRAMES_DE_CHAUFFE := 6     # frames rendues avant le nettoyage
@@ -168,6 +182,19 @@ const POS_SOUS_LUMIERE := Vector2(240.0, 240.0)
 var _refs: Array[Resource] = []
 var _tex_pixel: ImageTexture
 var _deja: Dictionary = {}       # clé (shader ou matériau) → true : déjà chauffé
+var _lignes: Array[Material] = [] # matériaux à chauffer aussi sur un Line2D (boot)
+
+
+## des primitives dessinées par `_draw` : lignes, polygone, rond, rectangle, arc
+## — chacune a sa variante de pipeline
+class Primitives extends Node2D:
+	func _draw() -> void:
+		draw_line(Vector2.ZERO, Vector2(3.0, 1.0), Color.WHITE, 1.0)
+		draw_polyline(PackedVector2Array([Vector2.ZERO, Vector2(2.0, 1.0), Vector2(3.0, 0.0)]), Color.WHITE, 1.0)
+		draw_polygon(PackedVector2Array([Vector2.ZERO, Vector2(3.0, 0.0), Vector2(1.0, 3.0)]), PackedColorArray([Color.WHITE]))
+		draw_circle(Vector2(1.0, 1.0), 1.5, Color.WHITE)
+		draw_rect(Rect2(0.0, 0.0, 2.0, 2.0), Color.WHITE)
+		draw_arc(Vector2(1.0, 1.0), 1.5, 0.0, TAU, 8, Color.WHITE, 1.0)
 
 
 func _ready() -> void:
@@ -196,6 +223,16 @@ func _ready() -> void:
 		_refs.append(ps)
 		_collecter_scene(ps, materiaux, particules)
 
+	for path in SHADERS_LINE2D:
+		var sh := load(path) as Shader
+		if sh == null:
+			push_warning("[WARMUP] shader introuvable : " + path)
+			continue
+		_refs.append(sh)
+		var m := ShaderMaterial.new()
+		m.shader = sh
+		_lignes.append(m)
+
 	_chauffer(materiaux, particules, "boot")
 
 
@@ -219,7 +256,8 @@ func _chauffer(materiaux: Array[Material], particules: Array[Dictionary], etique
 	zoo.layer = ZOO_LAYER
 	add_child(zoo)
 
-	# un sprite d'un pixel par matériau, hors lumière et sous la lumière
+	# un sprite d'un pixel par matériau, sans lumière (light_mask 0 : aucune
+	# lumière ne le touche) et sous la lumière
 	for m in materiaux:
 		if m != null:
 			_deja[_cle(m)] = true
@@ -229,7 +267,53 @@ func _chauffer(materiaux: Array[Material], particules: Array[Dictionary], etique
 			s.material = m
 			s.position = pos
 			s.scale = Vector2(0.25, 0.25)
+			if pos == POS_HORS_LUMIERE:
+				s.light_mask = 0
 			zoo.add_child(s)
+
+	# les autres façons de dessiner, avec le matériau par défaut (les `_draw`
+	# des pièces, les cordes, les cadres des boutons), sans lumière et sous la
+	# lumière ; et les shaders qui habillent un Line2D
+	for pos in [POS_HORS_LUMIERE, POS_SOUS_LUMIERE]:
+		var masque := 0 if pos == POS_HORS_LUMIERE else 1
+		var prim := Primitives.new()
+		prim.position = pos
+		prim.light_mask = masque
+		zoo.add_child(prim)
+		var ligne := Line2D.new()
+		ligne.points = PackedVector2Array([Vector2.ZERO, Vector2(3.0, 1.0), Vector2(4.0, 0.0)])
+		ligne.width = 1.0
+		ligne.position = pos
+		ligne.light_mask = masque
+		zoo.add_child(ligne)
+		var poly := Polygon2D.new()
+		poly.polygon = PackedVector2Array([Vector2.ZERO, Vector2(3.0, 0.0), Vector2(1.0, 3.0)])
+		poly.position = pos
+		poly.light_mask = masque
+		zoo.add_child(poly)
+		var cadre := NinePatchRect.new()
+		cadre.texture = _tex_pixel
+		cadre.size = Vector2(6.0, 6.0)
+		cadre.position = pos
+		cadre.light_mask = masque
+		zoo.add_child(cadre)
+		# un bouton : le StyleBox des menus a son pipeline à lui (mesuré : +1 au
+		# premier bouton), sans voler le focus ni la souris au menu
+		var bouton := Button.new()
+		bouton.text = "A"
+		bouton.focus_mode = Control.FOCUS_NONE
+		bouton.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		bouton.position = pos
+		bouton.light_mask = masque
+		zoo.add_child(bouton)
+		for m in _lignes:
+			var l := Line2D.new()
+			l.points = PackedVector2Array([Vector2.ZERO, Vector2(3.0, 1.0), Vector2(4.0, 0.0)])
+			l.width = 1.0
+			l.material = m
+			l.position = pos
+			l.light_mask = masque
+			zoo.add_child(l)
 
 	# la lumière déclenche les variantes "éclairées" des pipelines
 	var light := PointLight2D.new()
